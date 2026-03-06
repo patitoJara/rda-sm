@@ -228,27 +228,38 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   ngOnInit(): void {
     this.initForm();
     this.loadSessionContext();
+
+    // 🔹 Suscripciones reactivas (una sola vez)
+    this.form
+      .get('result')
+      ?.valueChanges.pipe(distinctUntilChanged())
+      .subscribe(() => {
+        this.aplicarReglaIngresoTratamiento();
+      });
+
+    this.form.get('fechaSolicitud')?.valueChanges.subscribe((fecha) => {
+      this.onFechaSolicitudChange(fecha);
+    });
+
+    this.form
+      .get('birthDate')
+      ?.valueChanges.pipe(distinctUntilChanged())
+      .subscribe((value) => {
+        this.edad = this.utils.getEdadDesdeFecha(value);
+      });
+
+    // 🔹 Carga de catálogos
     this.loadCatalogs().then(() => {
       queueMicrotask(() => {
-        this.nuevaDemanda(); // 👈 RESET REAL
+        this.nuevaDemanda(); // RESET REAL
 
-        // 📅 Fecha solicitud → días transcurridos
-        this.form.get('fechaSolicitud')?.valueChanges.subscribe((fecha) => {
-          this.onFechaSolicitudChange(fecha);
-        });
+        // Aplicar reglas una vez después de cargar todo
+        this.aplicarReglaIngresoTratamiento();
         this.onFechaSolicitudChange(this.form.get('fechaSolicitud')?.value);
-
-        // 🎂 Fecha nacimiento → edad
-
-        this.form
-          .get('birthDate')
-          ?.valueChanges.pipe(distinctUntilChanged())
-          .subscribe((value) => {
-            this.edad = this.utils.getEdadDesdeFecha(value);
-          });
         this.edad = this.utils.getEdadDesdeFecha(
           this.form.get('birthDate')?.value,
         );
+
         this.uiReady = true;
         this.cdRef.detectChanges();
       });
@@ -261,7 +272,13 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
    🔒 CONTROL DE CAMBIOS SIN GUARDAR
 ================================================== */
   hasPendingChanges(): boolean {
-    return this.form?.dirty === true && !this.saving;
+    if (this.saving) return false;
+
+    // Si el botón guardar está deshabilitado,
+    // no hay cambios relevantes
+    if (this.isSaveDisabled()) return false;
+
+    return this.form?.dirty === true;
   }
 
   @HostListener('window:beforeunload', ['$event'])
@@ -273,10 +290,20 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   private setupReactiveListeners(): void {
+    // 🔥 Resultado → aplicar regla clínica
     this.form
       .get('result')
       ?.valueChanges.pipe(distinctUntilChanged())
-      .subscribe(() => {});
+      .subscribe((value) => {
+        this.filterStateByResult(value);
+      });
+
+    this.form
+      .get('notRelevants')
+      ?.valueChanges.pipe(distinctUntilChanged())
+      .subscribe(() => {
+        this.aplicarReglaNoRelevante();
+      });
 
     this.form
       .get('intPrev')
@@ -523,6 +550,26 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   openNuevaCitacionModal(): void {
+    const existeAgendada = this.movements.some((m) => {
+      const estado = m?.state ?? '';
+      return estado.trim().toUpperCase() === 'AGENDADO';
+    });
+    if (existeAgendada) {
+      this.dialog.open(ConfirmDialogOkComponent, {
+        width: '420px',
+        disableClose: true,
+        data: {
+          title: 'Nueva Citación',
+          message:
+            'No se puede agendar una nueva citación mientras exista una citación con estado AGENDADO. Debe cambiar el estado de la anterior.',
+          icon: 'warning',
+          confirmText: 'Aceptar',
+        },
+      });
+
+      return; // 🚫 corta ejecución
+    }
+
     const dialogRef = this.dialog.open(CitacionModalComponent, {
       width: '300px',
       maxWidth: '95vw',
@@ -663,7 +710,27 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     if (!movement.id || stateChanged) {
       movement.__isDirty = true;
     }
+    this.form.markAsDirty();
     this.cdRef.detectChanges();
+  }
+
+  getStateClass(state: string): string {
+    switch (state) {
+      case 'AGENDADO':
+        return 'state-agendado';
+
+      case 'SE_PRESENTO':
+        return 'state-presentado';
+
+      case 'NO_SE_PRESENTO':
+        return 'state-no-presentado';
+
+      case 'CANCELA_PROGRAMA':
+        return 'state-cancelado';
+
+      default:
+        return 'state-default';
+    }
   }
 
   // ============================================================
@@ -1206,6 +1273,10 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       this.utils.cargarFichaCompletaEnFormulario(this.form, register);
 
       this.setEstadoFormularioFromRegister(register);
+
+      // 🔥 aplicar regla al abrir en edición
+      this.filterStateByResult(this.form.get('result')?.value);
+
       // ============================
       // 🟦 POSTULANTE COMPLETO (CLAVE)
       // ============================
@@ -1356,6 +1427,79 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     convPrevControl?.updateValueAndValidity({ emitEvent: false });
 
     this.cdRef.detectChanges();
+  }
+
+  // ============================================================
+  // ESTADO SEGUN EL RESULTADO
+  // ============================================================
+
+  private filterStateByResult(resultId: number): void {
+    const stateControl = this.form.get('state');
+
+    const ingreso = this.getResultadoIngresoTratamiento();
+    const aceptado = this.getEstadoAceptado();
+
+    if (!resultId) {
+      stateControl?.enable({ emitEvent: false });
+      return;
+    }
+
+    if (resultId === ingreso && aceptado) {
+      stateControl?.setValue(aceptado, { emitEvent: false });
+      stateControl?.disable({ emitEvent: false });
+    } else {
+      stateControl?.enable({ emitEvent: false });
+    }
+  }
+
+  // ============================================================
+  // ESTADO SEGUN EL NO RELEVANTE
+  // ============================================================
+
+  private aplicarReglaNoRelevante(): void {
+    if (!this.catalogsReady()) return;
+
+    const actualNoRelevante = this.form.get('notRelevants')?.value;
+
+    const ninguna = this.getNotRelevanteNinguna();
+    const historico = this.getResultadoHistorico();
+    const aunSinResultado = this.getResultadoSinResultado();
+
+    const noAceptado = this.getEstadoNoAceptado();
+    const enTramite = this.getEstadoEnTramite();
+
+    if (
+      !ninguna ||
+      !historico ||
+      !aunSinResultado ||
+      !noAceptado ||
+      !enTramite
+    ) {
+      return;
+    }
+
+    // 🔴 DISTINTO DE NINGUNA
+    if (actualNoRelevante && actualNoRelevante !== ninguna) {
+      this.form.patchValue(
+        {
+          result: historico,
+          state: noAceptado,
+        },
+        { emitEvent: false },
+      );
+      return;
+    }
+
+    // 🟢 ES NINGUNA
+    if (actualNoRelevante === ninguna) {
+      this.form.patchValue(
+        {
+          result: aunSinResultado,
+          state: enTramite,
+        },
+        { emitEvent: false },
+      );
+    }
   }
 
   // ============================================================
@@ -1540,6 +1684,8 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       .join(' ')
       .trim();
 
+    const rut = raw.rut ?? '-'; // 👈 aquí tomas el RUT
+
     // ✅ generar HTML (NO imprime)
     const html = this.report.generateFromMovement({
       numero,
@@ -1548,6 +1694,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       usuario: this.fullName,
       professions: this.professions,
       program: this.activeProgram,
+      rut,
     });
 
     // ✅ imprimir sin robar foco
@@ -1779,73 +1926,119 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   private aplicarReglaPrevision(intPrevId: number): void {
-    // 🔒 Regla clínica SOLO aplica en demanda nueva
-    if (this.currentAction !== 'NEW') return;
     // ⛔ Catálogos aún no cargados
     if (!this.catalogsReady()) return;
 
-    // 🟢 FONASA
-    if (intPrevId === 1) {
-      const ninguna = this.getNotRelevanteNinguna();
-      const sinResultado = this.getResultadoSinResultado();
-      const enTramite = this.getEstadoEnTramite();
+    // 🟢 SOLO si es NEW aplicamos regla automática
+    if (this.currentAction === 'NEW') {
+      // 🟢 FONASA
+      if (intPrevId === 1) {
+        const ninguna = this.getNotRelevanteNinguna();
+        const sinResultado = this.getResultadoSinResultado();
+        const enTramite = this.getEstadoEnTramite();
 
-      this.form.get('notRelevants')?.enable({ emitEvent: false });
-      this.form.get('result')?.enable({ emitEvent: false });
-      this.form.get('state')?.enable({ emitEvent: false });
+        this.form.get('notRelevants')?.enable({ emitEvent: false });
+        this.form.get('result')?.enable({ emitEvent: false });
+        this.form.get('state')?.enable({ emitEvent: false });
+
+        this.form.patchValue(
+          {
+            notRelevants: ninguna,
+            result: sinResultado,
+            state: enTramite,
+          },
+          { emitEvent: false },
+        );
+
+        return;
+      }
+
+      // 🔴 NO FONASA (NEW) → fuerza valores
+      const noRelevante = this.getNoRelevantePorPrevision();
+      const historico = this.getResultadoHistorico();
+      const noAceptado = this.getEstadoNoAceptado();
+
+      if (!noRelevante || !historico || !noAceptado) return;
 
       this.form.patchValue(
         {
-          notRelevants: ninguna, // ✅ NINGUNA
-          result: sinResultado, // ✅ AÚN SIN RESULTADO
-          state: enTramite, // ✅ EN TRÁMITE
+          notRelevants: noRelevante,
+          result: historico,
+          state: noAceptado,
         },
         { emitEvent: false },
       );
 
-      return;
+      this.form.get('notRelevants')?.disable({ emitEvent: false });
+      this.form.get('result')?.disable({ emitEvent: false });
+      this.form.get('state')?.disable({ emitEvent: false });
+
+      this.dialog.open(ConfirmDialogOkComponent, {
+        disableClose: true,
+        data: {
+          title: 'Importante – Previsión de Salud debe ser FONASA',
+          message: `
+          El postulante <strong>no cumple con el requisito de previsión de salud</strong>
+          para optar al tratamiento.<br><br>
+
+          El registro quedará marcado como:<br>
+          • <strong>No relevante: Por previsión de salud</strong><br>
+          • <strong>Resultado: Histórico</strong><br>
+          • <strong>Estado: No aceptado</strong><br><br>
+
+          <strong>El registro puede continuar.</strong><br>
+          La responsabilidad del ingreso recae en el profesional entrevistador.
+        `,
+          icon: 'warning',
+          color: 'warn',
+          confirmText: 'Entendido',
+        },
+      });
+    } else {
+      // 🔔 CASO MODIFY → solo avisar si NO es FONASA
+      if (intPrevId !== 1) {
+        const actualNoRelevante = this.form.get('notRelevants')?.value;
+        const actualResultado = this.form.get('result')?.value;
+        const actualEstado = this.form.get('state')?.value;
+
+        const noRelevante = this.getNoRelevantePorPrevision();
+        const historico = this.getResultadoHistorico();
+        const noAceptado = this.getEstadoNoAceptado();
+
+        if (!noRelevante || !historico || !noAceptado) return;
+
+        const yaEstaCorrecto =
+          actualNoRelevante === noRelevante &&
+          actualResultado === historico &&
+          actualEstado === noAceptado;
+
+        // 🟢 Si ya está correcto → no hacer nada
+        if (yaEstaCorrecto) return;
+
+        // 🔔 Si NO está correcto → mostrar advertencia
+        this.dialog.open(ConfirmDialogOkComponent, {
+          disableClose: true,
+          data: {
+            title: 'Previsión de Salud debe ser FONASA',
+            message: `
+          <strong>Importante</strong><br><br>
+          El postulante <strong>no cumple con el requisito de previsión de salud</strong>
+          para optar al tratamiento.<br><br>
+
+          La demanda debiera estar de la siguiente forma:<br><br>
+          • NO RELEVANTE / NO CORRESPONDE = POR PREVISIÓN DE SALUD<br>
+          • RESULTADO = HISTÓRICO<br>
+          • ESTADO = NO ACEPTADO<br><br>
+
+          La responsabilidad del ingreso recae en el profesional entrevistador.
+        `,
+            icon: 'warning',
+            color: 'warn',
+            confirmText: 'Entendido',
+          },
+        });
+      }
     }
-
-    // 🔴 NO FONASA → SIEMPRE avisar
-    const noRelevante = this.getNoRelevantePorPrevision();
-    const historico = this.getResultadoHistorico();
-    const noAceptado = this.getEstadoNoAceptado();
-
-    if (!noRelevante || !historico || !noAceptado) return;
-
-    this.form.patchValue(
-      {
-        notRelevants: noRelevante,
-        result: historico,
-        state: noAceptado,
-      },
-      { emitEvent: false },
-    );
-
-    this.form.get('notRelevants')?.disable({ emitEvent: false });
-    this.form.get('result')?.disable({ emitEvent: false });
-    this.form.get('state')?.disable({ emitEvent: false });
-
-    this.dialog.open(ConfirmDialogOkComponent, {
-      disableClose: true,
-      data: {
-        title: 'Importante – Previsión de Salud debe ser FONASA',
-        message: `
-        El postulante <strong>no cumple con el requisito de previsión de salud</strong>
-        para optar al tratamiento.<br><br>
-
-        El registro quedará marcado como:<br>
-        • <strong>No relevante: Por previsión de salud</strong><br>
-        • <strong>Resultado: Histórico</strong><br>
-        • <strong>Estado: No aceptado</strong><br><br>
-
-        <strong>El registro puede continuar.</strong><br>
-        La responsabilidad del ingreso recae en el profesional entrevistador.
-      `,
-        icon: 'warning',
-        confirmText: 'Entendido',
-      },
-    });
   }
 
   private normalize(text?: string): string {
@@ -2057,6 +2250,55 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     });
 
     this.cdRef.detectChanges();
+  }
+
+  //-------------------------------------------------------------------------------------------------------
+
+  private aplicarReglaIngresoTratamiento(): void {
+    if (!this.catalogsReady()) return;
+
+    const resultadoActual = this.form.get('result')?.value;
+
+    const ingreso = this.getResultadoIngresoTratamiento();
+    const aceptado = this.getEstadoAceptado();
+    const enTramite = this.getEstadoEnTramite();
+    const ninguna = this.getNotRelevanteNinguna();
+
+    if (!ingreso || !aceptado || !enTramite || !ninguna) return;
+
+    if (resultadoActual === ingreso) {
+      // 🟢 INGRESO A TRATAMIENTO
+      this.form.patchValue(
+        {
+          state: aceptado,
+          notRelevants: ninguna,
+        },
+        { emitEvent: false },
+      );
+    } else {
+      // 🔵 Cualquier otro resultado
+      this.form.patchValue(
+        {
+          state: enTramite,
+          notRelevants: ninguna,
+        },
+        { emitEvent: false },
+      );
+    }
+  }
+  private getResultadoIngresoTratamiento(): number | null {
+    return (
+      this.results.find(
+        (r: any) => this.normalize(r.name) === 'INGRESO A TRATAMIENTO',
+      )?.id ?? null
+    );
+  }
+
+  private getEstadoAceptado(): number | null {
+    return (
+      this.states.find((s: any) => this.normalize(s.name) === 'ACEPTADO')?.id ??
+      null
+    );
   }
 
   private getNotRelevanteNinguna(): number | null {

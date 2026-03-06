@@ -11,6 +11,7 @@ import { MantenedoresComponent } from './sections/mantenedores.component';
 import { RolesComponent } from './sections/roles.component';
 import { SeguridadComponent } from './sections/seguridad.component';
 import { TransferComponent } from './sections/transfer.component';
+import { PanelEstrategicoComponent } from './sections/panel-estrategico.component';
 
 import { Component, ViewChild, ElementRef } from '@angular/core';
 
@@ -32,6 +33,7 @@ import { Component, ViewChild, ElementRef } from '@angular/core';
     RolesComponent,
     SeguridadComponent,
     TransferComponent,
+    PanelEstrategicoComponent,
   ],
 })
 export class ManualComponent {

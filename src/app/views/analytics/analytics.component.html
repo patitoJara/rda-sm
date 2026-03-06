@@ -1,31 +1,142 @@
-<div class="analytics-container">
+<form [formGroup]="filtersForm" class="filters-row">
+  <div class="fila-3">
+    <!-- AÑO -->
+    <div class="field-clinico-linea">
+      <label>Año</label>
+      <mat-form-field appearance="fill" class="clinico-form-field">
+        <mat-select formControlName="year" panelClass="clinico-select-panel">
+          <mat-option [value]="ALL">TODOS</mat-option>
+          <mat-option *ngFor="let y of years" [value]="y">
+            {{ y }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
 
+    <!-- MES -->
+    <div class="field-clinico-linea">
+      <label>Mes</label>
+      <mat-form-field appearance="fill" class="clinico-form-field">
+        <mat-select formControlName="month" panelClass="clinico-select-panel">
+          <mat-option [value]="ALL">TODOS</mat-option>
+          <mat-option *ngFor="let m of months" [value]="m.value">
+            {{ m.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- ESTADO -->
+    <div class="field-clinico-linea">
+      <label>Estado Demanda</label>
+      <mat-form-field appearance="fill" class="clinico-form-field">
+        <mat-select formControlName="state" panelClass="clinico-select-panel">
+          <mat-option [value]="ALL">TODOS</mat-option>
+          <mat-option *ngFor="let s of states" [value]="s.value">
+            {{ s.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- BOTÓN MOSTRAR TODO -->
+    <div class="field-reset actions-group">
+      <button
+        mat-button
+        class="btn-reset-text"
+        type="button"
+        (click)="resetFilters()"
+      >
+        <mat-icon>filter_alt_off</mat-icon>
+        Mostrar todo
+      </button>
+    </div>
+  </div>
+</form>
+
+<div class="analytics-container">
   <!-- FILA 1 - KPIs -->
-  <div class="row row-kpi">
+  <div class="row">
     <mat-card class="kpi-card">
-      <div class="kpi-title">Demandas Activas</div>
-      <div class="kpi-value">{{ activeCount }}</div>
+      <div class="kpi-title">{{ kpiTitle }}</div>
+      <div class="kpi-value">{{ kpiValue }}</div>
     </mat-card>
 
     <mat-card class="kpi-card">
-      <div class="kpi-title">Promedio Espera</div>
+      <div class="kpi-header">
+        <div class="kpi-title">Promedio Espera</div>
+
+        <button mat-icon-button (click)="showGeneralAudit = !showGeneralAudit">
+          <mat-icon>
+            {{ showGeneralAudit ? "visibility_off" : "visibility" }}
+          </mat-icon>
+        </button>
+      </div>
+
       <div class="kpi-value">{{ averageWaitingDays }} días</div>
+
+      <div *ngIf="showGeneralAudit" class="audit-mini">
+        Casos: {{ auditGeneral?.totalCases }} | Días:
+        {{ auditGeneral?.totalDays }}
+      </div>
     </mat-card>
   </div>
 
   <!-- FILA 2 -->
   <div class="row">
     <mat-card class="chart-card">
-      <h3>Promedio Espera Mensual</h3>
+      <div class="chart-header">
+        <h3>Promedio Espera Mensual</h3>
+
+        <button mat-icon-button (click)="showMonthlyAudit = !showMonthlyAudit">
+          <mat-icon>
+            {{ showMonthlyAudit ? "visibility_off" : "visibility" }}
+          </mat-icon>
+        </button>
+      </div>
+
       <div class="chart-container">
-        <canvas baseChart [data]="lineChartData" [type]="'line'"></canvas>
+        <canvas
+          baseChart
+          [data]="lineChartData"
+          [type]="'line'"
+          [options]="chartOptions"
+        ></canvas>
+      </div>
+
+      <div *ngIf="showMonthlyAudit" class="audit-mini">
+        <div *ngFor="let m of auditMonthly">
+          {{ m.month }} → Casos: {{ m.totalCases }}, Días: {{ m.totalDays }},
+          Prom: {{ m.average }}
+        </div>
       </div>
     </mat-card>
 
     <mat-card class="chart-card">
-      <h3>Promedio por Programa</h3>
+      <div class="chart-header">
+        <h3>Promedio por Programa</h3>
+
+        <button mat-icon-button (click)="showProgramAudit = !showProgramAudit">
+          <mat-icon>
+            {{ showProgramAudit ? "visibility_off" : "visibility" }}
+          </mat-icon>
+        </button>
+      </div>
+
       <div class="chart-container">
-        <canvas baseChart [data]="barChartData" [type]="'bar'" [options]="chartOptions"></canvas>
+        <canvas
+          baseChart
+          [data]="barChartData"
+          [type]="'bar'"
+          [options]="chartOptions"
+        ></canvas>
+      </div>
+
+      <div *ngIf="showProgramAudit" class="audit-mini">
+        <div *ngFor="let p of auditProgram">
+          {{ p.program }} → Casos: {{ p.totalCases }}, Días: {{ p.totalDays }},
+          Prom: {{ p.average }}
+        </div>
       </div>
     </mat-card>
   </div>
@@ -35,16 +146,25 @@
     <mat-card class="chart-card">
       <h3>Sustancias Principales</h3>
       <div class="chart-container">
-        <canvas baseChart [data]="principalChartData" [type]="'bar'" [options]="chartOptions"></canvas>
+        <canvas
+          baseChart
+          [data]="principalChartData"
+          [type]="'bar'"
+          [options]="chartOptions"
+        ></canvas>
       </div>
     </mat-card>
 
     <mat-card class="chart-card">
       <h3>Sustancias Secundarias</h3>
       <div class="chart-container">
-        <canvas baseChart [data]="secondaryChartData" [type]="'bar'" [options]="chartOptions"></canvas>
+        <canvas
+          baseChart
+          [data]="secondaryChartData"
+          [type]="'bar'"
+          [options]="chartOptions"
+        ></canvas>
       </div>
     </mat-card>
   </div>
-
 </div>

@@ -68,6 +68,63 @@
     <li>Cancela programa</li>
   </ul>
 
+
+  <!-- Estado y resultado -->
+  <h3 class="manual-subtitle">Estado y resultado de la demanda</h3>
+
+  <p>
+    Cada demanda posee un <strong>Estado</strong> y un
+    <strong>Resultado clínico</strong> que determinan su situación dentro
+    del sistema.
+  </p>
+
+  <ul class="manual-list">
+    <li><strong>En trámite:</strong> Demanda en evaluación.</li>
+    <li><strong>En espera:</strong> Pendiente de gestión.</li>
+    <li><strong>No aceptado:</strong> No cumple criterios clínicos o administrativos.</li>
+    <li><strong>Histórico:</strong> Registro cerrado sin continuidad.</li>
+    <li><strong>Egresado / Abandono / Derivado:</strong> Resultado final del proceso.</li>
+  </ul>
+
+  <!-- Regla de citaciones -->
+  <div class="manual-box box-warning">
+    <mat-icon>warning</mat-icon>
+    <div>
+      No se puede generar una nueva citación si existe una citación anterior
+      en estado <strong>AGENDADO</strong>.  
+      Esto evita duplicidad de atención y mantiene coherencia clínica.
+    </div>
+  </div>
+
+  <!-- Observaciones -->
+  <h3 class="manual-subtitle">Observaciones clínicas</h3>
+
+  <p>
+    Las observaciones ingresadas se almacenan de forma acumulativa,
+    registrando fecha, hora y usuario responsable, asegurando trazabilidad
+    clínica del caso.
+  </p>
+
+  <!-- Indicadores visuales -->
+  <div class="manual-box box-info">
+    <mat-icon>visibility</mat-icon>
+    <div>
+      El sistema muestra indicadores visuales del estado actual de la
+      demanda, permitiendo una identificación rápida de su situación
+      clínica.
+    </div>
+  </div>
+
+  <!-- Comportamiento posterior al guardado -->
+  <h3 class="manual-subtitle">Comportamiento posterior al guardado</h3>
+
+  <ul class="manual-list">
+    <li>Se bloquean datos del postulante.</li>
+    <li>Se bloquea información del referente.</li>
+    <li>Se habilita la gestión de citaciones.</li>
+    <li>Se mantiene historial completo de movimientos.</li>
+  </ul>
+
   <!-- Regla clínica previsión -->
   <div class="manual-box box-warning">
     <mat-icon>warning</mat-icon>

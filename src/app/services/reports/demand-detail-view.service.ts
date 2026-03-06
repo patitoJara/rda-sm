@@ -7,6 +7,8 @@ export class DemandDetailViewService {
   constructor() {}
 
   generate(reg: any, sustancias: any[], movimientos: any[]): void {
+
+    const logoUrl = `${window.location.origin}/assets/logoSSM.png`;
     const fechaAtencion = reg.date_attention
       ? formatDate(reg.date_attention, 'dd/MM/yyyy', 'es-CL')
       : '---';
@@ -116,6 +118,7 @@ export class DemandDetailViewService {
       `;
 
     const html = `
+
     <html>
     <head>
       <title>Detalle Demanda</title>
@@ -128,10 +131,27 @@ export class DemandDetailViewService {
         th { background: #f2f2f2; }
         .titulo { font-weight: bold; margin-top: 15px; }
         .observaciones { white-space: pre-line; }
+
+
+.logo-container {
+  margin: 0;
+  padding: 0;
+}
+
+.logo-container img {
+  width: 160px;     /* ajusta tamaño aquí */
+  height: auto;
+  display: block;
+}
+
       </style>
     </head>
 
     <body>
+
+        <div class="logo-container">
+          <img src="${logoUrl}" class="logo" />
+        </div>
 
       <h2>SERVICIO DE SALUD MAGALLANES</h2>
       <h3>Departamento de Salud Mental</h3>

@@ -1,0 +1,119 @@
+<mat-card class="manual-section" id="manual-panel-estrategico">
+
+  <div class="section-header">
+    <mat-icon>analytics</mat-icon>
+    <h2>Panel Estratégico</h2>
+  </div>
+
+  <div class="manual-box box-info">
+    <mat-icon>insights</mat-icon>
+    <div>
+      El Panel Estratégico consolida información relevante del programa,
+      permitiendo el análisis dinámico de indicadores clave para la toma
+      de decisiones clínicas, técnicas y administrativas.  
+      Todos los cálculos se actualizan en tiempo real según los filtros aplicados.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Sistema de Filtros</h3>
+
+  <p>
+    El panel incorpora filtros que permiten segmentar la información
+    mostrada en los indicadores y gráficos. Estos filtros operan de forma
+    dinámica y recalculan automáticamente todos los resultados visualizados.
+  </p>
+
+  <ul class="manual-list">
+    <li><strong>Año:</strong> Filtra los registros según el año de atención.</li>
+    <li><strong>Mes:</strong> Permite acotar la visualización a un mes específico.</li>
+    <li>
+      <strong>Estado Demanda:</strong> Segmenta la información según el estado del registro
+      (Aceptado, En Trámite, No Aceptado).
+    </li>
+  </ul>
+
+  <div class="manual-box box-success">
+    <mat-icon>filter_alt</mat-icon>
+    <div>
+      Las comparaciones de estado se realizan mediante normalización automática
+      (mayúsculas y eliminación de acentos), garantizando coherencia en los resultados
+      incluso ante diferencias de formato en los datos.
+    </div>
+  </div>
+
+  <p>
+    El botón <strong>“Mostrar todo”</strong> restablece los filtros a su
+    condición inicial, eliminando cualquier restricción y mostrando
+    la totalidad de los registros disponibles.
+  </p>
+
+  <h3 class="manual-subtitle">Indicadores disponibles</h3>
+
+  <ul class="manual-list">
+    <li><strong>Total de demandas activas:</strong> Cantidad de registros vigentes según filtros aplicados.</li>
+    <li><strong>Promedio de espera general:</strong> Días promedio entre fecha de registro y fecha actual.</li>
+    <li><strong>Promedio de espera mensual:</strong> Cálculo promedio agrupado por mes de atención.</li>
+    <li><strong>Promedio de espera por programa:</strong> Comparación de tiempos promedio entre programas.</li>
+    <li><strong>Distribución por sustancia principal.</strong></li>
+    <li><strong>Distribución por sustancias secundarias.</strong></li>
+  </ul>
+
+  <div class="manual-box box-info">
+    <mat-icon>visibility</mat-icon>
+    <div>
+      Cada indicador principal incorpora un botón de visualización (ícono <mat-icon style="font-size:14px; vertical-align:middle;">visibility</mat-icon>)
+      que permite desplegar el detalle del cálculo realizado.
+      Esta funcionalidad entrega trazabilidad completa mostrando:
+      <ul style="margin-top:6px;">
+        <li>Total de casos considerados.</li>
+        <li>Total de días acumulados.</li>
+        <li>Promedio calculado.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="manual-box box-info">
+    <mat-icon>timeline</mat-icon>
+    <div>
+      Los gráficos de tendencia mensual y comparación por programa
+      permiten identificar variaciones en los tiempos de espera,
+      facilitando la detección temprana de brechas asistenciales
+      y apoyando la planificación estratégica.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Transparencia y Trazabilidad</h3>
+
+  <p>
+    El Panel Estratégico incorpora un modelo de cálculo auditable.
+    Cada promedio mostrado corresponde a la fórmula:
+  </p>
+
+  <div class="manual-box box-neutral">
+    <mat-icon>calculate</mat-icon>
+    <div>
+      <strong>Promedio = Total de días acumulados / Total de casos considerados</strong>
+    </div>
+  </div>
+
+  <p>
+    Esta metodología asegura coherencia estadística y permite validar
+    la consistencia de los indicadores mostrados en pantalla.
+  </p>
+
+  <h3 class="manual-subtitle">Proyección de desarrollo</h3>
+
+  <ul class="manual-list">
+    <li>Porcentaje de inasistencia a citaciones.</li>
+    <li>Resultados clínicos consolidados por período.</li>
+    <li>Indicadores comparativos entre programas.</li>
+    <li>Exportación de reportes estratégicos.</li>
+  </ul>
+
+  <p>
+    El Panel Estratégico evolucionará progresivamente incorporando nuevos
+    indicadores que fortalezcan el control de gestión, la planificación
+    estratégica y la mejora continua de la calidad asistencial.
+  </p>
+
+</mat-card>

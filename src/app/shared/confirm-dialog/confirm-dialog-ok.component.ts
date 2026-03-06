@@ -1,5 +1,4 @@
 // src/app/shared/confirm-dialog/confirm-dialog-ok.component.ts
-
 import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -28,10 +27,19 @@ export interface ConfirmDialogOkData {
   selector: 'app-confirm-dialog-ok',
   imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
   template: `
-    <h2 mat-dialog-title class="dialog-title">
-      <mat-icon *ngIf="data.icon" class="dialog-icon">
+    <h2
+      mat-dialog-title
+      class="dialog-title"
+      [ngClass]="'dialog-title-' + effectiveColor"
+    >
+      <mat-icon
+        *ngIf="data.icon"
+        class="dialog-icon"
+        [color]="effectiveColor"
+      >
         {{ data.icon }}
       </mat-icon>
+
       {{ data.title || 'Información' }}
     </h2>
 
@@ -46,7 +54,7 @@ export interface ConfirmDialogOkData {
       <button
         mat-flat-button
         type="button"
-        [color]="data.color || 'primary'"
+        [color]="effectiveColor"
         cdkFocusInitial
         (click)="onConfirm()"
         (keydown.enter)="onConfirm()"
@@ -61,17 +69,30 @@ export interface ConfirmDialogOkData {
         display: flex;
         align-items: center;
         gap: 8px;
-        color: #1976d2; 
         font-weight: 500;
       }
 
       .dialog-icon {
-        opacity: 0.9;
+        opacity: 0.95;
       }
 
       .dialog-message {
         margin: 0;
         white-space: pre-wrap;
+      }
+
+      /* Clases dinámicas por color */
+
+      .dialog-title-primary {
+        color: var(--mdc-theme-primary, #3f51b5);
+      }
+
+      .dialog-title-accent {
+        color: var(--mdc-theme-secondary, #ff4081);
+      }
+
+      .dialog-title-warn {
+        color: #f44336;
       }
     `,
   ],
@@ -81,6 +102,10 @@ export class ConfirmDialogOkComponent {
     private ref: MatDialogRef<ConfirmDialogOkComponent, true>,
     @Inject(MAT_DIALOG_DATA) public data: ConfirmDialogOkData
   ) {}
+
+  get effectiveColor(): 'primary' | 'accent' | 'warn' {
+    return this.data?.color ?? 'primary';
+  }
 
   onConfirm(): void {
     this.ref.close(true);

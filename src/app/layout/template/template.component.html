@@ -81,9 +81,9 @@
         </div>
 
         <!-- ADMIN -->
-        <p *ngIf="activeRole?.toUpperCase() === 'ADMIN'" class="admin-msg">
-          Eres administrador del sistema. Puedes continuar sin seleccionar un
-          rol o programa.
+         
+        <p *ngIf="userFullName?.toUpperCase() === 'ADMIN'" class="admin-msg">
+          Eres administrador del sistema. Puedes continuar sin seleccionar un rol o programa.
         </p>
 
         <!-- BOTONES (click)="logout()"  -->

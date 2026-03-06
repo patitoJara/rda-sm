@@ -11,26 +11,32 @@ import { MatIconModule } from '@angular/material/icon';
 export interface ErrorConfirmData {
   title?: string;
   message: string;
-  confirmText?: string;   // ej: "Eliminar definitivamente"
-  cancelText?: string;    // ej: "Cancelar"
-  icon?: string;          // ej: 'warning', 'delete_forever'
+  confirmText?: string;   // default: 'Aceptar'
+  icon?: string;          // ej: 'error', 'warning'
   dense?: boolean;
 }
 
 @Component({
   standalone: true,
-  selector: 'app-danger-confirm-dialog',
+  selector: 'app-error-confirm-dialog',
   imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
   template: `
-    <h2 mat-dialog-title class="danger-title">
-      <mat-icon class="danger-icon">
-        {{ data.icon || 'warning' }}
+    <h2
+      mat-dialog-title
+      class="dialog-title dialog-title-warn"
+    >
+      <mat-icon
+        class="dialog-icon"
+        color="warn"
+      >
+        {{ data.icon || 'error' }}
       </mat-icon>
-      {{ data.title || 'Confirmación requerida' }}
+
+      {{ data.title || 'Error' }}
     </h2>
 
     <mat-dialog-content [style.padding.px]="data.dense ? 8 : 16">
-      <p class="danger-message">
+      <p class="dialog-message">
         {{ data.message }}
       </p>
     </mat-dialog-content>
@@ -44,24 +50,28 @@ export interface ErrorConfirmData {
         (click)="onConfirm()"
         (keydown.enter)="onConfirm()"
       >
-        {{ data.confirmText || 'Continuar' }}
+        {{ data.confirmText || 'Aceptar' }}
       </button>
     </mat-dialog-actions>
   `,
   styles: [
     `
-      .danger-title {
+      .dialog-title {
         display: flex;
         align-items: center;
         gap: 8px;
-        color: #c62828;
+        font-weight: 600;
       }
 
-      .danger-icon {
-        color: #c62828;
+      .dialog-title-warn {
+        color: #f44336; /* usa warn del theme */
       }
 
-      .danger-message {
+      .dialog-icon {
+        opacity: 0.95;
+      }
+
+      .dialog-message {
         margin: 0;
         white-space: pre-wrap;
         font-weight: 500;
@@ -71,16 +81,12 @@ export interface ErrorConfirmData {
 })
 export class ErrorConfirmDialogComponent {
   constructor(
-    private ref: MatDialogRef<ErrorConfirmDialogComponent, boolean>,
+    private ref: MatDialogRef<ErrorConfirmDialogComponent, true>,
     @Inject(MAT_DIALOG_DATA) public data: ErrorConfirmData
   ) {}
 
   onConfirm(): void {
     this.ref.close(true);
-  }
-
-  onCancel(): void {
-    this.ref.close(false);
   }
 }
 

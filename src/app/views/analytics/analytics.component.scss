@@ -1,14 +1,150 @@
+// C:\Users\pjara\Documents\DESARROLLO\ANGULAR\rda-sm\src\app\views\analytics\analytics.component.scss
+/* =========================================
+   📊 FILTROS DASHBOARD — ESTILO CLÍNICO
+========================================= */
+
+.filters-row {
+  margin: 12px 0 18px 0;
+}
+
+/* Contenedor en una sola línea */
+.filters-row .fila-3 {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  gap: 18px;
+  align-items: end;
+}
+
+/* Campo clínico */
+.filters-row .field-clinico-linea {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Label clínico */
+.filters-row .field-clinico-linea label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #546e7a;
+  line-height: 1.1;
+}
+
+/* Quitar caja material */
+::ng-deep .filters-row .mdc-notched-outline {
+  display: none;
+}
+
+/* Form-field compacto */
+::ng-deep .filters-row .mat-mdc-form-field {
+  width: 100%;
+  min-height: unset !important;
+}
+
+/* Flex interno */
+::ng-deep .filters-row .mat-mdc-form-field-flex {
+  padding: 0 !important;
+  align-items: flex-end;
+  background: transparent !important;
+}
+
+/* Altura real del select */
+::ng-deep .filters-row .mat-mdc-form-field-infix {
+  padding: 0 !important;
+  min-height: 24px !important;
+}
+
+/* Trigger */
+::ng-deep .filters-row .mat-mdc-select-trigger {
+  height: 24px !important;
+  min-height: 24px !important;
+  padding: 0 !important;
+}
+
+/* Texto seleccionado */
+::ng-deep .filters-row .mat-mdc-select-value,
+::ng-deep .filters-row .mat-mdc-select-value-text {
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: #263238;
+  line-height: 24px;
+  margin: 0;
+  padding: 0;
+}
+
+/* Línea inferior normal */
+::ng-deep .filters-row .mdc-line-ripple {
+  height: 1px;
+  background-color: #9e9e9e;
+}
+
+/* Línea activa verde institucional */
+::ng-deep .filters-row .mat-mdc-form-field.mat-focused .mdc-line-ripple {
+  height: 2px;
+  background-color: #2e7d32;
+}
+
+.analytics-container {
+  padding: 12px 20px 16px 20px;
+}
+
+/* Quitar espacio fantasma inferior */
+::ng-deep .filters-row .mat-mdc-form-field-subscript-wrapper {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Panel desplegable */
+::ng-deep .clinico-select-panel {
+  padding: 4px 0;
+  max-height: 260px;
+}
+
+::ng-deep .clinico-select-panel .mat-mdc-option {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  min-height: 26px;
+  padding: 4px 10px;
+}
+
+::ng-deep .clinico-select-panel .mat-mdc-option.mdc-list-item--selected {
+  background-color: #e8f5e9;
+  color: #1b5e20;
+}
+
+::ng-deep .clinico-select-panel .mat-mdc-option:hover {
+  background-color: #f1f5f9;
+}
+
 .analytics-container {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  padding: 12px 20px 16px 20px;
+}
+
+/* ================= KPI ================= */
+
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
 }
 
 .kpi-card {
   text-align: center;
-  padding: 18px;
+  padding: 14px;
   border-radius: 16px;
   background: #fafafa;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;  
 }
 
 .kpi-title {
@@ -19,30 +155,23 @@
 }
 
 .kpi-value {
-  font-size: 30px;
+  font-size: 24px;
   font-weight: 700;
   color: #f57c00;
 }
 
-.kpi-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-}
+/* ================= CHARTS ================= */
 
 .row {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 20px;
-}
-
-.row-kpi {
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
 .chart-card {
   padding: 16px;
   border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
 }
 
 .chart-card h3 {
@@ -54,17 +183,145 @@
 }
 
 .chart-container {
-  height: 280px;
+  height: 220px;
   position: relative;
 }
 
-.chart-card,
-.kpi-card {
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+.chart-container canvas {
+  width: 100% !important;
+  height: 100% !important;
 }
 
-@media (max-width: 900px) {
-  .row {
-    grid-template-columns: 1fr;
+/* ================= RESPONSIVE ================= */
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .chart-container {
+    height: 250px;
   }
+}
+
+/* Celulares */
+@media (max-width: 600px) {
+  .chart-container {
+    height: 220px;
+  }
+
+  .kpi-value {
+    font-size: 22px;
+  }
+}
+
+.btn-reset {
+  height: 36px;
+  font-size: 13px;
+  padding: 0 14px;
+  border-radius: 6px;
+}
+
+.calculation-panel {
+  margin-top: 16px;
+  border-radius: 12px;
+}
+
+.calculation-content {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #455a64;
+}
+
+.id-list {
+  font-size: 12px;
+  color: #78909c;
+  word-break: break-word;
+}
+
+.actions-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-audit {
+  border-radius: 20px;
+}
+
+.audit-panel {
+  margin: 15px 0 25px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.audit-card {
+  padding: 16px;
+  border-radius: 10px;
+  background: #f7f9fc;
+}
+
+.audit-row {
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.ids-box {
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: #eef3f8;
+  border-radius: 6px;
+  font-size: 12px;
+  max-height: 60px;
+  overflow-y: auto;
+}
+
+.kpi-header,
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.audit-mini {
+  margin-top: 10px;
+  padding: 10px;
+  background: #f4f7fb;
+  border-radius: 8px;
+  font-size: 13px;
+
+  animation: fadeIn 0.25s ease;
+}
+
+.audit-mini div {
+  padding: 4px 0;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.audit-mini div:last-child {
+  border-bottom: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chart-header button,
+.kpi-header button {
+  width: 30px;
+  height: 30px;
+  color: #78909c;
+  transition: all 0.2s ease;
+}
+
+.chart-header button:hover,
+.kpi-header button:hover {
+  background: #eef3f8;
+  border-radius: 50%;
+  color: #2e7d32;
 }

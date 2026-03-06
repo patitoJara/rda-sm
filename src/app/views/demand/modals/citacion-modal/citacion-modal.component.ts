@@ -52,13 +52,16 @@ export class CitacionModalComponent {
 
     this.form = this.fb.group({
       date: [citacion?.date_attention ?? null, Validators.required],
-      hour: [citacion?.hour_attention ?? null, Validators.required],
+      hour: [
+  citacion?.hour_attention ?? null,
+  [
+    Validators.required,
+    Validators.pattern(/^([01]\d|2[0-3]):([0-5]\d)$/)
+  ]
+],
       profession: [citacion?.profession?.id ?? null, Validators.required],
       professional: [citacion?.full_name ?? '', Validators.required],
-      state: [
-        citacion?.state ?? 'AGENDADO',
-        Validators.required,
-      ],
+      state: [citacion?.state ?? 'AGENDADO', Validators.required],
     });
   }
 
@@ -69,8 +72,7 @@ export class CitacionModalComponent {
   confirmar(): void {
     if (this.form.invalid) return;
 
-    const { date, hour, profession, professional, state } =
-      this.form.value;
+    const { date, hour, profession, professional, state } = this.form.value;
 
     const movement = {
       id: this.data?.citacion?.id ?? null,
@@ -100,4 +102,5 @@ export class CitacionModalComponent {
         return 'schedule';
     }
   }
+
 }

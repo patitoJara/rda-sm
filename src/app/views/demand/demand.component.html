@@ -894,6 +894,7 @@
                   Historial de Citaciones
                   <button
                     mat-icon-button
+                    type="button"
                     class="historial-add-btn"
                     matTooltip="Agregar citación"
                     (click)="openNuevaCitacionModal()"
@@ -960,12 +961,14 @@
                     <ng-container matColumnDef="state">
                       <th mat-header-cell *matHeaderCellDef>Estado</th>
                       <td mat-cell *matCellDef="let m" class="estado-text">
-                        {{ getStateLabel(m.state) }}
+                        <span [ngClass]="getStateClass(m.state)">
+                          {{ getStateLabel(m.state) }}
+                        </span>
                       </td>
                     </ng-container>
 
                     <!-- ================= ACCIONES ================= -->
-                    <!-- ================= ACCIONES ================= -->
+
                     <ng-container matColumnDef="actions">
                       <th
                         mat-header-cell
@@ -984,6 +987,7 @@
                         <ng-container *ngIf="m.id; else nuevaCitacion">
                           <!-- Imprimir -->
                           <button
+                            *ngIf="m.state === 'AGENDADO'"
                             type="button"
                             mat-icon-button
                             matTooltip="Imprimir citación"
@@ -1008,8 +1012,12 @@
                               mat-menu-item
                               (click)="setMovementState(m, 'AGENDADO')"
                             >
-                              <mat-icon>schedule</mat-icon>
-                              <span>Agendado</span>
+                              <mat-icon [ngClass]="getStateClass('AGENDADO')"
+                                >schedule</mat-icon
+                              >
+                              <span [ngClass]="getStateClass('AGENDADO')"
+                                >Agendado</span
+                              >
                             </button>
 
                             <button
@@ -1017,8 +1025,12 @@
                               mat-menu-item
                               (click)="setMovementState(m, 'SE_PRESENTO')"
                             >
-                              <mat-icon>check_circle</mat-icon>
-                              <span>Se presentó</span>
+                              <mat-icon [ngClass]="getStateClass('SE_PRESENTO')"
+                                >check_circle</mat-icon
+                              >
+                              <span [ngClass]="getStateClass('SE_PRESENTO')"
+                                >Se presentó</span
+                              >
                             </button>
 
                             <button
@@ -1026,8 +1038,13 @@
                               mat-menu-item
                               (click)="setMovementState(m, 'NO_SE_PRESENTO')"
                             >
-                              <mat-icon>person_off</mat-icon>
-                              <span>No se presentó</span>
+                              <mat-icon
+                                [ngClass]="getStateClass('NO_SE_PRESENTO')"
+                                >person_off</mat-icon
+                              >
+                              <span [ngClass]="getStateClass('NO_SE_PRESENTO')"
+                                >No se presentó</span
+                              >
                             </button>
 
                             <button
@@ -1035,8 +1052,14 @@
                               mat-menu-item
                               (click)="setMovementState(m, 'CANCELA_PROGRAMA')"
                             >
-                              <mat-icon>cancel</mat-icon>
-                              <span>Cancela programa</span>
+                              <mat-icon
+                                [ngClass]="getStateClass('CANCELA_PROGRAMA')"
+                                >cancel</mat-icon
+                              >
+                              <span
+                                [ngClass]="getStateClass('CANCELA_PROGRAMA')"
+                                >Cancela programa</span
+                              >
                             </button>
                           </mat-menu>
                         </ng-container>
@@ -1047,7 +1070,9 @@
                             type="button"
                             mat-icon-button
                             matTooltip="Editar"
-                            (click)="editarMovimiento(i, m); $event.stopPropagation()"
+                            (click)="
+                              editarMovimiento(i, m); $event.stopPropagation()
+                            "
                           >
                             <mat-icon>edit</mat-icon>
                           </button>
@@ -1057,7 +1082,9 @@
                             mat-icon-button
                             color="warn"
                             matTooltip="Eliminar"
-                            (click)="eliminarMovimiento(i); $event.stopPropagation()"
+                            (click)="
+                              eliminarMovimiento(i); $event.stopPropagation()
+                            "
                           >
                             <mat-icon>delete</mat-icon>
                           </button>

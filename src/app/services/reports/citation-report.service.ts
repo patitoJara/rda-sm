@@ -19,8 +19,9 @@ export class CitationReportService {
     usuario: string;
     professions: any[];
     program: string | null;
+    rut: string;
   }): string {
-    const { numero, movement, demandante, usuario, professions, program } =
+    const { numero, movement, demandante, usuario, professions, program, rut } =
       payload;
 
     // ================================
@@ -53,6 +54,7 @@ export class CitationReportService {
     );
 
     const profesionNombre = professionObj?.name ?? 'Profesión no informada';
+    const rutFmt = rut ?? '-';
 
     const fechaFormateada = formatDate(
       movement.date_attention,
@@ -61,8 +63,7 @@ export class CitationReportService {
     );
 
     const fechaFinal =
-      fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1);
-
+    fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1);
     const demandanteFmt = capitalizeWords(demandante);
     const usuarioFmt = capitalizeWords(usuario);
     const profesionalFmt = capitalizeWords(
@@ -77,28 +78,36 @@ export class CitationReportService {
       <style>
         @page { size: A4; margin: 20mm; }
         body { font-family: Roboto, Arial, sans-serif; font-size: 13px; }
-        .header { text-align: center; border-bottom: 2px solid #1565c0; padding-bottom: 8px; }
+        .header { 
+            text-align: center; 
+            padding-bottom: 8px; 
+        }    
         h2, h3 { margin: 4px 0; color: #1565c0; }
         table { width: 100%; border-collapse: collapse; margin-top: 16px; }
         td { padding: 6px; }
         .label { width: 30%; font-weight: bold; }
-        .firma { margin-top: 60px; text-align: center; }
+        .firma { margin-top: 120px; text-align: center; }
       </style>
 
-      <div class="header">
-        <h2>SERVICIO DE SALUD MAGALLANES</h2>
-        <h3>Departamento de Salud Mental</h3>
-        <h3>Registro de Demanda de Atención de Tratamientos de Drogas</h3>
+      <div class="header">        
+          <div class="header-text">
+            <h2>SERVICIO DE SALUD MAGALLANES</h2>
+            <h3>Departamento de Salud Mental</h3>
+            <h3>Registro de Demanda de Atención de Tratamientos de Drogas</h3>
+          </div>
       </div>
 
-      <h2 style="text-align:center; margin-top:16px;">${titulo}</h2>
+      <h2 style="text-align:center; margin-top:16px;border-bottom: 1px solid #1565c0;border-top: 1px solid #1565c0;">
+        ${titulo}
+      </h2>
 
       <table>
         <tr><td class="label">Programa</td><td>${program ?? '-'}</td></tr>
         <tr><td class="label">Demandante</td><td>${demandanteFmt}</td></tr>
+        <tr><td class="label">RUT del Demandante</td><td>${rutFmt}</td></tr>
         <tr><td class="label">Profesional</td><td>${profesionalFmt}</td></tr>
-        <tr><td class="label">Fecha</td><td>${fechaFinal}</td></tr>
-        <tr><td class="label">Hora</td><td>${movement.hour_attention}</td></tr>
+        <tr><td class="label">Fecha Citación</td><td>${fechaFinal}</td></tr>
+        <tr><td class="label">Hora Citación</td><td>${movement.hour_attention}</td></tr>
       </table>
 
       <p style="margin-top:24px;">
@@ -106,7 +115,7 @@ export class CitationReportService {
       </p>
 
       <div class="firma">
-        ___________________________<br>
+        ______________________________________<br>
         ${usuarioFmt}
       </div>
     </div>
@@ -145,29 +154,62 @@ export class CitationReportService {
     const doc = iframe.contentWindow?.document;
     if (!doc) return;
 
+    const logoUrl = `${window.location.origin}/assets/logoSSM.png`;
+
     doc.open();
     doc.write(`
     <html>
       <head>
         <title>Citación</title>
         <style>
-          @media print {
-            body { margin: 0; }
+          @page { size: A4; margin: 20mm; }
+
+          body {
+            font-family: Roboto, Arial, sans-serif;
+            font-size: 13px;
+          }
+
+          .logo-container {
+            text-align: left;
+            margin-bottom: 10px;
+          }
+
+          .logo {
+            height: 80px;
+          }
+
+          .header-text {
+            text-align: center;            
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+          }
+
+          .header-text h2,
+          .header-text h3 {
+            margin: 2px 0;
+            color: #1565c0;
           }
         </style>
       </head>
       <body>
+
+        <div class="logo-container">
+          <img src="${logoUrl}" class="logo" />
+        </div>
         ${html}
+
       </body>
     </html>
   `);
     doc.close();
 
-    iframe.contentWindow?.focus();
-    iframe.contentWindow?.print();
-
     setTimeout(() => {
-      document.body.removeChild(iframe);
-    }, 500);
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+      }, 500);
+    }, 300);
   }
 }

@@ -29,10 +29,19 @@ export interface ConfirmDialogData {
   selector: 'app-confirm-dialog',
   imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
   template: `
-    <h2 mat-dialog-title class="dialog-title">
-      <mat-icon *ngIf="data.icon" class="dialog-icon">
+    <h2
+      mat-dialog-title
+      class="dialog-title"
+      [ngClass]="'dialog-title-' + effectiveColor"
+    >
+      <mat-icon
+        *ngIf="data.icon"
+        class="dialog-icon"
+        [color]="effectiveColor"
+      >
         {{ data.icon }}
       </mat-icon>
+
       {{ data.title || 'Confirmar acción' }}
     </h2>
 
@@ -54,7 +63,7 @@ export interface ConfirmDialogData {
       <button
         mat-flat-button
         type="button"
-        [color]="data.color || 'primary'"
+        [color]="effectiveColor"
         cdkFocusInitial
         (click)="onConfirm()"
         (keydown.enter)="onConfirm()"
@@ -69,16 +78,30 @@ export interface ConfirmDialogData {
         display: flex;
         align-items: center;
         gap: 8px;
-        color: #1976d2; 
+        font-weight: 500;
       }
 
       .dialog-icon {
-        opacity: 0.9;
+        opacity: 0.95;
       }
 
       .dialog-message {
         margin: 0;
         white-space: pre-wrap;
+      }
+
+      /* Clases dinámicas por color */
+
+      .dialog-title-primary {
+        color: var(--mdc-theme-primary, #3f51b5);
+      }
+
+      .dialog-title-accent {
+        color: var(--mdc-theme-secondary, #ff4081);
+      }
+
+      .dialog-title-warn {
+        color: #f44336;
       }
     `,
   ],
@@ -89,6 +112,10 @@ export class ConfirmDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: ConfirmDialogData
   ) {}
 
+  get effectiveColor(): 'primary' | 'accent' | 'warn' {
+    return this.data?.color ?? 'primary';
+  }
+
   onConfirm(): void {
     this.ref.close(true);
   }
@@ -97,7 +124,6 @@ export class ConfirmDialogComponent {
     this.ref.close(false);
   }
 }
-
 
 /* ejemplo de Uso
 

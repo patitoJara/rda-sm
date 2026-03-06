@@ -1,4 +1,4 @@
-//C:\Users\pjara\Documents\DESARROLLO\ANGULAR\rda-sm\src\app\shared\confirm-dialog\confirm-dialog-yes-no.component.ts
+// src/app/shared/confirm-dialog/confirm-dialog-yes-no.component.ts
 
 import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -24,15 +24,26 @@ export interface ConfirmDialogYesNoData {
   selector: 'app-confirm-dialog-yes-no',
   imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
   template: `
-    <h2 mat-dialog-title class="dialog-title">
-      <mat-icon *ngIf="data.icon" class="dialog-icon">
+    <h2
+      mat-dialog-title
+      class="dialog-title"
+      [ngClass]="'dialog-title-' + effectiveColor"
+    >
+      <mat-icon
+        *ngIf="data.icon"
+        class="dialog-icon"
+        [color]="effectiveColor"
+      >
         {{ data.icon }}
       </mat-icon>
+
       {{ data.title }}
     </h2>
 
     <mat-dialog-content>
-      <p class="dialog-message">{{ data.message }}</p>
+      <p class="dialog-message">
+        {{ data.message }}
+      </p>
     </mat-dialog-content>
 
     <mat-dialog-actions align="end">
@@ -42,7 +53,7 @@ export interface ConfirmDialogYesNoData {
 
       <button
         mat-flat-button
-        [color]="data.color || 'warn'"
+        [color]="effectiveColor"
         cdkFocusInitial
         (click)="confirm()"
       >
@@ -60,12 +71,26 @@ export interface ConfirmDialogYesNoData {
       }
 
       .dialog-icon {
-        opacity: 0.9;
+        opacity: 0.95;
       }
 
       .dialog-message {
         margin: 0;
         white-space: pre-wrap;
+      }
+
+      /* Opcional: puedes personalizar colores si quieres override visual */
+
+      .dialog-title-primary {
+        color: var(--mdc-theme-primary, #3f51b5);
+      }
+
+      .dialog-title-accent {
+        color: var(--mdc-theme-secondary, #ff4081);
+      }
+
+      .dialog-title-warn {
+        color: #f44336;
       }
     `,
   ],
@@ -76,6 +101,10 @@ export class ConfirmDialogYesNoComponent {
     @Inject(MAT_DIALOG_DATA) public data: ConfirmDialogYesNoData
   ) {}
 
+  get effectiveColor(): 'primary' | 'accent' | 'warn' {
+    return this.data?.color ?? 'warn';
+  }
+
   cancel(): void {
     this.ref.close(false);
   }
@@ -83,6 +112,4 @@ export class ConfirmDialogYesNoComponent {
   confirm(): void {
     this.ref.close(true);
   }
-
-    
 }

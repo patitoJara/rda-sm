@@ -21,7 +21,19 @@
         <div class="field-clinico-linea">
           <mat-form-field appearance="outline">
             <mat-label>Hora</mat-label>
-            <input matInput type="time" formControlName="hour" />
+
+            
+              <input
+                matInput
+                type="text"
+                formControlName="hour"
+                placeholder="HH:mm"
+              />
+
+              <mat-error *ngIf="form.get('hour')?.hasError('pattern')">
+                Formato inválido. Use HH:mm (24 horas)
+              </mat-error>
+
             <button
               mat-icon-button
               matSuffix

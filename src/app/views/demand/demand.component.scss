@@ -1491,3 +1491,31 @@
 }
 
 /* fin ficha de Bloque */
+
+//
+// color para los distintos estados de las citaciones
+//
+
+.state-agendado {
+  color: #1976d2; // azul
+  font-weight: 600;
+}
+
+.state-presentado {
+  color: #2e7d32; // verde
+  font-weight: 600;
+}
+
+.state-no-presentado {
+  color: #f57c00; // naranja
+  font-weight: 600;
+}
+
+.state-cancelado {
+  color: #d32f2f; // rojo
+  font-weight: 600;
+}
+
+.state-default {
+  color: #616161;
+}

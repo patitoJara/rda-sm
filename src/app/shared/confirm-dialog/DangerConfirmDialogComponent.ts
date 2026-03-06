@@ -22,15 +22,22 @@ export interface DangerConfirmData {
   selector: 'app-danger-confirm-dialog',
   imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
   template: `
-    <h2 mat-dialog-title class="danger-title">
-      <mat-icon class="danger-icon">
+    <h2
+      mat-dialog-title
+      class="dialog-title dialog-title-warn"
+    >
+      <mat-icon
+        class="dialog-icon"
+        color="warn"
+      >
         {{ data.icon || 'warning' }}
       </mat-icon>
+
       {{ data.title || 'Confirmación requerida' }}
     </h2>
 
     <mat-dialog-content [style.padding.px]="data.dense ? 8 : 16">
-      <p class="danger-message">
+      <p class="dialog-message">
         {{ data.message }}
       </p>
     </mat-dialog-content>
@@ -58,18 +65,22 @@ export interface DangerConfirmData {
   `,
   styles: [
     `
-      .danger-title {
+      .dialog-title {
         display: flex;
         align-items: center;
         gap: 8px;
-        color: #c62828;
+        font-weight: 600;
       }
 
-      .danger-icon {
-        color: #c62828;
+      .dialog-title-warn {
+        color: #f44336; /* usa warn del theme */
       }
 
-      .danger-message {
+      .dialog-icon {
+        opacity: 0.95;
+      }
+
+      .dialog-message {
         margin: 0;
         white-space: pre-wrap;
         font-weight: 500;

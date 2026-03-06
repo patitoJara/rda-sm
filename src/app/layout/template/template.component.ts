@@ -81,8 +81,9 @@ export class TemplateComponent implements OnInit {
 
   userRoles: string[] = [];
   userPrograms: string[] = [];
-  userFullName: string = 'Usuario';
+  
   activeRole: string | null = null;
+  userFullName: string | null = 'Usuario';
   activeProgram: string | null = null;
 
   menuItems: any[] = [];
@@ -164,7 +165,7 @@ export class TemplateComponent implements OnInit {
     // 🆕 SINCRONIZAR ID DEL PROGRAMA ACTIVO
     // =============================================
 
-    console.log('🔎 DEBUG — profile.programs:', profile.programs);
+    console.log('🔎 DEBUG — profile.programs 167:', this.tokenService.getActiveProgramId());
     console.log('🔎 DEBUG — activeProgram actual:', this.activeProgram);
 
     if (profile?.programs?.length && this.activeProgram) {
