@@ -1,9 +1,6 @@
 // src/app/core/interceptors/auth.interceptor.ts
 
-import {
-  HttpInterceptorFn,
-  HttpErrorResponse,
-} from '@angular/common/http';
+import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import {
   catchError,
@@ -42,11 +39,19 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
+
       if (error.status !== 401) {
         return throwError(() => error);
       }
 
-      // 🚫 Si ya estamos refrescando, esperar
+      const refreshToken = tokenService.getRefreshToken();
+
+      if (!refreshToken) {
+        console.warn('[AuthInterceptor] ⚠️ No hay refreshToken disponible');
+        tokenService.clear();
+        return throwError(() => error);
+      }
+
       if (isRefreshing) {
         return refreshSubject.pipe(
           filter((token) => token !== null),
@@ -60,30 +65,37 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         );
       }
 
-      // 🔒 Iniciar refresh único
       isRefreshing = true;
       refreshSubject.next(null);
 
       return authService.refresh().pipe(
         switchMap((response: any) => {
-          const newToken = response?.token;
 
-          if (!newToken) {
+          const newAccessToken = response?.token || response?.accessToken;
+          const newRefreshToken = response?.refreshToken;
+
+          if (!newAccessToken) {
             tokenService.clear();
             return throwError(() => error);
           }
 
-          tokenService.setAccessToken(newToken);
+          // 🔧 AQUÍ está el cambio importante
+          if (newRefreshToken) {
+            tokenService.setTokens(newAccessToken, newRefreshToken);
+          } else {
+            tokenService.setAccessToken(newAccessToken);
+          }
 
           isRefreshing = false;
-          refreshSubject.next(newToken);
+          refreshSubject.next(newAccessToken);
 
           const retryReq = req.clone({
-            setHeaders: { Authorization: `Bearer ${newToken}` },
+            setHeaders: { Authorization: `Bearer ${newAccessToken}` },
           });
 
           return next(retryReq);
         }),
+
         catchError((refreshError) => {
           isRefreshing = false;
           tokenService.clear();

@@ -1,0 +1,23 @@
+<div class="dashboard-container">
+
+  <app-dashboard-filters
+    (filtersChange)="onFiltersChange($event)">
+  </app-dashboard-filters>
+
+  <app-dashboard-cards
+    [stats]="stats">
+  </app-dashboard-cards>
+
+  <app-dashboard-charts
+    [dataset]="dataset">
+  </app-dashboard-charts>
+
+  <app-dashboard-critical-table
+    [data]="criticos">
+  </app-dashboard-critical-table>
+
+  <app-dashboard-table
+    [data]="dataset">
+  </app-dashboard-table>
+
+</div>

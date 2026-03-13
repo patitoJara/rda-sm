@@ -56,6 +56,9 @@ export class TokenService {
     return Number.isFinite(id) && id > 0 ? id : null;
   }
 
+  setRefreshToken(token: string): void {
+    sessionStorage.setItem(this.REFRESH_KEY, token);
+  }
   /*
   getAccessToken(): string | null {
     return sessionStorage.getItem(this.TOKEN_KEY);
@@ -148,7 +151,7 @@ export class TokenService {
   getActiveRole(): string | null {
     return sessionStorage.getItem(this.ACTIVE_ROLE_KEY);
   }
-  
+
   getActiveProgramId(): number | null {
     // 🔥 Primero intentar memoria
     if (this.activeProgramIdMemory !== null) {

@@ -4,6 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule  } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { TokenService } from '../../services/token.service';
+import { DashboardComponent } from '../../views/dashboard/dashboard.component';
 
 
 @Component({
@@ -11,7 +12,7 @@ import { TokenService } from '../../services/token.service';
   selector: 'app-inicio',
   templateUrl: './inicio.component.html',
   styleUrls: ['./inicio.component.scss'],
-  imports: [CommonModule, MatCardModule, MatIconModule, MatDividerModule],
+  imports: [CommonModule, MatCardModule, MatIconModule, MatDividerModule, DashboardComponent],
 })
 export class InicioComponent implements OnInit {
 

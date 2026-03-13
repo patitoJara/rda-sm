@@ -125,30 +125,25 @@ export class ConfirmDialogComponent {
   }
 }
 
-/* ejemplo de Uso
-
+/* ejemplo de uso 
 
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogOkComponent } from '@app/shared/confirm-dialog/confirm-dialog-ok.component';
 
+export class xxxxxxxxx implements OnInit {
+  private dialog = inject(MatDialog);
 
-  this.dialog.open(ConfirmDialogComponent, {
+
+  this.dialog.open(ConfirmDialogOkComponent, {
     width: '420px',
     disableClose: true,
     data: {
-      title: 'Eliminar registro',
-      message: '¿Está seguro que desea eliminar este registro?',
-      confirmText: 'Eliminar',
-      cancelText: 'Cancelar',
-      icon: 'delete',
-      color: 'warn',
-    },
-  }).afterClosed().subscribe(ok => {
-    if (ok) {
-      // acción confirmada
-    }
+          title: 'Error en contraseñas',
+          message: 'Las contraseñas no coinciden.',
+          icon: 'check_circle',
+          color: 'primary',
+          confirmText: 'Aceptar',
   });
-
 
 
 */

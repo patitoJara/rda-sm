@@ -28,6 +28,7 @@ import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dial
 import { firstValueFrom } from 'rxjs';
 import { NavigationStateService } from '@app/core/services/navigation-state.service';
 import { SessionService } from '@app/core/services/session.service';
+import { DashboardComponent } from '../../views/dashboard/dashboard.component';
 
 let globalReloadListenerAdded = false;
 
@@ -81,7 +82,7 @@ export class TemplateComponent implements OnInit {
 
   userRoles: string[] = [];
   userPrograms: string[] = [];
-  
+
   activeRole: string | null = null;
   userFullName: string | null = 'Usuario';
   activeProgram: string | null = null;
@@ -165,7 +166,10 @@ export class TemplateComponent implements OnInit {
     // 🆕 SINCRONIZAR ID DEL PROGRAMA ACTIVO
     // =============================================
 
-    console.log('🔎 DEBUG — profile.programs 167:', this.tokenService.getActiveProgramId());
+    console.log(
+      '🔎 DEBUG — profile.programs 167:',
+      this.tokenService.getActiveProgramId(),
+    );
     console.log('🔎 DEBUG — activeProgram actual:', this.activeProgram);
 
     if (profile?.programs?.length && this.activeProgram) {

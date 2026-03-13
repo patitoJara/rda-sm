@@ -25,6 +25,7 @@ import { User } from '@app/models/user';
 import { ConfirmDialogOkComponent } from '@app/shared/confirm-dialog/confirm-dialog-ok.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RegisterSubstanceService } from '@app/services/register-substance.service';
+import { MailService } from '@app/core/services/mail.service';
 import { Program } from '@app/models/program';
 import { Role } from '@app/models/role';
 
@@ -61,6 +62,7 @@ export class TransferComponent {
   private usersService = inject(UsersService);
   private dialog = inject(MatDialog);
   private registerSubstanceService = inject(RegisterSubstanceService);
+  private mailService = inject(MailService);
 
   loadingUsers = false;
   loading = false;
@@ -310,8 +312,6 @@ export class TransferComponent {
     }
 
     try {
-
-      
       const transferComment = this.buildTransferComment();
       const currentDescription = this.selectedRegister.description ?? '';
 
@@ -324,9 +324,9 @@ export class TransferComponent {
           : transferComment.trim();
       }
 
-console.log('Length:', updatedDescription.length);
-console.log('Raw:', JSON.stringify(updatedDescription));
-      
+      console.log('Length:', updatedDescription.length);
+      console.log('Raw:', JSON.stringify(updatedDescription));
+
       // 🔥 IMPORTANTE: enviar TODO el objeto porque es PUT
       const payload = {
         ...this.selectedRegister,
@@ -348,12 +348,50 @@ console.log('Raw:', JSON.stringify(updatedDescription));
         this.registerService.getById(this.selectedRegister.id),
       );
 
+      /* ===============================
+       📧 ENVIAR CORREOS DE NOTIFICACIÓN
+       =============================== */
+
+      if (this.notificationEmails.length) {
+        const subject = 'Transferencia de Registro Clínico';
+
+        const message = `
+Se ha realizado una transferencia de registro.
+
+Paciente:
+${this.selectedRegister.postulant?.firstName || ''} ${this.selectedRegister.postulant?.lastName || ''}
+
+Programa origen:
+${this.currentProgram?.name}
+
+Programa destino:
+${this.selectedProgramName}
+
+Profesional asignado:
+${this.getSelectedDestinationUserName()}
+
+Fecha:
+${new Date().toLocaleString('es-CL')}
+`;
+
+        for (const email of this.notificationEmails) {
+          await firstValueFrom(
+            this.mailService.send({
+              to: email,
+              subject,
+              message,
+            }),
+          );
+        }
+      }
+
+      /* =============================== */
+
       this.transferCompleted = true;
       this.nextStep(); // Marca 6 y pasa a 7
+
       // 🔥 Marca también el 7 como completado
       this.steps[this.currentStep - 1].completed = true;
-
-      
     } catch (error) {
       console.error('❌ Error ejecutando transferencia', error);
     }
@@ -489,5 +527,30 @@ Asignado a: ${this.getSelectedDestinationUserName()}
       .filter((s: any) => s.level === 'Secundaria')
       .map((s: any) => s.substance?.name)
       .join(', ');
+  }
+
+  async sendTransferNotifications() {
+    const subject = 'Transferencia de Demandante';
+
+    const message = `
+Se ha realizado una transferencia de registro clínico.
+
+Programa origen: ${this.currentProgram?.name}
+Programa destino: ${this.selectedProgramName}
+
+Usuario asignado: ${this.getSelectedDestinationUserName()}
+
+Fecha: ${new Date().toLocaleString('es-CL')}
+`;
+
+    for (const email of this.notificationEmails) {
+      await firstValueFrom(
+        this.mailService.send({
+          to: email,
+          subject,
+          message,
+        }),
+      );
+    }
   }
 }

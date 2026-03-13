@@ -1,0 +1,82 @@
+<div class="filters-container">
+
+  <div class="filters-row">
+
+    <div class="filter-group">
+
+      <label>Periodo</label>
+
+      <select [(ngModel)]="filtros.periodo" (change)="applyFilters()">
+        <option value="mes">Mes</option>
+        <option value="6m">6 meses móviles</option>
+        <option value="12m">12 meses móviles</option>
+        <option value="rango">Entre fechas</option>
+      </select>
+
+    </div>
+
+
+    <div class="filter-group">
+
+      <label>Indicador</label>
+
+      <select [(ngModel)]="filtros.indicador" (change)="applyFilters()">
+        <option value="solicitud_hoy">Solicitud → Hoy</option>
+        <option value="solicitud_citacion">Solicitud → Primera citación</option>
+        <option value="solicitud_atencion">Solicitud → Primera atención efectiva</option>
+      </select>
+
+    </div>
+
+
+    <div class="filter-group">
+
+      <label>Estado programa</label>
+
+      <select [(ngModel)]="filtros.estadoPrograma" (change)="applyFilters()">
+        <option value="todos">Todos</option>
+        <option value="abierto">Unidad Atención Abierta</option>
+        <option value="cerrado">Unidad Atención Cerrada</option>
+      </select>
+
+    </div>
+
+
+    <div class="filter-group">
+
+      <label>Grupo etario</label>
+
+      <select [(ngModel)]="filtros.grupoEtario" (change)="applyFilters()">
+        <option value="todos">Todos</option>
+        <option value="infanto">Infanto Adolescente</option>
+        <option value="adulto">Adulto</option>
+      </select>
+
+    </div>
+
+
+    <div class="filter-group">
+
+      <label>Buscar RUT</label>
+
+      <input
+        type="text"
+        placeholder="11.799.136-9"
+        [(ngModel)]="filtros.rut"
+        (input)="applyFilters()"
+      >
+
+    </div>
+
+  </div>
+
+
+  <div class="filters-actions">
+
+    <button (click)="clearFilters()">
+      Limpiar filtros
+    </button>
+
+  </div>
+
+</div>

@@ -39,7 +39,7 @@ export class UsersService {
 
     // Si ya existe, solo sincronizamos relaciones
     console.log(
-      `[UsersService] 🔁 Usuario existente (id=${user.id}), sincronizando relaciones...`
+      `[UsersService] 🔁 Usuario existente (id=${user.id}), sincronizando relaciones...`,
     );
     return this.syncRelations(user, user);
   }
@@ -62,7 +62,6 @@ export class UsersService {
     return this.http.get<User[]>(this.resourceUrl);
   }
 
-
   getAllUsersPrograms() {
     return this.http.get<any[]>(`${this.BASE}/api/v1/users_programs`);
   }
@@ -74,7 +73,7 @@ export class UsersService {
     const newPrograms = original.programs ?? [];
 
     console.log(
-      `[syncRelations] Iniciando sincronización para usuario ${userId}`
+      `[syncRelations] Iniciando sincronización para usuario ${userId}`,
     );
 
     // === 1️⃣ Sincronizar Roles ===
@@ -84,7 +83,7 @@ export class UsersService {
         switchMap((existing) => {
           if (existing.length > 0) {
             console.log(
-              `[syncRelations] 🗑️ Eliminando ${existing.length} roles previos para usuario ${userId}`
+              `[syncRelations] 🗑️ Eliminando ${existing.length} roles previos para usuario ${userId}`,
             );
 
             // 🔹 Borrar todas las relaciones previas
@@ -92,13 +91,13 @@ export class UsersService {
               .delete(`${this.BASE}/api/v1/users_roles/user/${userId}`)
               .pipe(
                 tap(() =>
-                  console.log(`[syncRelations] ✅ Roles previos eliminados`)
+                  console.log(`[syncRelations] ✅ Roles previos eliminados`),
                 ),
-                switchMap(() => this.addRoles(userId, newRoles))
+                switchMap(() => this.addRoles(userId, newRoles)),
               );
           } else {
             console.log(
-              `[syncRelations] 🆕 Sin roles previos, agregando nuevos...`
+              `[syncRelations] 🆕 Sin roles previos, agregando nuevos...`,
             );
             return this.addRoles(userId, newRoles);
           }
@@ -106,10 +105,10 @@ export class UsersService {
         catchError((err) => {
           console.error(
             `[syncRelations] ❌ Error sincronizando roles:`,
-            err.message
+            err.message,
           );
           return of(null);
-        })
+        }),
       );
 
     // === 2️⃣ Sincronizar Programas ===
@@ -119,7 +118,7 @@ export class UsersService {
         switchMap((existing) => {
           if (existing.length > 0) {
             console.log(
-              `[syncRelations] 🗑️ Eliminando ${existing.length} programas previos para usuario ${userId}`
+              `[syncRelations] 🗑️ Eliminando ${existing.length} programas previos para usuario ${userId}`,
             );
 
             // 🔹 Borrar todas las relaciones previas
@@ -127,13 +126,15 @@ export class UsersService {
               .delete(`${this.BASE}/api/v1/users_programs/user/${userId}`)
               .pipe(
                 tap(() =>
-                  console.log(`[syncRelations] ✅ Programas previos eliminados`)
+                  console.log(
+                    `[syncRelations] ✅ Programas previos eliminados`,
+                  ),
                 ),
-                switchMap(() => this.addPrograms(userId, newPrograms))
+                switchMap(() => this.addPrograms(userId, newPrograms)),
               );
           } else {
             console.log(
-              `[syncRelations] 🆕 Sin programas previos, agregando nuevos...`
+              `[syncRelations] 🆕 Sin programas previos, agregando nuevos...`,
             );
             return this.addPrograms(userId, newPrograms);
           }
@@ -141,27 +142,27 @@ export class UsersService {
         catchError((err) => {
           console.error(
             `[syncRelations] ❌ Error sincronizando programas:`,
-            err.message
+            err.message,
           );
           return of(null);
-        })
+        }),
       );
 
     // Ejecutar ambas sincronizaciones en paralelo
     return forkJoin([syncRoles$, syncPrograms$]).pipe(
       tap(() =>
         console.log(
-          `[syncRelations] ✅ Sincronización completada para usuario ${userId}`
-        )
+          `[syncRelations] ✅ Sincronización completada para usuario ${userId}`,
+        ),
       ),
       map(() => savedUser),
       catchError((err) => {
         console.error(
           `[syncRelations] ❌ Error final en usuario ${userId}:`,
-          err.message
+          err.message,
         );
         return of(savedUser);
-      })
+      }),
     );
   }
 
@@ -182,11 +183,11 @@ export class UsersService {
           catchError((err) => {
             console.error(
               `[syncRelations] ⚠️ Error agregando rol ${r.id}:`,
-              err.message
+              err.message,
             );
             return of(null);
-          })
-        )
+          }),
+        ),
     );
 
     return forkJoin(requests);
@@ -203,16 +204,16 @@ export class UsersService {
         })
         .pipe(
           tap(() =>
-            console.log(`[syncRelations] ➕ Programa agregado: ${p.id}`)
+            console.log(`[syncRelations] ➕ Programa agregado: ${p.id}`),
           ),
           catchError((err) => {
             console.error(
               `[syncRelations] ⚠️ Error agregando programa ${p.id}:`,
-              err.message
+              err.message,
             );
             return of(null);
-          })
-        )
+          }),
+        ),
     );
 
     return forkJoin(requests);
@@ -233,13 +234,13 @@ export class UsersService {
         catchError((err) => {
           if (err.status === 403) {
             console.warn(
-              `[getUserRoles] Usuario ${userId} sin permisos o sin roles asociados.`
+              `[getUserRoles] Usuario ${userId} sin permisos o sin roles asociados.`,
             );
             return of([]);
           }
           console.error('[getUserRoles] Error:', err.message);
           return of([]);
-        })
+        }),
       );
   }
 
@@ -256,13 +257,13 @@ export class UsersService {
         catchError((err) => {
           if (err.status === 403) {
             console.warn(
-              `[getUserPrograms] Usuario ${userId} sin permisos o sin programas asociados.`
+              `[getUserPrograms] Usuario ${userId} sin permisos o sin programas asociados.`,
             );
             return of([]);
           }
           console.error('[getUserPrograms] Error:', err.message);
           return of([]);
-        })
+        }),
       );
   }
 
@@ -275,7 +276,7 @@ export class UsersService {
       q?: string;
       state?: string;
       sort?: string;
-    } = {}
+    } = {},
   ): Observable<Page<User>> {
     const { page = 0, size = 10, q, state, sort } = opts;
     let params = new HttpParams().set('page', page).set('size', size);

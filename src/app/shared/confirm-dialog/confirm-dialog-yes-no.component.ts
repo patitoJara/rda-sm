@@ -113,3 +113,27 @@ export class ConfirmDialogYesNoComponent {
     this.ref.close(true);
   }
 }
+
+
+/* ejemplo de uso 
+
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogOkComponent } from '@app/shared/confirm-dialog/confirm-dialog-ok.component';
+
+export class xxxxxxxxx implements OnInit {
+  private dialog = inject(MatDialog);
+
+
+  this.dialog.open(ConfirmDialogOkComponent, {
+    width: '420px',
+    disableClose: true,
+    data: {
+          title: 'Error en contraseñas',
+          message: 'Las contraseñas no coinciden.',
+          icon: 'check_circle',
+          color: 'primary',
+          confirmText: 'Aceptar',
+  });
+
+
+*/

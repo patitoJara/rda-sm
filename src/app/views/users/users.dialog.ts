@@ -23,6 +23,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { firstValueFrom } from 'rxjs';
 
 import { UsersService } from '../../services/users.service';
 import { ProgramService } from '../../services/program.service';
@@ -33,6 +34,7 @@ import { User } from '../../models/user';
 import { rutValidator } from '../../core/validator/rut.validator';
 import { ConfirmDialogOkComponent } from '../../shared/confirm-dialog/confirm-dialog-ok.component';
 import { AuthLoginService } from '../../services/auth.login.service';
+import { UsersRelationsService } from '../../services/users-relations.service';
 
 @Component({
   standalone: true,
@@ -58,6 +60,9 @@ export class UsersDialogComponent implements OnInit {
   roles: Role[] = [];
   hidePassword = true;
   public isEditing = false;
+  private originalRut: string | null = null;
+  private checkingRut = false;
+  private usersCache: User[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -68,12 +73,17 @@ export class UsersDialogComponent implements OnInit {
     private dialog: MatDialog,
     private dialogOk: MatDialog,
     private authService: AuthLoginService,
+    private relationsService: UsersRelationsService,
     private router: Router,
-    @Inject(MAT_DIALOG_DATA) public data: User | null
+    @Inject(MAT_DIALOG_DATA) public data: User | null,
   ) {}
 
   ngOnInit(): void {
     this.isEditing = !!this.data?.id;
+
+    this.usersService.listAll().subscribe((users) => {
+      this.usersCache = users || [];
+    });
 
     const userData = (
       this.isEditing
@@ -91,7 +101,7 @@ export class UsersDialogComponent implements OnInit {
             programs: [],
             roles: [],
           }
-    ) as User; // 👈 cierra paréntesis + fuerza tipo User
+    ) as User;
 
     // 1️⃣ Formulario base
     this.form = this.fb.group({
@@ -103,7 +113,7 @@ export class UsersDialogComponent implements OnInit {
       email: [userData.email, [Validators.required, Validators.email]],
       username: [userData.username],
       password: [
-        '', // nunca se precarga por seguridad
+        '',
         this.isEditing ? [] : [Validators.required, Validators.minLength(6)],
       ],
       rut: [userData.rut, [Validators.required, rutValidator()]],
@@ -113,6 +123,11 @@ export class UsersDialogComponent implements OnInit {
       ],
       roles: [userData.roles?.map((r) => r.id) ?? [], [Validators.required]],
     });
+
+    // ⭐ GUARDAR RUT ORIGINAL (IMPORTANTE)
+    if (this.isEditing) {
+      this.originalRut = userData.rut;
+    }
 
     // 2️⃣ Cargar catálogos
     this.loadPrograms();
@@ -134,7 +149,6 @@ export class UsersDialogComponent implements OnInit {
         error: (err) => this.handleError(err, 'programas'),
       });
     } else {
-      // 🔹 Reset forzado con valores iniciales vacíos
       setTimeout(() => {
         if (!this.isEditing) {
           this.form.reset({
@@ -150,8 +164,10 @@ export class UsersDialogComponent implements OnInit {
             programs: [],
             roles: [],
           });
+
           this.form.markAsPristine();
           this.form.markAsUntouched();
+
           console.log('[UsersDialog] 🧹 Nuevo usuario: formulario limpio');
         }
       });
@@ -161,11 +177,11 @@ export class UsersDialogComponent implements OnInit {
   /** 🔹 Maneja errores sin cerrar sesión ni bloquear el layout */
   private handleError(
     err: HttpErrorResponse,
-    tipo: 'roles' | 'programas'
+    tipo: 'roles' | 'programas',
   ): void {
     if (err.status === 403 || err.status === 404) {
       console.warn(
-        `[UsersDialog] Usuario sin ${tipo} asociados o sin permiso (${err.status}).`
+        `[UsersDialog] Usuario sin ${tipo} asociados o sin permiso (${err.status}).`,
       );
 
       // ✅ Mostramos aviso sin bloquear el resto
@@ -195,7 +211,7 @@ export class UsersDialogComponent implements OnInit {
       error: (err: HttpErrorResponse) =>
         console.error(
           '[UsersDialog] ❌ Error cargando programas:',
-          err.message
+          err.message,
         ),
     });
   }
@@ -209,36 +225,157 @@ export class UsersDialogComponent implements OnInit {
     });
   }
 
+  onRutFinalizado(): void {
+    const control = this.form.get('rut');
+    if (!control) return;
+
+    control.updateValueAndValidity();
+    control.markAsTouched();
+
+    if (!control.valid) return;
+
+    if (!this.isEditing) {
+      this.checkRutDuplicate();
+    }
+  }
+
+  autoFormatRut(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const control = this.form.get('rut');
+
+    if (!control) return;
+
+    let value = input.value.toUpperCase().replace(/[^0-9K]/g, '');
+
+    if (value.length < 2) {
+      input.value = value;
+      return;
+    }
+
+    const body = value.slice(0, -1);
+    const dv = value.slice(-1);
+
+    let formatted = '';
+
+    for (let i = body.length; i > 0; i -= 3) {
+      const start = Math.max(i - 3, 0);
+      formatted = body.substring(start, i) + (formatted ? '.' + formatted : '');
+    }
+
+    const formattedRut = `${formatted}-${dv}`;
+
+    input.value = formattedRut;
+
+    // ⚠ no emitir evento para no romper el cursor
+    control.setValue(formattedRut, { emitEvent: false });
+  }
+  
+  checkRutDuplicate(): void {
+    if (this.isEditing) return;
+
+    const control = this.form.get('rut');
+    if (!control) return;
+
+    const rut = control.value;
+    if (!rut) return;
+
+    // 🔹 variable auxiliar para validar
+    const rutNormalizado = rut
+      .replace(/\./g, '')
+      .replace('-', '')
+      .toUpperCase();
+
+    const exists = this.usersCache.some((u) => {
+      if (!u.rut) return false;
+
+      const rutUser = u.rut.replace(/\./g, '').replace('-', '').toUpperCase();
+
+      return rutUser === rutNormalizado;
+    });
+
+    if (exists) {
+      control.setErrors({
+        ...control.errors,
+        rutDuplicado: true,
+      });
+
+      control.markAsTouched();
+
+      this.showWarning('El RUT ingresado ya está registrado en el sistema.');
+    }
+  }
+
   /** Guardar usuario (crear o actualizar) */
-  /** Guardar usuario (crear o actualizar) */
-  save(): void {
+  async save(): Promise<void> {
     if (this.form.invalid) return;
 
+    if (this.isEditing) {
+      await this.updateUser();
+    } else {
+      await this.createUser();
+    }
+  }
+
+  async createUser(): Promise<void> {
     const formValue = this.form.value;
 
-    // 🔹 No enviar password vacío al backend
-    if (this.isEditing && !formValue.password) {
+    const payload: User = {
+      ...formValue,
+      roles: [],
+      programs: [],
+    };
+
+    const savedUser = await firstValueFrom(this.usersService.save(payload));
+
+    const userId = savedUser.id!;
+
+    await this.relationsService.updateRoles(
+      userId,
+      formValue.roles.map((id: number) => ({ id })),
+    );
+
+    await this.relationsService.updatePrograms(
+      userId,
+      formValue.programs.map((id: number) => ({ id })),
+    );
+
+    console.log('✅ Usuario creado');
+
+    this.ref.close(true);
+  }
+
+  async updateUser(): Promise<void> {
+    const formValue = this.form.value;
+
+    if (!formValue.password) {
       delete formValue.password;
     }
 
     const payload: User = {
       ...formValue,
-      programs: formValue.programs.map((id: number) => ({ id })),
-      roles: formValue.roles.map((id: number) => ({ id })),
+      roles: [],
+      programs: [],
     };
 
-    const request$ = payload.id
-      ? this.usersService.update(payload.id, payload)
-      : this.usersService.save(payload);
+    const savedUser = await firstValueFrom(
+      this.usersService.update(payload.id!, payload),
+    );
 
-    request$.subscribe({
-      next: () => {
-        console.log('[UsersDialog] ✅ Usuario guardado con éxito.');
-        this.ref.close(true);
-      },
-      error: (err) =>
-        console.error('[UsersDialog] ❌ Error guardando usuario:', err),
-    });
+    const userId = savedUser.id!;
+
+    await this.relationsService.updateRoles(
+      userId,
+      formValue.roles.map((id: number) => ({ id })),
+    );
+
+    await this.relationsService.updatePrograms(
+      userId,
+      formValue.programs.map((id: number) => ({ id })),
+    );
+
+    console.log('✅ Usuario actualizado');
+
+    this.ref.close(true);
   }
 
   cancel(): void {
@@ -250,86 +387,76 @@ export class UsersDialogComponent implements OnInit {
     const control = this.form.get('rut');
     if (!control) return;
 
-    // 🔹 Limpia y prepara el valor (solo números y K)
-    let value = input.value.toUpperCase().replace(/[^0-9K]/g, '');
-
-    if (!value) {
-      control.setValue('', { emitEvent: true });
-      return;
+    // 🧹 limpiar error de duplicado al volver a escribir
+    if (control.hasError('rutDuplicado')) {
+      const errors = { ...(control.errors || {}) };
+      delete errors['rutDuplicado'];
+      control.setErrors(Object.keys(errors).length ? errors : null);
     }
 
-    // 🔹 Separar cuerpo y dígito verificador
-    const body = value.slice(0, -1);
-    const dv = value.slice(-1);
-    let formatted = '';
-
-    // 🔹 Insertar puntos cada 3 dígitos desde el final
-    for (let i = body.length; i > 0; i -= 3) {
-      const start = Math.max(i - 3, 0);
-      formatted = body.substring(start, i) + (formatted ? '.' + formatted : '');
-    }
-
-    const formattedRut = `${formatted}-${dv}`;
-
-    // 🔹 Actualizar input y form control
-    input.value = formattedRut;
-    control.setValue(formattedRut, { emitEvent: true });
-
-    // 🔹 Mantener cursor al final (mejor UX)
-    const len = formattedRut.length;
-    input.setSelectionRange(len, len);
+    // ... resto de tu lógica
   }
 
-  /*
-  formatRut(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    let value = input.value.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+  generarUsername(): void {
+    const firstName = this.form.get('firstName')?.value;
+    const secondName = this.form.get('secondName')?.value;
+    const lastName = this.form.get('firstLastName')?.value;
 
-    if (value.length > 1) {
-      const body = value.slice(0, -1);
-      const dv = value.slice(-1);
-      let formatted = '';
+    const usernameControl = this.form.get('username');
+    const emailControl = this.form.get('email');
 
-      // Agregar puntos cada 3 dígitos desde el final
-      for (let i = body.length; i > 0; i -= 3) {
-        const start = Math.max(i - 3, 0);
-        const part = body.substring(start, i);
-        formatted = part + (formatted ? '.' + formatted : '');
-      }
+    if (!firstName || !lastName || !usernameControl) return;
 
-      input.value = `${formatted}-${dv}`;
-    } else {
-      input.value = value;
+    const clean = (s: string) =>
+      s
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+
+    const firstInitial = clean(firstName)[0];
+    const secondInitial = secondName ? clean(secondName)[0] : '';
+    const last = clean(lastName);
+
+    const username = firstInitial + secondInitial + last;
+
+    usernameControl.setValue(username);
+
+    /** generar correo si está vacío */
+
+    if (emailControl && !emailControl.value) {
+      const email = username + '@redsalud.gob.cl';
+
+      emailControl.setValue(email);
     }
-
-    // Actualiza el valor del control sin perder validaciones
-    this.form.get('rut')?.setValue(input.value, { emitEvent: false });
   }
 
-  validateRutOnBlur(): void {
-    const control = this.form.get('rut');
-    if (!control) return;
+  completarCorreo(): void {
+    const control = this.form.get('email');
 
-    let value = control.value?.trim() || '';
+    let value = control?.value;
+
     if (!value) return;
 
-    // 🔹 Limpia y formatea antes de validar
-    value = value.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+    value = value.trim().toLowerCase();
 
-    // 🔹 Marca el control como tocado y modificado
-    control.markAsTouched();
-    control.markAsDirty();
-
-    // 🔹 Fuerza a Angular a reconocer el cambio y disparar el validador
-    control.setValue(value, { emitEvent: true });
-    control.updateValueAndValidity({ emitEvent: true });
-
-    // 🔹 Verifica si es válido y muestra feedback
-    if (control.invalid) {
-      console.warn('[UsersDialog] ⚠️ RUT inválido al perder el foco:', value);
-    } else {
-      console.log('[UsersDialog] ✅ RUT válido al perder el foco:', value);
+    if (!value.includes('@')) {
+      value = value + '@redsalud.gob.cl';
     }
+
+    control?.setValue(value);
   }
-    */
+
+  showWarning(message: string) {
+    this.dialog.open(ConfirmDialogOkComponent, {
+      width: '420px',
+      disableClose: true,
+      data: {
+        title: 'RUT duplicado',
+        message: message,
+        icon: 'warning',
+        color: 'warn',
+        confirmText: 'Aceptar',
+      },
+    });
+  }
 }

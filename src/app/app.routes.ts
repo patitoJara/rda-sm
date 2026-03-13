@@ -8,17 +8,37 @@ import { roleGuard } from './core/guards/role.guard';
 import { pendingChangesGuard } from './core/guards/pending-changes.guard';
 
 export const routes: Routes = [
-  // 🚀 La app siempre inicia en LOGIN
-  //{ path: '', redirectTo: 'auth/login', pathMatch: 'full' },
-  //{ path: '', redirectTo: 'inicio', pathMatch: 'full' },
+  // 🔓 RUTAS PÚBLICAS
+  { path: 'auth/login', component: LoginComponent },
 
+  {
+    path: 'auth/recover',
+    loadComponent: () =>
+      import('./views/auth/recover/recover.component').then(
+        (m) => m.RecoverComponent,
+      ),
+  },
+
+  {
+    path: 'auth/change-password',
+    loadComponent: () =>
+      import('./views/auth/change-password/change-password.component').then(
+        (m) => m.ChangePasswordComponent,
+      ),
+  },
+
+  { path: 'about-public', component: AboutPublicComponent },
+
+  // 🚀 INICIO DE LA APP
   { path: '', redirectTo: 'inicio', pathMatch: 'full' },
-  // 🔐 Layout principal (protegido)
+
+  // 🔐 LAYOUT PRINCIPAL PROTEGIDO
   {
     path: '',
     component: TemplateComponent,
     canActivate: [authGuard],
     children: [
+      // 🏠 INICIO (bienvenida + dashboard)
       {
         path: 'inicio',
         loadComponent: () =>
@@ -27,6 +47,7 @@ export const routes: Routes = [
           ),
       },
 
+      // 📊 ANALYTICS
       {
         path: 'analytics',
         loadComponent: () =>
@@ -37,24 +58,25 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'SUPERVISOR'] },
       },
 
-      // 👤 PERFIL — cambio de clave interno (SIN rol)
+      // 👤 PERFIL
       {
         path: 'profile',
         loadComponent: () =>
           import('./views/profile/profile.component').then(
             (m) => m.ProfileComponent,
           ),
-        canActivate: [authGuard],
       },
+
+      // 📖 MANUAL
       {
         path: 'manual',
         loadComponent: () =>
-          import('@app/views/manual/manual.component').then(
+          import('./views/manual/manual.component').then(
             (m) => m.ManualComponent,
           ),
       },
 
-      // 🔹 Módulos protegidos por rol
+      // 🔹 DEMANDA
       {
         path: 'demand',
         loadComponent: () =>
@@ -85,6 +107,8 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['ADMIN', 'SUPERVISOR'] },
       },
+
+      // 👥 USUARIOS
       {
         path: 'user',
         loadComponent: () =>
@@ -92,6 +116,7 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['ADMIN'] },
       },
+
       {
         path: 'roles',
         loadComponent: () =>
@@ -99,6 +124,8 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['ADMIN'] },
       },
+
+      // ⚙️ CONFIGURACIÓN
       {
         path: 'commune',
         loadComponent: () =>
@@ -108,6 +135,7 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['ADMIN'] },
       },
+
       {
         path: 'results',
         loadComponent: () =>
@@ -117,6 +145,7 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['ADMIN'] },
       },
+
       {
         path: 'professions',
         loadComponent: () =>
@@ -126,6 +155,7 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['ADMIN'] },
       },
+
       {
         path: 'program',
         loadComponent: () =>
@@ -135,6 +165,7 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['ADMIN'] },
       },
+
       {
         path: 'substances',
         loadComponent: () =>
@@ -144,6 +175,7 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['ADMIN'] },
       },
+
       {
         path: 'states',
         loadComponent: () =>
@@ -153,6 +185,7 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['ADMIN'] },
       },
+
       {
         path: 'diverter',
         loadComponent: () =>
@@ -162,6 +195,7 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['ADMIN'] },
       },
+
       {
         path: 'conv-prev',
         loadComponent: () =>
@@ -171,6 +205,7 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['ADMIN'] },
       },
+
       {
         path: 'senders',
         loadComponent: () =>
@@ -180,6 +215,7 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['ADMIN'] },
       },
+
       {
         path: 'typecontact',
         loadComponent: () =>
@@ -189,6 +225,7 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['ADMIN'] },
       },
+
       {
         path: 'not-relevants',
         loadComponent: () =>
@@ -198,6 +235,7 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['ADMIN'] },
       },
+
       {
         path: 'sexs',
         loadComponent: () =>
@@ -206,7 +244,7 @@ export const routes: Routes = [
         data: { roles: ['ADMIN'] },
       },
 
-      // Acerca del sistema (privado)
+      // ℹ️ ABOUT PRIVADO
       {
         path: 'about',
         component: AboutPrivateComponent,
@@ -216,26 +254,6 @@ export const routes: Routes = [
     ],
   },
 
-  // 🔓 Públicos
-  { path: 'auth/login', component: LoginComponent },
-  {
-    path: 'auth/recover',
-    loadComponent: () =>
-      import('./views/auth/recover/recover.component').then(
-        (m) => m.RecoverComponent,
-      ),
-  },
-  {
-    path: 'auth/change-password',
-    loadComponent: () =>
-      import('./views/auth/change-password/change-password.component').then(
-        (m) => m.ChangePasswordComponent,
-      ),
-  },
-
-  // 🆕 Public About
-  { path: 'about-public', component: AboutPublicComponent },
-
-  // 🚫 Desconocidas
+  // 🚫 RUTA DESCONOCIDA
   { path: '**', redirectTo: 'auth/login' },
 ];

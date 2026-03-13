@@ -1,0 +1,65 @@
+<div class="cards-container">
+
+  <div class="card">
+    <div class="card-title">Demandas ingresadas</div>
+
+    <div class="card-value">
+      {{ stats.totalDemandas }}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Demandas atendidas</div>
+
+    <div class="card-value">
+      {{ stats.demandasAtendidas }}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Demandas en espera</div>
+
+    <div class="card-value">
+      {{ stats.demandasEnEspera }}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Promedio espera</div>
+
+    <div
+      class="card-value"
+      [style.color]="getColor(stats.promedioEspera)"
+    >
+      {{ stats.promedioEspera }} días
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Mediana espera</div>
+
+    <div class="card-value">
+      {{ stats.medianaEspera }} días
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Máximo espera</div>
+
+    <div
+      class="card-value"
+      [style.color]="getColor(stats.maxEspera)"
+    >
+      {{ stats.maxEspera }} días
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Críticos (>30 días)</div>
+
+    <div class="card-value danger">
+      {{ stats.criticos }}
+    </div>
+  </div>
+
+</div>

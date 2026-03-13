@@ -12,6 +12,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+// 📧 servicio correo
+import { MailService } from '@app/core/services/mail.service';
+
 @Component({
   selector: 'app-recover',
   standalone: true,
@@ -30,9 +33,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   styleUrls: ['./recover.component.scss'],
 })
 export class RecoverComponent {
+
   private fb = inject(FormBuilder);
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
+  private mailService = inject(MailService);
 
   loading = false;
 
@@ -44,25 +49,68 @@ export class RecoverComponent {
     return this.form.controls;
   }
 
-  /** 🔐 Simulación de envío de correo de recuperación */
+  /** 📧 Enviar correo de recuperación */
   sendRecovery(): void {
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
-    this.loading = true;
-    const { email } = this.form.value;
-    console.log('[Recover] Simulando envío de recuperación a:', email);
+    const email = this.form.value.email!;
 
-    setTimeout(() => {
-      this.loading = false;
-      this.snackBar.open(
-        `Se ha enviado un enlace de recuperación a ${email}`,
-        'OK',
-        { duration: 4000, panelClass: ['warn-snackbar'] }
-      );
-      this.router.navigate(['/auth/login']);
-    }, 1800);
+    this.loading = true;
+
+    this.mailService.send({
+
+      to: email,
+
+      subject: 'Recuperación de contraseña',
+
+      message: `
+Estimado usuario,
+
+Hemos recibido una solicitud para recuperar su contraseña.
+
+Si usted realizó esta solicitud, comuníquese con el administrador del sistema
+para realizar el proceso de restablecimiento.
+
+Sistema Teletrabajo
+Servicio de Salud Magallanes
+      `
+
+    }).subscribe({
+
+      next: () => {
+
+        this.loading = false;
+
+        this.snackBar.open(
+          `Se ha enviado un correo a ${email}`,
+          'OK',
+          { duration: 4000 }
+        );
+
+        this.router.navigate(['/auth/login']);
+
+      },
+
+      error: (err) => {
+
+        this.loading = false;
+
+        console.error('Error enviando correo', err);
+
+        this.snackBar.open(
+          'No fue posible enviar el correo.',
+          'OK',
+          { duration: 4000, panelClass: ['warn-snackbar'] }
+        );
+
+      }
+
+    });
+
   }
+
 }

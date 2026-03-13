@@ -91,28 +91,25 @@ export class ErrorConfirmDialogComponent {
 }
 
 
-/* ejemplo para usar
-
+/* ejemplo de uso 
 
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogOkComponent } from '@app/shared/confirm-dialog/confirm-dialog-ok.component';
 
+export class xxxxxxxxx implements OnInit {
+  private dialog = inject(MatDialog);
 
-    this.dialog.open(DangerConfirmDialogComponent, {
-    width: '460px',
+
+  this.dialog.open(ConfirmDialogOkComponent, {
+    width: '420px',
     disableClose: true,
     data: {
-        title: 'Eliminar definitivamente',
-        message:
-        '⚠️ Esta acción es irreversible.\n\nEl registro será eliminado de forma permanente.',
-        confirmText: 'Eliminar definitivamente',
-        cancelText: 'Cancelar',
-        icon: 'delete_forever',
-    },
-    }).afterClosed().subscribe(ok => {
-    if (ok) {
-        // 🔥 acción irreversible aquí
-    }
-    });
+          title: 'Error en contraseñas',
+          message: 'Las contraseñas no coinciden.',
+          icon: 'check_circle',
+          color: 'primary',
+          confirmText: 'Aceptar',
+  });
+
 
 */

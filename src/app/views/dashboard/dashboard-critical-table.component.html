@@ -1,0 +1,61 @@
+<div class="critical-container">
+
+  <h3>🚨 Demandas críticas (>30 días)</h3>
+
+  <table>
+
+    <thead>
+
+      <tr>
+        <th>RUT</th>
+        <th>Usuario</th>
+        <th>Programa</th>
+        <th>Solicitud</th>
+        <th>Citaciones</th>
+        <th>Asistió</th>
+        <th>No asistió</th>
+        <th>Días</th>
+        <th></th>
+      </tr>
+
+    </thead>
+
+    <tbody>
+
+      <tr *ngFor="let row of data">
+
+        <td>{{ row.rut }}</td>
+
+        <td>{{ row.usuario }}</td>
+
+        <td>{{ row.programa }}</td>
+
+        <td>{{ row.requestDate | date:'dd-MM-yyyy' }}</td>
+
+        <td>{{ row.citacionesTotal }}</td>
+
+        <td>{{ row.citacionesAsistio }}</td>
+
+        <td>{{ row.citacionesNoAsistio }}</td>
+
+        <td
+          [style.color]="getColor(row.diasEspera)"
+        >
+          {{ row.diasEspera }}
+        </td>
+
+        <td>
+
+          <button (click)="viewDetail(row)">
+            👁
+          </button>
+
+        </td>
+
+      </tr>
+
+    </tbody>
+
+  </table>
+
+</div>

@@ -1,0 +1,29 @@
+.charts-container {
+
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 20px;
+
+}
+
+.chart-box {
+
+  background: white;
+
+  padding: 16px;
+
+  border-radius: 8px;
+
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+
+}
+
+.chart-box h3 {
+
+  font-size: 14px;
+
+  margin-bottom: 10px;
+
+}
