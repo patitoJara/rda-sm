@@ -342,67 +342,139 @@
 }
 
 /* =========================================
-   🎨 FICHA — SUSTANCIAS
+   🎨 FICHA — SUSTANCIAS (PRO FINAL)
 ========================================= */
-.ficha-demanda {
-  padding: 16px 18px;
-}
-
-.form-demanda {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
 
 .ficha-sustancias {
-  padding: 16px 18px;
-  border-color: #835225; 
+  padding: 12px 14px; // 🔥 menos aire
+  border-color: #835225;
 }
 
-/* Contenedor del formulario */
+/* CONTENEDOR */
 .form-sustancias {
-  display: block;
+  //display: block;
+  max-height: 450px; // 🔥 ajusta a tu layout
+  overflow-y: auto;
+  padding-right: 4px;  
 }
 
+.form-sustancias::-webkit-scrollbar {
+  width: 10px;
+}
+
+.form-sustancias::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.2);
+  border-radius: 4px;
+}
+
+/* HEADER */
 .substan-header {
   display: grid;
-  grid-template-columns: 1fr 90px 90px;
+  grid-template-columns: 1fr 60px 70px;
   align-items: center;
 
-  border-bottom: 1px solid #e0e0e0;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
+  font-weight: 600;
 
-  padding: 0 4px;
-  min-height: 22px;   /* 🔑 controla la altura real  font-weight: 700; */
+  color: #6a1b9a;
+  opacity: 0.8;
 
-  color: #4b0783;
-  text-transform: uppercase;
+  margin-bottom: 4px;
 }
 
+/* FILAS */
 .row-item-substan {
   display: grid;
-  grid-template-columns: 1fr 80px 80px;
+  grid-template-columns: 1fr 60px 70px;
   align-items: center;
-  border-bottom: 1px solid #e0e0e0;
-  font-size: 0.7rem;
 
-  padding: 0 4px;
-  min-height: 22px;   /* 🔑 controla la altura real*/
+  min-height: 26px;
+  padding: 2px 4px;
 
+  border-radius: 6px;
+  transition: background 0.15s ease;
+  cursor: pointer;
 }
 
+.row-item-substan.disabled {
+  opacity: 1;
+  pointer-events: none;
+}
+
+.orden-badge {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.row-item-substan:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.substan-help {
+  font-size: 11px;
+  opacity: 0.6;
+  margin-bottom: 6px;
+  color: #6a1b9a;
+}
+
+
+
+/* NOMBRE */
 .name-substan {
   font-size: 0.7rem;
   font-weight: 500;
-  color: #333;
-  line-height: 1.1;  /* ✅ nunca 0 */
+  color: #2c2c2c;
+  line-height: 1.2;
 }
 
-::ng-deep .mat-radio-outer-circle,
-::ng-deep .mat-checkbox-frame {
-  transform: scale(0.8);
+/* RADIO */
+::ng-deep mat-radio-button {
+  transform: scale(0.75);
 }
 
+/* SELECT (ORDEN) */
+::ng-deep .mat-mdc-form-field {
+  margin: 0;
+}
+
+::ng-deep .mat-mdc-text-field-wrapper {
+  height: 28px; // 🔥 ultra compacto
+  padding: 0;
+}
+
+::ng-deep .mat-mdc-select-trigger {
+  font-size: 0.7rem;
+}
+
+/* OPCIONAL: RESALTAR SELECCIONADOS */
+.row-item-substan.selected {
+  background: rgba(106, 27, 154, 0.08);
+}
+
+.orden-field {
+  width: 55px;
+
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none; // ❌ elimina espacio fantasma
+  }
+
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    height: 28px;
+    padding: 0;
+    border-radius: 6px;
+  }
+
+  ::ng-deep .mat-mdc-select-trigger {
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  ::ng-deep .mdc-notched-outline {
+    border-width: 1px;
+  }
+}
 
 /* =====================================================
    🧠 SELECT CLÍNICO — DEFINITIVO (COMPACTO REAL)
@@ -1486,8 +1558,15 @@
   display: flex;
   gap: 8px;
   align-items: center;
-  font-size: 13px;
+  font-size: 11px;
   color: #37474f;
+}
+
+.estado-inline {
+  font-size: 12px;
+  font-weight: normal;
+  margin-left: 6px;
+  opacity: 0.85;
 }
 
 /* fin ficha de Bloque */

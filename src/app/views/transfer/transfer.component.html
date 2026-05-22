@@ -2,7 +2,7 @@
   <!-- HEADER -->
   <div class="transfer-header">
     <mat-icon>swap_horiz</mat-icon>
-    <span>Transferencia de Demandante</span>
+    <span>Referencia de Demandante</span>
   </div>
 
   <!-- BOTÓN VOLVER -->
@@ -252,7 +252,7 @@
       Confirmación Final
     </div>
 
-    <div class="confirm-body">Usted está transfiriendo a:</div>
+    <div class="confirm-body">Usted está referenciando a:</div>
 
     <div class="confirm-program">
       {{ selectedRegister.postulant?.firstName }}
@@ -285,7 +285,7 @@
 
     <div class="confirm-actions">
       <button mat-raised-button color="primary" (click)="executeTransfer()">
-        Ejecutar Transferencia
+        Ejecutar Referencia
       </button>
     </div>
   </div>
@@ -294,13 +294,13 @@
   <div *ngIf="currentStep === 7" class="success-fullscreen">
     <div class="success-card">
       <mat-icon>check_circle</mat-icon>
-      <h2>Transferencia realizada correctamente</h2>
+      <h2>Referencia realizada correctamente</h2>
       <button
         mat-raised-button
         color="primary"
         (click)="reiniciarTransferencia()"
       >
-        Nueva transferencia
+        Nueva Referencia
       </button>
     </div>
   </div>

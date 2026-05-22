@@ -4,7 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-  selector: 'app-transfer',
+  selector: 'app-referencia',
   standalone: true,
   //host: { id: 'modulo-demandas' },
   templateUrl: './transfer.component.html',

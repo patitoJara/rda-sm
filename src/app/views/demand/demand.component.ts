@@ -123,8 +123,12 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
 
   mostrarBloqueoPostulante = false;
   mostrarBloqueoReferente = false;
+  mostrarBloqueoDemanda = false;
 
   estadoFormulario: number | null = null;
+
+  ordenes: number[] = Array.from({ length: 10 }, (_, i) => i + 1);
+  secondaryMap: { [id: number]: number } = {};
 
   // =========================
   // 🔐 FLAGS DE EDICIÓN
@@ -946,14 +950,19 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     }
 
     // 🟡 Secundarias
+    let orden = 1;
+
     for (const s of secondaries) {
       await firstValueFrom(
         this.registerSubstanceServiceDto.create({
-          register: { id: registerId },
+          register: { id: register.id },
           substance: { id: s },
           level: 'Secundaria',
+          order: orden, // 👈 clave
         }),
       );
+
+      orden++;
     }
 
     console.log('✅ Sustancias actualizadas (DTO)');
@@ -1092,14 +1101,19 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
         );
       }
 
+      let orden = 1;
+
       for (const s of secondaries) {
         await firstValueFrom(
           this.registerSubstanceServiceDto.create({
             register: { id: register.id },
             substance: { id: s },
             level: 'Secundaria',
+            order: orden, // 👈 clave
           }),
         );
+
+        orden++;
       }
 
       // ===============================================================
@@ -1344,9 +1358,10 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       // 🟦 SUSTANCIAS
       // ============================
       const principal = substances.find((s: any) => s.level === 'Principal');
-      const secundarias = substances.filter(
-        (s: any) => s.level === 'Secundaria',
-      );
+
+      const secundarias = substances
+        .filter((s: any) => s.level === 'Secundaria')
+        .sort((a: any, b: any) => (a.order ?? 999) - (b.order ?? 999));
 
       this.form.patchValue(
         {
@@ -1507,6 +1522,24 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   // ============================================================
   selectPrincipal(id: number) {
     this.utils.selectPrincipal(this.form, id);
+
+    // ❌ si era secundaria, eliminar
+    if (this.secondaryMap[id]) {
+      delete this.secondaryMap[id];
+
+      // 🔥 REORDENAR TODO
+      const ordered = Object.entries(this.secondaryMap).sort(
+        (a, b) => a[1] - b[1],
+      );
+
+      this.secondaryMap = {};
+
+      ordered.forEach(([key], index) => {
+        this.secondaryMap[+key] = index + 1;
+      });
+    }
+
+    this.syncFormSecondary();
   }
 
   toggleSecondary(id: number) {
@@ -1517,6 +1550,61 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     return this.utils.validatePrincipal(this.form);
   }
 
+  getOrder(id: number): number | null {
+    return this.secondaryMap[id] ?? null;
+  }
+
+  setOrder(id: number, order: number | null): void {
+    if (!order) {
+      delete this.secondaryMap[id];
+    } else {
+      // evitar duplicados
+      Object.keys(this.secondaryMap).forEach((key) => {
+        if (this.secondaryMap[+key] === order) {
+          delete this.secondaryMap[+key];
+        }
+      });
+
+      this.secondaryMap[id] = order;
+    }
+
+    this.syncFormSecondary();
+  }
+
+  syncFormSecondary(): void {
+    const arr = Object.entries(this.secondaryMap).map(([id, order]) => ({
+      id: Number(id),
+      order,
+    }));
+
+    this.form.patchValue({
+      secondarySubstances: arr,
+    });
+  }
+
+  toggleOrder(id: number): void {
+    if (this.form.value.substance === id) return;
+
+    if (this.secondaryMap[id]) {
+      delete this.secondaryMap[id];
+    } else {
+      const max = Math.max(0, ...Object.values(this.secondaryMap));
+      this.secondaryMap[id] = max + 1;
+    }
+
+    // 🔥 SIEMPRE REORDENAR
+    const ordered = Object.entries(this.secondaryMap).sort(
+      (a, b) => a[1] - b[1],
+    );
+
+    this.secondaryMap = {};
+
+    ordered.forEach(([key], index) => {
+      this.secondaryMap[+key] = index + 1;
+    });
+
+    this.syncFormSecondary();
+  }
   // ===========================================================
   // 🧾 Métodos del formulario
   // ===========================================================
@@ -2711,6 +2799,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       this.ultimoRutBuscado = null;
       this.estadoFormulario = null;
       this.mostrarBloqueoPostulante = false;
+      this.mostrarBloqueoDemanda = false;
 
       // 🔹 Estado lógico
       this.register = null;
@@ -2774,6 +2863,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
             //this.bloquearCamposPostulante();
             this.bloquearCamposReferente();
             this.mostrarBloqueoPostulante = true;
+            this.mostrarBloqueoDemanda = true;
 
             this.cdRef.detectChanges();
           });
@@ -2841,6 +2931,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     this.estadoFormulario = null;
 
     this.mostrarBloqueoPostulante = false;
+    this.mostrarBloqueoDemanda = false;
 
     this.cdRef.detectChanges();
   }
@@ -3004,5 +3095,21 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   get selectedEstado(): any | null {
     if (!this.estadoFormulario) return null;
     return this.states.find((s) => s.id === this.estadoFormulario) ?? null;
+  }
+
+  private bloquearCamposDemanda(): void {
+    ['fechaSolicitud', 'contactTypes', 'senders', 'diverters', 'ntrat'].forEach(
+      (c) => {
+        this.form.get(c)?.disable({ emitEvent: false });
+      },
+    );
+  }
+
+  private habilitarCamposDemanda(): void {
+    ['fechaSolicitud', 'contactTypes', 'senders', 'diverters', 'ntrat'].forEach(
+      (c) => {
+        this.form.get(c)?.enable({ emitEvent: false });
+      },
+    );
   }
 }

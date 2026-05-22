@@ -1,16 +1,16 @@
-<mat-card class="manual-section" id="modulo-transferencia">
+<mat-card class="manual-section" id="modulo-referencia">
   <div class="section-header">
-    <mat-icon>swap_horiz</mat-icon>
-    <h2>Módulo de Transferencia de Demandante entre Programas</h2>
+    <mat-icon>sync_alt</mat-icon>
+    <h2>Módulo de Referencia de Demandante entre Programas</h2>
   </div>
 
   <!-- Caja informativa principal -->
   <div class="manual-box box-info">
     <mat-icon>info</mat-icon>
     <div>
-      El módulo de Transferencia permite trasladar formalmente un demandante 
+      El módulo de Referencia permite gestionar el traslado de un demandante 
       desde un programa activo a otro dentro del sistema RDA-SM, asegurando 
-      trazabilidad clínica, notificación institucional y consistencia normativa.
+      trazabilidad, continuidad de atención y consistencia normativa.
     </div>
   </div>
 
@@ -18,7 +18,7 @@
   <h3 class="manual-subtitle">Objetivo del módulo</h3>
 
   <p>
-    La transferencia está diseñada para mantener la continuidad del proceso 
+    La referencia está orientada a mantener la continuidad del proceso 
     terapéutico cuando un usuario requiere cambiar de programa por razones 
     clínicas, administrativas o territoriales.
   </p>
@@ -26,13 +26,13 @@
   <div class="manual-box box-success">
     <mat-icon>verified</mat-icon>
     <div>
-      La transferencia no elimina información previa. El registro clínico original 
-      mantiene su historial, y el nuevo programa asume la continuidad del proceso.
+      La referencia no elimina información previa. El registro clínico original 
+      mantiene su historial, y el programa destino asume la continuidad del proceso.
     </div>
   </div>
 
   <!-- Flujo del proceso -->
-  <h3 class="manual-subtitle">Flujo del proceso de transferencia</h3>
+  <h3 class="manual-subtitle">Flujo del proceso de referencia</h3>
 
   <ul class="manual-list">
     <li>
@@ -47,23 +47,23 @@
 
     <li>
       <strong>Paso 3 – Revisión Clínica:</strong> se muestra una ficha resumen 
-      tipo hoja clínica con datos del postulante y del registro actual.
+      con datos del postulante y del registro actual.
     </li>
 
     <li>
       <strong>Paso 4 – Programa Destino:</strong> se selecciona el programa 
-      al cual será transferido el demandante. El sistema excluye automáticamente 
+      al cual será referenciado el demandante. El sistema excluye automáticamente 
       el programa de origen.
     </li>
 
     <li>
       <strong>Paso 5 – Confirmación:</strong> se muestra un resumen de la 
-      transferencia incluyendo programa destino y lista de correos que serán notificados.
+      referencia incluyendo programa destino y lista de correos que serán notificados.
     </li>
 
     <li>
       <strong>Paso 6 – Ejecución:</strong> el sistema confirma la operación y 
-      registra la transferencia.
+      registra la referencia en la bitácora del demandante.
     </li>
   </ul>
 
@@ -73,7 +73,7 @@
   <div class="manual-box box-rule">
     <mat-icon>mail</mat-icon>
     <div>
-      Al ejecutar la transferencia, el sistema genera una notificación por 
+      Al ejecutar la referencia, el sistema genera una notificación por 
       correo electrónico a:
       <ul>
         <li>Profesionales asociados al programa de origen</li>
@@ -85,8 +85,8 @@
   </div>
 
   <p>
-    Esta notificación informa que el demandante ha sido transferido, 
-    permitiendo coordinación clínica inmediata entre equipos.
+    Esta notificación informa que el demandante ha sido referenciado, 
+    facilitando la coordinación clínica entre equipos.
   </p>
 
   <!-- Validaciones -->
@@ -95,11 +95,11 @@
   <div class="manual-box box-warning">
     <mat-icon>warning</mat-icon>
     <div>
-      El sistema no permite ejecutar la transferencia si:
+      El sistema no permite ejecutar la referencia si:
       <ul>
         <li>No se ha seleccionado un programa destino.</li>
         <li>El usuario no posee permisos suficientes.</li>
-        <li>El registro clínico no está vigente.</li>
+        <li>El registro clínico no se encuentra vigente.</li>
       </ul>
     </div>
   </div>
@@ -112,7 +112,7 @@
     <div>
       El proceso mantiene trazabilidad institucional, registrando:
       <ul>
-        <li>Usuario que ejecuta la transferencia</li>
+        <li>Usuario que ejecuta la referencia</li>
         <li>Programa de origen</li>
         <li>Programa destino</li>
         <li>Fecha y hora del evento</li>
@@ -120,20 +120,20 @@
     </div>
   </div>
 
-  <!-- Reinicio -->
+  <!-- Finalización -->
   <h3 class="manual-subtitle">Finalización del proceso</h3>
 
   <p>
-    Una vez completada la transferencia, el sistema muestra un mensaje de 
+    Una vez completada la referencia, el sistema muestra un mensaje de 
     confirmación y permite reiniciar el módulo para realizar una nueva 
-    transferencia si fuese necesario.
+    referencia si fuese necesario.
   </p>
 
   <div class="manual-box box-success">
     <mat-icon>check_circle</mat-icon>
     <div>
-      La transferencia es una acción formal dentro del sistema y debe ser 
-      realizada únicamente cuando exista validación clínica o administrativa 
+      La referencia es una acción clínica formal dentro del sistema y debe ser 
+      realizada únicamente cuando exista validación profesional o administrativa 
       correspondiente.
     </div>
   </div>  

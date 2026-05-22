@@ -26,6 +26,7 @@ import { ConfirmDialogOkComponent } from '@app/shared/confirm-dialog/confirm-dia
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RegisterSubstanceService } from '@app/services/register-substance.service';
 import { MailService } from '@app/core/services/mail.service';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Program } from '@app/models/program';
 import { Role } from '@app/models/role';
 
@@ -91,8 +92,8 @@ export class TransferComponent {
     { id: 3, title: 'Revisión Clínica', completed: false },
     { id: 4, title: 'Programa Destino', completed: false },
     { id: 5, title: 'Profesional Destino', completed: false },
-    { id: 6, title: 'Confirmación', completed: false },
-    { id: 7, title: 'Ejecución', completed: false },
+    { id: 6, title: 'Confirmación de Referencia', completed: false },
+    { id: 7, title: 'Ejecución de Referencia', completed: false },
   ];
 
   currentStep = 1;
@@ -101,6 +102,44 @@ export class TransferComponent {
 
   get progress(): number {
     return Math.round(((this.currentStep - 1) / (this.steps.length - 1)) * 100);
+  }
+
+  ngOnInit() {
+    this.form
+      .get('rut')
+      ?.valueChanges.pipe(debounceTime(400), distinctUntilChanged())
+      .subscribe((value) => {
+        if (value && value.length >= 7) {
+          this.buscarRutAuto(value); // ✅ correcto
+        } else {
+          this.registers = [];
+        }
+      });
+  }
+
+  async buscarRutAuto(rut: string) {
+    try {
+      const response = await firstValueFrom(
+        this.registerService.getAllByRut(rut),
+      );
+
+      const activeProgramId = Number(this.tokenService.getActiveProgramId());
+
+      const filtered = (response || []).filter(
+        (r: any) => Number(r.program?.id) === activeProgramId,
+      );
+
+      this.registers = await Promise.all(
+        filtered.map((r) => firstValueFrom(this.registerService.getById(r.id))),
+      );
+
+      // 👇 importante: sin modal
+      if (this.registers.length > 0) {
+        this.currentStep = 2;
+      }
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   nextStep(): void {
@@ -272,7 +311,7 @@ export class TransferComponent {
         return this.getSelectedDestinationUserName();
 
       case 6:
-        return this.transferCompleted ? 'Transferencia realizada' : null;
+        return this.transferCompleted ? 'Referencia realizada' : null;
 
       default:
         return null;
@@ -317,7 +356,7 @@ export class TransferComponent {
 
       let updatedDescription = currentDescription;
 
-      // 🔎 Evitar duplicar transferencia
+      // 🔎 Evitar duplicar Referencia
       if (!currentDescription.includes('TRANSFERENCIA')) {
         updatedDescription = currentDescription
           ? `${currentDescription.trim()}\n\n${transferComment.trim()}`
@@ -339,9 +378,40 @@ export class TransferComponent {
 
       console.log('Payload final enviado:', payload);
 
-      await firstValueFrom(
-        this.registerService.update(this.selectedRegister.id, payload),
+      //await firstValueFrom(
+      //  this.registerService.update(this.selectedRegister.id, payload),
+      //);
+
+
+
+      
+      // Clonado demanda para referenciar al otro programa
+
+      // 🔥 FECHA MAÑANA
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      // 🔥 CLON DEL REGISTRO
+      const clonePayload = {
+        ...this.selectedRegister,
+
+        id: null, // 🔑 MUY IMPORTANTE (nuevo registro)
+
+        program: { id: this.selectedProgramId },
+        user: { id: this.selectedDestinationUserId },
+
+        fechaSolicitud: tomorrow.toISOString().split('T')[0],
+
+        description: updatedDescription,
+      };
+
+      console.log('🔥 CLON A CREAR:', clonePayload);
+
+      // 🔥 CREAR NUEVO (NO UPDATE)
+      const newRegister = await firstValueFrom(
+        this.registerService.create(clonePayload),
       );
+
 
       // 🔄 Recargar desde backend para asegurar consistencia
       this.selectedRegister = await firstValueFrom(
@@ -353,10 +423,10 @@ export class TransferComponent {
        =============================== */
 
       if (this.notificationEmails.length) {
-        const subject = 'Transferencia de Registro Clínico';
+        const subject = 'Referencia de Registro Clínico';
 
         const message = `
-Se ha realizado una transferencia de registro.
+Se ha realizado una referencia de registro.
 
 Paciente:
 ${this.selectedRegister.postulant?.firstName || ''} ${this.selectedRegister.postulant?.lastName || ''}
@@ -393,7 +463,7 @@ ${new Date().toLocaleString('es-CL')}
       // 🔥 Marca también el 7 como completado
       this.steps[this.currentStep - 1].completed = true;
     } catch (error) {
-      console.error('❌ Error ejecutando transferencia', error);
+      console.error('❌ Error ejecutando Referencia', error);
     }
   }
 
@@ -405,7 +475,7 @@ ${new Date().toLocaleString('es-CL')}
     const hora = now.toLocaleTimeString('es-CL');
 
     return `
---- TRANSFERENCIA ---
+--- REFERENCIA  ---
 Fecha: ${fecha} ${hora}
 Desde programa: ${this.currentProgram?.name}
 Usuario anterior: ${this.originUserDisplayName}
@@ -460,7 +530,7 @@ Asignado a: ${this.getSelectedDestinationUserName()}
       value = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '-' + dv;
     }
 
-    this.form.get('rut')?.setValue(value, { emitEvent: false });
+    this.form.get('rut')?.setValue(value);
   }
 
   reiniciarTransferencia(): void {
@@ -530,10 +600,10 @@ Asignado a: ${this.getSelectedDestinationUserName()}
   }
 
   async sendTransferNotifications() {
-    const subject = 'Transferencia de Demandante';
+    const subject = 'Referencia de Demandante';
 
     const message = `
-Se ha realizado una transferencia de registro clínico.
+Se ha realizado una referencia de registro clínico.
 
 Programa origen: ${this.currentProgram?.name}
 Programa destino: ${this.selectedProgramName}

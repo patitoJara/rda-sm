@@ -1,15 +1,24 @@
 // src/app/pages/communes/program.dialog.ts
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import {
+  FormBuilder,
+  ReactiveFormsModule,
+  Validators,
+  FormGroup,
+} from '@angular/forms';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { ProgramService } from '../../services/program.service';
 import { Program } from '../../models/program';
-
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   standalone: true,
@@ -24,38 +33,69 @@ import { Program } from '../../models/program';
     MatInputModule,
     MatButtonModule,
     MatCardModule,
-]
+    MatSelectModule,
+  ],
 })
 export class ProgramDialogComponent implements OnInit {
   form!: FormGroup;
+
+  uttOptions = ['ADOLESCENTE', 'ADULTO'];
+  typeOptions = ['RESIDENCIAL', 'AMBULATORIO'];
+
+  c1Options = ['NINGUNA','POBLACION GENERAL', 'ESPECIFICO MUJERES', 'POBLACION INFRACTORA DE LEY', 'POBLACION ESPECIFICO MUJERES'];
+
+  c2Options = ['NINGUNA','POBLACION GENERAL', 'ESPECIFICO MUJERES', 'POBLACION INFRACTORA DE LEY', 'POBLACION ESPECIFICO MUJERES'];
 
   constructor(
     private fb: FormBuilder,
     private api: ProgramService,
     private ref: MatDialogRef<ProgramDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: Program | null
-  ) { }
+    @Inject(MAT_DIALOG_DATA) public data: Program | null,
+  ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
       id: [this.data?.id ?? null],
-      name: [this.data?.name ?? '', [Validators.required, Validators.maxLength(120)]],
+
+      name: [
+        this.data?.name ?? '',
+        [Validators.required, Validators.maxLength(120)],
+      ],
+
+      utt: [this.data?.utt ?? '', Validators.required],
+      type: [this.data?.type ?? '', Validators.required],
+
+      c1: [this.data?.c1 ?? null],
+      c2: [this.data?.c2 ?? null],
+
+      address: [this.data?.address ?? ''],
+      cellphone: [this.data?.cellphone ?? ''],
+      email: [this.data?.email ?? ''],
+      city: [this.data?.city ?? ''],
+      description: [this.data?.description ?? ''],
     });
   }
 
   save(): void {
-    const v = this.form.getRawValue() as { id: number | null; name: string };
-    const req = v.id
+    const raw = this.form.getRawValue();
 
-      ? this.api.update(this.form.value.id, this.form.value)
-      : this.api.save({ name: v.name });
+    const payload = {
+      ...raw,
+      c1: raw.c1 || null,
+      c2: raw.c2 || null,
+    };
+
+    const req = payload.id
+      ? this.api.update(payload.id, payload)
+      : this.api.save(payload);
 
     req.subscribe({
       next: (row: Program) => this.ref.close(row),
-      error: (err: unknown) => console.error(err)
-    });    
+      error: (err: unknown) => console.error(err),
+    });
   }
 
-  cancel(): void { this.ref.close(); }
-
+  cancel(): void {
+    this.ref.close();
+  }
 }

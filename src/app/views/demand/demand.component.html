@@ -544,9 +544,14 @@
               <mat-card class="card ficha-demanda">
                 <div class="card-title-colored card-title-orange">
                   Datos de la Demanda
+
+                  <span class="estado-inline" *ngIf="mostrarBloqueoDemanda">
+                    (bloqueado)
+                  </span>
                 </div>
 
                 <div class="form-demanda">
+                  <div class="cortina" *ngIf="mostrarBloqueoDemanda"></div>
                   <!-- FILA 1: FECHA -->
                   <div class="fila-3">
                     <div class="field-clinico-linea">
@@ -665,6 +670,7 @@
               </mat-card>
 
               <!-- Sustancias -->
+
               <mat-card class="card ficha-sustancias">
                 <div class="card-title-colored card-title-purple">
                   Sustancias
@@ -675,25 +681,28 @@
                     <div class="col-principal">PRINCIPAL</div>
                     <div class="col-secundaria">SECUNDARIA</div>
                   </div>
-
-                  <div *ngFor="let s of substances" class="row-item-substan">
+                  <div class="substan-help">
+                    Click en la fila para asignar orden de consumo
+                  </div>
+                  <div
+                    *ngFor="let s of substances"
+                    class="row-item-substan"
+                    (click)="toggleOrder(s.id)"
+                    [class.disabled]="form.value.substance === s.id"
+                  >
                     <div class="name-substan">{{ s.name }}</div>
 
                     <mat-radio-button
-                      class="name-substan"
+                      (click)="$event.stopPropagation()"
                       [checked]="form.value.substance === s.id"
                       (change)="selectPrincipal(s.id)"
-                    >
-                    </mat-radio-button>
+                    ></mat-radio-button>
 
-                    <mat-checkbox
-                      class="name-substan"
-                      [checked]="
-                        (form.value.secondarySubstances || []).includes(s.id)
-                      "
-                      (change)="toggleSecondary(s.id)"
-                    >
-                    </mat-checkbox>
+                    <div class="orden-secundaria">
+                      <span class="orden-badge">
+                        {{ getOrder(s.id) || "-" }}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </mat-card>
