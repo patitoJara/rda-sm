@@ -975,3 +975,34 @@ mat-sidenav {
     white-space: nowrap;
   }
 }
+
+/* ======================================================
+   PIE MENÚ LATERAL — TEXTO INSTITUCIONAL
+   ====================================================== */
+
+.menu-divider {
+  display: none !important;
+}
+
+.sidenav-footer {
+  margin: 18px 18px 14px;
+  padding: 14px 12px;
+  border-top: 1px solid #d8e5e8;
+  color: #60747b;
+  text-align: center;
+
+  span {
+    display: block;
+    color: #0f4d56;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    font-size: 0.82rem;
+  }
+
+  small {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.72rem;
+    color: #7c9298;
+  }
+}
