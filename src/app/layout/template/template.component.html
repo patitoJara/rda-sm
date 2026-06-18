@@ -31,7 +31,8 @@
         <div class="role-program-item">
           <mat-form-field appearance="fill">
             <mat-label>Programa</mat-label>
-            <mat-select [(ngModel)]="activeProgram"
+            <mat-select
+              [(ngModel)]="activeProgram"
               (selectionChange)="onProgramChange($event.value)"
             >
               <mat-option *ngFor="let p of userPrograms" [value]="p">{{
@@ -81,9 +82,10 @@
         </div>
 
         <!-- ADMIN -->
-         
+
         <p *ngIf="userFullName?.toUpperCase() === 'ADMIN'" class="admin-msg">
-          Eres administrador del sistema. Puedes continuar sin seleccionar un rol o programa.
+          Eres administrador del sistema. Puedes continuar sin seleccionar un
+          rol o programa.
         </p>
 
         <!-- BOTONES (click)="logout()"  -->
@@ -131,21 +133,33 @@
       [mode]="(isHandset$ | async) ? 'over' : 'side'"
       [opened]="(isHandset$ | async) === false"
     >
-      <mat-toolbar class="sidenav-title">MENÚ</mat-toolbar>
+      <div class="sidenav-brand">
+        <div class="brand-mark">
+          <mat-icon>health_and_safety</mat-icon>
+        </div>
+
+        <div class="brand-text">
+          <strong>Gestión de Demanda</strong>
+          <span>Servicio de Salud Magallanes</span>
+        </div>
+      </div>
 
       <!-- 🔹 MENÚ DINÁMICO -->
-      <mat-nav-list>
-        <!-- =========================
-       📌 MENÚ PRINCIPAL
-       ========================= -->
+      <mat-nav-list class="modern-nav">
         <a
           *ngFor="let item of menuItems"
           mat-list-item
+          class="nav-link"
           [routerLink]="item.route"
           routerLinkActive="active"
         >
-          <mat-icon>{{ item.icon }}</mat-icon>
-          {{ item.title }}
+          <span class="nav-icon">
+            <mat-icon>{{ item.icon }}</mat-icon>
+          </span>
+
+          <span class="nav-label">
+            {{ item.title }}
+          </span>
         </a>
       </mat-nav-list>
 
@@ -155,7 +169,6 @@
       <div class="menu-divider">
         <img src="assets/logoSSM.png" alt="Logo SSM" />
       </div>
-      
     </mat-sidenav>
 
     <!-- 🧱 CONTENIDO PRINCIPAL -->
@@ -172,7 +185,7 @@
         </span>
 
         <span class="spacer"></span>
-        
+
         <!-- ================
        ⏱️ TEMPORIZADOR
        ================ -->
@@ -205,11 +218,7 @@
           <mat-icon>verified_user</mat-icon>
           {{ userFullName }}
         </span>
-        <button
-          mat-icon-button
-          matTooltip="Mi Perfil"
-          (click)="goToProfile()"
-        >
+        <button mat-icon-button matTooltip="Mi Perfil" (click)="goToProfile()">
           <mat-icon>manage_accounts</mat-icon>
         </button>
         <!-- 🔒 Logout -->

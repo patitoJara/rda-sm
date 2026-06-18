@@ -465,7 +465,7 @@ export class TemplateComponent implements OnInit {
     const titles: Record<string, string> = {
       inicio: 'Inicio',
       manual: 'Manual',
-      administracion: 'Administración del Sistema',
+      administracion: 'Administración',
       demand: 'Demandas',
       transfer: 'Referencia',
       'demand-list': 'Listado de Demandas',
