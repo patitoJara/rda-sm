@@ -1006,3 +1006,16 @@ mat-sidenav {
     color: #7c9298;
   }
 }
+
+/* ======================================================
+   AJUSTE FOOTER — EVITA TAPAR CONTENIDO
+   ====================================================== */
+
+.footer {
+  height: 30px;
+  pointer-events: none;
+}
+
+.mat-sidenav-content {
+  padding-bottom: 46px !important;
+}
