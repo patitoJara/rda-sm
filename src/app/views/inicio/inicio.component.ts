@@ -1,28 +1,36 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
-import { MatIconModule  } from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { TokenService } from '../../services/token.service';
 import { DashboardComponent } from '../../views/dashboard/dashboard.component';
-
+import { RouterModule } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   standalone: true,
   selector: 'app-inicio',
   templateUrl: './inicio.component.html',
   styleUrls: ['./inicio.component.scss'],
-  imports: [CommonModule, MatCardModule, MatIconModule, MatDividerModule, DashboardComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatCardModule,
+    MatIconModule,
+    MatButtonModule,
+    MatDividerModule,
+    DashboardComponent,
+  ],
 })
 export class InicioComponent implements OnInit {
-
   private tokenService = inject(TokenService);
 
   programs: string[] = [];
   activeProgram: string | null = null;
 
-  roles: string[] = [];               // 🆕 todos los roles
-  activeRole: string | null = null;   // 🆕 rol activo
+  roles: string[] = []; // 🆕 todos los roles
+  activeRole: string | null = null; // 🆕 rol activo
 
   fullName: string = '';
   currentDate: Date = new Date();
@@ -37,7 +45,6 @@ export class InicioComponent implements OnInit {
   }
 
   private loadData(): void {
-
     // ----------------------------------------------------
     // 🟦 Perfil
     // ----------------------------------------------------
@@ -54,9 +61,7 @@ export class InicioComponent implements OnInit {
     // 🟦 Rol activo
     // ----------------------------------------------------
     this.activeRole =
-      sessionStorage.getItem('activeRole') ||
-      this.roles[0] ||
-      null;
+      sessionStorage.getItem('activeRole') || this.roles[0] || null;
 
     if (this.activeRole) {
       sessionStorage.setItem('activeRole', this.activeRole);
@@ -72,9 +77,7 @@ export class InicioComponent implements OnInit {
     // 🟦 Programa activo
     // ----------------------------------------------------
     this.activeProgram =
-      this.tokenService.getActiveProgram() ||
-      this.programs[0] ||
-      null;
+      this.tokenService.getActiveProgram() || this.programs[0] || null;
 
     if (this.activeProgram) {
       sessionStorage.setItem('activeProgram', this.activeProgram);

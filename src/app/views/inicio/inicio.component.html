@@ -1,86 +1,129 @@
-<mat-card class="welcome-card">
-  <!-- 🧭 Encabezado -->
+<section class="inicio-page">
+  <div class="inicio-hero">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <mat-icon>health_and_safety</mat-icon>
+        Sistema institucional DSSM
+      </div>
 
-  <div class="welcome-header">
-    <div class="avatar">
-      <mat-icon>account_circle</mat-icon>
+      <h1>
+        Bienvenido/a,
+        <span>{{ fullName }}</span>
+      </h1>
+
+      <p>
+        Gestión de Demanda de Atención de Tratamiento de Drogas. Seguimiento
+        longitudinal, trazabilidad de episodios y gestión en red.
+      </p>
+
+      <div class="hero-actions">
+        <a mat-flat-button routerLink="/demand">
+          <mat-icon>add_circle</mat-icon>
+          Nueva demanda
+        </a>
+
+        <a mat-stroked-button routerLink="/demand-list">
+          <mat-icon>format_list_bulleted</mat-icon>
+          Listado de demandas
+        </a>
+
+        <a mat-stroked-button routerLink="/analytics">
+          <mat-icon>monitoring</mat-icon>
+          Panel estratégico
+        </a>
+      </div>
     </div>
 
-    <h2>
-      Bienvenido, <span class="username">{{ fullName }}</span>
-    </h2>
+    <div class="hero-panel">
+      <div class="panel-icon">
+        <mat-icon>account_tree</mat-icon>
+      </div>
+
+      <span class="panel-label">Programa activo</span>
+      <strong>{{ activeProgram || "Sin programa" }}</strong>
+
+      <small>
+        Rol actual:
+        <b>{{ activeRole || "Sin rol" }}</b>
+      </small>
+    </div>
   </div>
 
-  <!-- 🧱 CONTENEDOR PRINCIPAL -->
-  <div class="main-grid">
-    <div class="left-column">
-      <!-- Programas disponibles -->
-      <div class="info-box">
+  <div class="quick-grid">
+    <mat-card class="quick-card">
+      <div class="quick-icon">
         <mat-icon>apps</mat-icon>
-        <div>
-          <span class="label">Programas disponibles</span>
-          <ul class="program-list">
-            <li *ngFor="let p of programs" class="program-item">
-              <mat-icon *ngIf="p === activeProgram" class="check">
-                check_circle
-              </mat-icon>
-
-              <span [class.active]="p === activeProgram">
-                {{ p }}
-              </span>
-            </li>
-          </ul>
-        </div>
       </div>
 
-      <!-- Roles disponibles -->
-      <div class="info-box">
+      <div>
+        <span class="label">Programas disponibles</span>
+
+        <ul class="chip-list" *ngIf="programs.length">
+          <li *ngFor="let p of programs" [class.active]="p === activeProgram">
+            <mat-icon *ngIf="p === activeProgram">check_circle</mat-icon>
+            {{ p }}
+          </li>
+        </ul>
+
+        <span class="empty-value" *ngIf="!programs.length">
+          Sin programas asignados
+        </span>
+      </div>
+    </mat-card>
+
+    <mat-card class="quick-card">
+      <div class="quick-icon">
         <mat-icon>security</mat-icon>
-        <div>
-          <span class="label">Roles disponibles</span>
-          <ul class="program-list">
-            <li *ngFor="let r of roles" class="program-item">
-              <mat-icon *ngIf="r === activeRole" class="check">
-                check_circle
-              </mat-icon>
-
-              <span [class.active]="r === activeRole">
-                {{ r }}
-              </span>
-            </li>
-          </ul>
-        </div>
       </div>
 
-      <!-- Nombre completo -->
-      <div class="info-box">
+      <div>
+        <span class="label">Roles disponibles</span>
+
+        <ul class="chip-list">
+          <li *ngFor="let r of roles" [class.active]="r === activeRole">
+            <mat-icon *ngIf="r === activeRole">check_circle</mat-icon>
+            {{ r }}
+          </li>
+        </ul>
+      </div>
+    </mat-card>
+
+    <mat-card class="quick-card">
+      <div class="quick-icon">
         <mat-icon>person</mat-icon>
-        <div>
-          <span class="label">Nombre completo</span>
-          <span class="value">{{ fullName || "Sin nombre" }}</span>
-        </div>
       </div>
 
-      <!-- Fecha y hora -->
-      <div class="info-box">
+      <div>
+        <span class="label">Usuario</span>
+        <strong class="value">{{ fullName || "Sin nombre" }}</strong>
+      </div>
+    </mat-card>
+
+    <mat-card class="quick-card">
+      <div class="quick-icon">
         <mat-icon>calendar_today</mat-icon>
-        <div>
-          <span class="label">Fecha y hora actual</span>
-          <span class="value">
-            {{ currentDate | date: "fullDate" }} —
-            {{ currentDate | date: "shortTime" }}
-          </span>
-        </div>
       </div>
+
+      <div>
+        <span class="label">Fecha y hora actual</span>
+        <strong class="value">
+          {{ currentDate | date: "fullDate" }} —
+          {{ currentDate | date: "shortTime" }}
+        </strong>
+      </div>
+    </mat-card>
+  </div>
+
+  <div class="section-title">
+    <div>
+      <span>Resumen operativo</span>
+      <h2>Panel estratégico</h2>
     </div>
+
+    <small>
+      Información de apoyo para supervisión y seguimiento de demanda.
+    </small>
   </div>
 
-  <!-- 📩 Mensaje final -->
-  <div class="footer-msg">
-    <mat-icon>info</mat-icon>
-    <span>Seleccione una opción en el menú lateral para comenzar.</span>
-  </div>
-</mat-card>
-
-<!-- 🚀 DASHBOARD ESTRATÉGICO -->
-<app-dashboard></app-dashboard>
+  <app-dashboard></app-dashboard>
+</section>

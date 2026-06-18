@@ -1,194 +1,349 @@
-/* ===============================================
-   💠 ESTILO INSTITUCIONAL — BIENVENIDA RDA-SM
-   =============================================== */
-
 :host {
-  display: flex;
-  justify-content: center;
-  padding: 3rem 1rem;
-  background-color: #f7f9fc;
-  font-family: "Roboto", "Segoe UI", Arial, sans-serif;
-  color: #1e293b;
+  display: block;
+  min-height: calc(100vh - 60px);
+  background:
+    radial-gradient(circle at top left, rgba(22, 115, 134, 0.12), transparent 34%),
+    linear-gradient(180deg, #f5fafb 0%, #eef5f6 100%);
+  color: #1f3f49;
 }
 
-/* === 📋 TARJETA PRINCIPAL === */
-.welcome-card {
+.inicio-page {
   width: 100%;
-  max-width: 950px;
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  padding: 2.5rem 3rem;
-  border: 1px solid #e3e8f0;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 28px 26px 48px;
 }
 
-/* === 🧩 BLOQUES DE INFORMACIÓN === */
-.info-grid {
+/* ======================================================
+   HERO INSTITUCIONAL
+   ====================================================== */
+
+.inicio-hero {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 1.5rem; /* 🔹 más aire entre bloques */
-  margin-bottom: 2rem;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 24px;
+  align-items: stretch;
+  margin-bottom: 24px;
 }
 
-.info-box {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 1rem 1.2rem;
-  border: 1px solid #e0e6ed;
-  border-radius: 12px;
-  background-color: #f9fbfd;
-  transition: all 0.25s ease;
+.hero-content {
+  position: relative;
+  overflow: hidden;
+  padding: 34px 36px;
+  border-radius: 28px;
+  background:
+    linear-gradient(135deg, rgba(15, 77, 86, 0.98) 0%, rgba(22, 115, 134, 0.96) 100%);
+  color: #ffffff;
+  box-shadow: 0 22px 42px rgba(15, 47, 61, 0.18);
 
-  mat-icon {
-    font-size: 22px;
-    color: #1976d2;
-    margin-top: 3px;
+  &::after {
+    content: "";
+    position: absolute;
+    right: -80px;
+    top: -90px;
+    width: 260px;
+    height: 260px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
   }
 
-  .label {
-    font-weight: 600;
-    color: #1e293b;
-    display: block;
-    margin-bottom: 2px;
-  }
+  h1 {
+    position: relative;
+    z-index: 1;
+    margin: 18px 0 10px;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    font-weight: 900;
 
-  .value {
-    color: #334155;
-    font-weight: 400;
-    font-size: 0.96rem;
-    line-height: 1.4;
-  }
-
-  &:hover {
-    background: #eef5ff;
-    border-color: #c7dbf6;
-  }
-}
-
-/* === 🧭 PROGRAMA ACTIVO === */
-.active-program {
-  margin-top: 2.5rem;
-
-  h3 {
-    font-size: 1.15rem;
-    font-weight: 600;
-    color: #0d47a1;
-    margin-bottom: 1rem;
-  }
-
-  .mat-mdc-form-field {
-    width: 100%;
-    margin-bottom: 1.2rem;
-  }
-
-  button {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #1565c0;
-    color: #fff;
-    font-weight: 500;
-    border-radius: 8px;
-    padding: 0.55rem 1.2rem;
-    box-shadow: 0 3px 6px rgba(21, 101, 192, 0.25);
-    transition: all 0.25s ease;
-
-    &:hover {
-      background: #0d47a1;
-      transform: translateY(-1px);
-    }
-
-    mat-icon {
-      font-size: 18px;
+    span {
+      color: #d8f3f1;
     }
   }
+
+  p {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
 }
 
-/* === 📌 MENSAJE FINAL === */
-.footer-msg {
-  margin-top: 2.5rem;
-  font-size: 0.95rem;
-  color: #475569;
-  display: flex;
+.hero-badge {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.13);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.82rem;
 
   mat-icon {
+    color: #d8f3f1;
     font-size: 20px;
-    color: #1565c0;
+    width: 20px;
+    height: 20px;
   }
 }
 
+.hero-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
 
-/* === ✔️ ACTIVO (programa / rol) === */
+  a {
+    border-radius: 999px !important;
+    font-weight: 850 !important;
+    padding: 0 18px !important;
+  }
 
-.program-list {
+  a[mat-flat-button] {
+    background: #ffffff !important;
+    color: #0f4d56 !important;
+  }
+
+  a[mat-stroked-button] {
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.45) !important;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  mat-icon {
+    margin-right: 6px;
+  }
+}
+
+.hero-panel {
+  padding: 28px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid #d8e5e8;
+  box-shadow: 0 18px 36px rgba(15, 47, 61, 0.12);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 220px;
+}
+
+.panel-icon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  background: #e2f3f4;
+  color: #0f6b75;
+  margin-bottom: 18px;
+
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+}
+
+.panel-label {
+  color: #6b838a;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.hero-panel strong {
+  display: block;
+  margin-top: 8px;
+  color: #123b44;
+  font-size: 1.35rem;
+  line-height: 1.25;
+  font-weight: 900;
+}
+
+.hero-panel small {
+  display: block;
+  margin-top: 14px;
+  color: #6b838a;
+
+  b {
+    color: #0f4d56;
+  }
+}
+
+/* ======================================================
+   TARJETAS RÁPIDAS
+   ====================================================== */
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.quick-card {
+  display: flex;
+  gap: 14px;
+  min-height: 142px;
+  padding: 20px;
+  border-radius: 22px !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid #dce8eb;
+  box-shadow: 0 12px 28px rgba(15, 47, 61, 0.08) !important;
+}
+
+.quick-icon {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: #eef7f7;
+  color: #0f6b75;
+
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.label {
+  display: block;
+  margin-bottom: 8px;
+  color: #6b838a;
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.value {
+  display: block;
+  color: #123b44;
+  font-size: 0.96rem;
+  line-height: 1.45;
+  font-weight: 800;
+}
+
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
   list-style: none;
   padding: 0;
-  margin: 6px 0 0;
+  margin: 0;
 }
 
-.program-item {
-  display: flex;
+.chip-list li {
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 2px 0;
-  font-size: 0.95rem;
-}
-
-.program-item .check {
-  font-size: 18px;
-  color: #1976d2;
-}
-
-.program-item span.active {
-  font-weight: 600;
-  color: #1976d2;
-}
-
-
-.welcome-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 2rem;
-
-  min-height: 48px;   /* 🔥 espacio real */
-}
-
-.avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #e3f2fd;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  flex-shrink: 0;     /* 🔥 nunca se achica */
-  overflow: visible; /* 🔥 CLAVE */
+  gap: 5px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #eef5f6;
+  color: #46656d;
+  font-size: 0.78rem;
+  font-weight: 750;
 
   mat-icon {
-  font-size: 28px;
-  line-height: 28px;   /* 🔥 CLAVE */
-  width: 28px;
-  height: 28px;
-  display: block;      /* 🔥 evita clipping inline */
-  color: #1565c0;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &.active {
+    background: #dff2f4;
+    color: #0f4d56;
   }
 }
 
-h2 {
-  margin: 0;
-  font-size: 1.9rem;
-  font-weight: 600;
-  color: #0d47a1;
+/* ======================================================
+   TÍTULO SECCIÓN DASHBOARD
+   ====================================================== */
+
+.section-title {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 28px 2px 16px;
+
+  span {
+    display: block;
+    color: #0f6b75;
+    font-size: 0.78rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  h2 {
+    margin: 4px 0 0;
+    color: #123b44;
+    font-size: 1.55rem;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+  }
+
+  small {
+    color: #6b838a;
+    font-weight: 600;
+  }
 }
 
-.username {
+/* ======================================================
+   RESPONSIVE
+   ====================================================== */
+
+@media (max-width: 1100px) {
+  .inicio-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .inicio-page {
+    padding: 18px 14px 36px;
+  }
+
+  .hero-content {
+    padding: 26px 22px;
+    border-radius: 22px;
+  }
+
+  .hero-panel,
+  .quick-card {
+    border-radius: 20px !important;
+  }
+
+  .quick-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+.empty-value {
+  display: block;
+  color: #8aa0a6;
+  font-size: 0.9rem;
   font-weight: 700;
-  color: #111827;
 }
-
