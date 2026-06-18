@@ -356,53 +356,38 @@ export class TemplateComponent implements OnInit {
   buildMenu(): void {
     const role = (this.activeRole || '').toUpperCase();
 
-    // 🔹 Menú principal base
     const baseMenu: any[] = [
       { title: 'Inicio', icon: 'home', route: '/inicio' },
     ];
 
-    // 🔹 Mantenedores
-    const mantenedores: any[] = [];
-
-    // 🔹 Obtener rutas hijas del layout principal
     const mainRoute = routes.find((r) => r.children);
     const childRoutes = mainRoute?.children ?? [];
 
     for (const route of childRoutes) {
-      // ❌ Excluir rutas inválidas, base y ocultas
       if (
         !route.path ||
         ['', '**', 'inicio'].includes(route.path) ||
-        this.HIDDEN_MENU_PATHS.includes(route.path)
+        this.HIDDEN_MENU_PATHS.includes(route.path) ||
+        this.MANTENEDOR_PATHS.includes(route.path)
       ) {
         continue;
       }
 
-      // 🔐 Validar roles
       const allowedRoles = route.data?.['roles'] ?? [];
       const visible = allowedRoles.length === 0 || allowedRoles.includes(role);
 
       if (!visible) continue;
 
-      // 📌 Item de menú
-      const item = {
+      baseMenu.push({
         title: this.getTitleFromPath(route.path),
         icon: this.getIcon(route.path),
         route: '/' + route.path,
         path: route.path,
-      };
-
-      // 🛠️ Clasificar como mantenedor o menú principal
-      if (this.MANTENEDOR_PATHS.includes(route.path)) {
-        mantenedores.push(item);
-      } else {
-        baseMenu.push(item);
-      }
+      });
     }
 
-    // 🔚 Asignar a la vista
     this.menuItems = baseMenu;
-    this.mantenedorItems = mantenedores;
+    this.mantenedorItems = [];
   }
 
   private readonly HIDDEN_MENU_PATHS: string[] = ['profile'];
@@ -470,7 +455,9 @@ export class TemplateComponent implements OnInit {
       about: 'info',
       manual: 'menu_book',
       analytics: 'insights',
+      administracion: 'settings_suggest',
     };
+
     return icons[path] || 'chevron_right';
   }
 
@@ -478,6 +465,7 @@ export class TemplateComponent implements OnInit {
     const titles: Record<string, string> = {
       inicio: 'Inicio',
       manual: 'Manual',
+      administracion: 'Administración del Sistema',
       demand: 'Demandas',
       transfer: 'Referencia',
       'demand-list': 'Listado de Demandas',

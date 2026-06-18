@@ -147,35 +147,6 @@
           <mat-icon>{{ item.icon }}</mat-icon>
           {{ item.title }}
         </a>
-
-        <!-- =========================
-       🛠️ MANTENEDORES
-       ========================= -->
-        <ng-container *ngIf="mantenedorItems.length > 0">
-          <mat-divider></mat-divider>
-
-          <div
-            class="menu-section-title collapsable"
-            (click)="toggleMantenedores()"
-          >
-            <mat-icon class="rotate" [class.open]="mantenedoresOpen">
-              settings
-            </mat-icon>
-            Mantenedores
-          </div>
-
-          <div class="submenu" *ngIf="mantenedoresOpen">
-            <a
-              *ngFor="let item of mantenedorItems"
-              mat-list-item
-              [routerLink]="item.route"
-              routerLinkActive="active"
-            >
-              <mat-icon>{{ item.icon }}</mat-icon>
-              {{ item.title }}
-            </a>
-          </div>
-        </ng-container>
       </mat-nav-list>
 
       <!-- fin menu dinamico -->
