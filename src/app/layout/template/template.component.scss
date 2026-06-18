@@ -818,3 +818,160 @@ mat-sidenav {
     filter: drop-shadow(0 6px 12px rgba(15, 47, 61, 0.12));
   }
 }
+
+/* ======================================================
+   BARRA SUPERIOR INSTITUCIONAL — REDISEÑO DEMANDA
+   ====================================================== */
+
+.topbar {
+  height: 60px !important;
+  padding: 0 16px !important;
+  background: linear-gradient(135deg, #0f4d56 0%, #167386 100%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 10px 28px rgba(15, 47, 61, 0.16);
+  color: #ffffff;
+  gap: 14px;
+}
+
+.menu-toggle {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff !important;
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+  }
+
+  mat-icon {
+    color: #ffffff !important;
+  }
+}
+
+.topbar-brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  line-height: 1.15;
+}
+
+.system-name {
+  font-size: 0.98rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.035em;
+  color: #ffffff;
+}
+
+.program-name {
+  margin-top: 3px;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: rgba(255, 255, 255, 0.78);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.session-box {
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.session-timer {
+  background: rgba(255, 255, 255, 0.13) !important;
+  border: 1px solid rgba(255, 255, 255, 0.42) !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+
+  &.warn {
+    background: #f59e0b !important;
+    border-color: #fde68a !important;
+  }
+
+  &.critical {
+    background: #dc2626 !important;
+    border-color: #fecaca !important;
+  }
+}
+
+.user-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.welcome-badge {
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 2px !important;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff !important;
+  font-size: 0.86rem;
+  font-weight: 750;
+
+  mat-icon {
+    color: #d8f3f1 !important;
+  }
+}
+
+.profile-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 13px !important;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff !important;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  mat-icon {
+    color: #ffffff !important;
+  }
+}
+
+.logout-btn {
+  height: 36px !important;
+  padding: 0 16px !important;
+  border-radius: 999px !important;
+  border-color: rgba(255, 255, 255, 0.48) !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  background: rgba(255, 255, 255, 0.08);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.18) !important;
+  }
+
+  mat-icon {
+    color: #ffffff !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .system-name {
+    font-size: 0.82rem;
+  }
+
+  .program-name {
+    display: none;
+  }
+
+  .welcome-badge {
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

@@ -174,15 +174,16 @@
     <!-- 🧱 CONTENIDO PRINCIPAL -->
     <mat-sidenav-content>
       <mat-toolbar class="topbar">
-        <!-- Botón del menú lateral -->
-        <button mat-icon-button (click)="toggleDrawer()">
+        <button mat-icon-button class="menu-toggle" (click)="toggleDrawer()">
           <mat-icon>menu</mat-icon>
         </button>
-        <!-- Nombre del sistema + programa activo -->
-        <span class="brand">
-          Departamento Salud Mental —
-          <strong>{{ activeProgram || "Sin programa" }}</strong>
-        </span>
+
+        <div class="topbar-brand">
+          <span class="system-name">Departamento Salud Mental</span>
+          <span class="program-name">
+            {{ activeProgram || "Sin programa" }}
+          </span>
+        </div>
 
         <span class="spacer"></span>
 
@@ -214,18 +215,26 @@
         </div>
 
         <!-- 👤 Bienvenida -->
-        <span class="welcome-badge">
-          <mat-icon>verified_user</mat-icon>
-          {{ userFullName }}
-        </span>
-        <button mat-icon-button matTooltip="Mi Perfil" (click)="goToProfile()">
-          <mat-icon>manage_accounts</mat-icon>
-        </button>
-        <!-- 🔒 Logout -->
-        <button mat-stroked-button class="logout-btn" (click)="logout()">
-          <mat-icon>logout</mat-icon>
-          Salir
-        </button>
+        <div class="user-area">
+          <span class="welcome-badge">
+            <mat-icon>verified_user</mat-icon>
+            {{ userFullName }}
+          </span>
+
+          <button
+            mat-icon-button
+            class="profile-btn"
+            matTooltip="Mi Perfil"
+            (click)="goToProfile()"
+          >
+            <mat-icon>manage_accounts</mat-icon>
+          </button>
+
+          <button mat-stroked-button class="logout-btn" (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            Salir
+          </button>
+        </div>
       </mat-toolbar>
 
       <div class="content fade-route">
