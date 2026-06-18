@@ -4,7 +4,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { TokenService } from '../../services/token.service';
-import { DashboardComponent } from '../../views/dashboard/dashboard.component';
 import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 
@@ -20,7 +19,6 @@ import { MatButtonModule } from '@angular/material/button';
     MatIconModule,
     MatButtonModule,
     MatDividerModule,
-    DashboardComponent,
   ],
 })
 export class InicioComponent implements OnInit {

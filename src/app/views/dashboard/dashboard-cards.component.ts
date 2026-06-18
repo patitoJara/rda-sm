@@ -2,6 +2,7 @@
 
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 import { DashboardStats } from './models/dashboard-stats.model';
 
 @Component({
@@ -9,10 +10,21 @@ import { DashboardStats } from './models/dashboard-stats.model';
   selector: 'app-dashboard-cards',
   templateUrl: './dashboard-cards.component.html',
   styleUrls: ['./dashboard-cards.component.scss'],
-  imports: [CommonModule],
+  imports: [CommonModule, MatIconModule],
 })
 export class DashboardCardsComponent {
-  @Input() stats!: DashboardStats;
+  @Input() stats: DashboardStats = {
+    totalDemandas: 0,
+    demandasAtendidas: 0,
+    demandasEnEspera: 0,
+    promedioEspera: 0,
+    medianaEspera: 0,
+    maxEspera: 0,
+    criticos: 0,
+    citacionesTotal: 0,
+    citacionesAsistio: 0,
+    citacionesNoAsistio: 0,
+  };
 
   getColor(dias: number): string {
     if (dias > 30) return '#d32f2f'; // rojo

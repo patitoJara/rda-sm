@@ -68,10 +68,78 @@ export class DashboardService {
   filterDataset(data: DashboardDemand[], filtros: any): DashboardDemand[] {
     let result = [...data];
 
-    if (filtros?.rut) {
-      result = result.filter((d) => d.rut.includes(filtros.rut));
+    // ==========================
+    // FILTRO POR PERIODO
+    // ==========================
+    if (filtros?.periodo) {
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      const currentMonth = today.getMonth(); // 0 = enero
+
+      result = result.filter((d) => {
+        if (!d.requestDate) return false;
+
+        const requestDate = new Date(d.requestDate);
+
+        if (isNaN(requestDate.getTime())) return false;
+
+        const requestYear = requestDate.getFullYear();
+        const requestMonth = requestDate.getMonth();
+
+        // Mes actual
+        if (filtros.periodo === 'mes_actual') {
+          return requestYear === currentYear && requestMonth === currentMonth;
+        }
+
+        // Mes específico: 01 a 12
+        if (/^(0[1-9]|1[0-2])$/.test(filtros.periodo)) {
+          const selectedMonth = Number(filtros.periodo) - 1;
+
+          return requestYear === currentYear && requestMonth === selectedMonth;
+        }
+
+        // Últimos 6 meses móviles
+        if (filtros.periodo === '6m') {
+          const limit = new Date(today);
+          limit.setMonth(limit.getMonth() - 6);
+
+          return requestDate >= limit && requestDate <= today;
+        }
+
+        // Últimos 12 meses móviles
+        if (filtros.periodo === '12m') {
+          const limit = new Date(today);
+          limit.setMonth(limit.getMonth() - 12);
+
+          return requestDate >= limit && requestDate <= today;
+        }
+
+        return true;
+      });
     }
 
+    // ==========================
+    // FILTRO POR RUT
+    // ==========================
+    if (filtros?.rut) {
+      const rut = filtros.rut
+        .replace(/\./g, '')
+        .replace(/-/g, '')
+        .toLowerCase();
+
+      result = result.filter((d) => {
+        const demandRut = (d.rut || '')
+          .replace(/\./g, '')
+          .replace(/-/g, '')
+          .toLowerCase();
+
+        return demandRut.includes(rut);
+      });
+    }
+
+    // ==========================
+    // FILTRO POR PROGRAMA
+    // ==========================
     if (filtros?.programa) {
       result = result.filter((d) => d.programa === filtros.programa);
     }

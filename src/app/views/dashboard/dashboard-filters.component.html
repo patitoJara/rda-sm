@@ -1,36 +1,53 @@
 <div class="filters-container">
-
-  <div class="filters-row">
-
-    <div class="filter-group">
-
-      <label>Periodo</label>
-
-      <select [(ngModel)]="filtros.periodo" (change)="applyFilters()">
-        <option value="mes">Mes</option>
-        <option value="6m">6 meses móviles</option>
-        <option value="12m">12 meses móviles</option>
-        <option value="rango">Entre fechas</option>
-      </select>
-
+  <div class="filters-header">
+    <div>
+      <span>Filtros de análisis</span>
+      <h3>Segmentación del panel</h3>
     </div>
 
+    <button type="button" class="clear-btn" (click)="clearFilters()">
+      Limpiar filtros
+    </button>
+  </div>
+
+  <div class="filters-row">
+    <div class="filter-group">
+      <label>Periodo</label>
+      
+      <select [(ngModel)]="filtros.periodo" (change)="applyFilters()">
+        <option value="mes_actual">Mes actual</option>
+
+        <option value="01">Enero</option>
+        <option value="02">Febrero</option>
+        <option value="03">Marzo</option>
+        <option value="04">Abril</option>
+        <option value="05">Mayo</option>
+        <option value="06">Junio</option>
+        <option value="07">Julio</option>
+        <option value="08">Agosto</option>
+        <option value="09">Septiembre</option>
+        <option value="10">Octubre</option>
+        <option value="11">Noviembre</option>
+        <option value="12">Diciembre</option>
+
+        <option value="6m">6 meses móviles</option>
+        <option value="12m">12 meses móviles</option>
+      </select>
+    </div>
 
     <div class="filter-group">
-
       <label>Indicador</label>
 
       <select [(ngModel)]="filtros.indicador" (change)="applyFilters()">
         <option value="solicitud_hoy">Solicitud → Hoy</option>
         <option value="solicitud_citacion">Solicitud → Primera citación</option>
-        <option value="solicitud_atencion">Solicitud → Primera atención efectiva</option>
+        <option value="solicitud_atencion">
+          Solicitud → Primera atención efectiva
+        </option>
       </select>
-
     </div>
 
-
     <div class="filter-group">
-
       <label>Estado programa</label>
 
       <select [(ngModel)]="filtros.estadoPrograma" (change)="applyFilters()">
@@ -38,12 +55,9 @@
         <option value="abierto">Unidad Atención Abierta</option>
         <option value="cerrado">Unidad Atención Cerrada</option>
       </select>
-
     </div>
 
-
     <div class="filter-group">
-
       <label>Grupo etario</label>
 
       <select [(ngModel)]="filtros.grupoEtario" (change)="applyFilters()">
@@ -51,12 +65,9 @@
         <option value="infanto">Infanto Adolescente</option>
         <option value="adulto">Adulto</option>
       </select>
-
     </div>
 
-
     <div class="filter-group">
-
       <label>Buscar RUT</label>
 
       <input
@@ -64,19 +75,7 @@
         placeholder="11.799.136-9"
         [(ngModel)]="filtros.rut"
         (input)="applyFilters()"
-      >
-
+      />
     </div>
-
   </div>
-
-
-  <div class="filters-actions">
-
-    <button (click)="clearFilters()">
-      Limpiar filtros
-    </button>
-
-  </div>
-
 </div>

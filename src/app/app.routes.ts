@@ -47,12 +47,12 @@ export const routes: Routes = [
           ),
       },
 
-      // 📊 ANALYTICS
+      // 📊 PANEL ESTRATÉGICO
       {
         path: 'analytics',
         loadComponent: () =>
-          import('./views/analytics/analytics.component').then(
-            (m) => m.AnalyticsComponent,
+          import('./views/dashboard/dashboard.component').then(
+            (m) => m.DashboardComponent,
           ),
         canActivate: [roleGuard],
         data: { roles: ['ADMIN', 'SUPERVISOR'] },
@@ -86,7 +86,7 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { roles: ['ADMIN'] },
       },
-      
+
       // 🔹 DEMANDA
       {
         path: 'demand',

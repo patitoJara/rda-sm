@@ -11,7 +11,7 @@
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 28px 26px 48px;
+  padding: 28px 26px 90px;
 }
 
 /* ======================================================
@@ -20,7 +20,7 @@
 
 .inicio-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
   gap: 24px;
   align-items: stretch;
   margin-bottom: 24px;
@@ -47,20 +47,19 @@
     background: rgba(255, 255, 255, 0.1);
   }
 
-  h1 {
-    position: relative;
-    z-index: 1;
-    margin: 18px 0 10px;
-    font-size: clamp(2rem, 4vw, 3rem);
-    line-height: 1.05;
-    letter-spacing: -0.04em;
-    font-weight: 900;
+h1 {
+  position: relative;
+  z-index: 1;
+  margin: 18px 0 10px;
+  font-size: clamp(1.75rem, 2.8vw, 2.35rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  font-weight: 900;
 
-    span {
-      color: #d8f3f1;
-    }
+  span {
+    color: #d8f3f1;
   }
-
+}
   p {
     position: relative;
     z-index: 1;
@@ -133,6 +132,7 @@
   flex-direction: column;
   justify-content: center;
   min-height: 220px;
+  min-width: 0;
 }
 
 .panel-icon {
@@ -164,9 +164,12 @@
   display: block;
   margin-top: 8px;
   color: #123b44;
-  font-size: 1.35rem;
+  font-size: clamp(1rem, 1.4vw, 1.35rem);
   line-height: 1.25;
   font-weight: 900;
+  word-break: normal;
+  overflow-wrap: anywhere;
+  max-width: 100%;
 }
 
 .hero-panel small {
@@ -269,40 +272,6 @@
 }
 
 /* ======================================================
-   TÍTULO SECCIÓN DASHBOARD
-   ====================================================== */
-
-.section-title {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-  margin: 28px 2px 16px;
-
-  span {
-    display: block;
-    color: #0f6b75;
-    font-size: 0.78rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
-  h2 {
-    margin: 4px 0 0;
-    color: #123b44;
-    font-size: 1.55rem;
-    font-weight: 900;
-    letter-spacing: -0.03em;
-  }
-
-  small {
-    color: #6b838a;
-    font-weight: 600;
-  }
-}
-
-/* ======================================================
    RESPONSIVE
    ====================================================== */
 
@@ -335,10 +304,6 @@
     grid-template-columns: 1fr;
   }
 
-  .section-title {
-    align-items: flex-start;
-    flex-direction: column;
-  }
 }
 
 .empty-value {
