@@ -955,16 +955,15 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     for (const s of secondaries) {
       await firstValueFrom(
         this.registerSubstanceServiceDto.create({
-          register: { id: register.id },
+          register: { id: registerId },
           substance: { id: s },
           level: 'Secundaria',
-          order: orden, // 👈 clave
+          order: orden,
         }),
       );
 
       orden++;
     }
-
     console.log('✅ Sustancias actualizadas (DTO)');
   }
 

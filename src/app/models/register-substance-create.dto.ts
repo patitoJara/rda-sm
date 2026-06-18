@@ -4,4 +4,5 @@ export interface RegisterSubstanceCreateDto {
   register: { id: number };
   substance: { id: number };
   level: 'Principal' | 'Secundaria';
+  order?: number;
 }
