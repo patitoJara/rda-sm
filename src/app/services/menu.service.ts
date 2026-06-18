@@ -9,9 +9,9 @@ export interface MenuItem {
 
 @Injectable({ providedIn: 'root' })
 export class MenuService {
-  /** Retorna el menú dinámico según el rol del usuario */
+  /** Retorna el menú dinámico según el rol activo del usuario */
   getMenuByRole(role: string): MenuItem[] {
-    switch (role.toUpperCase()) {
+    switch ((role || '').toUpperCase()) {
       case 'ADMIN':
         return this.adminMenu();
       case 'ADMINISTRATIVO':
@@ -26,22 +26,28 @@ export class MenuService {
   private adminMenu(): MenuItem[] {
     return [
       { title: 'Inicio', icon: 'home', route: '/inicio' },
-      { title: 'Registro de Demanda', icon: 'assignment_add', route: '/demand' },
+      { title: 'Dashboard ejecutivo', icon: 'dashboard', route: '/analytics' },
       {
-        title: 'Mantenedor',
-        icon: 'build',
+        title: 'Gestión de Demanda',
+        icon: 'assignment',
         children: [
-          { title: 'Usuarios', icon: 'people_alt', route: '/user' },
-          { title: 'Comunas', icon: 'maps_home_work', route: '/commune' },
-          { title: 'Tipos de Contacto', icon: 'category', route: '/typecontact' },
-          { title: 'Quien Deriva', icon: 'person', route: '/diverter' },
-          { title: 'Quien Solicita', icon: 'person', route: '/senders' },
-          { title: 'Programas', icon: 'assignment', route: '/program' },
-          { title: 'Roles', icon: 'supervisor_account', route: '/roles' },
-          { title: 'Sustancias', icon: 'medication', route: '/substances' },
-          { title: 'Género', icon: 'wc', route: '/sexs' },
+          { title: 'Nueva demanda', icon: 'add_circle', route: '/demand' },
+          { title: 'Bandeja priorizada', icon: 'table_chart', route: '/demand-list' },
+          { title: 'Referencias', icon: 'sync_alt', route: '/transfer' },
         ],
       },
+      {
+        title: 'Administración',
+        icon: 'admin_panel_settings',
+        children: [
+          {
+            title: 'Centro de mantenedores',
+            icon: 'settings_suggest',
+            route: '/administracion',
+          },
+        ],
+      },
+      { title: 'Manual', icon: 'menu_book', route: '/manual' },
       { title: 'Acerca de', icon: 'info', route: '/about' },
     ];
   }
@@ -49,14 +55,24 @@ export class MenuService {
   private administrativoMenu(): MenuItem[] {
     return [
       { title: 'Inicio', icon: 'home', route: '/inicio' },
-      { title: 'Registro de Demanda', icon: 'assignment_add', route: '/demand' },
+      {
+        title: 'Gestión de Demanda',
+        icon: 'assignment',
+        children: [
+          { title: 'Nueva demanda', icon: 'add_circle', route: '/demand' },
+          { title: 'Referencias', icon: 'sync_alt', route: '/transfer' },
+        ],
+      },
+      { title: 'Manual', icon: 'menu_book', route: '/manual' },
     ];
   }
 
   private supervisorMenu(): MenuItem[] {
     return [
       { title: 'Inicio', icon: 'home', route: '/inicio' },
-      { title: 'Planilla de Demanda', icon: 'table_chart', route: '/demand-report' }, // futura
+      { title: 'Dashboard ejecutivo', icon: 'dashboard', route: '/analytics' },
+      { title: 'Bandeja priorizada', icon: 'table_chart', route: '/demand-list' },
+      { title: 'Manual', icon: 'menu_book', route: '/manual' },
     ];
   }
 

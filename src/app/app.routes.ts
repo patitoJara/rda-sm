@@ -76,6 +76,17 @@ export const routes: Routes = [
           ),
       },
 
+      // ⚙️ ADMINISTRACIÓN DEL SISTEMA
+      {
+        path: 'administracion',
+        loadComponent: () =>
+          import('./views/admin-maintainers/admin-maintainers.component').then(
+            (m) => m.AdminMaintainersComponent,
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN'] },
+      },
+      
       // 🔹 DEMANDA
       {
         path: 'demand',
