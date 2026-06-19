@@ -444,3 +444,146 @@
     grid-template-columns: 1fr;
   }
 }
+
+.empty-banner.searching {
+  background: #eef7f7;
+  color: #31545d;
+}
+
+.empty-banner.success {
+  background: #e8f5ef;
+  color: #1f6b46;
+
+  mat-icon {
+    color: #1f8a5b;
+  }
+}
+
+.empty-banner.warning {
+  background: #fff7e6;
+  color: #7a5300;
+
+  mat-icon {
+    color: #b7791f;
+  }
+}
+
+.empty-banner.error {
+  background: #fdeaea;
+  color: #8a1f1f;
+
+  mat-icon {
+    color: #c62828;
+  }
+}
+
+.person-summary {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  background: #f4f8f9;
+}
+
+.summary-row {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #dce8eb;
+
+  span {
+    color: #6b838a;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  strong {
+    color: #123b44;
+    font-size: 0.9rem;
+    font-weight: 900;
+    overflow-wrap: anywhere;
+  }
+}
+
+.summary-row:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.summary-note {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 4px;
+  padding: 10px;
+  border-radius: 14px;
+  background: #e8f3f5;
+  color: #4d6870;
+  font-size: 0.82rem;
+  line-height: 1.35;
+
+  mat-icon {
+    color: #0f6b75;
+    font-size: 19px;
+    width: 19px;
+    height: 19px;
+  }
+}
+
+
+.field-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.field-chip {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: #eef7f7;
+  border: 1px solid #d4e8eb;
+  color: #31545d;
+  font-size: 0.76rem;
+  font-weight: 850;
+  line-height: 1.15;
+}
+
+.empty-state.compact {
+  min-height: 108px;
+  padding: 14px;
+}
+
+.mini-field-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 12px;
+}
+
+.mini-field-chip {
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: #eef7f7;
+  border: 1px solid #d4e8eb;
+  color: #31545d;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.detail-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+@media (max-width: 720px) {
+  .field-chip,
+  .mini-field-chip {
+    border-radius: 12px;
+  }
+}

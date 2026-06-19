@@ -3,6 +3,10 @@ import { Component, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
+import { finalize } from 'rxjs/operators';
+import { PostulantService } from '@app/services/postulant.service';
+import { Postulant } from '@app/models/postulant';
+
 // Angular Material
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -32,6 +36,7 @@ import { MatDividerModule } from '@angular/material/divider';
 })
 export class DemandNewComponent {
   private fb = inject(FormBuilder);
+  private postulantService = inject(PostulantService);
 
   searchForm = this.fb.group({
     rut: ['', Validators.required],
@@ -42,12 +47,156 @@ export class DemandNewComponent {
   episodeLoaded = false;
   stageLoaded = false;
 
+  isSearching = false;
+  searched = false;
+  personNotFound = false;
+  selectedPerson: Postulant | null = null;
+  searchError: string | null = null;
+
   readonly flowSteps = [
     'Persona',
     'Episodio',
     'Etapa por programa',
     'Eventos',
     'Referencias',
+  ];
+
+  readonly personFields = [
+    'RUN',
+    'Primer nombre',
+    'Segundo nombre',
+    'Primer apellido',
+    'Segundo apellido',
+    'Fecha nacimiento',
+    'Sexo',
+    'Teléfono',
+    'Correo',
+    'Dirección',
+    'Comuna',
+    'Previsión',
+  ];
+
+  readonly episodeFields = [
+    'Código episodio',
+    'Tipo episodio',
+    'Fecha solicitud original',
+    'Programa inicial',
+    'Programa actual',
+    'Vía de ingreso',
+    'Remitente',
+    'Derivador',
+    'Número de tratamiento previo',
+    'Estado actual',
+    'Resultado actual',
+    'Días acumulados',
+    'Fecha ingreso a tratamiento',
+    'Fecha egreso',
+    'Motivo cierre',
+    'Observación inicial',
+  ];
+
+  readonly stageFields = [
+    'Programa responsable',
+    'Orden de etapa',
+    'Fecha recepción',
+    'Fecha cierre',
+    'Estado de etapa',
+    'Resultado de etapa',
+    'Etapa actual',
+    'Motivo cierre etapa',
+    'Observación cierre etapa',
+  ];
+
+  readonly structuralSections = [
+    {
+      icon: 'timeline',
+      title: 'Eventos del episodio',
+      empty: 'No existen eventos registrados.',
+      fields: [
+        'Tipo evento',
+        'Fecha evento',
+        'Hora evento',
+        'Profesión',
+        'Profesional',
+        'Estado citación',
+        'Resultado asociado',
+        'Comentario de citación',
+        'Observación general',
+        'Próxima acción',
+        'Fecha próxima acción',
+        'Usuario que registra',
+      ],
+    },
+    {
+      icon: 'sync_alt',
+      title: 'Referencias entre programas',
+      empty:
+        'No existen referencias registradas. Las referencias conservarán la fecha original y los días acumulados.',
+      fields: [
+        'Programa origen',
+        'Programa destino',
+        'Fecha referencia',
+        'Motivo referencia',
+        'Observación',
+        'Documento asociado',
+        'Usuario que registra',
+        'Impacto de la referencia',
+      ],
+    },
+    {
+      icon: 'science',
+      title: 'Sustancias',
+      empty: 'No existen sustancias asociadas al episodio.',
+      fields: [
+        'Sustancia principal',
+        'Sustancias secundarias',
+        'Nivel / orden',
+        'Observación',
+      ],
+    },
+    {
+      icon: 'attach_file',
+      title: 'Documentos asociados',
+      empty: 'No existen documentos asociados.',
+      fields: [
+        'Tipo documento',
+        'Archivo',
+        'Asociado a',
+        'Usuario que sube',
+        'Fecha subida',
+      ],
+    },
+    {
+      icon: 'notification_important',
+      title: 'Alertas y seguimiento',
+      empty: 'No existen alertas activas.',
+      fields: [
+        'Tipo alerta',
+        'Nivel prioridad',
+        'Descripción',
+        'Acción realizada',
+        'Próxima acción',
+        'Fecha comprometida',
+        'Responsable',
+        'Estado alerta',
+      ],
+    },
+    {
+      icon: 'verified_user',
+      title: 'Auditoría / decisiones críticas',
+      empty:
+        'Las decisiones críticas quedarán registradas con usuario, fecha y autorización.',
+      fields: [
+        'Acción crítica',
+        'Valor anterior',
+        'Valor nuevo',
+        'Motivo',
+        'Usuario que ejecuta',
+        'Usuario que autoriza',
+        'Fecha acción',
+        'Reversión / rectificación',
+      ],
+    },
   ];
 
   readonly operativeActions = [
@@ -101,13 +250,48 @@ export class DemandNewComponent {
   searchPerson(): void {
     this.searchForm.markAllAsTouched();
 
-    if (this.searchForm.invalid) return;
+    if (this.searchForm.invalid || this.isSearching) return;
 
-    // Por ahora no buscamos backend nuevo.
-    // Se deja preparado para endpoint futuro Persona/Episodio.
-    console.log(
-      '[DemandNew] Buscar persona por RUN:',
-      this.searchForm.getRawValue().rut,
-    );
+    const rut = this.searchForm.getRawValue().rut?.trim();
+
+    if (!rut) return;
+
+    this.isSearching = true;
+    this.searched = true;
+    this.personNotFound = false;
+    this.selectedPerson = null;
+    this.searchError = null;
+
+    this.personLoaded = false;
+    this.episodeLoaded = false;
+    this.stageLoaded = false;
+
+    this.postulantService
+      .getAllRutPaginated({
+        rut,
+        page: 0,
+        size: 1,
+      })
+      .pipe(finalize(() => (this.isSearching = false)))
+      .subscribe({
+        next: (response) => {
+          const person = response?.content?.[0] ?? null;
+
+          if (!person) {
+            this.personNotFound = true;
+            return;
+          }
+
+          this.selectedPerson = person;
+          this.personLoaded = true;
+
+          // Siguiente etapa futura:
+          // buscar episodio activo de esta persona.
+        },
+        error: () => {
+          this.searchError =
+            'No fue posible consultar la persona. Intente nuevamente o contacte a soporte.';
+        },
+      });
   }
 }

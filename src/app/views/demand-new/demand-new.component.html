@@ -10,8 +10,8 @@
       <h1>Gestión de demanda actual</h1>
 
       <p>
-        Pantalla base para trabajar la demanda desde la lógica
-        Persona → Episodio → Etapa por programa → Eventos → Referencias.
+        Pantalla base para trabajar la demanda desde la lógica Persona →
+        Episodio → Etapa por programa → Eventos → Referencias.
       </p>
 
       <div class="flow-strip">
@@ -31,7 +31,10 @@
         <li>La fecha original de solicitud no se reinicia.</li>
         <li>La referencia crea una nueva etapa, no un nuevo episodio.</li>
         <li>El KPI de espera se detiene con ingreso a tratamiento.</li>
-        <li>El cierre formal debe usar el término <strong>egreso</strong> cuando corresponda.</li>
+        <li>
+          El cierre formal debe usar el término <strong>egreso</strong> cuando
+          corresponda.
+        </li>
       </ul>
     </aside>
   </section>
@@ -42,11 +45,18 @@
       <mat-icon>person_search</mat-icon>
       <div>
         <h2>Búsqueda de persona</h2>
-        <p>Busque por RUN para iniciar una nueva demanda o recuperar historia longitudinal.</p>
+        <p>
+          Busque por RUN para iniciar una nueva demanda o recuperar historia
+          longitudinal.
+        </p>
       </div>
     </div>
 
-    <form [formGroup]="searchForm" (ngSubmit)="searchPerson()" class="search-form">
+    <form
+      [formGroup]="searchForm"
+      (ngSubmit)="searchPerson()"
+      class="search-form"
+    >
       <mat-form-field appearance="fill">
         <mat-label>RUN de la persona</mat-label>
         <input matInput formControlName="rut" placeholder="12.345.678-9" />
@@ -60,20 +70,53 @@
         Buscar persona
       </button>
 
-      <button mat-stroked-button class="secondary-btn" type="button" disabled>
+      <button
+        mat-stroked-button
+        class="secondary-btn"
+        type="button"
+        [disabled]="!personNotFound"
+      >
         <mat-icon>person_add</mat-icon>
         Crear persona
       </button>
     </form>
 
-    <div class="empty-banner">
+    <div class="empty-banner" *ngIf="!searched && !isSearching">
       <mat-icon>info</mat-icon>
       <span>
-        Busque una persona por RUN para iniciar o recuperar su historia longitudinal.
+        Busque una persona por RUN para iniciar o recuperar su historia
+        longitudinal.
       </span>
+    </div>
+
+    <div class="empty-banner searching" *ngIf="isSearching">
+      <mat-icon>hourglass_top</mat-icon>
+      <span>Consultando persona en el sistema...</span>
+    </div>
+
+    <div class="empty-banner success" *ngIf="selectedPerson">
+      <mat-icon>check_circle</mat-icon>
+      <span>
+        Persona encontrada. Revise los datos base antes de continuar con el
+        episodio.
+      </span>
+    </div>
+
+    <div class="empty-banner warning" *ngIf="personNotFound">
+      <mat-icon>person_add</mat-icon>
+      <span>
+        No se encontró una persona registrada con ese RUN. Puede continuar
+        creando una nueva persona.
+      </span>
+    </div>
+
+    <div class="empty-banner error" *ngIf="searchError">
+      <mat-icon>error</mat-icon>
+      <span>{{ searchError }}</span>
     </div>
   </mat-card>
 
+  <!-- GRID PRINCIPAL -->
   <!-- GRID PRINCIPAL -->
   <section class="demand-grid">
     <!-- PERSONA -->
@@ -88,11 +131,55 @@
         </div>
       </div>
 
-      <div class="empty-state">
-        <mat-icon>person_off</mat-icon>
-        <strong>Sin persona cargada</strong>
-        <span>La información aparecerá al buscar un RUN existente o crear una nueva persona.</span>
+      <div class="person-summary" *ngIf="selectedPerson; else personStructure">
+        <div class="summary-row">
+          <span>RUN</span>
+          <strong>{{ selectedPerson.rut || "Sin información" }}</strong>
+        </div>
+
+        <div class="summary-row">
+          <span>Nombre</span>
+          <strong>
+            {{ selectedPerson.firstName }}
+            {{ selectedPerson.lastName }}
+            {{ selectedPerson.firstLastName }}
+            {{ selectedPerson.secondLastName }}
+          </strong>
+        </div>
+
+        <div class="summary-row">
+          <span>Teléfono</span>
+          <strong>{{ selectedPerson.phone || "Sin información" }}</strong>
+        </div>
+
+        <div class="summary-row">
+          <span>Correo</span>
+          <strong>{{ selectedPerson.email || "Sin información" }}</strong>
+        </div>
+
+        <div class="summary-note">
+          <mat-icon>history</mat-icon>
+          La siguiente etapa será consultar si posee episodio activo o historia
+          previa.
+        </div>
       </div>
+
+      <ng-template #personStructure>
+        <div class="field-preview">
+          <div class="field-chip" *ngFor="let field of personFields">
+            {{ field }}
+          </div>
+        </div>
+
+        <div class="empty-state compact">
+          <mat-icon>person_off</mat-icon>
+          <strong>Sin persona cargada</strong>
+          <span>
+            La información aparecerá al buscar un RUN existente o crear una
+            nueva persona.
+          </span>
+        </div>
+      </ng-template>
     </mat-card>
 
     <!-- EPISODIO -->
@@ -102,15 +189,24 @@
       <div class="card-header">
         <mat-icon>folder_shared</mat-icon>
         <div>
-          <h3>Episodio activo</h3>
-          <p>Nueva demanda o episodio vigente de la persona.</p>
+          <h3>Episodio / Nueva demanda</h3>
+          <p>Demanda vigente o nuevo episodio de la persona.</p>
         </div>
       </div>
 
-      <div class="empty-state">
+      <div class="field-preview">
+        <div class="field-chip" *ngFor="let field of episodeFields">
+          {{ field }}
+        </div>
+      </div>
+
+      <div class="empty-state compact">
         <mat-icon>inventory_2</mat-icon>
         <strong>Sin episodio activo cargado</strong>
-        <span>Si la persona tiene episodio activo, se abrirá el vigente. Si no, se podrá crear uno nuevo.</span>
+        <span>
+          Si la persona tiene episodio activo, se abrirá el vigente. Si no, se
+          podrá crear uno nuevo.
+        </span>
       </div>
     </mat-card>
 
@@ -126,10 +222,19 @@
         </div>
       </div>
 
-      <div class="empty-state">
+      <div class="field-preview">
+        <div class="field-chip" *ngFor="let field of stageFields">
+          {{ field }}
+        </div>
+      </div>
+
+      <div class="empty-state compact">
         <mat-icon>route</mat-icon>
         <strong>Sin etapa activa cargada</strong>
-        <span>La etapa inicial se creará junto con el episodio y cambiará si existe referencia.</span>
+        <span>
+          La etapa inicial se creará junto con el episodio y cambiará si existe
+          referencia.
+        </span>
       </div>
     </mat-card>
   </section>
@@ -159,37 +264,23 @@
   </mat-card>
 
   <!-- SECCIONES INFERIORES -->
+  <!-- SECCIONES INFERIORES -->
   <section class="lower-grid">
-    <mat-card class="detail-card">
-      <h3><mat-icon>timeline</mat-icon> Eventos del episodio</h3>
-      <div class="empty-line">No existen eventos registrados.</div>
-    </mat-card>
+    <mat-card class="detail-card" *ngFor="let section of structuralSections">
+      <h3>
+        <mat-icon>{{ section.icon }}</mat-icon>
+        {{ section.title }}
+      </h3>
 
-    <mat-card class="detail-card">
-      <h3><mat-icon>sync_alt</mat-icon> Referencias entre programas</h3>
-      <div class="empty-line">
-        No existen referencias registradas. Las referencias conservarán la fecha original y los días acumulados.
+      <div class="mini-field-preview">
+        <div class="mini-field-chip" *ngFor="let field of section.fields">
+          {{ field }}
+        </div>
       </div>
-    </mat-card>
 
-    <mat-card class="detail-card">
-      <h3><mat-icon>attach_file</mat-icon> Documentos</h3>
-      <div class="empty-line">No existen documentos asociados.</div>
-    </mat-card>
-
-    <mat-card class="detail-card">
-      <h3><mat-icon>notification_important</mat-icon> Alertas y seguimiento</h3>
-      <div class="empty-line">No existen alertas activas.</div>
-    </mat-card>
-
-    <mat-card class="detail-card">
-      <h3><mat-icon>science</mat-icon> Sustancias</h3>
-      <div class="empty-line">No existen sustancias asociadas al episodio.</div>
-    </mat-card>
-
-    <mat-card class="detail-card">
-      <h3><mat-icon>verified_user</mat-icon> Auditoría</h3>
-      <div class="empty-line">Las decisiones críticas quedarán registradas con usuario, fecha y autorización.</div>
+      <div class="empty-line">
+        {{ section.empty }}
+      </div>
     </mat-card>
   </section>
 </div>
