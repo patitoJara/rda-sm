@@ -6,8 +6,7 @@ import { appConfig } from './app/app.config';
 import { registerLocaleData } from '@angular/common';
 import localeEsCL from '@angular/common/locales/es-CL';
 
-import * as moment from 'moment';
-import 'moment/locale/es';
+import moment from 'moment';
 
 // 🔑 Locale Angular + Moment
 registerLocaleData(localeEsCL);
@@ -21,5 +20,4 @@ bootstrapApplication(AppComponent, appConfig)
       setTimeout(() => splash.remove(), 2500);
     }
   })
-  .catch(err => console.error(err));
-
+  .catch((err) => console.error(err));
