@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { MatSelectModule } from '@angular/material/select';
 
 import { finalize } from 'rxjs/operators';
 import { PostulantService } from '@app/services/postulant.service';
 import { Postulant } from '@app/models/postulant';
+import { PreloadCatalogsService } from '@app/services/demand/preload-catalogs.service';
 
 // Angular Material
 import { MatCardModule } from '@angular/material/card';
@@ -32,11 +34,19 @@ import { MatDividerModule } from '@angular/material/divider';
     MatInputModule,
     MatChipsModule,
     MatDividerModule,
+    MatSelectModule,
   ],
 })
-export class DemandNewComponent {
+export class DemandNewComponent implements OnInit {
   private fb = inject(FormBuilder);
   private postulantService = inject(PostulantService);
+  private preloadCatalogs = inject(PreloadCatalogsService);
+
+  sexes: any[] = [];
+  communes: any[] = [];
+  intPrev: any[] = [];
+  convPrev: any[] = [];
+  filteredConvPrev: any[] = [];
 
   searchForm = this.fb.group({
     rut: ['', Validators.required],
@@ -49,12 +59,13 @@ export class DemandNewComponent {
     firstLastName: [''],
     secondLastName: [''],
     birthDate: [''],
-    sex: [''],
+    sex: [null],
     phone: [''],
     email: [''],
     address: [''],
-    commune: [''],
-    previsionalCoverage: [''],
+    commune: [null],
+    intPrev: [null],
+    convPrev: [{ value: null, disabled: true }],
   });
 
   // Estados vacíos reales: no mocks
@@ -274,6 +285,51 @@ export class DemandNewComponent {
       enabled: false,
     },
   ];
+
+  ngOnInit(): void {
+    this.loadCatalogs();
+
+    this.personForm.get('intPrev')?.valueChanges.subscribe((id) => {
+      this.filterConvPrevByIntPrev(Number(id));
+    });
+  }
+
+  private loadCatalogs(): void {
+    this.preloadCatalogs.loadAll().subscribe({
+      next: (data) => {
+        this.sexes = data.sexes ?? [];
+        this.communes = data.communes ?? [];
+        this.intPrev = data.intPrev ?? [];
+        this.convPrev = data.convPrev ?? [];
+        this.filteredConvPrev = [];
+      },
+      error: () => {
+        this.sexes = [];
+        this.communes = [];
+        this.intPrev = [];
+        this.convPrev = [];
+        this.filteredConvPrev = [];
+      },
+    });
+  }
+
+  private filterConvPrevByIntPrev(intPrevId: number): void {
+    this.personForm.get('convPrev')?.reset();
+
+    if (!intPrevId) {
+      this.filteredConvPrev = [];
+      this.personForm.get('convPrev')?.disable();
+      return;
+    }
+
+    this.filteredConvPrev = this.convPrev.filter((item: any) => {
+      const relatedId =
+        item?.intPrev?.id ?? item?.int_prev_id ?? item?.intPrevId;
+      return Number(relatedId) === intPrevId;
+    });
+
+    this.personForm.get('convPrev')?.enable();
+  }
 
   showCreatePerson(): void {
     const rut = this.searchForm.getRawValue().rut?.trim() ?? '';

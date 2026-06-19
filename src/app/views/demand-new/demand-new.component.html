@@ -163,7 +163,11 @@
 
       <mat-form-field appearance="fill">
         <mat-label>Sexo</mat-label>
-        <input matInput formControlName="sex" />
+        <mat-select formControlName="sex">
+          <mat-option *ngFor="let item of sexes" [value]="item.id">
+            {{ item.name }}
+          </mat-option>
+        </mat-select>
       </mat-form-field>
 
       <mat-form-field appearance="fill">
@@ -183,12 +187,29 @@
 
       <mat-form-field appearance="fill">
         <mat-label>Comuna</mat-label>
-        <input matInput formControlName="commune" />
+        <mat-select formControlName="commune">
+          <mat-option *ngFor="let item of communes" [value]="item.id">
+            {{ item.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Tipo previsión</mat-label>
+        <mat-select formControlName="intPrev">
+          <mat-option *ngFor="let item of intPrev" [value]="item.id">
+            {{ item.name }}
+          </mat-option>
+        </mat-select>
       </mat-form-field>
 
       <mat-form-field appearance="fill">
         <mat-label>Previsión</mat-label>
-        <input matInput formControlName="previsionalCoverage" />
+        <mat-select formControlName="convPrev">
+          <mat-option *ngFor="let item of filteredConvPrev" [value]="item.id">
+            {{ item.name }}
+          </mat-option>
+        </mat-select>
       </mat-form-field>
     </form>
 
