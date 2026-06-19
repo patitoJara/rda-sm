@@ -87,6 +87,17 @@ export const routes: Routes = [
         data: { roles: ['ADMIN'] },
       },
 
+
+{
+  path: 'demand-new',
+  loadComponent: () =>
+    import('./views/demand-new/demand-new.component').then(
+      (m) => m.DemandNewComponent,
+    ),
+  canActivate: [roleGuard],
+  data: { roles: ['ADMIN', 'ADMINISTRATIVO'] },
+},
+
       // 🔹 DEMANDA
       {
         path: 'demand',

@@ -1,0 +1,195 @@
+<div class="demand-new-page">
+  <!-- HEADER -->
+  <section class="demand-hero">
+    <div class="hero-main">
+      <span class="eyebrow">
+        <mat-icon>account_tree</mat-icon>
+        Nuevo modelo funcional
+      </span>
+
+      <h1>Gestión de demanda actual</h1>
+
+      <p>
+        Pantalla base para trabajar la demanda desde la lógica
+        Persona → Episodio → Etapa por programa → Eventos → Referencias.
+      </p>
+
+      <div class="flow-strip">
+        <ng-container *ngFor="let step of flowSteps; let last = last">
+          <span>{{ step }}</span>
+          <mat-icon *ngIf="!last">chevron_right</mat-icon>
+        </ng-container>
+      </div>
+    </div>
+
+    <aside class="hero-rules">
+      <mat-icon>policy</mat-icon>
+      <h2>Reglas funcionales</h2>
+
+      <ul>
+        <li>Un solo episodio activo por persona.</li>
+        <li>La fecha original de solicitud no se reinicia.</li>
+        <li>La referencia crea una nueva etapa, no un nuevo episodio.</li>
+        <li>El KPI de espera se detiene con ingreso a tratamiento.</li>
+        <li>El cierre formal debe usar el término <strong>egreso</strong> cuando corresponda.</li>
+      </ul>
+    </aside>
+  </section>
+
+  <!-- BUSCADOR -->
+  <mat-card class="search-card">
+    <div class="section-heading">
+      <mat-icon>person_search</mat-icon>
+      <div>
+        <h2>Búsqueda de persona</h2>
+        <p>Busque por RUN para iniciar una nueva demanda o recuperar historia longitudinal.</p>
+      </div>
+    </div>
+
+    <form [formGroup]="searchForm" (ngSubmit)="searchPerson()" class="search-form">
+      <mat-form-field appearance="fill">
+        <mat-label>RUN de la persona</mat-label>
+        <input matInput formControlName="rut" placeholder="12.345.678-9" />
+        <mat-error *ngIf="searchForm.controls.rut.hasError('required')">
+          El RUN es obligatorio para iniciar la búsqueda.
+        </mat-error>
+      </mat-form-field>
+
+      <button mat-flat-button class="primary-btn" type="submit">
+        <mat-icon>search</mat-icon>
+        Buscar persona
+      </button>
+
+      <button mat-stroked-button class="secondary-btn" type="button" disabled>
+        <mat-icon>person_add</mat-icon>
+        Crear persona
+      </button>
+    </form>
+
+    <div class="empty-banner">
+      <mat-icon>info</mat-icon>
+      <span>
+        Busque una persona por RUN para iniciar o recuperar su historia longitudinal.
+      </span>
+    </div>
+  </mat-card>
+
+  <!-- GRID PRINCIPAL -->
+  <section class="demand-grid">
+    <!-- PERSONA -->
+    <mat-card class="model-card">
+      <div class="card-topline"></div>
+
+      <div class="card-header">
+        <mat-icon>person</mat-icon>
+        <div>
+          <h3>Persona</h3>
+          <p>Datos base de identificación y contacto.</p>
+        </div>
+      </div>
+
+      <div class="empty-state">
+        <mat-icon>person_off</mat-icon>
+        <strong>Sin persona cargada</strong>
+        <span>La información aparecerá al buscar un RUN existente o crear una nueva persona.</span>
+      </div>
+    </mat-card>
+
+    <!-- EPISODIO -->
+    <mat-card class="model-card">
+      <div class="card-topline"></div>
+
+      <div class="card-header">
+        <mat-icon>folder_shared</mat-icon>
+        <div>
+          <h3>Episodio activo</h3>
+          <p>Nueva demanda o episodio vigente de la persona.</p>
+        </div>
+      </div>
+
+      <div class="empty-state">
+        <mat-icon>inventory_2</mat-icon>
+        <strong>Sin episodio activo cargado</strong>
+        <span>Si la persona tiene episodio activo, se abrirá el vigente. Si no, se podrá crear uno nuevo.</span>
+      </div>
+    </mat-card>
+
+    <!-- ETAPA -->
+    <mat-card class="model-card">
+      <div class="card-topline"></div>
+
+      <div class="card-header">
+        <mat-icon>hub</mat-icon>
+        <div>
+          <h3>Etapa por programa</h3>
+          <p>Programa responsable, recepción, salida y resultado del tramo.</p>
+        </div>
+      </div>
+
+      <div class="empty-state">
+        <mat-icon>route</mat-icon>
+        <strong>Sin etapa activa cargada</strong>
+        <span>La etapa inicial se creará junto con el episodio y cambiará si existe referencia.</span>
+      </div>
+    </mat-card>
+  </section>
+
+  <!-- ACCIONES -->
+  <mat-card class="actions-card">
+    <div class="section-heading">
+      <mat-icon>play_circle</mat-icon>
+      <div>
+        <h2>Acciones operativas</h2>
+        <p>Se habilitarán cuando exista una persona y un episodio activo.</p>
+      </div>
+    </div>
+
+    <div class="actions-grid">
+      <button
+        *ngFor="let action of operativeActions"
+        type="button"
+        class="action-tile"
+        [disabled]="!action.enabled"
+      >
+        <mat-icon>{{ action.icon }}</mat-icon>
+        <strong>{{ action.title }}</strong>
+        <span>{{ action.description }}</span>
+      </button>
+    </div>
+  </mat-card>
+
+  <!-- SECCIONES INFERIORES -->
+  <section class="lower-grid">
+    <mat-card class="detail-card">
+      <h3><mat-icon>timeline</mat-icon> Eventos del episodio</h3>
+      <div class="empty-line">No existen eventos registrados.</div>
+    </mat-card>
+
+    <mat-card class="detail-card">
+      <h3><mat-icon>sync_alt</mat-icon> Referencias entre programas</h3>
+      <div class="empty-line">
+        No existen referencias registradas. Las referencias conservarán la fecha original y los días acumulados.
+      </div>
+    </mat-card>
+
+    <mat-card class="detail-card">
+      <h3><mat-icon>attach_file</mat-icon> Documentos</h3>
+      <div class="empty-line">No existen documentos asociados.</div>
+    </mat-card>
+
+    <mat-card class="detail-card">
+      <h3><mat-icon>notification_important</mat-icon> Alertas y seguimiento</h3>
+      <div class="empty-line">No existen alertas activas.</div>
+    </mat-card>
+
+    <mat-card class="detail-card">
+      <h3><mat-icon>science</mat-icon> Sustancias</h3>
+      <div class="empty-line">No existen sustancias asociadas al episodio.</div>
+    </mat-card>
+
+    <mat-card class="detail-card">
+      <h3><mat-icon>verified_user</mat-icon> Auditoría</h3>
+      <div class="empty-line">Las decisiones críticas quedarán registradas con usuario, fecha y autorización.</div>
+    </mat-card>
+  </section>
+</div>
