@@ -176,20 +176,26 @@ export class TokenService {
   // =====================================================
   setActiveRole(role: string | null): void {
     this.activeRoleMemory = role;
+
     if (role) {
-      sessionStorage.setItem('activeRole', role);
+      sessionStorage.setItem(this.ACTIVE_ROLE_KEY, role);
     } else {
-      sessionStorage.removeItem('activeRole');
+      sessionStorage.removeItem(this.ACTIVE_ROLE_KEY);
     }
+
+    this.activeRole$.next(role);
   }
 
   setActiveProgram(program: string | null): void {
     this.activeProgramMemory = program;
+
     if (program) {
-      sessionStorage.setItem('activeProgram', program);
+      sessionStorage.setItem(this.ACTIVE_PROGRAM_KEY, program);
     } else {
-      sessionStorage.removeItem('activeProgram');
+      sessionStorage.removeItem(this.ACTIVE_PROGRAM_KEY);
     }
+
+    this.activeProgram$.next(program);
   }
 
   setActiveProgramId(programId: number | null): void {

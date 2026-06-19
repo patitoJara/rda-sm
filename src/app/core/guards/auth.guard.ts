@@ -16,6 +16,7 @@ export const authGuard: CanActivateFn = () => {
 
   const exp = tokenService.getTokenExpiration();
   if (!exp || exp <= Date.now()) {
+    tokenService.clear();
     router.navigate(['/auth/login']);
     return false;
   }

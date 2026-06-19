@@ -6,17 +6,22 @@ export const roleGuard: CanActivateFn = (route, state) => {
   const tokenService = inject(TokenService);
   const router = inject(Router);
 
-  const userRoles = tokenService.getUserRoles();       // ['ADMIN', 'OPERADOR', ...]
+  const userRoles = tokenService.getUserRoles(); // ['ADMIN', 'OPERADOR', ...]
   const activeRole = (tokenService.getActiveRole() || '').toUpperCase();
-  const allowedRoles = (route.data?.['roles'] as string[] | undefined)?.map(r => r.toUpperCase());
+  const allowedRoles = (route.data?.['roles'] as string[] | undefined)?.map(
+    (r) => r.toUpperCase(),
+  );
 
   // 🔹 Permitir siempre la vista "about"
   if (state.url.includes('/about')) return true;
 
   // 🔹 Si no hay rol activo → volver a elegir rol
   if (!activeRole) {
-    console.warn('[roleGuard] ❌ No hay rol activo. Redirigiendo a selección de programa.');
-    router.navigate(['/program-select']);
+    console.warn(
+      '[roleGuard] ❌ No hay rol activo. Redirigiendo al inicio para seleccionar rol/programa.',
+    );
+
+    router.navigate(['/inicio']);
     return false;
   }
 
@@ -32,7 +37,7 @@ export const roleGuard: CanActivateFn = (route, state) => {
 
   // 🔹 Si NO tiene acceso
   console.warn(
-    `[roleGuard] ❌ Acceso denegado. Rol activo "${activeRole}" no está en ${JSON.stringify(allowedRoles)}`
+    `[roleGuard] ❌ Acceso denegado. Rol activo "${activeRole}" no está en ${JSON.stringify(allowedRoles)}`,
   );
   router.navigate(['/inicio']);
   return false;

@@ -24,6 +24,7 @@ import { A11yModule } from '@angular/cdk/a11y';
 import { AuthLoginService } from '../../services/auth.login.service';
 import { TokenService } from '../../services/token.service';
 import { SessionService } from '../../core/services/session.service';
+import { AppCacheService } from '../../core/services/app-cache.service';
 
 // Dialog
 import { ErrorConfirmDialogComponent } from '../../shared/confirm-dialog/errorConfirmDialogComponent';
@@ -55,6 +56,7 @@ export class LoginComponent implements AfterViewInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private dialog = inject(MatDialog);
+  private appCache = inject(AppCacheService);
 
   hidePwd = true;
   loading = false;
@@ -77,6 +79,10 @@ export class LoginComponent implements AfterViewInit {
 
   get f() {
     return this.form.controls;
+  }
+
+  ngOnInit(): void {
+    void this.appCache.clearBeforeLoginIfNeeded();
   }
 
   login(): void {
@@ -154,7 +160,7 @@ export class LoginComponent implements AfterViewInit {
       pwd?.focus();
     }
   }
-  
+
   goToRecover(): void {
     const emailInput = document.querySelector(
       'input[formControlName="email"]',

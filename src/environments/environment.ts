@@ -18,7 +18,8 @@ export const environment = {
   
 
   /** Flags opcionales (ajusta si los usas) */
-  enableDebugTools: false
+  enableDebugTools: false,
 
-
+  // 🔄 Versión frontend para limpieza controlada de caché
+  frontendVersion: '2026-06-19-01',
 };
