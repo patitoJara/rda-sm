@@ -170,6 +170,24 @@ export const routes: Routes = [
       },
 
       {
+        path: 'transfer',
+        loadComponent: () =>
+          import('./views/transfer/transfer.component').then(
+            (m) => m.TransferComponent,
+          ),
+        canActivate: [roleGuard],
+        data: {
+          module: 'demanda',
+          group: 'Demanda',
+          section: 'main',
+          title: 'Referencia',
+          icon: 'sync_alt',
+          roles: ['ADMIN', 'ADMINISTRATIVO'],
+          iconColor: '#ef6c00',
+        },
+      },
+            
+      {
         path: 'demand-list',
         loadComponent: () =>
           import('./views/demand-list/demand-list.component').then(
@@ -187,23 +205,6 @@ export const routes: Routes = [
         },
       },
 
-      {
-        path: 'transfer',
-        loadComponent: () =>
-          import('./views/transfer/transfer.component').then(
-            (m) => m.TransferComponent,
-          ),
-        canActivate: [roleGuard],
-        data: {
-          module: 'demanda',
-          group: 'Demanda',
-          section: 'main',
-          title: 'Referencia',
-          icon: 'sync_alt',
-          roles: ['ADMIN', 'ADMINISTRATIVO'],
-          iconColor: '#ef6c00',
-        },
-      },
       {
         path: 'program',
         loadComponent: () =>
