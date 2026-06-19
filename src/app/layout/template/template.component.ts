@@ -354,140 +354,59 @@ export class TemplateComponent implements OnInit {
   }
 
   buildMenu(): void {
-    const role = (this.activeRole || '').toUpperCase();
-
-    const baseMenu: any[] = [
-      { title: 'Inicio', icon: 'home', route: '/inicio' },
-    ];
+    const role = (this.activeRole || '').trim().toUpperCase();
 
     const mainRoute = routes.find((r) => r.children);
     const childRoutes = mainRoute?.children ?? [];
 
-    for (const route of childRoutes) {
-      if (
-        !route.path ||
-        ['', '**', 'inicio'].includes(route.path) ||
-        this.HIDDEN_MENU_PATHS.includes(route.path) ||
-        this.MANTENEDOR_PATHS.includes(route.path)
-      ) {
-        continue;
-      }
+    const baseMenu: any[] = [];
+    const mantenedores: any[] = [];
 
-      const allowedRoles = route.data?.['roles'] ?? [];
-      const visible = allowedRoles.length === 0 || allowedRoles.includes(role);
+    for (const route of childRoutes) {
+      if (!route.path || ['', '**'].includes(route.path)) continue;
+
+      const data = route.data ?? {};
+
+      if (data['hidden']) continue;
+
+      const allowedRoles = (data['roles'] ?? []) as string[];
+
+      const visible =
+        allowedRoles.length === 0 ||
+        allowedRoles.some((r) => r.trim().toUpperCase() === role);
 
       if (!visible) continue;
 
-      baseMenu.push({
-        title: this.getTitleFromPath(route.path),
-        icon: this.getIcon(route.path),
+      const item = {
+        title: data['title'] || route.path,
+        icon: data['icon'] || 'chevron_right',
         route: '/' + route.path,
         path: route.path,
-      });
+        module: data['module'] || 'demanda',
+        group: data['group'] || 'General',
+        section: data['section'] || 'main',
+        iconColor: data['iconColor'] || '#0f6b75',
+      };
+
+      if (item.section === 'maintainer') {
+        mantenedores.push(item);
+      } else {
+        baseMenu.push(item);
+      }
     }
 
     this.menuItems = baseMenu;
-    this.mantenedorItems = [];
+    this.mantenedorItems = mantenedores;
   }
 
   private readonly HIDDEN_MENU_PATHS: string[] = ['profile', 'about'];
 
-  private readonly MANTENEDOR_PATHS = [
-    'user',
-    'roles',
-    'commune',
-    'program',
-    'professions',
-    'substances',
-    'states',
-    'results',
-    'diverter',
-    'conv-prev',
-    'senders',
-    'typecontact',
-    'not-relevants',
-    'sexs',
-  ];
-
   isMantenedor(route: string): boolean {
-    const mantenedores = [
-      '/user',
-      '/roles',
-      '/commune',
-      '/program',
-      '/professions',
-      '/substances',
-      '/states',
-      '/results',
-      '/diverter',
-      '/conv-prev',
-      '/senders',
-      '/typecontact',
-      '/not-relevants',
-      '/sexs',
-    ];
-    return mantenedores.includes(route);
+    return this.mantenedorItems.some((item) => item.route === route);
   }
 
   hasMantenedores(): boolean {
-    return this.menuItems.some((item) => this.isMantenedor(item.route));
-  }
-  private getIcon(path: string): string {
-    const icons: any = {
-      user: 'group',
-      roles: 'admin_panel_settings',
-      program: 'apps',
-      commune: 'location_city',
-      demand: 'assignment_add',
-      transfer: 'sync_alt',
-      substances: 'science',
-      states: 'fact_check',
-      professions: 'medication_liquid',
-      results: 'flag',
-      diverter: 'psychology',
-      IntPrevComponent: 'medical_information',
-      senders: 'diversity_3',
-      typecontact: 'support_agent',
-      'conv-prev': 'medical_services',
-      'not-relevants': 'block',
-      'demand-list': 'list_alt',
-      sexs: 'wc',
-      about: 'info',
-      manual: 'menu_book',
-      analytics: 'insights',
-      administracion: 'settings_suggest',
-    };
-
-    return icons[path] || 'chevron_right';
-  }
-
-  private getTitleFromPath(path: string): string {
-    const titles: Record<string, string> = {
-      inicio: 'Inicio',
-      manual: 'Manual',
-      administracion: 'Administración',
-      demand: 'Demandas',
-      transfer: 'Referencia',
-      'demand-list': 'Listado de Demandas',
-      user: 'Usuarios',
-      roles: 'Roles',
-      commune: 'Comunas',
-      program: 'Programas',
-      professions: 'Profesionales',
-      substances: 'Sustancias',
-      states: 'Estado',
-      results: 'Resultado',
-      diverter: 'Quien Deriva',
-      IntPrevComponent: 'Sistema de Salud',
-      senders: 'Quien Solicita',
-      typecontact: 'Tipo de contacto',
-      'conv-prev': 'Covertura de Salud',
-      'not-relevants': 'No relevantes',
-      sexs: 'Género',
-      about: 'Acerca del sistema',
-      analytics: 'Panel Estratégico',
-    };
-    return titles[path] || path.charAt(0).toUpperCase() + path.slice(1);
+    return this.mantenedorItems.length > 0;
   }
 
   toggleDrawer(): void {
