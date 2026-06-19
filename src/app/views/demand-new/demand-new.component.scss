@@ -587,3 +587,123 @@
     border-radius: 12px;
   }
 }
+
+.episode-modules {
+  max-width: 1440px;
+  margin: 0 auto 28px;
+}
+
+.modules-heading {
+  margin-bottom: 16px;
+  padding: 22px 24px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid #d8e5e8;
+  box-shadow: 0 14px 30px rgba(15, 47, 61, 0.06);
+
+  h2 {
+    margin: 10px 0 4px;
+    color: #123b44;
+    font-size: 1.35rem;
+    font-weight: 950;
+    letter-spacing: -0.035em;
+  }
+
+  p {
+    margin: 0;
+    color: #6b838a;
+    font-size: 0.92rem;
+  }
+}
+
+.eyebrow-light {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: #eef7f7;
+  color: #0f6b75;
+  font-size: 0.78rem;
+  font-weight: 900;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.module-card {
+  position: relative;
+  overflow: hidden;
+  padding: 20px !important;
+  border-radius: 24px !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  border: 1px solid #d8e5e8;
+  box-shadow: 0 14px 30px rgba(15, 47, 61, 0.08) !important;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 6px;
+    background: linear-gradient(90deg, #0f4d56 0%, #167386 48%, #28a3a4 100%);
+  }
+}
+
+.module-card-header {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+
+  h3 {
+    margin: 0;
+    color: #123b44;
+    font-size: 1rem;
+    font-weight: 950;
+  }
+
+  p {
+    margin: 4px 0 0;
+    color: #6b838a;
+    font-size: 0.8rem;
+    line-height: 1.35;
+  }
+}
+
+.module-icon {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: #eef7f7;
+  color: #0f6b75;
+
+  mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+  }
+}
+
+@media (max-width: 1280px) {
+  .modules-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .modules-grid {
+    grid-template-columns: 1fr;
+  }
+}

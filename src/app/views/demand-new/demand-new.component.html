@@ -264,23 +264,47 @@
   </mat-card>
 
   <!-- SECCIONES INFERIORES -->
-  <!-- SECCIONES INFERIORES -->
-  <section class="lower-grid">
-    <mat-card class="detail-card" *ngFor="let section of structuralSections">
-      <h3>
-        <mat-icon>{{ section.icon }}</mat-icon>
-        {{ section.title }}
-      </h3>
+  <!-- MÓDULOS DEL EPISODIO -->
+  <section class="episode-modules">
+    <div class="modules-heading">
+      <div>
+        <span class="eyebrow-light">
+          <mat-icon>dataset</mat-icon>
+          Módulos del episodio
+        </span>
 
-      <div class="mini-field-preview">
-        <div class="mini-field-chip" *ngFor="let field of section.fields">
-          {{ field }}
+        <h2>Información complementaria del modelo</h2>
+
+        <p>
+          Estos módulos se activarán progresivamente cuando exista una persona,
+          un episodio y una etapa vigente.
+        </p>
+      </div>
+    </div>
+
+    <div class="modules-grid">
+      <mat-card class="module-card" *ngFor="let section of structuralSections">
+        <div class="module-card-header">
+          <div class="module-icon">
+            <mat-icon>{{ section.icon }}</mat-icon>
+          </div>
+
+          <div>
+            <h3>{{ section.title }}</h3>
+            <p>{{ section.subtitle }}</p>
+          </div>
         </div>
-      </div>
 
-      <div class="empty-line">
-        {{ section.empty }}
-      </div>
-    </mat-card>
+        <div class="mini-field-preview">
+          <div class="mini-field-chip" *ngFor="let field of section.fields">
+            {{ field }}
+          </div>
+        </div>
+
+        <div class="empty-line">
+          {{ section.empty }}
+        </div>
+      </mat-card>
+    </div>
   </section>
 </div>

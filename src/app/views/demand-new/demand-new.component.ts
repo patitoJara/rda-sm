@@ -111,6 +111,8 @@ export class DemandNewComponent {
     {
       icon: 'timeline',
       title: 'Eventos del episodio',
+      subtitle:
+        'Registro cronológico de citaciones, entrevistas, observaciones, ingreso, egreso y cierre.',
       empty: 'No existen eventos registrados.',
       fields: [
         'Tipo evento',
@@ -130,6 +132,8 @@ export class DemandNewComponent {
     {
       icon: 'sync_alt',
       title: 'Referencias entre programas',
+      subtitle:
+        'Cierre de etapa origen y creación de etapa receptora sin reiniciar días.',
       empty:
         'No existen referencias registradas. Las referencias conservarán la fecha original y los días acumulados.',
       fields: [
@@ -146,6 +150,8 @@ export class DemandNewComponent {
     {
       icon: 'science',
       title: 'Sustancias',
+      subtitle:
+        'Sustancia principal, sustancias secundarias, nivel u orden y observación.',
       empty: 'No existen sustancias asociadas al episodio.',
       fields: [
         'Sustancia principal',
@@ -157,6 +163,8 @@ export class DemandNewComponent {
     {
       icon: 'attach_file',
       title: 'Documentos asociados',
+      subtitle:
+        'Documentos vinculados a episodio, etapa, evento, referencia, egreso o cierre.',
       empty: 'No existen documentos asociados.',
       fields: [
         'Tipo documento',
@@ -169,6 +177,8 @@ export class DemandNewComponent {
     {
       icon: 'notification_important',
       title: 'Alertas y seguimiento',
+      subtitle:
+        'Alertas con prioridad, responsable, próxima acción y estado de seguimiento.',
       empty: 'No existen alertas activas.',
       fields: [
         'Tipo alerta',
@@ -184,6 +194,8 @@ export class DemandNewComponent {
     {
       icon: 'verified_user',
       title: 'Auditoría / decisiones críticas',
+      subtitle:
+        'Trazabilidad de cierres, referencias, ingresos, egresos, rectificaciones y reversión superior.',
       empty:
         'Las decisiones críticas quedarán registradas con usuario, fecha y autorización.',
       fields: [
