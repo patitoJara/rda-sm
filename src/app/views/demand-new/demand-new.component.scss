@@ -752,3 +752,10 @@
     grid-column: span 1;
   }
 }
+
+.create-person-actions .primary-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: grayscale(0.15);
+  box-shadow: none !important;
+}
