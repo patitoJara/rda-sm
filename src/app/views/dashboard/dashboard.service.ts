@@ -168,7 +168,7 @@ export class DashboardService {
 
     const maxEspera = dias.length ? Math.max(...dias) : 0;
 
-    const criticos = data.filter((d) => d.diasEspera > 30).length;
+    const criticos = data.filter((d) => d.diasEspera > 60).length;
 
     const citacionesTotal = data.reduce((sum, d) => sum + d.citacionesTotal, 0);
 
@@ -201,7 +201,7 @@ export class DashboardService {
 
   getCriticos(data: DashboardDemand[]): DashboardDemand[] {
     return data
-      .filter((d) => d.diasEspera > 30)
+      .filter((d) => d.diasEspera > 60)
       .sort((a, b) => b.diasEspera - a.diasEspera)
       .slice(0, 10);
   }

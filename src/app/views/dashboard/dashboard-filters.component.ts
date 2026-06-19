@@ -1,49 +1,40 @@
 // src/app/dashboard/dashboard-filters.component.ts
 
-import { Component, EventEmitter, Output } from '@angular/core'
-import { CommonModule } from '@angular/common'
-import { FormsModule } from '@angular/forms'
+import { Component, EventEmitter, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   standalone: true,
   selector: 'app-dashboard-filters',
   templateUrl: './dashboard-filters.component.html',
   styleUrls: ['./dashboard-filters.component.scss'],
-  imports: [
-    CommonModule,
-    FormsModule
-  ]
+  imports: [CommonModule, FormsModule],
 })
 export class DashboardFiltersComponent {
-
-  @Output() filtersChange = new EventEmitter<any>()
+  @Output() filtersChange = new EventEmitter<any>();
 
   filtros = {
-    periodo: '6m',
+    periodo: 'mes_actual',
     indicador: 'solicitud_hoy',
     estadoPrograma: 'todos',
     grupoEtario: 'todos',
-    rut: ''
-  }
+    rut: '',
+  };
 
   applyFilters(): void {
-
-    this.filtersChange.emit({ ...this.filtros })
-
+    this.filtersChange.emit({ ...this.filtros });
   }
 
   clearFilters(): void {
-
     this.filtros = {
-      periodo: '6m',
+      periodo: 'mes_actual',
       indicador: 'solicitud_hoy',
       estadoPrograma: 'todos',
       grupoEtario: 'todos',
-      rut: ''
-    }
+      rut: '',
+    };
 
-    this.applyFilters()
-
+    this.applyFilters();
   }
-
 }
