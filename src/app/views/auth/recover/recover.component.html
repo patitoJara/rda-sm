@@ -4,6 +4,7 @@
      ======================================================= -->
 <div class="login-wrapper">
   <div class="login-card animate-entry">
+    <div class="card-topline"></div>
     <!-- 🏛️ Logo y encabezado -->
     <div class="logo-header">
       <img src="assets/logoSSM.png" alt="Logo Servicio de Salud Magallanes" />
@@ -13,7 +14,7 @@
 
     <h3 class="form-title">Recuperar Contraseña</h3>
     <p class="subtitle">
-      Ingresa tu correo electrónico. Se enviará un mensaje al soporte con copia a tu correo.
+      Ingresa tu correo electrónico institucional. El sistema enviará una solicitud de recuperación al equipo de soporte TIC.
     </p>
 
     <form [formGroup]="form" (ngSubmit)="recover()" novalidate>
@@ -43,7 +44,7 @@
         type="submit"
         [disabled]="loading || form.invalid"
       >
-        <ng-container *ngIf="!loading; else loadingTpl">Enviar correo</ng-container>
+        <ng-container *ngIf="!loading; else loadingTpl">ENVIAR SOLICITUD</ng-container>
       </button>
 
       <ng-template #loadingTpl>

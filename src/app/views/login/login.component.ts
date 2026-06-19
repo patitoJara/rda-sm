@@ -8,7 +8,7 @@ import {
 
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 // Angular Material
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -35,7 +35,6 @@ import { ErrorConfirmDialogComponent } from '../../shared/confirm-dialog/errorCo
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterLink,
     MatFormFieldModule,
     MatInputModule,
     MatCheckboxModule,
