@@ -390,7 +390,7 @@ export class TemplateComponent implements OnInit {
     this.mantenedorItems = [];
   }
 
-  private readonly HIDDEN_MENU_PATHS: string[] = ['profile'];
+  private readonly HIDDEN_MENU_PATHS: string[] = ['profile', 'about'];
 
   private readonly MANTENEDOR_PATHS = [
     'user',

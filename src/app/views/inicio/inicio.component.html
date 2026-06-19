@@ -107,8 +107,7 @@
       <div>
         <span class="label">Fecha y hora actual</span>
         <strong class="value">
-          {{ currentDate | date: "fullDate" }} —
-          {{ currentDate | date: "shortTime" }}
+          {{ currentDateLabel }}
         </strong>
       </div>
     </mat-card>
@@ -121,5 +120,7 @@
       Utilice el menú lateral o los accesos rápidos para iniciar una nueva
       demanda, revisar el listado o consultar el panel estratégico.
     </span>
+
+    <a routerLink="/about" class="about-link"> Acerca del sistema </a>
   </div>
 </section>

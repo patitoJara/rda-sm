@@ -1306,7 +1306,7 @@ mat-sidenav {
 
 .role-select-card {
   max-height: calc(100vh - 72px);
-  overflow: visible;
+  overflow: hidden !important;
 }
 
 /* ======================================================
@@ -1391,9 +1391,15 @@ mat-sidenav-content {
 }
 
 .content {
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-height: 0;
-  overflow: auto;
+  height: calc(100vh - 90px);
+  overflow: hidden;
+}
+
+.footer {
+  flex: 0 0 30px;
+  height: 30px;
 }
 
 /* ======================================================
@@ -1401,7 +1407,7 @@ mat-sidenav-content {
    ====================================================== */
 
 .role-select-card {
-  padding-top: 44px !important;
+  padding-top: 34px !important;
 }
 
 .role-select-card .card-topline {
@@ -1424,3 +1430,4 @@ mat-sidenav-content {
   background: rgba(255, 255, 255, 0.88);
   box-shadow: 0 8px 18px rgba(15, 47, 61, 0.08);
 }
+

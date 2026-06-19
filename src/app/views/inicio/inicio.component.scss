@@ -312,3 +312,26 @@ h1 {
   font-size: 0.9rem;
   font-weight: 700;
 }
+
+.inicio-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.inicio-note mat-icon {
+  color: #0f6b75;
+}
+
+.about-link {
+  margin-left: 8px;
+  color: #0f6b75;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.about-link:hover {
+  color: #0f4d56;
+  text-decoration: underline;
+}

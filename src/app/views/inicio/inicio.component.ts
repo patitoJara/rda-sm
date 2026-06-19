@@ -16,9 +16,9 @@ import { MatButtonModule } from '@angular/material/button';
     CommonModule,
     RouterModule,
     MatCardModule,
-    MatIconModule,
     MatButtonModule,
     MatDividerModule,
+    MatIconModule,
   ],
 })
 export class InicioComponent implements OnInit {
@@ -80,5 +80,22 @@ export class InicioComponent implements OnInit {
     if (this.activeProgram) {
       sessionStorage.setItem('activeProgram', this.activeProgram);
     }
+  }
+
+  get currentDateLabel(): string {
+    const date = this.currentDate.toLocaleDateString('es-CL', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    });
+
+    const time = this.currentDate.toLocaleTimeString('es-CL', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+
+    return `${date} — ${time}`;
   }
 }

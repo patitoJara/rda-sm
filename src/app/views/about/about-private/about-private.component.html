@@ -1,50 +1,36 @@
-<!-- 🌐 Vista pública (sin login) -->
-<div *ngIf="!isLoggedIn" class="login-wrapper">
-  <div class="login-card">
-    <div class="logo-header">
-      <img src="assets/logoSSM.png" alt="Logo SSM" />
-      <h2>Servicio de Salud Magallanes</h2>
-      <p>Departamento de Salud Mental</p>
-    </div>
-
-    <h3 class="form-title">Acerca del sistema</h3>
-    <p class="subtitle">
-      Sistema para el registro y gestión de la demanda de atención en
-      tratamientos de drogas — Área Salud Mental del Servicio de Salud
-      Magallanes.
-    </p>
-
-    <p style="font-size: 0.9rem; color: #555">
-      Desarrollado por el Equipo TIC — SSM<br />
-      © {{ currentYear }} Ministerio de Salud — Gobierno de Chile.
-    </p>
-    
-<a [routerLink]="['/auth/login']" class="back-link">
-  <mat-icon>arrow_back</mat-icon>
-  Volver al inicio de sesión
-</a>
-  </div>
-
-  <footer class="footer-seal">
-    <img src="assets/logoGobierno.png" alt="Gobierno de Chile" />
-    <span>Gobierno de Chile — Ministerio de Salud</span>
-  </footer>  
-</div>
-
-<!-- 🔒 Vista interna (logueado, dentro del menú) -->
 <div *ngIf="isLoggedIn" class="page-container">
   <mat-card class="section-card">
+    <div class="card-topline"></div>
+
+    <div class="about-icon">
+      <mat-icon>info</mat-icon>
+    </div>
+
+    <span class="about-eyebrow">Sistema RDA-SM</span>
+
     <h2>Acerca del sistema</h2>
-    <p>
-      Este sistema forma parte del proyecto institucional de Salud Mental del
-      Servicio de Salud Magallanes (SSM), destinado al registro y seguimiento de
-      la demanda de atención de tratamientos de drogas.
-    </p>
 
     <p>
-      <strong>Versión:</strong> 1.0.0<br />
-      <strong>Desarrollado por:</strong> Equipo TIC — SSM<br />
-      <strong>Contacto:</strong> soporte.tic&#64;redsaludmagallanes.cl
+      Sistema institucional para el registro, seguimiento y trazabilidad de la
+      demanda de atención de tratamiento de drogas del Departamento de Salud
+      Mental del Servicio de Salud Magallanes.
     </p>
+
+    <div class="about-info">
+      <div>
+        <span>Versión</span>
+        <strong>1.0.0</strong>
+      </div>
+
+      <div>
+        <span>Desarrollado por</span>
+        <strong>Equipo TIC — SSM</strong>
+      </div>
+
+      <div>
+        <span>Contacto</span>
+        <strong>soporte.tic&#64;redsaludmagallanes.cl</strong>
+      </div>
+    </div>
   </mat-card>
 </div>
