@@ -13,6 +13,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { AuthLoginService } from '../../services/auth.login.service';
 import { TokenService } from '../../services/token.service';
@@ -43,6 +44,7 @@ interface DecodedToken {
     MatInputModule,
     MatDividerModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
   ],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss'],

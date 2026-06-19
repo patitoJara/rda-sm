@@ -1,93 +1,188 @@
 /* ============================================
-   🎨 PERFIL DE USUARIO — Diseño Institucional
+   👤 PERFIL DE USUARIO — RDA-SM / DSSM
    ============================================ */
 
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+:host,
+:host * {
+  box-sizing: border-box;
+}
+
 .profile-container {
+  height: calc(100dvh - 118px);
+  max-height: calc(100dvh - 118px);
   display: flex;
   justify-content: center;
-  padding: 32px;
-  background-color: #f5f7fa;
+  align-items: center;
+  padding: 12px 20px 18px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top left, rgba(216, 243, 241, 0.26), transparent 32%),
+    linear-gradient(180deg, #eef7f7 0%, #f6f9fa 100%);
 }
 
 .profile-card {
   position: relative;
   width: 100%;
-  max-width: 600px;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  max-width: 660px;
+  max-height: 100%;
+  border-radius: 24px !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+  color: #244650;
+  overflow: hidden;
+  box-shadow:
+    0 22px 60px rgba(15, 47, 61, 0.16),
+    0 0 0 1px rgba(216, 229, 232, 0.9) !important;
+}
+
+.card-topline {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 7px;
+  background: linear-gradient(90deg, #0f4d56 0%, #167386 48%, #28a3a4 100%);
 }
 
 /* ================= HEADER ================= */
 
 mat-card-header {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 16px 48px 8px; // espacio para la X
+  justify-content: center;
+  padding: 18px 54px 4px;
   text-align: center;
 }
 
+.profile-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #e8f6f3;
+  color: #0f6b75;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 mat-card-title {
-  font-weight: 600;
-  color: #0d47a1;
-  font-size: 1.4rem;
+  color: #143f49;
+  font-size: 1.55rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
   margin-bottom: 4px;
 }
 
 mat-card-subtitle {
-  font-size: 0.9rem;
-  color: #555;
+  font-size: 0.92rem;
+  color: #60747b;
+  font-weight: 600;
 }
 
 /* Botón cerrar */
 .close-btn {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  color: #757575;
-  opacity: 0.7;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  color: #0f6b75 !important;
+  border-radius: 14px !important;
+  background: #eef7f7;
 
   &:hover {
-    opacity: 1;
-    background: rgba(0, 0, 0, 0.04);
+    background: #dff2f4;
   }
 }
 
 /* ================= USUARIO ================= */
 
+mat-card-content {
+  padding: 4px 28px 20px !important;
+}
+
 .user-section {
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .profile-avatar {
   display: flex;
   justify-content: center;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 
   mat-icon {
-    font-size: 80px;
-    height: 80px;
-    width: 80px;
-    color: #1565c0;
+    font-size: 60px;
+    height: 60px;
+    width: 60px;
+    color: #0f6b75;
+    filter: drop-shadow(0 8px 16px rgba(15, 77, 86, 0.14));
   }
 }
 
 .user-section h2 {
   margin: 8px 0 0;
-  color: #1565c0;
+  color: #143f49;
+  font-size: clamp(1.16rem, 1.9vw, 1.42rem);
+  font-weight: 900;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 
 .user-section .email {
-  color: #333;
+  margin: 6px 0 0;
+  color: #60747b;
   font-size: 0.95rem;
+  font-weight: 650;
 }
 
 .roles {
-  margin-top: 12px;
-  font-size: 0.9rem;
-  color: #444;
+  margin: 10px auto 0;
+  display: grid;
+  gap: 10px;
+  max-width: 580px;
+}
+
+.info-row {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  padding: 7px 10px;
+  border-radius: 16px;
+  background: #f4f8f9;
+  border: 1px solid #d8e5e8;
+  text-align: left;
+}
+
+.info-label {
+  color: #0f6b75;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.info-row strong {
+  color: #244650;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+mat-divider {
+  margin: 12px 0 12px;
+  border-top-color: #d8e5e8;
 }
 
 /* ================= FORM ================= */
@@ -95,39 +190,176 @@ mat-card-subtitle {
 .password-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-top: 24px;
+  gap: 6px;
+  margin-top: 0;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 2px;
+  color: #0f6b75;
+
+  mat-icon {
+    color: #0f6b75;
+  }
+}
+
+.section-title {
+  margin: 0;
+  text-align: center;
+  font-size: 1.08rem;
+  font-weight: 900;
+  color: #143f49;
 }
 
 .full {
   width: 100%;
 }
 
-button[type='submit'] {
-  font-weight: 600;
-  margin-top: 12px;
+::ng-deep .profile-card .mat-mdc-text-field-wrapper {
+  border-radius: 14px !important;
+  background: #f4f8f9 !important;
+}
+
+::ng-deep .profile-card .mat-mdc-form-field-focus-overlay {
+  background: transparent !important;
+}
+
+::ng-deep
+  .profile-card
+  .mat-mdc-form-field.mat-focused
+  .mat-mdc-text-field-wrapper {
+  box-shadow: 0 0 0 2px rgba(15, 107, 117, 0.18);
+}
+
+::ng-deep .profile-card .mdc-floating-label {
+  color: #60747b !important;
+}
+
+::ng-deep .profile-card .mat-mdc-form-field.mat-focused .mdc-floating-label {
+  color: #0f6b75 !important;
+}
+
+.update-btn {
+  width: 100%;
+  height: 44px;
+  margin-top: 0;
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, #0f4d56 0%, #167386 100%) !important;
+  color: #ffffff !important;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  box-shadow: 0 12px 26px rgba(15, 77, 86, 0.22);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.18s ease;
+}
+
+.update-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+  box-shadow: 0 16px 34px rgba(15, 77, 86, 0.3);
+}
+
+.update-btn:disabled {
+  opacity: 0.58;
+  box-shadow: none;
+}
+
+.update-btn mat-spinner,
+ng-template mat-spinner {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 620px) {
+  .profile-container {
+    padding: 18px 14px 42px;
+  }
+
+  mat-card-header {
+    padding: 30px 42px 10px;
+  }
+
+  mat-card-content {
+    padding: 8px 20px 28px !important;
+  }
+
+  .info-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    text-align: center;
+  }
+
+  .profile-avatar mat-icon {
+    font-size: 52px;
+    height: 52px;
+    width: 52px;
+  }
 }
 
 
-/* ===============================
-   SECCIÓN CAMBIO DE CONTRASEÑA
-=============================== */
+/* ======================================================
+   AJUSTE ALTURA PERFIL — EVITA SCROLL Y FOOTER CORTADO
+   ====================================================== */
+
+::ng-deep .profile-card .mat-mdc-form-field {
+  margin-bottom: 0 !important;
+}
+
+::ng-deep .profile-card .mat-mdc-text-field-wrapper {
+  min-height: 46px !important;
+}
+
+::ng-deep .profile-card .mat-mdc-form-field-infix {
+  min-height: 46px !important;
+  padding-top: 12px !important;
+  padding-bottom: 8px !important;
+}
+
+::ng-deep .profile-card .mat-mdc-form-field-subscript-wrapper {
+  min-height: 14px !important;
+  font-size: 0.72rem !important;
+}
+
+.profile-eyebrow {
+  margin-bottom: 6px;
+}
+
+mat-card-title {
+  font-size: 1.38rem;
+}
+
+mat-card-subtitle {
+  font-size: 0.86rem;
+}
+
+.user-section .email {
+  font-size: 0.88rem;
+}
+
+mat-divider {
+  margin: 8px 0 10px !important;
+}
+
+.section-heading {
+  margin-bottom: 0 !important;
+}
 
 .section-title {
-  text-align: center;
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: #0d47a1;
-  margin: 8px 0 12px;   // 👈 menos aire arriba/abajo
+  font-size: 1rem;
 }
 
-/* Reducir espacio antes del formulario */
-.password-form {
-  margin-top: 12px;    // antes estaba muy separado
-  gap: 8px;           // más compacto
+.update-btn {
+  height: 42px !important;
 }
 
-/* Ajuste fino del divider */
-mat-divider {
-  margin: 8px 0;      // 👈 clave para quitar “vacío”
+.content {
+  overflow: hidden;
 }

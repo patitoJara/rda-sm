@@ -1,25 +1,36 @@
-<!-- C:\Users\pjara\Documents\DESARROLLO\ANGULAR\rda-sm\src\app\views\profile\profile.component.html  -->
+<!-- =======================================================
+     👤 PERFIL DE USUARIO — RDA-SM / DSSM
+     Información del usuario y cambio de contraseña
+     ======================================================= -->
+
 <div class="profile-container">
   <mat-card class="profile-card" appearance="outlined">
-    <mat-card-header>
-      <mat-card-title>Mi Perfil</mat-card-title>
-      <mat-card-subtitle
-        >Información del usuario y cambio de contraseña</mat-card-subtitle
-      >
+    <div class="card-topline"></div>
 
-      <!-- ❌ CERRAR -->
-      <button
-        mat-icon-button
-        matTooltip="Cerrar"
-        (click)="goBack()"
-        class="close-btn"
-      >
-        <mat-icon>close</mat-icon>
-      </button>
+    <button
+      mat-icon-button
+      matTooltip="Volver"
+      (click)="goBack()"
+      class="close-btn"
+      type="button"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+
+    <mat-card-header>
+      <div class="profile-heading">
+        <span class="profile-eyebrow">Sistema RDA-SM</span>
+
+        <mat-card-title>Mi Perfil</mat-card-title>
+
+        <mat-card-subtitle>
+          Información del usuario y actualización de contraseña
+        </mat-card-subtitle>
+      </div>
     </mat-card-header>
 
     <mat-card-content>
-      <div class="user-section" *ngIf="userData">
+      <section class="user-section" *ngIf="userData">
         <div class="profile-avatar">
           <mat-icon>account_circle</mat-icon>
         </div>
@@ -28,16 +39,17 @@
         <p class="email">{{ userData.email }}</p>
 
         <div class="roles">
-          <p>
-            <strong>Rol:</strong>
-            {{ userData.roles?.join(", ") || "No asignado" }}
-          </p>
-          <p>
-            <strong>Programas:</strong>
-            {{ userData.programs?.join(", ") || "Ninguno asignado" }}
-          </p>
+          <div class="info-row">
+            <span class="info-label">Rol</span>
+            <strong>{{ userData.roles?.join(", ") || "No asignado" }}</strong>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Programas</span>
+            <strong>{{ userData.programs?.join(", ") || "Ninguno asignado" }}</strong>
+          </div>
         </div>
-      </div>
+      </section>
 
       <mat-divider></mat-divider>
 
@@ -46,37 +58,91 @@
         (ngSubmit)="changePassword()"
         class="password-form"
       >
-        <h3 class="section-title">Cambiar contraseña</h3>
+        <div class="section-heading">
+          <mat-icon>lock_reset</mat-icon>
+          <h3 class="section-title">Cambiar contraseña</h3>
+        </div>
 
         <mat-form-field appearance="fill" class="full">
           <mat-label>Contraseña actual</mat-label>
-          <input matInput type="password" formControlName="currentPassword" />
+          <input
+            matInput
+            type="password"
+            formControlName="currentPassword"
+            autocomplete="current-password"
+          />
+          <mat-error
+            *ngIf="
+              passwordForm.controls.currentPassword.touched &&
+              passwordForm.controls.currentPassword.hasError('required')
+            "
+          >
+            La contraseña actual es obligatoria.
+          </mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="fill" class="full">
           <mat-label>Nueva contraseña</mat-label>
-          <input matInput type="password" formControlName="newPassword" />
+          <input
+            matInput
+            type="password"
+            formControlName="newPassword"
+            autocomplete="new-password"
+          />
           <mat-hint>Debe tener al menos 8 caracteres.</mat-hint>
+
+          <mat-error
+            *ngIf="
+              passwordForm.controls.newPassword.touched &&
+              passwordForm.controls.newPassword.hasError('required')
+            "
+          >
+            La nueva contraseña es obligatoria.
+          </mat-error>
+
+          <mat-error
+            *ngIf="
+              passwordForm.controls.newPassword.touched &&
+              passwordForm.controls.newPassword.hasError('minlength')
+            "
+          >
+            Debe tener al menos 8 caracteres.
+          </mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="fill" class="full">
           <mat-label>Confirmar nueva contraseña</mat-label>
-          <input matInput type="password" formControlName="confirmPassword" />
+          <input
+            matInput
+            type="password"
+            formControlName="confirmPassword"
+            autocomplete="new-password"
+          />
+
+          <mat-error
+            *ngIf="
+              passwordForm.controls.confirmPassword.touched &&
+              passwordForm.controls.confirmPassword.hasError('required')
+            "
+          >
+            Debes confirmar la nueva contraseña.
+          </mat-error>
         </mat-form-field>
 
         <button
           mat-flat-button
-          color="primary"
+          class="update-btn"
           type="submit"
           [disabled]="loading || passwordForm.invalid"
         >
-          <ng-container *ngIf="!loading; else loadingTpl"
-            >Actualizar Contraseña</ng-container
-          >
+          <ng-container *ngIf="!loading; else loadingTpl">
+            ACTUALIZAR CONTRASEÑA
+          </ng-container>
         </button>
 
         <ng-template #loadingTpl>
-          <mat-spinner diameter="18"></mat-spinner>&nbsp; Procesando...
+          <mat-spinner diameter="18"></mat-spinner>
+          <span>Procesando...</span>
         </ng-template>
       </form>
     </mat-card-content>
