@@ -75,6 +75,7 @@
         class="secondary-btn"
         type="button"
         [disabled]="!personNotFound"
+        (click)="showCreatePerson()"
       >
         <mat-icon>person_add</mat-icon>
         Crear persona
@@ -116,7 +117,6 @@
     </div>
   </mat-card>
 
-  <!-- GRID PRINCIPAL -->
   <!-- GRID PRINCIPAL -->
   <section class="demand-grid">
     <!-- PERSONA -->
@@ -180,6 +180,97 @@
           </span>
         </div>
       </ng-template>
+    </mat-card>
+
+    <!-- CREAR PERSONA -->
+    <mat-card class="create-person-card" *ngIf="showCreatePersonForm">
+      <div class="section-heading">
+        <mat-icon>person_add</mat-icon>
+        <div>
+          <h2>Crear persona</h2>
+          <p>
+            Complete los datos base de identificación y contacto según el modelo
+            de persona del informe.
+          </p>
+        </div>
+      </div>
+
+      <form [formGroup]="personForm" class="person-form-grid">
+        <mat-form-field appearance="fill">
+          <mat-label>RUN</mat-label>
+          <input matInput formControlName="rut" />
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Primer nombre</mat-label>
+          <input matInput formControlName="firstName" />
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Segundo nombre</mat-label>
+          <input matInput formControlName="secondName" />
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Primer apellido</mat-label>
+          <input matInput formControlName="firstLastName" />
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Segundo apellido</mat-label>
+          <input matInput formControlName="secondLastName" />
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Fecha nacimiento</mat-label>
+          <input matInput type="date" formControlName="birthDate" />
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Sexo</mat-label>
+          <input matInput formControlName="sex" />
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Teléfono</mat-label>
+          <input matInput formControlName="phone" />
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Correo</mat-label>
+          <input matInput formControlName="email" />
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="span-2">
+          <mat-label>Dirección</mat-label>
+          <input matInput formControlName="address" />
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Comuna</mat-label>
+          <input matInput formControlName="commune" />
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Previsión</mat-label>
+          <input matInput formControlName="previsionalCoverage" />
+        </mat-form-field>
+      </form>
+
+      <div class="create-person-actions">
+        <div class="empty-banner">
+          <mat-icon>info</mat-icon>
+          <span>
+            Esta sección solo prepara la estructura visual. El guardado real se
+            conectará después.
+          </span>
+        </div>
+
+        <button mat-flat-button class="primary-btn" type="button" disabled>
+          <mat-icon>save</mat-icon>
+          Guardar persona
+        </button>
+      </div>
     </mat-card>
 
     <!-- EPISODIO -->

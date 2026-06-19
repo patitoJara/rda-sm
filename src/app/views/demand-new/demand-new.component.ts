@@ -42,6 +42,21 @@ export class DemandNewComponent {
     rut: ['', Validators.required],
   });
 
+  personForm = this.fb.group({
+    rut: [{ value: '', disabled: true }],
+    firstName: [''],
+    secondName: [''],
+    firstLastName: [''],
+    secondLastName: [''],
+    birthDate: [''],
+    sex: [''],
+    phone: [''],
+    email: [''],
+    address: [''],
+    commune: [''],
+    previsionalCoverage: [''],
+  });
+
   // Estados vacíos reales: no mocks
   personLoaded = false;
   episodeLoaded = false;
@@ -52,6 +67,7 @@ export class DemandNewComponent {
   personNotFound = false;
   selectedPerson: Postulant | null = null;
   searchError: string | null = null;
+  showCreatePersonForm = false;
 
   readonly flowSteps = [
     'Persona',
@@ -259,6 +275,16 @@ export class DemandNewComponent {
     },
   ];
 
+  showCreatePerson(): void {
+    const rut = this.searchForm.getRawValue().rut?.trim() ?? '';
+
+    this.showCreatePersonForm = true;
+
+    this.personForm.patchValue({
+      rut,
+    });
+  }
+
   searchPerson(): void {
     this.searchForm.markAllAsTouched();
 
@@ -273,6 +299,7 @@ export class DemandNewComponent {
     this.personNotFound = false;
     this.selectedPerson = null;
     this.searchError = null;
+    this.showCreatePersonForm = false;
 
     this.personLoaded = false;
     this.episodeLoaded = false;
