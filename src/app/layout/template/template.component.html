@@ -3,17 +3,24 @@
      Selección de rol/programa antes de mostrar menú
      ======================================================= -->
 <ng-container *ngIf="!menuVisible; else mainLayout">
-  <div class="login-wrapper">
-    <mat-card class="login-card" appearance="outlined">
+  <div class="login-wrapper role-select-wrapper">
+    <mat-card class="login-card role-select-card" appearance="outlined">
+      <div class="card-topline"></div>
       <div class="login-header">
         <img
           src="assets/logoSSM.png"
-          alt="Logo SSM"
+          alt="Logo Servicio de Salud Magallanes"
           class="login-logo"
-          width="120"
         />
-        <h2>Bienvenido, {{ userFullName }}</h2>
-        <p>Selecciona el rol y programa con los cuales deseas ingresar.</p>
+
+        <span class="select-eyebrow">Sistema RDA-SM</span>
+
+        <h2>Bienvenido/a, {{ userFullName }}</h2>
+
+        <p>
+          Selecciona el rol y programa con el cual deseas trabajar en esta
+          sesión.
+        </p>
       </div>
 
       <div class="role-program-row">
@@ -94,10 +101,11 @@
             mat-stroked-button
             color="accent"
             class="back-btn"
-            [routerLink]="['/auth/login']"
+            type="button"
+            (click)="logout()"
           >
             <mat-icon>arrow_back</mat-icon>
-            Volver al Login
+            Cerrar sesión
           </button>
 
           <button
@@ -108,7 +116,7 @@
           >
             <ng-container *ngIf="!isLoading; else loadingTpl">
               <mat-icon>arrow_forward</mat-icon>
-              Siguiente
+              INGRESAR AL SISTEMA
             </ng-container>
             <ng-template #loadingTpl>
               <mat-icon>hourglass_empty</mat-icon>

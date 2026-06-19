@@ -499,9 +499,10 @@ export class TemplateComponent implements OnInit {
       .open(ConfirmDialogComponent, {
         width: '420px',
         disableClose: true,
+        panelClass: 'rda-confirm-dialog',
         data: {
-          title: 'Salir del Sistema',
-          message: 'Esta seguro que desea salir del Sistema ???...',
+          title: 'Cerrar sesión',
+          message: '¿Está seguro/a que desea cerrar la sesión actual?',
           confirmText: 'Salir',
           cancelText: 'Volver',
           icon: 'logout',

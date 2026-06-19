@@ -1019,3 +1019,329 @@ mat-sidenav {
 .mat-sidenav-content {
   padding-bottom: 46px !important;
 }
+
+
+/* ======================================================
+   SELECCIÓN ROL / PROGRAMA — REDISEÑO INSTITUCIONAL
+   ====================================================== */
+
+.role-select-wrapper {
+  height: 100vh;
+  width: 100%;
+  padding: 24px 18px 64px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top left, rgba(216, 243, 241, 0.34), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(22, 115, 134, 0.26), transparent 32%),
+    linear-gradient(135deg, #0f4d56 0%, #167386 45%, #eef7f7 45.2%, #f5f8f9 100%);
+}
+
+.role-select-card {
+  position: relative;
+  width: 560px !important;
+  max-width: 94vw;
+  padding: 40px 42px 38px !important;
+  border-radius: 24px !important;
+  background: rgba(255, 255, 255, 0.97) !important;
+  color: #244650;
+  overflow: hidden;
+  box-shadow:
+    0 24px 70px rgba(15, 47, 61, 0.26),
+    0 0 0 1px rgba(216, 229, 232, 0.9) !important;
+}
+
+.role-select-card::after {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border-radius: 19px;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(15, 107, 117, 0.08);
+}
+
+.card-topline {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 7px;
+  background: linear-gradient(90deg, #0f4d56 0%, #167386 48%, #28a3a4 100%);
+}
+
+.role-select-card .login-header {
+  margin-bottom: 22px;
+}
+
+.role-select-card .login-logo {
+  width: 145px;
+  height: auto;
+  margin-bottom: 14px;
+  filter: drop-shadow(0 8px 16px rgba(15, 47, 61, 0.14));
+}
+
+.select-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #e8f6f3;
+  color: #0f6b75;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.role-select-card .login-header h2 {
+  margin: 0;
+  color: #143f49;
+  font-size: clamp(1.35rem, 2.3vw, 1.75rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+
+.role-select-card .login-header p {
+  max-width: 430px;
+  margin: 10px auto 0;
+  color: #60747b;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.role-program-row {
+  gap: 16px !important;
+  margin-top: 14px !important;
+}
+
+.role-program-item {
+  width: 100% !important;
+}
+
+.role-program-item mat-form-field {
+  width: 100% !important;
+}
+
+.role-select-card mat-form-field {
+  min-width: 0 !important;
+}
+
+::ng-deep .role-select-card .mat-mdc-text-field-wrapper {
+  border-radius: 14px !important;
+  background: #f4f8f9 !important;
+}
+
+::ng-deep .role-select-card .mat-mdc-form-field-focus-overlay {
+  background: transparent !important;
+}
+
+::ng-deep .role-select-card .mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper {
+  box-shadow: 0 0 0 2px rgba(15, 107, 117, 0.18);
+}
+
+::ng-deep .role-select-card .mdc-floating-label {
+  color: #60747b !important;
+}
+
+::ng-deep .role-select-card .mat-mdc-select-value {
+  color: #244650 !important;
+  font-weight: 700;
+}
+
+.alert-msg {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #fff7ed;
+  color: #9a3412;
+  border: 1px solid #fed7aa;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.alert-msg mat-icon {
+  color: #ea580c;
+  margin-top: 1px;
+}
+
+.admin-msg {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #e8f6f3;
+  color: #0f4d56;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.login-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px !important;
+}
+
+.back-btn {
+  height: 44px;
+  border-radius: 14px !important;
+  color: #0f6b75 !important;
+  border-color: #b8dadd !important;
+  font-weight: 800 !important;
+  background: #ffffff;
+}
+
+.back-btn:hover {
+  background: #eef7f7 !important;
+}
+
+.role-select-card .login-btn {
+  min-width: 190px;
+  height: 44px;
+  border: 0;
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, #0f4d56 0%, #167386 100%) !important;
+  color: #ffffff !important;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  box-shadow: 0 12px 26px rgba(15, 77, 86, 0.26);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.role-select-card .login-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 34px rgba(15, 77, 86, 0.32);
+}
+
+.role-select-card .login-btn:disabled {
+  opacity: 0.58;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+@media (max-width: 620px) {
+  .role-select-wrapper {
+    padding: 16px 14px 48px;
+  }
+
+  .role-select-card {
+    padding: 30px 22px 30px !important;
+    border-radius: 20px !important;
+  }
+
+  .role-select-card .login-logo {
+    width: 112px;
+  }
+
+  .login-actions {
+    flex-direction: column-reverse;
+  }
+
+  .back-btn,
+  .role-select-card .login-btn {
+    width: 100%;
+  }
+}
+
+/* ======================================================
+   FIX SCROLL SELECCIÓN ROL / PROGRAMA
+   ====================================================== */
+
+:host,
+:host * {
+  box-sizing: border-box;
+}
+
+.role-select-wrapper {
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow: hidden !important;
+  box-sizing: border-box;
+  padding: 18px 18px 42px !important;
+}
+
+.role-select-card {
+  max-height: calc(100vh - 72px);
+  overflow: visible;
+}
+
+/* ======================================================
+   MODAL CONFIRMACIÓN — ESTILO RDA-SM
+   ====================================================== */
+
+::ng-deep .rda-confirm-dialog .mat-mdc-dialog-surface {
+  border-radius: 22px !important;
+  overflow: hidden !important;
+  box-shadow:
+    0 24px 70px rgba(15, 47, 61, 0.28),
+    0 0 0 1px rgba(216, 229, 232, 0.9) !important;
+}
+
+::ng-deep .rda-confirm-dialog .mat-mdc-dialog-surface::before {
+  content: '';
+  display: block;
+  height: 7px;
+  background: linear-gradient(90deg, #0f4d56 0%, #167386 48%, #28a3a4 100%);
+}
+
+::ng-deep .rda-confirm-dialog h1,
+::ng-deep .rda-confirm-dialog h2,
+::ng-deep .rda-confirm-dialog .mat-mdc-dialog-title {
+  color: #0f4d56 !important;
+  font-weight: 900 !important;
+}
+
+::ng-deep .rda-confirm-dialog mat-icon {
+  color: #0f6b75 !important;
+}
+
+::ng-deep .rda-confirm-dialog .mat-mdc-dialog-content {
+  color: #4b6268 !important;
+  font-size: 0.95rem !important;
+}
+
+::ng-deep .rda-confirm-dialog button {
+  border-radius: 999px !important;
+  font-weight: 800 !important;
+}
+
+::ng-deep .rda-confirm-dialog button.mat-primary,
+::ng-deep .rda-confirm-dialog .mat-mdc-raised-button,
+::ng-deep .rda-confirm-dialog .mat-mdc-unelevated-button {
+  background: linear-gradient(135deg, #0f4d56 0%, #167386 100%) !important;
+  color: #ffffff !important;
+}
+
+::ng-deep .rda-confirm-dialog .mat-mdc-outlined-button {
+  color: #0f6b75 !important;
+  border-color: #b8dadd !important;
+}
+
+::ng-deep .rda-confirm-dialog .mat-mdc-dialog-container {
+  --mdc-dialog-container-shape: 22px;
+}
+
+::ng-deep .rda-confirm-dialog .mat-mdc-dialog-title {
+  padding: 22px 28px 8px !important;
+  margin: 0 !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+::ng-deep .rda-confirm-dialog .mat-mdc-dialog-content {
+  padding: 18px 28px 12px !important;
+  min-height: 58px;
+}
+
+::ng-deep .rda-confirm-dialog .mat-mdc-dialog-actions {
+  padding: 8px 24px 22px !important;
+  gap: 10px;
+}
