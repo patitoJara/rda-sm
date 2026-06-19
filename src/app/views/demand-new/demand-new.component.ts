@@ -1,4 +1,4 @@
- import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -54,17 +54,19 @@ export class DemandNewComponent {
     {
       icon: 'event_available',
       title: 'Nueva citación',
-      description: 'Registrar fecha, hora, profesional y comentario de citación.',
+      description:
+        'Registrar fecha, hora, profesional y comentario de citación.',
       enabled: false,
     },
     {
       icon: 'how_to_reg',
       title: 'Registrar asistencia',
-      description: 'Marcar si se presentó, no se presentó, reprogramó o quedó pendiente.',
+      description:
+        'Marcar si se presentó, no se presentó, reprogramó o quedó pendiente.',
       enabled: false,
     },
     {
-      icon: 'clinical_notes',
+      icon: 'assignment',
       title: 'Entrevista / evaluación',
       description: 'Registrar evento clínico o social independiente.',
       enabled: false,
@@ -78,7 +80,8 @@ export class DemandNewComponent {
     {
       icon: 'sync_alt',
       title: 'Referir programa',
-      description: 'Cerrar etapa origen y crear etapa receptora sin reiniciar días.',
+      description:
+        'Cerrar etapa origen y crear etapa receptora sin reiniciar días.',
       enabled: false,
     },
     {
@@ -102,6 +105,9 @@ export class DemandNewComponent {
 
     // Por ahora no buscamos backend nuevo.
     // Se deja preparado para endpoint futuro Persona/Episodio.
-    console.log('[DemandNew] Buscar persona por RUN:', this.searchForm.value.rut);
+    console.log(
+      '[DemandNew] Buscar persona por RUN:',
+      this.searchForm.getRawValue().rut,
+    );
   }
 }
