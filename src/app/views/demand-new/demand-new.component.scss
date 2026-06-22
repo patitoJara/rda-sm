@@ -982,4 +982,58 @@
   }
 }
 
+.stage-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
 
+.stage-item {
+  padding: 14px;
+  border-radius: 16px;
+  background: #f8fbfc;
+  border: 1px solid #d8e5e8;
+
+  span {
+    display: block;
+    margin-bottom: 5px;
+    color: #6b838a;
+    font-size: 0.74rem;
+    font-weight: 850;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  strong {
+    color: #123b44;
+    font-size: 0.95rem;
+    font-weight: 950;
+    line-height: 1.25;
+    word-break: break-word;
+  }
+}
+
+.warning-stage {
+  margin-top: 14px;
+  border: 1px solid #ead7a4;
+  background: #fff8e5;
+
+  mat-icon {
+    color: #9a6b00;
+  }
+
+  strong {
+    color: #6f4b00;
+  }
+
+  span {
+    color: #755c20;
+  }
+}
+
+@media (max-width: 720px) {
+  .stage-summary {
+    grid-template-columns: 1fr;
+  }
+}

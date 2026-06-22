@@ -13,6 +13,7 @@ import { finalize } from 'rxjs/operators';
 import { PostulantService } from '@app/services/postulant.service';
 import { Postulant } from '@app/models/postulant';
 import { PreloadCatalogsService } from '@app/services/demand/preload-catalogs.service';
+import { TokenService } from '@app/services/token.service';
 
 // Angular Material
 import { MatCardModule } from '@angular/material/card';
@@ -48,6 +49,7 @@ export class DemandNewComponent implements OnInit {
   private fb = inject(FormBuilder);
   private postulantService = inject(PostulantService);
   private preloadCatalogs = inject(PreloadCatalogsService);
+  private readonly tokenService = inject(TokenService);
 
   sexes: any[] = [];
   communes: any[] = [];
@@ -65,6 +67,10 @@ export class DemandNewComponent implements OnInit {
   searchForm = this.fb.group({
     rut: ['', Validators.required],
   });
+
+  activeProgramName: string | null = null;
+  activeProgramId: number | null = null;
+  stageVisualState = 'Pendiente de creación';
 
   personForm = this.fb.group({
     rut: [{ value: '', disabled: true }],
@@ -322,6 +328,7 @@ export class DemandNewComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCatalogs();
+    this.loadActiveProgramContext();
 
     this.personForm.get('intPrev')?.valueChanges.subscribe((id) => {
       this.filterConvPrevByIntPrev(Number(id));
@@ -353,6 +360,11 @@ export class DemandNewComponent implements OnInit {
         this.diverters = [];
       },
     });
+  }
+
+  private loadActiveProgramContext(): void {
+    this.activeProgramName = this.tokenService.getActiveProgram();
+    this.activeProgramId = this.tokenService.getActiveProgramId();
   }
 
   private filterConvPrevByIntPrev(intPrevId: number): void {

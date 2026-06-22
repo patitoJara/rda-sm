@@ -532,18 +532,40 @@
         </div>
       </div>
 
-      <div class="field-preview">
-        <div class="field-chip" *ngFor="let field of stageFields">
-          {{ field }}
+      <div class="stage-summary">
+        <div class="stage-item">
+          <span>Programa activo</span>
+          <strong>
+            {{ activeProgramName || "Sin programa seleccionado" }}
+          </strong>
+        </div>
+
+        <div class="stage-item">
+          <span>ID programa</span>
+          <strong>
+            {{ activeProgramId || "Pendiente" }}
+          </strong>
+        </div>
+
+        <div class="stage-item">
+          <span>Estado etapa</span>
+          <strong>
+            {{ stageVisualState }}
+          </strong>
+        </div>
+
+        <div class="stage-item">
+          <span>Fecha ingreso etapa</span>
+          <strong>Pendiente</strong>
         </div>
       </div>
 
-      <div class="empty-state compact">
-        <mat-icon>route</mat-icon>
-        <strong>Sin etapa activa cargada</strong>
+      <div class="empty-state compact warning-stage">
+        <mat-icon>lock</mat-icon>
+        <strong>Etapa pendiente de creación</strong>
         <span>
-          La etapa inicial se creará junto con el episodio y cambiará si existe
-          referencia.
+          La etapa inicial se creará junto con el episodio real cuando exista el
+          backend del nuevo modelo.
         </span>
       </div>
     </mat-card>
