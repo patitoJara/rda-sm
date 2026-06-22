@@ -68,6 +68,20 @@ export class DemandNewComponent implements OnInit {
     convPrev: [{ value: null, disabled: true }],
   });
 
+  episodeForm = this.fb.group({
+    episodeType: [{ value: '', disabled: true }],
+    originalRequestDate: [{ value: '', disabled: true }],
+    initialProgram: [{ value: '', disabled: true }],
+    currentProgram: [{ value: '', disabled: true }],
+    contactType: [{ value: '', disabled: true }],
+    sender: [{ value: '', disabled: true }],
+    diverter: [{ value: '', disabled: true }],
+    previousTreatmentNumber: [{ value: '', disabled: true }],
+    currentState: [{ value: '', disabled: true }],
+    currentResult: [{ value: '', disabled: true }],
+    initialObservation: [{ value: '', disabled: true }],
+  });
+
   // Estados vacíos reales: no mocks
   personLoaded = false;
   episodeLoaded = false;
@@ -79,6 +93,7 @@ export class DemandNewComponent implements OnInit {
   selectedPerson: Postulant | null = null;
   searchError: string | null = null;
   showCreatePersonForm = false;
+  showCreateEpisodeForm = false;
 
   readonly flowSteps = [
     'Persona',
@@ -389,4 +404,9 @@ export class DemandNewComponent implements OnInit {
         },
       });
   }
+
+  showCreateEpisode(): void {
+    this.showCreateEpisodeForm = true;
+  }
+
 }

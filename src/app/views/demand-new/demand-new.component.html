@@ -229,6 +229,100 @@
     </div>
   </mat-card>
 
+  <!-- CREAR EPISODIO / NUEVA DEMANDA -->
+  <mat-card class="create-episode-card" *ngIf="showCreateEpisodeForm">
+    <div class="section-heading">
+      <mat-icon>folder_shared</mat-icon>
+      <div>
+        <h2>Crear episodio / nueva demanda</h2>
+        <p>
+          Complete los datos iniciales del episodio según el modelo funcional
+          del informe.
+        </p>
+      </div>
+    </div>
+
+    <form [formGroup]="episodeForm" class="episode-form-grid">
+      <mat-form-field appearance="fill">
+        <mat-label>Tipo episodio</mat-label>
+        <input matInput formControlName="episodeType" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Fecha solicitud original</mat-label>
+        <input matInput type="date" formControlName="originalRequestDate" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Programa inicial</mat-label>
+        <input matInput formControlName="initialProgram" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Programa actual</mat-label>
+        <input matInput formControlName="currentProgram" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Vía de ingreso</mat-label>
+        <input matInput formControlName="contactType" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Remitente</mat-label>
+        <input matInput formControlName="sender" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Derivador</mat-label>
+        <input matInput formControlName="diverter" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Número de tratamiento previo</mat-label>
+        <input
+          matInput
+          type="number"
+          formControlName="previousTreatmentNumber"
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Estado actual</mat-label>
+        <input matInput formControlName="currentState" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Resultado actual</mat-label>
+        <input matInput formControlName="currentResult" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="span-2">
+        <mat-label>Observación inicial</mat-label>
+        <textarea
+          matInput
+          rows="3"
+          formControlName="initialObservation"
+        ></textarea>
+      </mat-form-field>
+    </form>
+
+    <div class="create-episode-actions">
+      <div class="empty-banner">
+        <mat-icon>info</mat-icon>
+        <span>
+          Al crear el episodio se generará automáticamente la primera etapa por
+          programa.
+        </span>
+      </div>
+
+      <button mat-flat-button class="primary-btn" type="button" disabled>
+        <mat-icon>save</mat-icon>
+        Crear episodio
+      </button>
+    </div>
+  </mat-card>
+
   <!-- GRID PRINCIPAL -->
   <section class="demand-grid">
     <!-- PERSONA -->
@@ -319,6 +413,18 @@
           Si la persona tiene episodio activo, se abrirá el vigente. Si no, se
           podrá crear uno nuevo.
         </span>
+      </div>
+      <div class="card-actions-preview">
+        <button
+          mat-stroked-button
+          class="secondary-btn"
+          type="button"
+          (click)="showCreateEpisode()"
+          
+        >
+          <mat-icon>add_circle</mat-icon>
+          Preparar episodio
+        </button>
       </div>
     </mat-card>
 
