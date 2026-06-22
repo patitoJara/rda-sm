@@ -482,6 +482,7 @@
     </mat-card>
 
     <!-- EPISODIO -->
+    <!-- EPISODIO -->
     <mat-card class="model-card">
       <div class="card-topline"></div>
 
@@ -493,29 +494,62 @@
         </div>
       </div>
 
-      <div class="field-preview">
-        <div class="field-chip" *ngFor="let field of episodeFields">
-          {{ field }}
+      <div class="episode-status-summary">
+        <div class="episode-status-item">
+          <span>Estado consulta</span>
+          <strong>Pendiente backend nuevo</strong>
+        </div>
+
+        <div class="episode-status-item">
+          <span>Episodio activo</span>
+          <strong>No consultado</strong>
+        </div>
+
+        <div class="episode-status-item">
+          <span>Persona seleccionada</span>
+          <strong>
+            {{ selectedPerson ? "Sí" : "No" }}
+          </strong>
+        </div>
+
+        <div class="episode-status-item">
+          <span>Acción disponible</span>
+          <strong>
+            {{
+              selectedPerson ? "Preparar episodio" : "Buscar persona primero"
+            }}
+          </strong>
         </div>
       </div>
 
-      <div class="empty-state compact">
-        <mat-icon>inventory_2</mat-icon>
-        <strong>Sin episodio activo cargado</strong>
+      <div class="empty-state compact warning-stage">
+        <mat-icon>lock</mat-icon>
+        <strong>Consulta de episodio activo pendiente</strong>
         <span>
-          Si la persona tiene episodio activo, se abrirá el vigente. Si no, se
-          podrá crear uno nuevo.
+          Esta pantalla no usará el modelo antiguo Register para simular
+          episodios. La consulta real se conectará cuando exista el backend del
+          nuevo modelo.
         </span>
       </div>
+
+      <div class="empty-banner warning" *ngIf="!selectedPerson">
+        <mat-icon>info</mat-icon>
+        <span>
+          Primero debe buscar y seleccionar una persona para preparar el
+          episodio.
+        </span>
+      </div>
+
       <div class="card-actions-preview">
         <button
           mat-stroked-button
           class="secondary-btn"
           type="button"
+          [disabled]="!selectedPerson"
           (click)="showCreateEpisode()"
         >
           <mat-icon>add_circle</mat-icon>
-          Preparar episodio
+          {{ selectedPerson ? "Preparar episodio" : "Buscar persona primero" }}
         </button>
       </div>
     </mat-card>
