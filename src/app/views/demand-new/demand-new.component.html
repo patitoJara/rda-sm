@@ -470,12 +470,18 @@
           </div>
         </div>
 
-        <div class="empty-state compact">
+        <div class="empty-state compact" *ngIf="!searched && !personNotFound">
           <mat-icon>person_off</mat-icon>
-          <strong>Sin persona cargada</strong>
+          <strong>Sin búsqueda realizada</strong>
+          <span> Busque una persona por RUN para cargar sus datos base. </span>
+        </div>
+
+        <div class="empty-state compact warning-person" *ngIf="personNotFound">
+          <mat-icon>person_add</mat-icon>
+          <strong>Persona no registrada</strong>
           <span>
-            La información aparecerá al buscar un RUN existente o crear una
-            nueva persona.
+            No existe una persona registrada con el RUN buscado. Puede continuar
+            creando una nueva persona.
           </span>
         </div>
       </ng-template>
@@ -526,9 +532,9 @@
         <mat-icon>lock</mat-icon>
         <strong>Consulta de episodio activo pendiente</strong>
         <span>
-          Esta pantalla no usará el modelo antiguo Register para simular
-          episodios. La consulta real se conectará cuando exista el backend del
-          nuevo modelo.
+          Esta pantalla esperará la consulta oficial del nuevo modelo para
+          confirmar si existe un episodio activo. La creación real se conectará
+          cuando exista el backend del nuevo modelo.
         </span>
       </div>
 

@@ -1084,3 +1084,20 @@
   border-color: #d8e5e8;
   color: #8aa0a6;
 }
+
+.warning-person {
+  border: 1px solid #ead7a4;
+  background: #fff8e5;
+
+  mat-icon {
+    color: #9a6b00;
+  }
+
+  strong {
+    color: #6f4b00;
+  }
+
+  span {
+    color: #755c20;
+  }
+}
