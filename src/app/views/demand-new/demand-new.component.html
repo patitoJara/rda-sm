@@ -265,17 +265,38 @@
 
       <mat-form-field appearance="fill">
         <mat-label>Vía de ingreso</mat-label>
-        <input matInput formControlName="contactType" />
+        <mat-select formControlName="contactType">
+          <mat-option *ngFor="let item of contactTypes" [value]="item.id">
+            {{ item.name }}
+          </mat-option>
+        </mat-select>
+        <mat-hint *ngIf="!contactTypes.length">
+          Catálogo no disponible desde backend.
+        </mat-hint>
       </mat-form-field>
 
       <mat-form-field appearance="fill">
         <mat-label>Remitente</mat-label>
-        <input matInput formControlName="sender" />
+        <mat-select formControlName="sender">
+          <mat-option *ngFor="let item of senders" [value]="item.id">
+            {{ item.name }}
+          </mat-option>
+        </mat-select>
+        <mat-hint *ngIf="!senders.length">
+          Catálogo no disponible desde backend.
+        </mat-hint>
       </mat-form-field>
 
       <mat-form-field appearance="fill">
         <mat-label>Derivador</mat-label>
-        <input matInput formControlName="diverter" />
+        <mat-select formControlName="diverter">
+          <mat-option *ngFor="let item of diverters" [value]="item.id">
+            {{ item.name }}
+          </mat-option>
+        </mat-select>
+        <mat-hint *ngIf="!diverters.length">
+          Catálogo no disponible desde backend.
+        </mat-hint>
       </mat-form-field>
 
       <mat-form-field appearance="fill">

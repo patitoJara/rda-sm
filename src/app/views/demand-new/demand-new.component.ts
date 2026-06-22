@@ -58,6 +58,10 @@ export class DemandNewComponent implements OnInit {
   substances: any[] = [];
   secondarySubstanceMap: { [id: number]: number } = {};
 
+  contactTypes: any[] = [];
+  senders: any[] = [];
+  diverters: any[] = [];
+
   searchForm = this.fb.group({
     rut: ['', Validators.required],
   });
@@ -83,16 +87,18 @@ export class DemandNewComponent implements OnInit {
     originalRequestDate: [{ value: '', disabled: true }],
     initialProgram: [{ value: '', disabled: true }],
     currentProgram: [{ value: '', disabled: true }],
-    contactType: [{ value: '', disabled: true }],
-    sender: [{ value: '', disabled: true }],
-    diverter: [{ value: '', disabled: true }],
+    contactType: new FormControl<number | null>(null),
+    sender: new FormControl<number | null>(null),
+    diverter: new FormControl<number | null>(null),
     previousTreatmentNumber: [{ value: '', disabled: true }],
     currentState: [{ value: '', disabled: true }],
     currentResult: [{ value: '', disabled: true }],
     initialObservation: [{ value: '', disabled: true }],
 
     primarySubstanceId: new FormControl<number | null>(null),
-    secondarySubstances: new FormControl<{ substanceId: number; order: number }[]>([]),
+    secondarySubstances: new FormControl<
+      { substanceId: number; order: number }[]
+    >([]),
   });
 
   // Estados vacíos reales: no mocks
@@ -331,6 +337,9 @@ export class DemandNewComponent implements OnInit {
         this.convPrev = data.convPrev ?? [];
         this.filteredConvPrev = [];
         this.substances = data.substances ?? [];
+        this.contactTypes = data.contactTypes ?? [];
+        this.senders = data.senders ?? [];
+        this.diverters = data.diverters ?? [];
       },
       error: () => {
         this.sexes = [];
@@ -339,6 +348,9 @@ export class DemandNewComponent implements OnInit {
         this.convPrev = [];
         this.filteredConvPrev = [];
         this.substances = [];
+        this.contactTypes = [];
+        this.senders = [];
+        this.diverters = [];
       },
     });
   }
