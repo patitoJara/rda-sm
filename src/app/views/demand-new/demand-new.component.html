@@ -307,6 +307,78 @@
       </mat-form-field>
     </form>
 
+    <div class="episode-substances-panel">
+      <div class="substances-title">
+        <mat-icon>science</mat-icon>
+        <div>
+          <h3>Sustancias del episodio</h3>
+          <p>
+            Seleccione una sustancia principal y, si corresponde, ordene las
+            sustancias secundarias.
+          </p>
+        </div>
+      </div>
+
+      <div class="empty-banner" *ngIf="!substances.length">
+        <mat-icon>info</mat-icon>
+        <span> Catálogo de sustancias no disponible desde backend. </span>
+      </div>
+
+      <div class="substances-table" *ngIf="substances.length">
+        <div class="substances-header">
+          <div class="col-name"></div>
+          <div class="col-main">Principal</div>
+          <div class="col-secondary">Secundaria</div>
+        </div>
+
+        <div class="substances-help">
+          Click en la fila para asignar o quitar orden de consumo secundario.
+        </div>
+
+        <div
+          *ngFor="let item of substances"
+          class="substance-row"
+          (click)="toggleSecondarySubstance(item.id)"
+          [class.primary-selected]="
+            episodeForm.getRawValue().primarySubstanceId === item.id
+          "
+        >
+          <div class="substance-name">
+            {{ item.name }}
+          </div>
+
+          <mat-radio-button
+            (click)="$event.stopPropagation()"
+            [checked]="episodeForm.getRawValue().primarySubstanceId === item.id"
+            (change)="selectPrimarySubstance(item.id)"
+          ></mat-radio-button>
+
+          <div class="secondary-order">
+            <span
+              class="order-badge"
+              [class.primary-badge]="
+                episodeForm.getRawValue().primarySubstanceId === item.id
+              "
+            >
+              {{
+                episodeForm.getRawValue().primarySubstanceId === item.id
+                  ? "Principal"
+                  : getSecondarySubstanceOrder(item.id) || "-"
+              }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-banner warning">
+        <mat-icon>lock</mat-icon>
+        <span>
+          Esta selección es solo visual por ahora. El guardado real se conectará
+          cuando exista un episodio creado.
+        </span>
+      </div>
+    </div>
+
     <div class="create-episode-actions">
       <div class="empty-banner">
         <mat-icon>info</mat-icon>
@@ -420,7 +492,6 @@
           class="secondary-btn"
           type="button"
           (click)="showCreateEpisode()"
-          
         >
           <mat-icon>add_circle</mat-icon>
           Preparar episodio

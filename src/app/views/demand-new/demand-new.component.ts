@@ -1,6 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  Validators,
+  FormControl,
+} from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { MatSelectModule } from '@angular/material/select';
 
@@ -17,6 +22,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatRadioModule } from '@angular/material/radio';
 
 @Component({
   selector: 'app-demand-new',
@@ -35,6 +41,7 @@ import { MatDividerModule } from '@angular/material/divider';
     MatChipsModule,
     MatDividerModule,
     MatSelectModule,
+    MatRadioModule,
   ],
 })
 export class DemandNewComponent implements OnInit {
@@ -47,6 +54,9 @@ export class DemandNewComponent implements OnInit {
   intPrev: any[] = [];
   convPrev: any[] = [];
   filteredConvPrev: any[] = [];
+
+  substances: any[] = [];
+  secondarySubstanceMap: { [id: number]: number } = {};
 
   searchForm = this.fb.group({
     rut: ['', Validators.required],
@@ -80,6 +90,9 @@ export class DemandNewComponent implements OnInit {
     currentState: [{ value: '', disabled: true }],
     currentResult: [{ value: '', disabled: true }],
     initialObservation: [{ value: '', disabled: true }],
+
+    primarySubstanceId: new FormControl<number | null>(null),
+    secondarySubstances: new FormControl<{ substanceId: number; order: number }[]>([]),
   });
 
   // Estados vacíos reales: no mocks
@@ -317,6 +330,7 @@ export class DemandNewComponent implements OnInit {
         this.intPrev = data.intPrev ?? [];
         this.convPrev = data.convPrev ?? [];
         this.filteredConvPrev = [];
+        this.substances = data.substances ?? [];
       },
       error: () => {
         this.sexes = [];
@@ -324,6 +338,7 @@ export class DemandNewComponent implements OnInit {
         this.intPrev = [];
         this.convPrev = [];
         this.filteredConvPrev = [];
+        this.substances = [];
       },
     });
   }
@@ -409,4 +424,61 @@ export class DemandNewComponent implements OnInit {
     this.showCreateEpisodeForm = true;
   }
 
+  selectPrimarySubstance(id: number): void {
+    this.episodeForm.patchValue({
+      primarySubstanceId: id,
+    });
+
+    if (this.secondarySubstanceMap[id]) {
+      delete this.secondarySubstanceMap[id];
+      this.reorderSecondarySubstances();
+    }
+
+    this.syncSecondarySubstances();
+  }
+
+  toggleSecondarySubstance(id: number): void {
+    const primaryId = this.episodeForm.getRawValue().primarySubstanceId;
+
+    if (Number(primaryId) === Number(id)) return;
+
+    if (this.secondarySubstanceMap[id]) {
+      delete this.secondarySubstanceMap[id];
+    } else {
+      const max = Math.max(0, ...Object.values(this.secondarySubstanceMap));
+      this.secondarySubstanceMap[id] = max + 1;
+    }
+
+    this.reorderSecondarySubstances();
+    this.syncSecondarySubstances();
+  }
+
+  getSecondarySubstanceOrder(id: number): number | null {
+    return this.secondarySubstanceMap[id] ?? null;
+  }
+
+  private reorderSecondarySubstances(): void {
+    const ordered = Object.entries(this.secondarySubstanceMap).sort(
+      (a, b) => a[1] - b[1],
+    );
+
+    this.secondarySubstanceMap = {};
+
+    ordered.forEach(([key], index) => {
+      this.secondarySubstanceMap[+key] = index + 1;
+    });
+  }
+
+  private syncSecondarySubstances(): void {
+    const arr = Object.entries(this.secondarySubstanceMap).map(
+      ([id, order]) => ({
+        substanceId: Number(id),
+        order,
+      }),
+    );
+
+    this.episodeForm.patchValue({
+      secondarySubstances: arr,
+    });
+  }
 }
