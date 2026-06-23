@@ -1,6 +1,17 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+:host,
+:host * {
+  box-sizing: border-box;
+}
+
 .admin-page {
-  min-height: calc(100vh - 64px);
-  padding: 28px;
+  height: 100%;
+  overflow: auto;
+  padding: 28px 28px 96px;
   background: #f4f7f8;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: #17343d;
@@ -235,7 +246,7 @@ mat-chip {
 
 @media (max-width: 760px) {
   .admin-page {
-    padding: 18px;
+    padding: 18px 18px 88px;
   }
 
   .admin-hero {
