@@ -1,5 +1,5 @@
 //C:\Users\pjara\Documents\DESARROLLO\ANGULAR\rda-sm\src\app\views\manual\manual.component.scss
-@use './manual.shared.scss' as *;
+@use "./manual.shared.scss" as *;
 
 .manual-container {
   position: relative; // ✅ vuelve al flujo normal
@@ -11,14 +11,13 @@
   padding: 24px;
   border-radius: 20px;
 
-  width: 100%;          // 🔑 ocupa el espacio del body
-  max-width: 1400px;    // 🔑 alineado al frontend
+  width: 100%; // 🔑 ocupa el espacio del body
+  max-width: 1400px; // 🔑 alineado al frontend
   margin: 0 auto;
 
   overflow-y: auto;
   max-height: calc(100vh - 180px); // 🔑 deja respirar header + banner
 }
-
 
 .manual-content {
   display: flex;
@@ -29,18 +28,60 @@
   margin: 0 auto;
 }
 
-/* 🟦 BOTÓN FLOTANTE */
+/* 🟦 BOTÓN FLOTANTE - VOLVER AL ÍNDICE */
 .btn-indice {
-  position: fixed; // ✅ CLAVE
-  right: calc((100vw - 1200px) / 2 + 16px);
-  top: 50%;
-  transform: translateY(-50%);
+  position: fixed;
+  right: max(24px, calc((100vw - 1200px) / 2 + 24px));
+  bottom: 72px;
 
-  z-index: 1000;
-  opacity: 0.9;
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+
+  border-radius: 50% !important;
+  z-index: 1200;
+
+  background: #0b6f7a !important;
+  color: #ffffff !important;
+
+  opacity: 0.94;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.28);
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  mat-icon {
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+  }
 
   &:hover {
     opacity: 1;
-    transform: translateY(-50%) scale(1.05);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.34);
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba(11, 111, 122, 0.35);
+    outline-offset: 4px;
+  }
+}
+
+.btn-indice.mat-mdc-mini-fab,
+.btn-indice.mat-mini-fab {
+  border-radius: 50% !important;
+}
+
+@media (max-width: 768px) {
+  .btn-indice {
+    right: 18px;
+    bottom: 76px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
   }
 }

@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
   standalone: true,
   //host: { id: 'mantenedores' },
   templateUrl: './panel-estrategico.component.html',
-  styleUrls: ['../manual.shared.scss'],
+  styleUrls: ['../manual.shared.scss'], 
   imports: [
     CommonModule,
     MatCardModule,

@@ -1,19 +1,239 @@
-<h3 class="manual-subtitle">Eventos del episodio</h3>
+<mat-card class="manual-section" id="eventos">
 
-<p>
-  Los eventos registran la trazabilidad cronológica del episodio, incluyendo
-  citaciones, asistencias, entrevistas, observaciones, retroalimentaciones,
-  ingresos, egresos, cierres y seguimientos.
-</p>
+  <div class="section-header">
+    <mat-icon>event_note</mat-icon>
+    <h2>Eventos del episodio</h2>
+  </div>
 
-<ul class="manual-list">
-  <li>Citación</li>
-  <li>Asistencia</li>
-  <li>Entrevista</li>
-  <li>Observación</li>
-  <li>Retroalimentación</li>
-  <li>Ingreso a tratamiento</li>
-  <li>Egreso</li>
-  <li>Cierre</li>
-  <li>Seguimiento</li>
-</ul>
+  <div class="manual-box box-info">
+    <mat-icon>history</mat-icon>
+    <div>
+      Los eventos permiten registrar hitos, acciones, cambios de estado,
+      atenciones, inasistencias, referencias, ingresos, cierres y observaciones
+      relevantes ocurridas durante el episodio de demanda.
+    </div>
+  </div>
+
+  <div class="manual-box box-warning">
+    <mat-icon>warning</mat-icon>
+    <div>
+      <strong>Regla central:</strong>
+      todo evento debe asociarse a un episodio real. Cuando corresponda,
+      también debe vincularse a la etapa donde ocurrió. No deben existir eventos
+      ficticios, simulados ni generados solo para completar la interfaz.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Relación funcional</h3>
+
+  <div class="manual-box box-neutral">
+    <mat-icon>account_tree</mat-icon>
+    <div>
+      <strong>Episodio → Etapa → Evento → Auditoría</strong>
+    </div>
+  </div>
+
+  <p>
+    Los eventos permiten reconstruir la historia completa del episodio. Cada
+    acción relevante debe quedar registrada con fecha, tipo de evento,
+    responsable, programa asociado y observación cuando corresponda.
+  </p>
+
+  <h3 class="manual-subtitle">Tipos de eventos esperados</h3>
+
+  <ul class="manual-list">
+    <li><strong>Solicitud inicial:</strong> hito de origen del episodio o demanda.</li>
+    <li><strong>Contacto con persona:</strong> registro de comunicación o intento de contacto.</li>
+    <li><strong>Evaluación:</strong> revisión técnica, clínica o administrativa del caso.</li>
+    <li><strong>Ingreso a tratamiento:</strong> hito que detiene el KPI de espera.</li>
+    <li><strong>Inasistencia:</strong> registro de ausencia a citación o atención programada.</li>
+    <li><strong>Referencia enviada:</strong> envío desde un programa de origen a otro receptor.</li>
+    <li><strong>Referencia recibida:</strong> recepción de continuidad por el programa receptor.</li>
+    <li><strong>Retroalimentación:</strong> evento repetible de comunicación, devolución o revisión.</li>
+    <li><strong>Cierre por causal formal:</strong> término administrativo, técnico o clínico.</li>
+    <li><strong>Egreso:</strong> salida formal del proceso cuando corresponda.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Datos mínimos de evento</h3>
+
+  <ul class="manual-list">
+    <li><strong>Identificador del evento:</strong> código único del registro.</li>
+    <li><strong>Identificador del episodio:</strong> relación directa con el episodio real.</li>
+    <li><strong>Identificador de etapa:</strong> relación con la etapa donde ocurrió, cuando corresponda.</li>
+    <li><strong>Tipo de evento:</strong> clasificación funcional del hito registrado.</li>
+    <li><strong>Fecha del evento:</strong> fecha y hora en que ocurre o se registra la acción.</li>
+    <li><strong>Usuario responsable:</strong> usuario que registra o ejecuta la acción.</li>
+    <li><strong>Programa asociado:</strong> programa desde donde se registra el evento.</li>
+    <li><strong>Observación o descripción:</strong> detalle técnico o administrativo del evento.</li>
+    <li><strong>Estado o resultado:</strong> consecuencia del evento cuando aplique.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Inasistencias</h3>
+
+  <p>
+    Las inasistencias deben registrarse como eventos trazables del episodio. La
+    regla funcional definida indica que dos inasistencias con el mismo
+    profesional pueden generar cierre por inasistencias, según validación y
+    autorización correspondiente.
+  </p>
+
+  <div class="manual-box box-warning">
+    <mat-icon>person_off</mat-icon>
+    <div>
+      El término correcto para este caso es
+      <strong>Cierre por inasistencias</strong>, no “Abandono”.
+      Cada inasistencia debe quedar registrada como evento real y no como dato
+      local o comentario sin trazabilidad.
+    </div>
+  </div>
+
+  <ul class="manual-list">
+    <li>Debe registrarse fecha de la inasistencia.</li>
+    <li>Debe quedar asociado el profesional o programa correspondiente.</li>
+    <li>Debe permitir revisar la cantidad de inasistencias acumuladas.</li>
+    <li>Debe permitir aplicar cierre solo cuando exista regla formal.</li>
+    <li>No debe cerrar automáticamente si backend no valida la regla.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Retroalimentación</h3>
+
+  <p>
+    La retroalimentación debe registrarse como evento repetible. Puede utilizarse
+    para dejar constancia de comunicación, revisión técnica, devolución,
+    coordinación entre programas o información relevante entregada durante el
+    proceso.
+  </p>
+
+  <div class="manual-box box-info">
+    <mat-icon>forum</mat-icon>
+    <div>
+      La retroalimentación no cierra por sí sola el episodio. Su objetivo es
+      mantener trazabilidad de comunicaciones o revisiones asociadas al caso.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Ingreso a tratamiento</h3>
+
+  <p>
+    El ingreso a tratamiento es un evento o hito clave porque detiene el KPI de
+    espera del episodio. Debe provenir de un registro real y no debe simularse
+    desde frontend.
+  </p>
+
+  <div class="manual-box box-success">
+    <mat-icon>play_circle</mat-icon>
+    <div>
+      El KPI de espera se detiene únicamente cuando existe ingreso efectivo a
+      tratamiento registrado en el sistema. Una referencia, derivación o cambio
+      de etapa no debe detener por sí sola el conteo de espera.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">No corresponde / No es perfil</h3>
+
+  <p>
+    Cuando el caso no corresponde o no es perfil para el programa, debe
+    registrarse una causal formal. “No es perfil” puede cerrar de forma
+    inmediata cuando la regla institucional así lo defina y existan avisos o
+    validaciones correspondientes.
+  </p>
+
+  <ul class="manual-list">
+    <li><strong>No corresponde:</strong> debe exigir causal formal.</li>
+    <li><strong>No es perfil:</strong> puede cerrar inmediatamente según regla definida.</li>
+    <li><strong>Observación:</strong> debe dejar fundamento técnico o administrativo.</li>
+    <li><strong>Auditoría:</strong> debe registrar usuario, fecha, rol y acción ejecutada.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Eventos asociados a referencias</h3>
+
+  <p>
+    Las referencias entre programas deben generar eventos trazables dentro del
+    episodio, permitiendo identificar el paso desde el programa de origen hacia
+    el programa receptor.
+  </p>
+
+  <ul class="manual-list">
+    <li><strong>Referencia enviada:</strong> programa de origen registra la solicitud de referencia.</li>
+    <li><strong>Referencia recibida:</strong> programa receptor toma conocimiento del caso.</li>
+    <li><strong>Referencia observada:</strong> se registra observación o devolución cuando corresponda.</li>
+    <li><strong>Referencia aceptada:</strong> se confirma continuidad en la etapa receptora.</li>
+    <li><strong>Referencia rechazada:</strong> debe existir causal formal y trazabilidad.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Eventos de cierre y egreso</h3>
+
+  <p>
+    Todo cierre o egreso debe quedar registrado como evento del episodio,
+    indicando causal, fecha, usuario responsable y observación cuando
+    corresponda.
+  </p>
+
+  <div class="manual-box box-success">
+    <mat-icon>check_circle</mat-icon>
+    <div>
+      El término correcto es <strong>Egreso</strong>, no “Alta”.
+      El egreso representa una salida formal del proceso de atención cuando
+      corresponde.
+    </div>
+  </div>
+
+  <ul class="manual-list">
+    <li>Cierre por inasistencias.</li>
+    <li>Cierre por no corresponde.</li>
+    <li>Cierre por no es perfil.</li>
+    <li>Cierre administrativo.</li>
+    <li>Cierre técnico o clínico.</li>
+    <li>Egreso formal del proceso.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Auditoría del evento</h3>
+
+  <p>
+    Cada evento debe dejar trazabilidad de usuario, fecha, rol activo, programa
+    activo, acción realizada y registro afectado. Esto permite reconstruir el
+    historial completo del episodio.
+  </p>
+
+  <ul class="manual-list">
+    <li>Usuario que registra el evento.</li>
+    <li>Rol activo utilizado.</li>
+    <li>Programa activo desde donde se registra.</li>
+    <li>Fecha y hora de creación.</li>
+    <li>Tipo de evento registrado.</li>
+    <li>Registro afectado.</li>
+    <li>Observación o fundamento.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Validaciones esperadas</h3>
+
+  <ul class="manual-list">
+    <li>Debe existir persona real.</li>
+    <li>Debe existir episodio real.</li>
+    <li>Debe existir etapa real cuando el evento dependa de una etapa.</li>
+    <li>Debe seleccionarse un tipo de evento válido desde catálogo real.</li>
+    <li>No se deben crear eventos sin fecha o sin responsable.</li>
+    <li>No se deben cargar eventos ficticios para completar la pantalla.</li>
+    <li>No se debe simular guardado si no existe endpoint confirmado.</li>
+  </ul>
+
+  <div class="manual-box box-warning">
+    <mat-icon>block</mat-icon>
+    <div>
+      <strong>Restricción actual:</strong>
+      mientras no estén disponibles las tablas nuevas de eventos, la pantalla
+      debe mostrar únicamente eventos reales entregados por backend. No se deben
+      cargar eventos de ejemplo, arreglos locales, listas simuladas ni mocks.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Estado vacío esperado</h3>
+
+  <div class="manual-box box-neutral">
+    <mat-icon>info</mat-icon>
+    <div>
+      No existen eventos registrados para este episodio.
+    </div>
+  </div>
+
+</mat-card>

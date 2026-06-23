@@ -1,8 +1,163 @@
-<div class="manual-box box-success">
-  <mat-icon>search</mat-icon>
-  <div>
-    El RUN es el punto de inicio del proceso. Al ingresar un RUN válido, el
-    sistema busca si la persona ya existe para reutilizar su ficha histórica y
-    evitar duplicidad de personas.
+<mat-card class="manual-section" id="persona">
+
+  <div class="section-header">
+    <mat-icon>person</mat-icon>
+    <h2>Persona</h2>
   </div>
-</div>
+
+  <div class="manual-box box-info">
+    <mat-icon>badge</mat-icon>
+    <div>
+      La Persona es la entidad base del sistema. Representa al usuario o
+      beneficiario que solicita atención, ingresa a demanda o participa en un
+      proceso asociado a programas de salud mental y tratamiento de drogas.
+    </div>
+  </div>
+
+  <div class="manual-box box-warning">
+    <mat-icon>warning</mat-icon>
+    <div>
+      <strong>Regla central:</strong>
+      la persona debe existir una sola vez en el sistema y debe identificarse
+      mediante datos reales. No se deben crear personas ficticias, duplicadas ni
+      registros simulados para completar visualmente la pantalla.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Relación general del modelo</h3>
+
+  <div class="manual-box box-neutral">
+    <mat-icon>account_tree</mat-icon>
+    <div>
+      <strong>Persona → Episodio → Etapa → Eventos → Referencias → Egreso</strong>
+    </div>
+  </div>
+
+  <p>
+    La Persona es el punto de inicio del flujo funcional. Desde ella se consulta
+    si existe un episodio activo, se revisa su historial y se determina si
+    corresponde preparar una nueva demanda.
+  </p>
+
+  <h3 class="manual-subtitle">Identificación mínima</h3>
+
+  <ul class="manual-list">
+    <li><strong>RUN o identificador oficial:</strong> dato principal para búsqueda y validación.</li>
+    <li><strong>Nombres:</strong> nombres registrados de la persona.</li>
+    <li><strong>Apellidos:</strong> apellidos registrados de la persona.</li>
+    <li><strong>Fecha de nacimiento:</strong> permite validar edad y antecedentes administrativos.</li>
+    <li><strong>Sexo:</strong> dato proveniente de catálogo real cuando esté disponible.</li>
+    <li><strong>Teléfono de contacto:</strong> medio principal de comunicación.</li>
+    <li><strong>Correo electrónico:</strong> dato opcional cuando exista.</li>
+    <li><strong>Comuna o territorio asociado:</strong> permite análisis territorial y derivación.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Información complementaria</h3>
+
+  <ul class="manual-list">
+    <li><strong>Dirección:</strong> domicilio o referencia territorial disponible.</li>
+    <li><strong>Previsión de salud:</strong> información previsional real desde catálogo.</li>
+    <li><strong>Convenio previsional:</strong> dato asociado cuando corresponda.</li>
+    <li><strong>Contacto alternativo:</strong> persona o medio de contacto adicional.</li>
+    <li><strong>Observaciones administrativas:</strong> antecedentes útiles para continuidad de atención.</li>
+    <li><strong>Antecedentes relevantes:</strong> información necesaria para orientar el proceso.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Búsqueda por RUN</h3>
+
+  <p>
+    El sistema debe permitir buscar una persona mediante RUN real, utilizando
+    servicios existentes del backend. La búsqueda debe normalizar el RUN,
+    evitando puntos, espacios u otros caracteres que puedan afectar la consulta.
+  </p>
+
+  <div class="manual-box box-info">
+    <mat-icon>search</mat-icon>
+    <div>
+      Si la persona existe, se muestra su tarjeta con información real entregada
+      por backend. Si no existe, se puede habilitar la opción de registrar
+      persona solo cuando el backend cuente con endpoint real para dicha
+      operación.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Cuando la persona existe</h3>
+
+  <ul class="manual-list">
+    <li>Se muestra la tarjeta de persona con datos reales.</li>
+    <li>Se habilita la consulta de episodio activo.</li>
+    <li>Se conserva el identificador real entregado por backend.</li>
+    <li>No se reemplazan datos por información local.</li>
+    <li>No se sobreescribe información sin acción autorizada.</li>
+    <li>No se genera una segunda persona para el mismo RUN.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Cuando la persona no existe</h3>
+
+  <ul class="manual-list">
+    <li>Se informa que no existe registro asociado al RUN consultado.</li>
+    <li>Se puede preparar formulario de creación solo si existe backend real habilitado.</li>
+    <li>No se crea persona automáticamente.</li>
+    <li>No se genera identificador ficticio.</li>
+    <li>No se continúa con episodio si no existe persona real.</li>
+    <li>No se deben completar campos con datos de prueba.</li>
+  </ul>
+
+  <div class="manual-box box-success">
+    <mat-icon>verified</mat-icon>
+    <div>
+      La búsqueda de persona debe ser el primer control de seguridad funcional
+      antes de preparar una nueva demanda. Esto evita duplicidad y permite
+      consultar si ya existe un episodio activo.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Relación con episodio</h3>
+
+  <p>
+    Una persona puede tener episodios históricos, pero solo debe tener un
+    episodio activo a la vez. Antes de preparar una nueva demanda, el sistema
+    debe consultar si existe un episodio activo real asociado a la persona.
+  </p>
+
+  <ul class="manual-list">
+    <li><strong>Si existe episodio activo:</strong> se muestra el episodio y se bloquea preparar nueva demanda.</li>
+    <li><strong>Si no existe episodio activo:</strong> se permite preparar una nueva demanda cuando exista operación real habilitada.</li>
+    <li><strong>Si falla la consulta:</strong> se debe mostrar error controlado y no inventar información.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Catálogos asociados</h3>
+
+  <p>
+    La creación o actualización de persona debe utilizar catálogos reales
+    disponibles desde backend.
+  </p>
+
+  <ul class="manual-list">
+    <li>Sexo.</li>
+    <li>Comuna.</li>
+    <li>Previsión.</li>
+    <li>Convenio previsional.</li>
+    <li>Otros catálogos administrativos confirmados.</li>
+  </ul>
+
+  <div class="manual-box box-warning">
+    <mat-icon>block</mat-icon>
+    <div>
+      Mientras no estén confirmadas todas las tablas nuevas, la pantalla de
+      persona debe consumir únicamente endpoints reales y catálogos reales. No
+      debe completar campos con datos ficticios, mocks, arreglos locales o
+      valores hardcodeados para simular información.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Estado vacío esperado</h3>
+
+  <div class="manual-box box-neutral">
+    <mat-icon>info</mat-icon>
+    <div>
+      Busque una persona por RUN para iniciar la revisión de demanda.
+    </div>
+  </div>
+
+</mat-card>

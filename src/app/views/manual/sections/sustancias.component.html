@@ -1,14 +1,249 @@
-<h3 class="manual-subtitle">Sustancias asociadas</h3>
+<mat-card class="manual-section" id="sustancias">
 
-<p>
-  En cada episodio se debe registrar una sustancia principal y, si corresponde,
-  sustancias secundarias ordenadas según relevancia de consumo.
-</p>
-
-<div class="manual-box box-rule">
-  <mat-icon>science</mat-icon>
-  <div>
-    Una sustancia seleccionada como principal no puede repetirse como secundaria.
-    Las sustancias secundarias deben mantener su orden de registro.
+  <div class="section-header">
+    <mat-icon>science</mat-icon>
+    <h2>Sustancias</h2>
   </div>
-</div>
+
+  <div class="manual-box box-info">
+    <mat-icon>medication</mat-icon>
+    <div>
+      La sección de Sustancias permite registrar o consultar la sustancia
+      principal y sustancias secundarias asociadas a un episodio de demanda,
+      cuando dicha información exista realmente en backend.
+    </div>
+  </div>
+
+  <div class="manual-box box-warning">
+    <mat-icon>warning</mat-icon>
+    <div>
+      <strong>Regla central:</strong>
+      las sustancias deben provenir de un catálogo real. No se deben inventar
+      sustancias, usar listas locales ficticias ni guardar selección si no existe
+      tabla o endpoint confirmado para persistir la información.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Relación funcional</h3>
+
+  <div class="manual-box box-neutral">
+    <mat-icon>account_tree</mat-icon>
+    <div>
+      <strong>Catálogo real → Sustancia principal → Sustancias secundarias → Episodio</strong>
+    </div>
+  </div>
+
+  <p>
+    Las sustancias se asocian al episodio y no a la persona de forma aislada.
+    Esto permite mantener antecedentes históricos por cada demanda o proceso de
+    atención, respetando la trazabilidad del modelo Persona → Episodio → Etapa.
+  </p>
+
+  <h3 class="manual-subtitle">Sustancia principal</h3>
+
+  <p>
+    Corresponde a la sustancia principal asociada al episodio. Debe
+    seleccionarse desde un catálogo real y quedar vinculada al episodio cuando
+    exista persistencia backend habilitada.
+  </p>
+
+  <ul class="manual-list">
+    <li>Debe existir solo una sustancia principal por episodio, salvo regla backend distinta.</li>
+    <li>Debe provenir de catálogo real entregado por backend.</li>
+    <li>Debe asociarse al episodio real consultado o creado.</li>
+    <li>No debe completarse automáticamente con valores ficticios.</li>
+    <li>No debe guardarse si no existe endpoint de persistencia confirmado.</li>
+    <li>No debe reemplazar información histórica sin autorización.</li>
+  </ul>
+
+  <div class="manual-box box-success">
+    <mat-icon>verified</mat-icon>
+    <div>
+      La sustancia principal debe permitir identificar el antecedente más
+      relevante del episodio, siempre sobre información real y trazable.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Sustancias secundarias</h3>
+
+  <p>
+    Corresponden a sustancias adicionales asociadas al episodio. Pueden
+    ordenarse según prioridad, relevancia clínica o regla institucional definida.
+  </p>
+
+  <ul class="manual-list">
+    <li>Pueden existir una o más sustancias secundarias.</li>
+    <li>Deben provenir del mismo catálogo real utilizado para la principal.</li>
+    <li>Deben mantener orden cuando corresponda.</li>
+    <li>No deben duplicar la sustancia principal.</li>
+    <li>No deben cargarse desde arreglos locales o datos hardcodeados.</li>
+    <li>No deben mostrarse si backend no entrega información real.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Comportamiento visual esperado</h3>
+
+  <p>
+    La pantalla puede permitir seleccionar una sustancia principal y ordenar
+    sustancias secundarias de forma visual, siempre dejando claro que la
+    persistencia real depende de tabla y endpoint backend confirmados.
+  </p>
+
+  <ul class="manual-list">
+    <li><strong>Selección principal:</strong> radio, botón o selector para marcar la sustancia principal.</li>
+    <li><strong>Orden secundario:</strong> click en fila o control visual para asignar orden.</li>
+    <li><strong>Indicadores visuales:</strong> chips, números o etiquetas para mostrar prioridad.</li>
+    <li><strong>Validación:</strong> impedir duplicar la sustancia principal como secundaria.</li>
+    <li><strong>Bloqueo:</strong> deshabilitar guardado si no existe backend disponible.</li>
+    <li><strong>Estado vacío:</strong> informar cuando no existan sustancias registradas.</li>
+  </ul>
+
+  <div class="manual-box box-info">
+    <mat-icon>touch_app</mat-icon>
+    <div>
+      El comportamiento visual puede quedar preparado en frontend, pero no debe
+      simular guardado ni crear registros locales si el backend aún no cuenta con
+      tabla y endpoint confirmados.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Validaciones esperadas</h3>
+
+  <ul class="manual-list">
+    <li>Debe existir persona real.</li>
+    <li>Debe existir episodio real.</li>
+    <li>Debe existir catálogo real de sustancias.</li>
+    <li>No se debe seleccionar una sustancia inexistente.</li>
+    <li>No se debe duplicar la sustancia principal como secundaria.</li>
+    <li>No se debe guardar si falta endpoint de persistencia.</li>
+    <li>No se debe completar información con datos de prueba.</li>
+    <li>Debe mostrarse estado vacío si no existen sustancias registradas.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Relación con episodio</h3>
+
+  <p>
+    Las sustancias se asocian al episodio porque forman parte del antecedente de
+    esa demanda específica. Una misma persona puede tener antecedentes históricos
+    diferentes en episodios distintos, por lo que la información debe conservarse
+    vinculada al episodio correspondiente.
+  </p>
+
+  <ul class="manual-list">
+    <li>La sustancia principal pertenece al episodio.</li>
+    <li>Las sustancias secundarias pertenecen al episodio.</li>
+    <li>No deben registrarse como dato aislado de persona sin relación con demanda.</li>
+    <li>El historial debe conservarse por episodio.</li>
+    <li>La modificación debe quedar auditada cuando exista persistencia real.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Relación con etapa y programa</h3>
+
+  <p>
+    Cuando el modelo backend lo permita, la información de sustancias puede
+    apoyar la gestión del programa responsable de la etapa activa. Sin embargo,
+    la relación principal debe mantenerse con el episodio para no perder
+    continuidad cuando exista referencia entre programas.
+  </p>
+
+  <div class="manual-box box-neutral">
+    <mat-icon>sync_alt</mat-icon>
+    <div>
+      Si la persona es referida a otro programa, la información de sustancias no
+      debe duplicarse ni reiniciarse. Debe mantenerse como antecedente del mismo
+      episodio.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Relación con indicadores</h3>
+
+  <p>
+    Cuando existan datos reales suficientes, las sustancias pueden utilizarse en
+    indicadores estratégicos y listados operativos.
+  </p>
+
+  <ul class="manual-list">
+    <li>Distribución por sustancia principal.</li>
+    <li>Distribución por sustancias secundarias.</li>
+    <li>Casos por programa y sustancia principal.</li>
+    <li>Casos críticos asociados a sustancia principal.</li>
+    <li>Comparación histórica por período.</li>
+  </ul>
+
+  <div class="manual-box box-warning">
+    <mat-icon>analytics</mat-icon>
+    <div>
+      Los indicadores por sustancias solo deben calcularse con registros reales.
+      No se deben mostrar gráficos, porcentajes ni totales si no existen datos
+      suficientes en backend.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Catálogo de sustancias</h3>
+
+  <p>
+    El catálogo de sustancias debe ser administrado desde backend o mantenedor
+    real habilitado. No corresponde crear listas locales para simular opciones
+    dentro del frontend.
+  </p>
+
+  <ul class="manual-list">
+    <li>Debe tener identificador real.</li>
+    <li>Debe tener nombre oficial de sustancia.</li>
+    <li>Debe permitir estado activo/inactivo cuando corresponda.</li>
+    <li>Debe evitar duplicidades.</li>
+    <li>Debe mantenerse trazabilidad de cambios si existe mantenedor.</li>
+  </ul>
+
+  <div class="manual-box box-warning">
+    <mat-icon>block</mat-icon>
+    <div>
+      <strong>Regla contra catálogos ficticios:</strong>
+      no se deben agregar sustancias hardcodeadas para completar la vista. Si el
+      backend no entrega catálogo, debe mostrarse estado pendiente o vacío.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Restricción actual del desarrollo</h3>
+
+  <div class="manual-box box-warning">
+    <mat-icon>storage</mat-icon>
+    <div>
+      Mientras no esté confirmada la tabla de sustancias asociadas al episodio,
+      el sistema puede mostrar la estructura visual y catálogos reales
+      disponibles, pero no debe simular guardado ni inventar registros.
+    </div>
+  </div>
+
+  <p>
+    Si existen catálogos reales disponibles, pueden utilizarse para visualización
+    o selección controlada. Sin embargo, la acción de guardar debe permanecer
+    bloqueada hasta contar con tabla y endpoint backend confirmados.
+  </p>
+
+  <h3 class="manual-subtitle">Auditoría esperada</h3>
+
+  <p>
+    Cuando exista persistencia real, toda creación, modificación o eliminación
+    de sustancias asociadas al episodio debe quedar registrada en auditoría.
+  </p>
+
+  <ul class="manual-list">
+    <li>Usuario responsable.</li>
+    <li>Rol activo utilizado.</li>
+    <li>Programa activo cuando corresponda.</li>
+    <li>Fecha y hora de la acción.</li>
+    <li>Sustancia principal anterior y nueva, cuando aplique.</li>
+    <li>Sustancias secundarias modificadas.</li>
+    <li>Motivo u observación si corresponde.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Estado vacío esperado</h3>
+
+  <div class="manual-box box-neutral">
+    <mat-icon>info</mat-icon>
+    <div>
+      No existen sustancias registradas para este episodio.
+    </div>
+  </div>
+
+</mat-card>

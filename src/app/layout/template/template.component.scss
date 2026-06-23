@@ -1,302 +1,36 @@
-// C:\Users\pjara\Documents\DESARROLLO\ANGULAR\rda-sm\src\app\layout\template\template.component.scss
+/* ======================================================
+   01. BASE GLOBAL / HOST / SCROLL
+   ====================================================== */
 
-/* ============================================
-   🎨 ESTILO GLOBAL DEL LAYOUT PRINCIPAL (SSM)
-   ============================================ */
+:host,
+:host * {
+  box-sizing: border-box;
+}
 
-/* ======== CONTENEDOR PRINCIPAL ======== */
+html,
+body,
+.sidenav-container,
+.mat-sidenav-container,
+.mat-sidenav-content {
+  overflow-x: hidden !important;
+}
+
+* {
+  scrollbar-width: thin;
+}
+
+/* ======================================================
+   02. LAYOUT PRINCIPAL
+   ====================================================== */
+
 .sidenav-container {
   height: 100vh;
+  width: 100%;
+  max-width: 100vw;
   display: flex;
   flex-direction: column;
   background-color: #f4f6f9;
-  width: 100vw;
   overflow: hidden;
-}
-
-/* ======== SIDENAV ======== */
-.sidenav {
-  width: 270px;
-  background-color: #ffffff;
-  border-right: 1px solid #e0e0e0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.08);
-}
-
-.sidenav-title {
-  background-color: #1565c0;
-  color: #fff;
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 1rem;
-  letter-spacing: 0.5px;
-  padding: 16px;
-  text-align: center;
-  border-bottom: 3px solid #0d47a1;
-}
-
-/* ======== LINKS ======== */
-mat-nav-list a[mat-list-item] {
-  color: #1a237e;
-  font-weight: 500;
-  border-radius: 4px;
-  margin: 2px 6px;
-  transition: all 0.2s ease-in-out;
-}
-
-mat-nav-list a[mat-list-item]:hover {
-  background-color: #e3f2fd;
-  color: #0d47a1;
-}
-
-mat-nav-list a.active {
-  background-color: #bbdefb;
-  color: #0d47a1;
-  font-weight: 600;
-}
-
-/* ======== ICONOS DE MENÚ ======== */
-mat-icon[matListItemIcon] {
-  color: #1565c0;
-  margin-right: 8px;
-  font-size: 20px;
-}
-
-/* ======== SUBMENÚS ======== */
-.submenu {
-  background-color: #fafafa;
-  border-radius: 6px;
-  margin: 4px 6px;
-  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.05);
-}
-
-mat-expansion-panel-header {
-  font-weight: 600;
-  color: #0d47a1;
-  background: #e3f2fd;
-  border-radius: 4px;
-}
-
-mat-expansion-panel-header:hover {
-  background-color: #bbdefb;
-}
-
-/* ======== TOPBAR ======== */
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background-color: #1565c0 !important;
-  color: white;
-  display: flex;
-  align-items: center;
-  height: 56px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  padding: 0 12px;
-  gap: 10px;
-
-  .brand {
-    font-weight: 600;
-    font-size: 1rem;
-    margin-left: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .spacer {
-    flex: 1 1 auto;
-  }
-
-  .mat-icon {
-    color: #fff;
-  }
-}
-
-/* ============================================
-   👤 SESIÓN / TIMER PROFESIONAL
-   ============================================ */
-
-.session-box {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.session-timer {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-weight: 700;
-  color: #fff;
-  background: #0d47a1;
-  border: 2px solid #bbdefb;
-  border-radius: 999px;
-  padding: 4px 12px;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-
-  mat-icon {
-    font-size: 18px;
-    height: 18px;
-    width: 18px;
-  }
-
-  &.warn {
-    background: #ff9800;
-    border-color: #ffe082;
-  }
-
-  &.critical {
-    background: #d32f2f;
-    border-color: #ffcdd2;
-  }
-}
-
-.extend-btn {
-  font-weight: 600;
-  border-radius: 999px;
-  height: 32px;
-  line-height: 24px;
-  background-color: #fff;
-  color: #1565c0 !important;
-  border-color: #1565c0 !important;
-  padding: 0 14px;
-
-  &:hover {
-    background-color: #e3f2fd;
-  }
-
-  &:disabled {
-    opacity: 0.6;
-  }
-}
-
-/* Bienvenida usuario */
-.welcome-badge {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-weight: 500;
-  margin-right: 12px;
-  color: #fff;
-  font-size: 0.9rem;
-
-  mat-icon {
-    color: #fff;
-    font-size: 18px;
-  }
-}
-
-/* ======== BOTÓN SALIR ======== */
-.logout-btn {
-  color: #fff !important;
-  font-weight: 600;
-  border-color: #bbdefb !important;
-  height: 32px;
-  line-height: 24px;
-
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-  }
-}
-
-/* ======== SNACKBARS ======== */
-::ng-deep .warn-snackbar {
-  background-color: #ff9800 !important;
-  color: #fff !important;
-}
-
-::ng-deep .error-snackbar {
-  background-color: #d32f2f !important;
-  color: #fff !important;
-}
-
-::ng-deep .success-snackbar {
-  background-color: #2e7d32 !important;
-  color: #fff !important;
-}
-
-/* ======== FOOTER ======== */
-.footer {
-  position: relative;
-  flex: 0 0 30px;
-  height: 30px;
-  width: 100%;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  text-align: center;
-  font-size: 0.75rem;
-  color: #60747b;
-  padding: 0;
-  background-color: #e8f3f5;
-  border-top: 1px solid #cfe2e6;
-  opacity: 0.85;
-
-  z-index: 1;
-}
-
-.footer p {
-  margin: 0;
-}
-
-/* ======== LOGIN / SELECCIÓN ======== */
-.login-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%);
-  padding: 1rem;
-}
-
-.login-card {
-  width: 100%;
-  max-width: 420px;
-  padding: 2.5rem 2rem;
-  border-radius: 1rem;
-  background-color: #ffffff;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-  text-align: center;
-  animation: fadeIn 0.5s ease-in-out;
-}
-
-.login-header {
-  margin-bottom: 1rem;
-
-  h2 {
-    font-weight: 600;
-    color: #0d47a1;
-    margin-bottom: 0.5rem;
-  }
-
-  p {
-    color: #555;
-    font-size: 0.95rem;
-    margin-bottom: 1rem;
-  }
-
-  .login-logo {
-    margin-bottom: 1rem;
-  }
-}
-
-.login-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 1.5rem;
-}
-
-/* =======================================================
-   🧱 CORRECCIÓN VISUAL DEL MENÚ LATERAL
-   ======================================================= */
-.mat-drawer,
-.mat-sidenav,
-.sidenav {
   border-radius: 0 !important;
 }
 
@@ -304,415 +38,44 @@ mat-expansion-panel-header:hover {
 .sidenav-container {
   border-top-left-radius: 0 !important;
   border-top-right-radius: 0 !important;
-  overflow: hidden;
 }
 
-/* Evita scroll lateral */
-html,
-body,
-.sidenav-container,
-.mat-sidenav-container {
-  overflow-x: hidden !important;
-}
-
-.sidenav-container {
-  width: 100%;
-  max-width: 100vw;
-}
-
-.mat-sidenav,
-.sidenav {
-  width: 260px;
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
-/* scrollbars */
-* {
-  scrollbar-width: thin;
-}
-
-.login-card {
-  max-width: 600px !important;
-}
-
-/* ============================================================
-   🎯 Selección de Rol y Programa — Diseño Profesional SSM
-   ============================================================ */
-
-/* Contenedor de ambas columnas */
-.role-program-row {
-  display: flex;
-  flex-direction: column; /* 🔹 UNA DEBAJO DE OTRA */
-  justify-content: center;
-  align-items: center;
-  gap: 22px; /* 🔹 Separación vertical */
-  margin-top: 18px;
-  width: 100%;
-}
-
-/* Cada item centrado */
-.role-program-item {
-  width: 260px; /* 🔹 Ancho uniforme */
-  text-align: center;
-}
-
-.role-program-item mat-form-field {
-  width: 100%;
-}
-
-/* Títulos de form-field más claros */
-.role-program-item .mat-mdc-form-field-label {
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  color: #1565c0 !important; /* Azul institucional */
-}
-
-/* --- CONTENEDOR EN COLUMNAS (ROL ARRIBA / PROGRAMA ABAJO) --- */
-.role-program-column {
-  display: flex;
+mat-sidenav-content {
+  display: flex !important;
   flex-direction: column;
-  gap: 20px;
-  width: 100%;
-  margin-top: 10px;
+  height: 100vh;
+  overflow: hidden !important;
 }
 
-/* --- CADA ITEM --- */
-.role-program-item {
-  width: 100%;
-}
-
-/* --- PROGRAMA OCUPA TODO EL ANCHO DISPONIBLE --- */
-.program-full mat-form-field {
-  width: 100% !important;
-}
-
-/* Para mantener uniformidad visual */
-mat-form-field {
-  min-width: 260px;
-}
-
-.menu-section-title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px; /* 👈 más compacto */
-  font-weight: 600;
-  color: #0d47a1;
-  text-transform: uppercase;
-  font-size: 0.75rem; /* 👈 clave */
-  background-color: #e3f2fd;
-  margin: 6px 8px;
-  border-radius: 4px;
-}
-
-.menu-section-title mat-icon {
-  font-size: 18px;
-}
-
-/* ==================================================
-   📦 MENÚ LATERAL COMPACTO (Material 3 / MDC)
-   ================================================== */
-/* ==================================================
-   🧱 MENÚ LATERAL — COMPACTO REAL (MDC FRIENDLY)
-   ================================================== */
-
-/* 🔑 ESTA ES LA CLAVE */
-mat-nav-list {
-  --mdc-list-list-item-one-line-container-height: 36px;
-  --mdc-list-list-item-two-line-container-height: 44px;
-
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-
-/* Item completo */
-mat-nav-list .mat-mdc-list-item {
-  margin: 2px 6px;
-  border-radius: 6px;
-}
-
-/* Contenido interno */
-mat-nav-list .mdc-list-item__content {
-  display: flex;
-  align-items: center;
-  padding: 0 !important;
-}
-
-/* Texto */
-mat-nav-list .mdc-list-item__primary-text {
-  font-size: 0.85rem;
-  line-height: 1;
-  font-weight: 500;
-}
-
-/* Ícono */
-mat-nav-list mat-icon {
-  font-size: 20px;
-  margin-right: 10px;
-  color: #1565c0;
-}
-
-/* Hover */
-mat-nav-list a.mat-mdc-list-item:hover {
-  background-color: #e3f2fd;
-}
-
-/* Activo */
-mat-nav-list a.active {
-  background-color: #bbdefb;
-  font-weight: 600;
-}
-
-.menu-section-title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  margin: 6px 8px;
-  border-radius: 4px;
-
-  background-color: #e3f2fd;
-  color: #0d47a1;
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-transform: uppercase;
-
-  mat-icon {
-    font-size: 18px;
-  }
-}
-
-/* ===============================
-   🛠️ MANTENEDORES COLAPSABLES
-   =============================== */
-
-.menu-section-title.collapsable {
-  cursor: pointer;
-  user-select: none;
-}
-
-/* Ícono rotatorio */
-.menu-section-title mat-icon.rotate {
-  transition: transform 0.3s ease;
-}
-
-.menu-section-title mat-icon.rotate.open {
-  transform: rotate(90deg);
-}
-
-/* Submenú compacto */
-.submenu {
-  margin-left: 8px;
-  margin-right: 8px;
-  margin-top: 4px;
-  margin-bottom: 6px;
-
-  border-left: 3px solid #bbdefb;
-  padding-left: 4px;
-}
-
-/* Más compacto aún */
-.submenu a.mat-mdc-list-item {
-  --mdc-list-list-item-one-line-container-height: 34px;
-}
-
-.menu-section-title.collapsable:hover {
-  background-color: #dbeafe;
-}
-
-/* ===============================
-   LOGOTIPO INFERIOR — SIDENAV
-   =============================== */
-
-.menu-divider {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  width: 100%;
-  padding: 12px 0;
-  overflow: hidden; /* 🔥 mata scroll horizontal */
-}
-
-.menu-divider img {
-  display: block;
-  width: 180px; /* 👈 TAMAÑO REAL DEL LOGO */
-  max-width: 90%; /* responsive */
-  height: auto;
-
-  object-fit: contain;
-}
-
-mat-sidenav,
-.mat-sidenav,
-.sidenav {
-  overflow-x: hidden !important;
-}
-
-.mat-sidenav-content,
-.mat-sidenav-container {
-  overflow-x: hidden !important;
-}
-
-.mat-sidenav-container,
-.sidenav-container {
-  overflow-x: hidden !important;
-}
-
-/* ===============================
-   ICONOS MENÚ LATERAL — PRO
-   =============================== */
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.3);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-/* ===============================
-   ⚙️ ANIMACIÓN ENGRANAJE MANTENEDORES
-   =============================== */
-
-@keyframes gear-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-.menu-section-title.animated mat-icon {
-  animation: gear-spin 6s linear infinite;
-}
-
-@keyframes gear-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* ===============================
-   📌 ÍCONOS MENÚ NORMAL
-   =============================== */
-
-mat-nav-list a.mat-mdc-list-item mat-icon {
-  transition:
-    transform 0.25s ease,
-    color 0.25s ease;
-}
-
-/* Hover */
-mat-nav-list a.mat-mdc-list-item:hover mat-icon {
-  transform: translateX(4px) scale(1.15);
-  color: #0d47a1;
-}
-
-/* Activo */
-mat-nav-list a.active mat-icon {
-  animation: menu-pulse 0.35s ease;
-}
-
-@keyframes menu-pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.25);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-/* ===============================
-   🎯 INDICADOR LATERAL ACTIVO
-   =============================== */
-
-mat-nav-list a.mat-mdc-list-item {
-  position: relative;
+.content {
+  flex: 1 1 0;
+  min-height: 0;
+  height: calc(100vh - 90px);
   overflow: hidden;
 }
-
-/* Barra azul */
-mat-nav-list a.mat-mdc-list-item::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 10%;
-  height: 80%;
-  width: 4px;
-  background-color: #1565c0;
-  border-radius: 0 4px 4px 0;
-
-  transform: scaleY(0);
-  transition: transform 0.25s ease;
-}
-
-/* Activo */
-mat-nav-list a.active::before {
-  transform: scaleY(1);
-}
-
-/* ===============================
-   🧭 TRANSICIÓN DE RUTAS
-   =============================== */
 
 .fade-route {
   animation: routeFade 0.25s ease;
 }
 
-@keyframes routeFade {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ===============================
-   ✨ MICRO INTERACCIONES MENÚ
-   =============================== */
-
-/* Hover */
-mat-nav-list a.mat-mdc-list-item:hover {
-  background-color: #e3f2fd;
-}
-
-/* Focus (teclado / accesibilidad) */
-mat-nav-list a.mat-mdc-list-item:focus-visible {
-  outline: none;
-  box-shadow: inset 0 0 0 2px #90caf9;
-  background-color: #e3f2fd;
-}
-
-/* Activo refuerzo */
-mat-nav-list a.active {
-  background-color: #bbdefb;
-  font-weight: 600;
+.fade-in {
+  animation: fadeIn 0.35s ease-in-out;
 }
 
 /* ======================================================
-   MENÚ LATERAL INSTITUCIONAL — REDISEÑO DEMANDA
+   03. MENÚ LATERAL INSTITUCIONAL
    ====================================================== */
 
-mat-sidenav {
+mat-sidenav,
+.mat-sidenav,
+.sidenav {
   width: 268px !important;
-  background: linear-gradient(180deg, #f8fbfc 0%, #eef5f6 100%);
-  border-right: 1px solid #d8e5e8;
-  box-shadow: 8px 0 28px rgba(15, 47, 61, 0.08);
+  max-width: 100%;
+  background: linear-gradient(180deg, #f8fbfc 0%, #eef5f6 100%) !important;
+  border-right: 1px solid #d8e5e8 !important;
+  border-radius: 0 !important;
+  box-shadow: 8px 0 28px rgba(15, 47, 61, 0.08) !important;
+  overflow-x: hidden !important;
 }
 
 .sidenav-brand {
@@ -729,6 +92,7 @@ mat-sidenav {
 .brand-mark {
   width: 44px;
   height: 44px;
+  min-width: 44px;
   display: grid;
   place-items: center;
   border-radius: 14px;
@@ -753,6 +117,7 @@ mat-sidenav {
     font-weight: 800;
     line-height: 1.15;
     letter-spacing: -0.02em;
+    color: #ffffff;
     white-space: normal;
   }
 
@@ -765,14 +130,20 @@ mat-sidenav {
 }
 
 .modern-nav {
-  padding: 14px 10px 10px;
+  padding: 14px 10px 10px !important;
+
+  --mdc-list-list-item-one-line-container-height: 46px;
+  --mdc-list-list-item-two-line-container-height: 46px;
 }
 
 .nav-link {
+  position: relative;
   height: 46px !important;
-  margin: 4px 0;
+  margin: 4px 0 !important;
   border-radius: 14px !important;
   color: #244650 !important;
+  overflow: hidden !important;
+
   transition:
     background 0.18s ease,
     color 0.18s ease,
@@ -786,19 +157,28 @@ mat-sidenav {
   }
 
   &.active {
-    background: linear-gradient(90deg, #dff2f4 0%, #eef9fa 100%) !important;
+    background: linear-gradient(90deg, #dff2f4 0%, #f4fbfc 100%) !important;
     color: #0f4d56 !important;
-    box-shadow: inset 4px 0 0 #0f6b75;
-    font-weight: 800;
+    box-shadow: inset 4px 0 0 #0f6b75 !important;
+    font-weight: 850 !important;
 
     .nav-icon {
       background: #0f6b75;
       color: #ffffff;
+      box-shadow: 0 6px 14px rgba(15, 107, 117, 0.25);
     }
   }
 
-  .mdc-list-item__content {
-    overflow: visible;
+  &:focus-visible {
+    outline: none;
+    box-shadow:
+      inset 4px 0 0 #0f6b75,
+      0 0 0 2px rgba(15, 107, 117, 0.22) !important;
+    background: #e5f2f4 !important;
+  }
+
+  &::before {
+    display: none !important;
   }
 }
 
@@ -812,50 +192,110 @@ mat-sidenav {
   border-radius: 11px;
   background: #eef7f7;
   color: #0f6b75;
+
   transition:
     background 0.18s ease,
-    color 0.18s ease;
+    color 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
 
   mat-icon {
     width: 20px;
     height: 20px;
     font-size: 20px;
+    margin: 0 !important;
+    color: inherit !important;
   }
+}
+
+.nav-link:hover .nav-icon {
+  background: #d8f3f1;
+  color: #0f4d56;
+  transform: scale(1.04);
 }
 
 .nav-label {
   font-size: 0.93rem;
   font-weight: 650;
+  color: inherit;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.menu-divider {
-  margin: 14px 16px 0;
-  padding: 18px 12px;
+/* Ajustes internos Material MDC */
+.modern-nav .mat-mdc-list-item {
+  --mdc-list-list-item-one-line-container-height: 46px;
+  border-radius: 14px !important;
+}
+
+.modern-nav .mdc-list-item__content {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  padding: 0 !important;
+}
+
+.modern-nav .mdc-list-item__primary-text {
+  display: flex;
+  align-items: center;
+  color: inherit !important;
+}
+
+/* Pie del menú */
+.sidenav-footer {
+  margin: auto 18px 14px;
+  padding: 12px 10px;
   border-top: 1px solid #d8e5e8;
+  color: #60747b;
   text-align: center;
 
-  img {
-    max-width: 128px;
-    opacity: 0.9;
-    filter: drop-shadow(0 6px 12px rgba(15, 47, 61, 0.12));
+  span {
+    display: block;
+    color: #0f4d56;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    font-size: 0.82rem;
+  }
+
+  small {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.72rem;
+    color: #7c9298;
   }
 }
 
+/* Logo inferior antiguo desactivado */
+.menu-divider {
+  display: none !important;
+}
+
 /* ======================================================
-   BARRA SUPERIOR INSTITUCIONAL — REDISEÑO DEMANDA
+   04. TOPBAR INSTITUCIONAL
    ====================================================== */
 
 .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   height: 60px !important;
   padding: 0 16px !important;
+  display: flex;
+  align-items: center;
+  gap: 14px;
   background: linear-gradient(135deg, #0f4d56 0%, #167386 100%) !important;
+  color: #ffffff;
   border-bottom: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow: 0 10px 28px rgba(15, 47, 61, 0.16);
-  color: #ffffff;
-  gap: 14px;
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+
+  .mat-icon {
+    color: #ffffff;
+  }
 }
 
 .menu-toggle {
@@ -864,6 +304,7 @@ mat-sidenav {
   border-radius: 14px !important;
   background: rgba(255, 255, 255, 0.12);
   color: #ffffff !important;
+
   transition:
     background 0.18s ease,
     transform 0.18s ease;
@@ -903,17 +344,39 @@ mat-sidenav {
   letter-spacing: 0.04em;
 }
 
+/* ======================================================
+   05. SESIÓN / TIMER / USUARIO
+   ====================================================== */
+
 .session-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   padding: 3px 6px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
+  flex: 0 0 auto;
 }
 
 .session-timer {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: #ffffff !important;
   background: rgba(255, 255, 255, 0.13) !important;
   border: 1px solid rgba(255, 255, 255, 0.42) !important;
-  color: #ffffff !important;
+  border-radius: 999px;
+  padding: 4px 12px;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+
+  mat-icon {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+  }
 
   &.warn {
     background: #f59e0b !important;
@@ -926,27 +389,60 @@ mat-sidenav {
   }
 }
 
+.extend-btn {
+  height: 32px;
+  line-height: 24px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-weight: 700;
+  background-color: #ffffff;
+  color: #0f6b75 !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: #e8f6f3;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
 .user-area {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  flex: 0 1 auto;
 }
 
 .welcome-badge {
   height: 34px;
+  max-width: 260px;
+  min-width: 0;
+
   display: inline-flex;
   align-items: center;
   gap: 6px;
+
   margin-right: 2px !important;
   padding: 0 12px;
   border-radius: 999px;
+
   background: rgba(255, 255, 255, 0.12);
   color: #ffffff !important;
   font-size: 0.86rem;
   font-weight: 750;
 
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
   mat-icon {
     color: #d8f3f1 !important;
+    font-size: 18px;
+    min-width: 18px;
   }
 }
 
@@ -956,6 +452,7 @@ mat-sidenav {
   border-radius: 13px !important;
   background: rgba(255, 255, 255, 0.1);
   color: #ffffff !important;
+  flex: 0 0 auto;
 
   &:hover {
     background: rgba(255, 255, 255, 0.18);
@@ -963,6 +460,40 @@ mat-sidenav {
 
   mat-icon {
     color: #ffffff !important;
+  }
+}
+
+/* Botón Cambio de clave con texto */
+.change-password-btn {
+  height: 36px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  border-color: rgba(255, 255, 255, 0.42) !important;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff !important;
+  font-weight: 800 !important;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  white-space: nowrap;
+  flex: 0 0 auto;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.18) !important;
+  }
+
+  mat-icon {
+    color: #ffffff !important;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  span {
+    line-height: 1;
   }
 }
 
@@ -974,6 +505,8 @@ mat-sidenav {
   color: #ffffff !important;
   font-weight: 800 !important;
   background: rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+  flex: 0 0 auto;
 
   &:hover {
     background: rgba(255, 255, 255, 0.18) !important;
@@ -984,72 +517,53 @@ mat-sidenav {
   }
 }
 
-@media (max-width: 760px) {
-  .system-name {
-    font-size: 0.82rem;
-  }
-
-  .program-name {
-    display: none;
-  }
-
-  .welcome-badge {
-    max-width: 110px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-}
-
 /* ======================================================
-   PIE MENÚ LATERAL — TEXTO INSTITUCIONAL
-   ====================================================== */
-
-.menu-divider {
-  display: none !important;
-}
-
-.sidenav-footer {
-  margin: 18px 18px 14px;
-  padding: 14px 12px;
-  border-top: 1px solid #d8e5e8;
-  color: #60747b;
-  text-align: center;
-
-  span {
-    display: block;
-    color: #0f4d56;
-    font-weight: 900;
-    letter-spacing: 0.08em;
-    font-size: 0.82rem;
-  }
-
-  small {
-    display: block;
-    margin-top: 4px;
-    font-size: 0.72rem;
-    color: #7c9298;
-  }
-}
-
-/* ======================================================
-   AJUSTE FOOTER — EVITA TAPAR CONTENIDO
+   06. FOOTER CONTENIDO
    ====================================================== */
 
 .footer {
+  flex: 0 0 30px;
   height: 30px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
   pointer-events: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+  font-size: 0.75rem;
+  color: #60747b;
+  padding: 0;
+  background-color: #e8f3f5;
+  border-top: 1px solid #cfe2e6;
+  opacity: 0.85;
+
+  p {
+    margin: 0;
+  }
 }
 
 /* ======================================================
-   SELECCIÓN ROL / PROGRAMA — REDISEÑO INSTITUCIONAL
+   07. SELECCIÓN ROL / PROGRAMA
    ====================================================== */
 
+.login-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .role-select-wrapper {
-  height: 100vh;
+  height: 100vh !important;
+  max-height: 100vh !important;
   width: 100%;
-  padding: 24px 18px 64px;
-  overflow: hidden;
+  padding: 18px 18px 42px !important;
+  overflow: hidden !important;
+  box-sizing: border-box;
+
   background:
     radial-gradient(
       circle at top left,
@@ -1070,15 +584,19 @@ mat-sidenav {
     );
 }
 
+.login-card,
 .role-select-card {
-  position: relative;
   width: 560px !important;
   max-width: 94vw;
-  padding: 40px 42px 38px !important;
+  max-height: calc(100vh - 72px);
+  position: relative;
+  padding: 34px 42px 38px !important;
   border-radius: 24px !important;
   background: rgba(255, 255, 255, 0.97) !important;
   color: #244650;
-  overflow: hidden;
+  text-align: center;
+  overflow: hidden !important;
+
   box-shadow:
     0 24px 70px rgba(15, 47, 61, 0.26),
     0 0 0 1px rgba(216, 229, 232, 0.9) !important;
@@ -1097,17 +615,45 @@ mat-sidenav {
   position: absolute;
   inset: 0 0 auto 0;
   height: 7px;
+  z-index: 1;
   background: linear-gradient(90deg, #0f4d56 0%, #167386 48%, #28a3a4 100%);
 }
 
-.role-select-card .login-header {
+.login-header {
+  position: relative;
+  z-index: 2;
   margin-bottom: 22px;
+
+  h2 {
+    margin: 0;
+    color: #143f49;
+    font-size: clamp(1.35rem, 2.3vw, 1.75rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1.12;
+    overflow-wrap: anywhere;
+  }
+
+  p {
+    max-width: 430px;
+    margin: 10px auto 0;
+    color: #60747b;
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
 }
 
+.login-logo,
 .role-select-card .login-logo {
-  width: 145px;
+  display: block;
+  width: 132px !important;
+  max-width: 42%;
   height: auto;
-  margin-bottom: 14px;
+  margin: 0 auto 14px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 8px 18px rgba(15, 47, 61, 0.08);
   filter: drop-shadow(0 8px 16px rgba(15, 47, 61, 0.14));
 }
 
@@ -1126,40 +672,87 @@ mat-sidenav {
   text-transform: uppercase;
 }
 
-.role-select-card .login-header h2 {
-  margin: 0;
-  color: #143f49;
-  font-size: clamp(1.35rem, 2.3vw, 1.75rem);
-  font-weight: 900;
-  letter-spacing: -0.03em;
-  line-height: 1.12;
-  overflow-wrap: anywhere;
-}
-
-.role-select-card .login-header p {
-  max-width: 430px;
-  margin: 10px auto 0;
-  color: #60747b;
-  font-size: 0.95rem;
-  line-height: 1.4;
-}
-
 .role-program-row {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
   gap: 16px !important;
   margin-top: 14px !important;
+  width: 100%;
 }
 
 .role-program-item {
   width: 100% !important;
+  text-align: left;
+
+  mat-form-field {
+    width: 100% !important;
+  }
 }
 
-.role-program-item mat-form-field {
-  width: 100% !important;
-}
-
-.role-select-card mat-form-field {
+.role-select-card mat-form-field,
+mat-form-field {
   min-width: 0 !important;
 }
+
+.login-form {
+  position: relative;
+  z-index: 2;
+}
+
+.login-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px !important;
+}
+
+.back-btn {
+  height: 44px;
+  border-radius: 14px !important;
+  color: #0f6b75 !important;
+  border-color: #b8dadd !important;
+  font-weight: 800 !important;
+  background: #ffffff;
+
+  &:hover {
+    background: #eef7f7 !important;
+  }
+}
+
+.role-select-card .login-btn,
+.login-btn {
+  min-width: 190px;
+  height: 44px;
+  border: 0;
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, #0f4d56 0%, #167386 100%) !important;
+  color: #ffffff !important;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  box-shadow: 0 12px 26px rgba(15, 77, 86, 0.26);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 34px rgba(15, 77, 86, 0.32);
+  }
+
+  &:disabled {
+    opacity: 0.58;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+}
+
+/* ======================================================
+   08. FORM FIELDS / ALERTAS SELECCIÓN
+   ====================================================== */
 
 ::ng-deep .role-select-card .mat-mdc-text-field-wrapper {
   border-radius: 14px !important;
@@ -1198,11 +791,11 @@ mat-sidenav {
   align-items: flex-start;
   text-align: left;
   font-size: 0.9rem;
-}
 
-.alert-msg mat-icon {
-  color: #ea580c;
-  margin-top: 1px;
+  mat-icon {
+    color: #ea580c;
+    margin-top: 1px;
+  }
 }
 
 .admin-msg {
@@ -1215,102 +808,8 @@ mat-sidenav {
   font-size: 0.9rem;
 }
 
-.login-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 24px !important;
-}
-
-.back-btn {
-  height: 44px;
-  border-radius: 14px !important;
-  color: #0f6b75 !important;
-  border-color: #b8dadd !important;
-  font-weight: 800 !important;
-  background: #ffffff;
-}
-
-.back-btn:hover {
-  background: #eef7f7 !important;
-}
-
-.role-select-card .login-btn {
-  min-width: 190px;
-  height: 44px;
-  border: 0;
-  border-radius: 14px !important;
-  background: linear-gradient(135deg, #0f4d56 0%, #167386 100%) !important;
-  color: #ffffff !important;
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  box-shadow: 0 12px 26px rgba(15, 77, 86, 0.26);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  cursor: pointer;
-}
-
-.role-select-card .login-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 16px 34px rgba(15, 77, 86, 0.32);
-}
-
-.role-select-card .login-btn:disabled {
-  opacity: 0.58;
-  box-shadow: none;
-  cursor: not-allowed;
-}
-
-@media (max-width: 620px) {
-  .role-select-wrapper {
-    padding: 16px 14px 48px;
-  }
-
-  .role-select-card {
-    padding: 30px 22px 30px !important;
-    border-radius: 20px !important;
-  }
-
-  .role-select-card .login-logo {
-    width: 112px;
-  }
-
-  .login-actions {
-    flex-direction: column-reverse;
-  }
-
-  .back-btn,
-  .role-select-card .login-btn {
-    width: 100%;
-  }
-}
-
 /* ======================================================
-   FIX SCROLL SELECCIÓN ROL / PROGRAMA
-   ====================================================== */
-
-:host,
-:host * {
-  box-sizing: border-box;
-}
-
-.role-select-wrapper {
-  height: 100vh !important;
-  max-height: 100vh !important;
-  overflow: hidden !important;
-  box-sizing: border-box;
-  padding: 18px 18px 42px !important;
-}
-
-.role-select-card {
-  max-height: calc(100vh - 72px);
-  overflow: hidden !important;
-}
-
-/* ======================================================
-   MODAL CONFIRMACIÓN — ESTILO RDA-SM
+   09. MODAL CONFIRMACIÓN RDA-SM
    ====================================================== */
 
 ::ng-deep .rda-confirm-dialog .mat-mdc-dialog-surface {
@@ -1342,6 +841,21 @@ mat-sidenav {
 ::ng-deep .rda-confirm-dialog .mat-mdc-dialog-content {
   color: #4b6268 !important;
   font-size: 0.95rem !important;
+  padding: 18px 28px 12px !important;
+  min-height: 58px;
+}
+
+::ng-deep .rda-confirm-dialog .mat-mdc-dialog-title {
+  padding: 22px 28px 8px !important;
+  margin: 0 !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+::ng-deep .rda-confirm-dialog .mat-mdc-dialog-actions {
+  padding: 8px 24px 22px !important;
+  gap: 10px;
 }
 
 ::ng-deep .rda-confirm-dialog button {
@@ -1365,69 +879,155 @@ mat-sidenav {
   --mdc-dialog-container-shape: 22px;
 }
 
-::ng-deep .rda-confirm-dialog .mat-mdc-dialog-title {
-  padding: 22px 28px 8px !important;
-  margin: 0 !important;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+/* ======================================================
+   10. SNACKBARS
+   ====================================================== */
+
+::ng-deep .warn-snackbar {
+  background-color: #ff9800 !important;
+  color: #ffffff !important;
 }
 
-::ng-deep .rda-confirm-dialog .mat-mdc-dialog-content {
-  padding: 18px 28px 12px !important;
-  min-height: 58px;
+::ng-deep .error-snackbar {
+  background-color: #d32f2f !important;
+  color: #ffffff !important;
 }
 
-::ng-deep .rda-confirm-dialog .mat-mdc-dialog-actions {
-  padding: 8px 24px 22px !important;
-  gap: 10px;
-}
-
-mat-sidenav-content {
-  display: flex !important;
-  flex-direction: column;
-  height: 100vh;
-  overflow: hidden !important;
-}
-
-.content {
-  flex: 1 1 0;
-  min-height: 0;
-  height: calc(100vh - 90px);
-  overflow: hidden;
-}
-
-.footer {
-  flex: 0 0 30px;
-  height: 30px;
+::ng-deep .success-snackbar {
+  background-color: #2e7d32 !important;
+  color: #ffffff !important;
 }
 
 /* ======================================================
-   FIX LOGO SELECCIÓN ROL / PROGRAMA
+   11. ANIMACIONES
    ====================================================== */
 
-.role-select-card {
-  padding-top: 34px !important;
+@keyframes routeFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.role-select-card .card-topline {
-  z-index: 1;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.role-select-card .login-header {
-  position: relative;
-  z-index: 2;
+/* ======================================================
+   12. RESPONSIVE
+   ====================================================== */
+
+@media (max-width: 1180px) {
+  .welcome-badge {
+    max-width: 210px;
+  }
+
+  .change-password-btn {
+    padding: 0 10px !important;
+  }
 }
 
-.role-select-card .login-logo {
-  display: block;
-  width: 132px !important;
-  max-width: 42%;
-  height: auto;
-  margin: 0 auto 14px;
-  padding: 8px 10px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 8px 18px rgba(15, 47, 61, 0.08);
+@media (max-width: 1100px) {
+  .welcome-badge {
+    max-width: 180px;
+  }
+
+  .change-password-btn {
+    width: 38px !important;
+    min-width: 38px !important;
+    padding: 0 !important;
+  }
+
+  .change-password-btn span {
+    display: none;
+  }
 }
 
+@media (max-width: 900px) {
+  .session-box {
+    display: none;
+  }
+
+  .welcome-badge {
+    max-width: 150px;
+  }
+}
+
+@media (max-width: 760px) {
+  mat-sidenav,
+  .mat-sidenav,
+  .sidenav {
+    width: min(280px, 88vw) !important;
+  }
+
+  .sidenav-brand {
+    min-height: 78px;
+    padding: 16px;
+  }
+
+  .brand-mark {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+
+  .brand-text strong {
+    font-size: 0.92rem;
+  }
+
+  .nav-link {
+    height: 44px !important;
+  }
+
+  .system-name {
+    font-size: 0.82rem;
+  }
+
+  .program-name {
+    display: none;
+  }
+
+  .welcome-badge {
+    max-width: 110px;
+  }
+}
+
+@media (max-width: 620px) {
+  .role-select-wrapper {
+    padding: 16px 14px 48px !important;
+  }
+
+  .role-select-card,
+  .login-card {
+    padding: 30px 22px 30px !important;
+    border-radius: 20px !important;
+  }
+
+  .role-select-card .login-logo,
+  .login-logo {
+    width: 112px !important;
+  }
+
+  .login-actions {
+    flex-direction: column-reverse;
+  }
+
+  .back-btn,
+  .role-select-card .login-btn,
+  .login-btn {
+    width: 100%;
+  }
+}

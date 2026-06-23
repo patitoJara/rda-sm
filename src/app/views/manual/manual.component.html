@@ -30,7 +30,7 @@
         </li>
         <li><a (click)="scrollTo('sustancias')">🧪 Sustancias</a></li>
         <li>
-          <a (click)="scrollTo('listado-derivacion')">📋 Listado de Demandas</a>
+          <a (click)="scrollTo('listado')">📋 Listado de Demandas</a>
         </li>
         <li>
           <a (click)="scrollTo('manual-panel-estrategico')"
@@ -64,10 +64,11 @@
 <button
   *ngIf="showIndexBtn"
   class="btn-indice"
-  mat-fab
-  color="primary"
+  mat-mini-fab
   matTooltip="Volver al índice"
+  matTooltipPosition="left"
+  aria-label="Volver al índice del manual"
   (click)="scrollTo('indice')"
 >
-  <mat-icon>arrow_upward</mat-icon>
+  <mat-icon>keyboard_arrow_up</mat-icon>
 </button>

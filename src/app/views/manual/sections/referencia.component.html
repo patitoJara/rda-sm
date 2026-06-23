@@ -1,140 +1,269 @@
-<mat-card class="manual-section" id="modulo-referencia">
+<mat-card class="manual-section" id="referencia">
+
   <div class="section-header">
     <mat-icon>sync_alt</mat-icon>
-    <h2>Módulo de Referencia de Demandante entre Programas</h2>
+    <h2>Referencia entre programas</h2>
   </div>
 
-  <!-- Caja informativa principal -->
   <div class="manual-box box-info">
-    <mat-icon>info</mat-icon>
+    <mat-icon>share</mat-icon>
     <div>
-      El módulo de Referencia permite gestionar el traslado de un demandante 
-      desde un programa activo a otro dentro del sistema RDA-SM, asegurando 
-      trazabilidad, continuidad de atención y consistencia normativa.
+      La referencia entre programas permite dar continuidad a la atención de una
+      persona cuando debe ser derivada desde un programa de origen hacia un
+      programa receptor, manteniendo la trazabilidad clínica, administrativa y
+      temporal dentro del mismo episodio de demanda.
     </div>
   </div>
-
-  <!-- Objetivo -->
-  <h3 class="manual-subtitle">Objetivo del módulo</h3>
-
-  <p>
-    La referencia está orientada a mantener la continuidad del proceso 
-    terapéutico cuando un usuario requiere cambiar de programa por razones 
-    clínicas, administrativas o territoriales.
-  </p>
-
-  <div class="manual-box box-success">
-    <mat-icon>verified</mat-icon>
-    <div>
-      La referencia no elimina información previa. El registro clínico original 
-      mantiene su historial, y el programa destino asume la continuidad del proceso.
-    </div>
-  </div>
-
-  <!-- Flujo del proceso -->
-  <h3 class="manual-subtitle">Flujo del proceso de referencia</h3>
-
-  <ul class="manual-list">
-    <li>
-      <strong>Paso 1 – Buscar RUT:</strong> se ingresa el RUT del demandante. 
-      El sistema valida formato y existencia de registros asociados.
-    </li>
-
-    <li>
-      <strong>Paso 2 – Seleccionar Registro:</strong> si existen múltiples 
-      registros, el usuario selecciona el correspondiente al programa activo.
-    </li>
-
-    <li>
-      <strong>Paso 3 – Revisión Clínica:</strong> se muestra una ficha resumen 
-      con datos del postulante y del registro actual.
-    </li>
-
-    <li>
-      <strong>Paso 4 – Programa Destino:</strong> se selecciona el programa 
-      al cual será referenciado el demandante. El sistema excluye automáticamente 
-      el programa de origen.
-    </li>
-
-    <li>
-      <strong>Paso 5 – Confirmación:</strong> se muestra un resumen de la 
-      referencia incluyendo programa destino y lista de correos que serán notificados.
-    </li>
-
-    <li>
-      <strong>Paso 6 – Ejecución:</strong> el sistema confirma la operación y 
-      registra la referencia en la bitácora del demandante.
-    </li>
-  </ul>
-
-  <!-- Notificación -->
-  <h3 class="manual-subtitle">Notificación automática</h3>
-
-  <div class="manual-box box-rule">
-    <mat-icon>mail</mat-icon>
-    <div>
-      Al ejecutar la referencia, el sistema genera una notificación por 
-      correo electrónico a:
-      <ul>
-        <li>Profesionales asociados al programa de origen</li>
-        <li>Profesionales asociados al programa destino</li>
-        <li>Usuarios con rol Supervisor</li>
-        <li>Usuarios con rol Administrador</li>
-      </ul>
-    </div>
-  </div>
-
-  <p>
-    Esta notificación informa que el demandante ha sido referenciado, 
-    facilitando la coordinación clínica entre equipos.
-  </p>
-
-  <!-- Validaciones -->
-  <h3 class="manual-subtitle">Validaciones del sistema</h3>
 
   <div class="manual-box box-warning">
     <mat-icon>warning</mat-icon>
     <div>
-      El sistema no permite ejecutar la referencia si:
-      <ul>
-        <li>No se ha seleccionado un programa destino.</li>
-        <li>El usuario no posee permisos suficientes.</li>
-        <li>El registro clínico no se encuentra vigente.</li>
-      </ul>
+      <strong>Regla central:</strong>
+      una referencia <strong>no crea un nuevo episodio</strong>. La persona
+      mantiene el mismo episodio y se genera una nueva etapa asociada al programa
+      receptor.
     </div>
   </div>
-
-  <!-- Seguridad -->
-  <h3 class="manual-subtitle">Seguridad y control</h3>
-
-  <div class="manual-box box-info">
-    <mat-icon>lock</mat-icon>
-    <div>
-      El proceso mantiene trazabilidad institucional, registrando:
-      <ul>
-        <li>Usuario que ejecuta la referencia</li>
-        <li>Programa de origen</li>
-        <li>Programa destino</li>
-        <li>Fecha y hora del evento</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- Finalización -->
-  <h3 class="manual-subtitle">Finalización del proceso</h3>
 
   <p>
-    Una vez completada la referencia, el sistema muestra un mensaje de 
-    confirmación y permite reiniciar el módulo para realizar una nueva 
-    referencia si fuese necesario.
+    La etapa del programa de origen queda cerrada o finalizada según la regla
+    definida, y la etapa receptora continúa el proceso dentro del mismo
+    episodio.
   </p>
 
-  <div class="manual-box box-success">
-    <mat-icon>check_circle</mat-icon>
+  <h3 class="manual-subtitle">Flujo general</h3>
+
+  <div class="manual-box box-neutral">
+    <mat-icon>account_tree</mat-icon>
     <div>
-      La referencia es una acción clínica formal dentro del sistema y debe ser 
-      realizada únicamente cuando exista validación profesional o administrativa 
-      correspondiente.
+      <strong>Persona → Episodio activo → Etapa origen → Referencia → Etapa receptora</strong>
     </div>
-  </div>  
+  </div>
+
+  <h3 class="manual-subtitle">Programa de origen</h3>
+
+  <p>
+    Corresponde al programa que actualmente mantiene la etapa activa de la
+    persona y que determina la necesidad de referencia hacia otro programa.
+  </p>
+
+  <ul class="manual-list">
+    <li>Registra la solicitud de referencia.</li>
+    <li>Indica el programa receptor.</li>
+    <li>Registra el motivo de referencia.</li>
+    <li>Agrega observaciones técnicas o administrativas.</li>
+    <li>Deja trazabilidad del usuario que realiza la acción.</li>
+    <li>No elimina ni reemplaza la información histórica.</li>
+    <li>No reinicia la fecha original de solicitud.</li>
+    <li>No crea una nueva demanda.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Programa receptor</h3>
+
+  <p>
+    Corresponde al programa que recibe la continuidad de atención dentro del
+    mismo episodio de demanda.
+  </p>
+
+  <ul class="manual-list">
+    <li>Recibe una nueva etapa del episodio.</li>
+    <li>Conserva la fecha original de solicitud.</li>
+    <li>No reinicia los días acumulados de espera.</li>
+    <li>Registra sus propios eventos de atención.</li>
+    <li>Gestiona el ingreso, continuidad, cierre o egreso según corresponda.</li>
+    <li>Debe poder identificar claramente el programa de origen.</li>
+  </ul>
+
+  <div class="manual-box box-success">
+    <mat-icon>verified</mat-icon>
+    <div>
+      La referencia representa continuidad de atención. No debe entenderse como
+      una demanda nueva ni como un reinicio del proceso.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Principios funcionales</h3>
+
+  <ul class="manual-list">
+    <li>La referencia representa continuidad de atención, no una demanda nueva.</li>
+    <li>El episodio sigue siendo único para la persona mientras se encuentre activo.</li>
+    <li>La fecha original de solicitud se conserva durante todo el episodio.</li>
+    <li>Los días de espera no se reinician por cambio de programa.</li>
+    <li>Los eventos, documentos, alertas y auditoría deben mantenerse asociados al episodio.</li>
+    <li>El programa receptor debe poder identificar claramente desde dónde fue referida la persona.</li>
+    <li>La referencia debe quedar registrada como hito trazable del episodio.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Datos mínimos de una referencia</h3>
+
+  <ul class="manual-list">
+    <li><strong>Identificador de la persona:</strong> relación con persona real.</li>
+    <li><strong>Identificador del episodio:</strong> episodio activo asociado.</li>
+    <li><strong>Etapa de origen:</strong> etapa desde la cual se referencia.</li>
+    <li><strong>Programa de origen:</strong> programa que emite la referencia.</li>
+    <li><strong>Programa receptor:</strong> programa que recibe la continuidad.</li>
+    <li><strong>Fecha de referencia:</strong> fecha en que se registra el movimiento.</li>
+    <li><strong>Motivo de referencia:</strong> causal o fundamento del traslado.</li>
+    <li><strong>Observación o fundamento:</strong> detalle técnico o administrativo.</li>
+    <li><strong>Estado de la referencia:</strong> situación actual del movimiento.</li>
+    <li><strong>Usuario responsable:</strong> usuario que registra la acción.</li>
+    <li><strong>Fecha de creación y actualización:</strong> trazabilidad temporal.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Estados esperados</h3>
+
+  <ul class="manual-list">
+    <li><strong>Pendiente de envío:</strong> referencia preparada, aún no enviada formalmente.</li>
+    <li><strong>Enviada:</strong> referencia emitida por el programa de origen.</li>
+    <li><strong>Recibida:</strong> programa receptor toma conocimiento del caso.</li>
+    <li><strong>Observada:</strong> referencia con observaciones o devolución.</li>
+    <li><strong>Aceptada:</strong> programa receptor acepta continuidad del proceso.</li>
+    <li><strong>Rechazada o no corresponde:</strong> debe existir causal formal.</li>
+    <li><strong>Anulada:</strong> solo por perfil autorizado y con auditoría.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Validaciones esperadas</h3>
+
+  <ul class="manual-list">
+    <li>Debe existir persona real.</li>
+    <li>Debe existir episodio activo real.</li>
+    <li>Debe existir etapa de origen real.</li>
+    <li>Debe seleccionarse programa receptor válido.</li>
+    <li>Debe registrarse motivo de referencia.</li>
+    <li>No debe permitirse referencia hacia el mismo programa sin regla definida.</li>
+    <li>No debe crearse un nuevo episodio por referencia.</li>
+    <li>No debe guardarse referencia si no existe endpoint real confirmado.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Relación con la etapa por programa</h3>
+
+  <p>
+    La referencia está directamente relacionada con la etapa del episodio. Al
+    referir a una persona, el sistema debe mantener el episodio y registrar el
+    cambio de responsabilidad desde una etapa de origen hacia una nueva etapa
+    receptora.
+  </p>
+
+  <p>
+    Este comportamiento permite conocer el recorrido completo de la persona por
+    los distintos programas, sin perder la historia ni duplicar demandas.
+  </p>
+
+  <div class="manual-box box-info">
+    <mat-icon>alt_route</mat-icon>
+    <div>
+      La etapa de origen se cierra o finaliza según corresponda, y la etapa
+      receptora continúa dentro del mismo episodio.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Relación con eventos</h3>
+
+  <p>
+    La referencia debe quedar reflejada como un hito dentro del episodio. Los
+    eventos posteriores deben asociarse a la etapa que corresponda, permitiendo
+    diferenciar qué acciones fueron realizadas por el programa de origen y
+    cuáles por el programa receptor.
+  </p>
+
+  <ul class="manual-list">
+    <li>Evento de referencia enviada.</li>
+    <li>Evento de recepción por programa receptor.</li>
+    <li>Evento de observación o devolución, si corresponde.</li>
+    <li>Evento de aceptación o continuidad de atención.</li>
+    <li>Evento de rechazo o no corresponde, cuando exista causal formal.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Relación con documentos</h3>
+
+  <p>
+    Los documentos asociados al episodio deben mantenerse disponibles durante la
+    referencia. El programa receptor debe poder consultar la información
+    necesaria para dar continuidad a la atención, según permisos y reglas de
+    acceso definidas.
+  </p>
+
+  <p>
+    La referencia no debe duplicar documentos ni romper la relación histórica
+    del episodio.
+  </p>
+
+  <h3 class="manual-subtitle">Relación con indicadores</h3>
+
+  <p>
+    La referencia no debe reiniciar los indicadores de espera. El cálculo debe
+    considerar la fecha original de solicitud del episodio y no la fecha de
+    recepción por el nuevo programa.
+  </p>
+
+  <div class="manual-box box-warning">
+    <mat-icon>timer</mat-icon>
+    <div>
+      El KPI de espera se detiene cuando existe ingreso efectivo a tratamiento,
+      no simplemente por el envío de una referencia.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Auditoría de referencia</h3>
+
+  <p>
+    Toda referencia debe quedar registrada con trazabilidad completa para
+    reconstruir el movimiento entre programas.
+  </p>
+
+  <ul class="manual-list">
+    <li>Usuario que registra la referencia.</li>
+    <li>Rol activo utilizado.</li>
+    <li>Programa de origen.</li>
+    <li>Programa receptor.</li>
+    <li>Fecha y hora de registro.</li>
+    <li>Motivo de referencia.</li>
+    <li>Estado anterior y nuevo estado cuando corresponda.</li>
+    <li>Observaciones o fundamento técnico.</li>
+  </ul>
+
+  <div class="manual-box box-warning">
+    <mat-icon>block</mat-icon>
+    <div>
+      <strong>Restricción actual del desarrollo:</strong>
+      actualmente aún no se cuenta con acceso confirmado a las tablas nuevas del
+      modelo de referencia. Por esta razón, el frontend no debe simular
+      referencias, no debe usar mocks y no debe inventar datos.
+    </div>
+  </div>
+
+  <div class="manual-box box-warning">
+    <mat-icon>storage</mat-icon>
+    <div>
+      Mientras el backend no confirme tablas y endpoints, la pantalla debe
+      mostrar únicamente información real proveniente del modelo antiguo
+      disponible o de servicios reales ya habilitados.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Regla contra datos ficticios</h3>
+
+  <p>
+    Si no existen referencias reales entregadas por backend, el sistema debe
+    mostrar un estado vacío controlado. No se deben mostrar ejemplos, registros
+    de prueba, nombres ficticios, programas simulados ni estados inventados.
+  </p>
+
+  <h3 class="manual-subtitle">Estado vacío esperado</h3>
+
+  <div class="manual-box box-neutral">
+    <mat-icon>info</mat-icon>
+    <div>
+      No existen referencias registradas para este episodio.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Resultado esperado para el usuario</h3>
+
+  <p>
+    El usuario debe poder comprender el recorrido de la persona entre programas,
+    identificar el origen de la referencia, conocer el programa receptor y
+    revisar la continuidad del episodio sin perder trazabilidad.
+  </p>
+
 </mat-card>

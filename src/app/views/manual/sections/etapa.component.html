@@ -1,15 +1,232 @@
-<h3 class="manual-subtitle">Etapa por programa</h3>
+<mat-card class="manual-section" id="etapa">
 
-<p>
-  La etapa representa el tramo del episodio bajo responsabilidad de un programa.
-  Cuando existe una referencia, se cierra la etapa de origen y se crea una nueva
-  etapa receptora dentro del mismo episodio.
-</p>
-
-<div class="manual-box box-rule">
-  <mat-icon>account_tree</mat-icon>
-  <div>
-    La referencia no crea un nuevo episodio. Mantiene la fecha original de
-    solicitud y no reinicia el conteo acumulado de días.
+  <div class="section-header">
+    <mat-icon>account_tree</mat-icon>
+    <h2>Etapa por programa</h2>
   </div>
-</div>
+
+  <div class="manual-box box-info">
+    <mat-icon>route</mat-icon>
+    <div>
+      La Etapa representa la permanencia de una persona dentro de un programa
+      específico durante un episodio. Un episodio puede tener una o más etapas a
+      lo largo de su recorrido, especialmente cuando existen referencias entre
+      programas.
+    </div>
+  </div>
+
+  <div class="manual-box box-warning">
+    <mat-icon>warning</mat-icon>
+    <div>
+      <strong>Regla central:</strong>
+      la etapa pertenece a un episodio. Una referencia entre programas no crea
+      un episodio nuevo, sino que cierra o finaliza la etapa de origen y genera
+      una nueva etapa receptora dentro del mismo episodio.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Relación funcional</h3>
+
+  <div class="manual-box box-neutral">
+    <mat-icon>alt_route</mat-icon>
+    <div>
+      <strong>Episodio → Etapa origen → Referencia → Etapa receptora</strong>
+    </div>
+  </div>
+
+  <p>
+    La etapa permite identificar qué programa es responsable de la gestión del
+    caso en un momento determinado del episodio. Cuando la persona cambia de
+    programa mediante una referencia, el sistema mantiene el mismo episodio y
+    registra una nueva etapa asociada al programa receptor.
+  </p>
+
+  <h3 class="manual-subtitle">Datos mínimos de etapa</h3>
+
+  <ul class="manual-list">
+    <li><strong>Identificador de etapa:</strong> código único de la etapa dentro del episodio.</li>
+    <li><strong>Identificador de episodio:</strong> relación directa con el episodio real.</li>
+    <li><strong>Programa asociado:</strong> programa responsable de la etapa.</li>
+    <li><strong>Fecha de inicio de etapa:</strong> fecha en que comienza la responsabilidad del programa.</li>
+    <li><strong>Fecha de término de etapa:</strong> fecha de cierre, término o referencia cuando corresponda.</li>
+    <li><strong>Estado de la etapa:</strong> situación actual dentro del programa.</li>
+    <li><strong>Responsable o equipo asociado:</strong> profesional, equipo o unidad vinculada si existe.</li>
+    <li><strong>Observación de etapa:</strong> antecedente técnico o administrativo relevante.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Estados esperados</h3>
+
+  <ul class="manual-list">
+    <li><strong>Pendiente de ingreso:</strong> etapa creada, pero aún sin ingreso efectivo.</li>
+    <li><strong>En espera:</strong> persona pendiente de atención o ingreso.</li>
+    <li><strong>En evaluación:</strong> etapa en proceso de revisión técnica o clínica.</li>
+    <li><strong>En tratamiento:</strong> persona con ingreso efectivo a tratamiento.</li>
+    <li><strong>Referida a otro programa:</strong> etapa origen cerrada por referencia.</li>
+    <li><strong>Cerrada:</strong> etapa finalizada por causal formal.</li>
+    <li><strong>Egresada:</strong> salida formal del proceso cuando corresponda.</li>
+    <li><strong>No corresponde:</strong> cierre con causal obligatoria.</li>
+    <li><strong>No es perfil:</strong> cierre inmediato cuando la regla institucional lo permita.</li>
+  </ul>
+
+  <div class="manual-box box-success">
+    <mat-icon>verified</mat-icon>
+    <div>
+      El término correcto para salida formal del proceso es
+      <strong>Egreso</strong>. No se debe utilizar “Alta” en el sistema ni en el
+      manual.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Etapa activa</h3>
+
+  <p>
+    La etapa activa representa el programa responsable actual dentro del
+    episodio. Debe existir solo una etapa activa principal para la gestión
+    operativa del caso, salvo reglas explícitas definidas por backend.
+  </p>
+
+  <ul class="manual-list">
+    <li>Permite identificar el programa responsable vigente.</li>
+    <li>Permite asociar eventos actuales al programa correcto.</li>
+    <li>Permite visualizar el estado operativo de la demanda.</li>
+    <li>No debe crearse etapa activa ficticia si backend no entrega datos.</li>
+    <li>No debe duplicarse una etapa activa sin regla backend confirmada.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Etapa de origen</h3>
+
+  <p>
+    La etapa de origen corresponde al programa que deriva, referencia o cierra
+    su participación dentro del episodio.
+  </p>
+
+  <ul class="manual-list">
+    <li>Corresponde al programa que deriva o referencia.</li>
+    <li>Debe dejar trazabilidad de su cierre o término.</li>
+    <li>No elimina eventos registrados.</li>
+    <li>No borra documentos ni historial.</li>
+    <li>No reinicia la fecha original de solicitud.</li>
+    <li>No crea una nueva demanda por sí misma.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Etapa receptora</h3>
+
+  <p>
+    La etapa receptora corresponde al programa que recibe la continuidad de
+    atención dentro del mismo episodio.
+  </p>
+
+  <ul class="manual-list">
+    <li>Se crea dentro del mismo episodio.</li>
+    <li>Debe conocer el programa de origen.</li>
+    <li>Continúa el proceso de atención.</li>
+    <li>Registra sus propios eventos.</li>
+    <li>Conserva la fecha original de solicitud del episodio.</li>
+    <li>No reinicia los días acumulados de espera.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Relación con referencias</h3>
+
+  <p>
+    La referencia entre programas se representa funcionalmente como el paso
+    desde una etapa de origen hacia una etapa receptora. Este movimiento debe
+    mantener la continuidad del episodio y conservar la trazabilidad completa.
+  </p>
+
+  <div class="manual-box box-info">
+    <mat-icon>sync_alt</mat-icon>
+    <div>
+      La referencia no debe generar un nuevo episodio. Debe registrar el cambio
+      de responsabilidad entre programas dentro del mismo episodio.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Relación con eventos</h3>
+
+  <p>
+    Los eventos deben asociarse al episodio y, cuando corresponda, a la etapa
+    donde ocurren. Esto permite diferenciar acciones realizadas por cada
+    programa durante el recorrido de la persona.
+  </p>
+
+  <ul class="manual-list">
+    <li>Evento de inicio de etapa.</li>
+    <li>Evento de evaluación.</li>
+    <li>Evento de ingreso a tratamiento.</li>
+    <li>Evento de inasistencia.</li>
+    <li>Evento de referencia enviada.</li>
+    <li>Evento de recepción por programa receptor.</li>
+    <li>Evento de cierre o egreso.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Ingreso a tratamiento</h3>
+
+  <p>
+    Cuando una etapa registra ingreso efectivo a tratamiento, se detiene el KPI
+    de espera del episodio. Este hito debe quedar trazado como evento o cambio
+    de estado real según el modelo backend disponible.
+  </p>
+
+  <div class="manual-box box-success">
+    <mat-icon>play_circle</mat-icon>
+    <div>
+      El ingreso a tratamiento es el hito que detiene el cálculo de espera. Una
+      referencia, cambio de etapa o derivación no debe detener por sí sola este
+      indicador.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Cierre de etapa</h3>
+
+  <p>
+    Una etapa puede cerrarse por referencia, egreso, causal administrativa,
+    causal técnica o por reglas institucionales definidas. El cierre de una
+    etapa no debe borrar el historial ni los eventos asociados.
+  </p>
+
+  <ul class="manual-list">
+    <li><strong>Referencia:</strong> cierra la etapa origen y crea etapa receptora.</li>
+    <li><strong>Egreso:</strong> formaliza salida del proceso cuando corresponda.</li>
+    <li><strong>No corresponde:</strong> exige causal formal.</li>
+    <li><strong>No es perfil:</strong> puede cerrar inmediatamente según regla definida.</li>
+    <li><strong>Inasistencias:</strong> pueden derivar en cierre por inasistencias según validación.</li>
+  </ul>
+
+  <h3 class="manual-subtitle">Auditoría de etapa</h3>
+
+  <p>
+    Los cambios relevantes de una etapa deben quedar registrados en auditoría.
+    Esto incluye creación, cambio de estado, referencia, cierre, egreso y
+    reversas autorizadas.
+  </p>
+
+  <ul class="manual-list">
+    <li>Usuario responsable.</li>
+    <li>Rol activo utilizado.</li>
+    <li>Programa activo.</li>
+    <li>Fecha y hora de la acción.</li>
+    <li>Estado anterior y nuevo estado cuando corresponda.</li>
+    <li>Motivo o causal de cambio.</li>
+  </ul>
+
+  <div class="manual-box box-warning">
+    <mat-icon>block</mat-icon>
+    <div>
+      <strong>Restricción actual:</strong>
+      mientras no exista acceso confirmado a las tablas nuevas de etapas, la
+      pantalla debe mostrar únicamente información real entregada por backend.
+      Si no existe etapa activa, debe mostrarse un estado vacío controlado.
+      No se deben usar mocks, datos inventados ni etapas simuladas.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Estado vacío esperado</h3>
+
+  <div class="manual-box box-neutral">
+    <mat-icon>info</mat-icon>
+    <div>
+      No existe etapa activa cargada para este episodio.
+    </div>
+  </div>
+
+</mat-card>

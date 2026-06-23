@@ -10,8 +10,21 @@
     <div>
       El Panel Estratégico consolida información relevante del programa,
       permitiendo el análisis dinámico de indicadores clave para la toma
-      de decisiones clínicas, técnicas y administrativas.  
-      Todos los cálculos se actualizan en tiempo real según los filtros aplicados.
+      de decisiones clínicas, técnicas, administrativas y estratégicas.
+      Todos los cálculos deben actualizarse según los filtros aplicados y
+      deben basarse exclusivamente en datos reales entregados por el backend.
+    </div>
+  </div>
+
+  <div class="manual-box box-warning">
+    <mat-icon>warning</mat-icon>
+    <div>
+      <strong>Restricción actual:</strong>
+      mientras no se tenga acceso confirmado a las tablas nuevas del modelo
+      Persona → Episodio → Etapa → Eventos → Referencias, el panel debe operar
+      únicamente con información real disponible en el modelo antiguo o en
+      endpoints reales ya habilitados. No se deben usar mocks, datos ficticios,
+      totales simulados ni gráficos construidos con arreglos locales.
     </div>
   </div>
 
@@ -20,54 +33,67 @@
   <p>
     El panel incorpora filtros que permiten segmentar la información
     mostrada en los indicadores y gráficos. Estos filtros operan de forma
-    dinámica y recalculan automáticamente todos los resultados visualizados.
+    dinámica y recalculan automáticamente todos los resultados visualizados,
+    siempre que exista información real disponible para realizar el cálculo.
   </p>
 
   <ul class="manual-list">
-    <li><strong>Año:</strong> Filtra los registros según el año de atención.</li>
+    <li><strong>Año:</strong> Filtra los registros según el año de atención o registro disponible.</li>
     <li><strong>Mes:</strong> Permite acotar la visualización a un mes específico.</li>
     <li>
-      <strong>Estado Demanda:</strong> Segmenta la información según el estado del registro
-      (Aceptado, En Trámite, No Aceptado).
+      <strong>Estado Demanda:</strong> Segmenta la información según el estado
+      real informado por backend.
     </li>
+    <li><strong>Programa:</strong> Permite analizar la demanda asociada a un programa específico.</li>
+    <li><strong>Casos críticos:</strong> Permite identificar registros con espera mayor a 60 días.</li>
   </ul>
 
   <div class="manual-box box-success">
     <mat-icon>filter_alt</mat-icon>
     <div>
-      Las comparaciones de estado se realizan mediante normalización automática
-      (mayúsculas y eliminación de acentos), garantizando coherencia en los resultados
-      incluso ante diferencias de formato en los datos.
+      Las comparaciones de estado deben realizarse mediante normalización
+      automática, considerando mayúsculas, minúsculas y eliminación de acentos,
+      para garantizar coherencia en los resultados incluso ante diferencias de
+      formato en los datos reales.
     </div>
   </div>
 
   <p>
     El botón <strong>“Mostrar todo”</strong> restablece los filtros a su
-    condición inicial, eliminando cualquier restricción y mostrando
-    la totalidad de los registros disponibles.
+    condición inicial, eliminando cualquier restricción y mostrando la totalidad
+    de los registros disponibles entregados por backend.
   </p>
 
   <h3 class="manual-subtitle">Indicadores disponibles</h3>
 
   <ul class="manual-list">
     <li><strong>Total de demandas activas:</strong> Cantidad de registros vigentes según filtros aplicados.</li>
-    <li><strong>Promedio de espera general:</strong> Días promedio entre fecha de registro y fecha actual.</li>
-    <li><strong>Promedio de espera mensual:</strong> Cálculo promedio agrupado por mes de atención.</li>
+    <li><strong>Episodios activos:</strong> Total de episodios reales que se encuentren abiertos o vigentes.</li>
+    <li><strong>Personas en espera:</strong> Personas que aún no registran ingreso efectivo a tratamiento.</li>
+    <li><strong>Casos críticos:</strong> Demandas con espera superior a 60 días.</li>
+    <li><strong>Promedio de espera general:</strong> Días promedio entre fecha original de solicitud y fecha de cálculo.</li>
+    <li><strong>Promedio de espera mensual:</strong> Cálculo promedio agrupado por mes de atención o registro.</li>
     <li><strong>Promedio de espera por programa:</strong> Comparación de tiempos promedio entre programas.</li>
-    <li><strong>Distribución por sustancia principal.</strong></li>
-    <li><strong>Distribución por sustancias secundarias.</strong></li>
+    <li><strong>Distribución por sustancia principal:</strong> Solo cuando exista información real registrada.</li>
+    <li><strong>Distribución por sustancias secundarias:</strong> Solo cuando exista información real registrada.</li>
+    <li><strong>Referencias entre programas:</strong> Cantidad de movimientos reales entre programas.</li>
+    <li><strong>Egresos registrados:</strong> Casos con salida formal del proceso.</li>
+    <li><strong>Cierres formales:</strong> Casos cerrados por causal administrativa, técnica o clínica.</li>
   </ul>
 
   <div class="manual-box box-info">
     <mat-icon>visibility</mat-icon>
     <div>
-      Cada indicador principal incorpora un botón de visualización (ícono <mat-icon style="font-size:14px; vertical-align:middle;">visibility</mat-icon>)
+      Cada indicador principal puede incorporar un botón de visualización
+      (ícono <mat-icon style="font-size:14px; vertical-align:middle;">visibility</mat-icon>)
       que permite desplegar el detalle del cálculo realizado.
       Esta funcionalidad entrega trazabilidad completa mostrando:
       <ul style="margin-top:6px;">
         <li>Total de casos considerados.</li>
         <li>Total de días acumulados.</li>
         <li>Promedio calculado.</li>
+        <li>Filtros aplicados.</li>
+        <li>Fuente real de información utilizada.</li>
       </ul>
     </div>
   </div>
@@ -75,12 +101,36 @@
   <div class="manual-box box-info">
     <mat-icon>timeline</mat-icon>
     <div>
-      Los gráficos de tendencia mensual y comparación por programa
-      permiten identificar variaciones en los tiempos de espera,
-      facilitando la detección temprana de brechas asistenciales
-      y apoyando la planificación estratégica.
+      Los gráficos de tendencia mensual y comparación por programa permiten
+      identificar variaciones en los tiempos de espera, facilitando la detección
+      temprana de brechas asistenciales y apoyando la planificación estratégica.
+      Si no existen datos reales suficientes, el gráfico debe mostrar un estado
+      vacío controlado.
     </div>
   </div>
+
+  <h3 class="manual-subtitle">Reglas funcionales del panel</h3>
+
+  <ul class="manual-list">
+    <li>
+      <strong>Caso crítico:</strong> corresponde a una espera mayor a 60 días.
+    </li>
+    <li>
+      <strong>Fecha original de solicitud:</strong> no debe reiniciarse por referencia entre programas.
+    </li>
+    <li>
+      <strong>KPI de espera:</strong> se detiene con ingreso efectivo a tratamiento.
+    </li>
+    <li>
+      <strong>Referencia:</strong> no crea un nuevo episodio, solo genera una nueva etapa receptora.
+    </li>
+    <li>
+      <strong>Egreso:</strong> es el término correcto para la salida formal del proceso cuando corresponde.
+    </li>
+    <li>
+      <strong>Inasistencias:</strong> deben registrarse como eventos trazables del episodio.
+    </li>
+  </ul>
 
   <h3 class="manual-subtitle">Transparencia y Trazabilidad</h3>
 
@@ -97,9 +147,35 @@
   </div>
 
   <p>
-    Esta metodología asegura coherencia estadística y permite validar
-    la consistencia de los indicadores mostrados en pantalla.
+    Esta metodología asegura coherencia estadística y permite validar la
+    consistencia de los indicadores mostrados en pantalla. Los casos
+    considerados en cada cálculo deben provenir de registros reales y no de
+    datos simulados.
   </p>
+
+  <h3 class="manual-subtitle">Estados vacíos controlados</h3>
+
+  <p>
+    Cuando el backend no entregue información suficiente para calcular un
+    indicador, el sistema debe mostrar un mensaje institucional claro.
+  </p>
+
+  <div class="manual-box box-neutral">
+    <mat-icon>info</mat-icon>
+    <div>
+      No existen datos suficientes para calcular este indicador.
+    </div>
+  </div>
+
+  <div class="manual-box box-warning">
+    <mat-icon>block</mat-icon>
+    <div>
+      No se deben mostrar totales de ejemplo, porcentajes inventados, gráficos
+      con datos falsos ni métricas calculadas sobre mocks. Si el dato no existe
+      en backend, el indicador debe quedar vacío, bloqueado o pendiente de
+      integración.
+    </div>
+  </div>
 
   <h3 class="manual-subtitle">Proyección de desarrollo</h3>
 
@@ -108,12 +184,17 @@
     <li>Resultados clínicos consolidados por período.</li>
     <li>Indicadores comparativos entre programas.</li>
     <li>Exportación de reportes estratégicos.</li>
+    <li>Indicadores de referencia emitida y recibida.</li>
+    <li>Indicadores de episodios con más de una etapa.</li>
+    <li>Indicadores de cierre por causal formal.</li>
+    <li>Indicadores de egreso por programa y período.</li>
   </ul>
 
   <p>
     El Panel Estratégico evolucionará progresivamente incorporando nuevos
     indicadores que fortalezcan el control de gestión, la planificación
-    estratégica y la mejora continua de la calidad asistencial.
+    estratégica y la mejora continua de la calidad asistencial, siempre sobre
+    datos reales y estructuras confirmadas por backend/base de datos.
   </p>
 
 </mat-card>
