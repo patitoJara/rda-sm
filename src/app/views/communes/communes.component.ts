@@ -1,12 +1,19 @@
 // src/app/pages/communes/communes.component.ts
-import { Component, AfterViewInit, ViewChild, inject, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  AfterViewInit,
+  ViewChild,
+  inject,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+import { MatIconModule } from '@angular/material/icon';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule, SortDirection } from '@angular/material/sort';
-import { MatIconModule } from '@angular/material/icon';
+
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -16,6 +23,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { merge } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { MatCardModule } from '@angular/material/card';
 
 import { CommuneService } from '../../services/comunes.service';
 import { CommunesDialogComponent } from './communes.dialog';
@@ -28,14 +36,32 @@ import { Commune } from '../../models/commune';
   templateUrl: './communes.component.html',
   styleUrls: ['./communes.component.scss'],
   imports: [
-    CommonModule, FormsModule,
-    MatTableModule, MatPaginatorModule, MatSortModule,
-    MatIconModule, MatButtonModule, MatFormFieldModule, MatInputModule,
-    MatTooltipModule, MatProgressBarModule, MatChipsModule, MatDialogModule
-  ]
+    CommonModule,
+    FormsModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatIconModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatTooltipModule,
+    MatProgressBarModule,
+    MatChipsModule,
+    MatDialogModule,
+    MatCardModule,
+  ],
 })
 export class CommunesComponent implements AfterViewInit {
-  displayedColumns = ['id','name','createdAt','updatedAt','deletedAt','estado','acciones'];
+  displayedColumns = [
+    'id',
+    'name',
+    'createdAt',
+    'updatedAt',
+    'deletedAt',
+    'estado',
+    'acciones',
+  ];
   dataSource = new MatTableDataSource<Commune>([]);
   loading = false;
   total = 0;
@@ -44,7 +70,7 @@ export class CommunesComponent implements AfterViewInit {
   q = '';
 
   /** Estado del filtro */
-  filterState: 'all'|'active'|'deleted' = 'active';
+  filterState: 'all' | 'active' | 'deleted' = 'active';
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -61,7 +87,9 @@ export class CommunesComponent implements AfterViewInit {
     this.sort.direction = 'asc' as SortDirection;
 
     this.sort.sortChange.subscribe(() => this.paginator.firstPage());
-    merge(this.sort.sortChange, this.paginator.page).subscribe(() => this.load());
+    merge(this.sort.sortChange, this.paginator.page).subscribe(() =>
+      this.load(),
+    );
 
     this.load();
     this.cdr.detectChanges();
@@ -69,12 +97,18 @@ export class CommunesComponent implements AfterViewInit {
 
   private mapSortField(active?: string): string {
     switch (active) {
-      case 'id':        return 'id';
-      case 'name':      return 'name';
-      case 'createdAt': return 'createdAt';
-      case 'updatedAt': return 'updatedAt';
-      case 'deletedAt': return 'deletedAt';
-      default:          return 'id';
+      case 'id':
+        return 'id';
+      case 'name':
+        return 'name';
+      case 'createdAt':
+        return 'createdAt';
+      case 'updatedAt':
+        return 'updatedAt';
+      case 'deletedAt':
+        return 'deletedAt';
+      default:
+        return 'id';
     }
   }
 
@@ -90,18 +124,21 @@ export class CommunesComponent implements AfterViewInit {
     const sortParam = `${sortField},${direction}`;
 
     //  this.api.getAllPaginated({ page, size })
-    this.api.listPaginated({ page, size, sort: sortParam, q: this.q })
+    this.api
+      .listPaginated({ page, size, sort: sortParam, q: this.q })
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (res: any) => {
-          const rows: Commune[] = Array.isArray(res) ? res : (res?.content ?? []);
+          const rows: Commune[] = Array.isArray(res)
+            ? res
+            : (res?.content ?? []);
 
           // aplicar filtro de estado
           let filtered: Commune[];
           if (this.filterState === 'deleted') {
-            filtered = rows.filter(r => !!r.deletedAt);
+            filtered = rows.filter((r) => !!r.deletedAt);
           } else if (this.filterState === 'active') {
-            filtered = rows.filter(r => !r.deletedAt);
+            filtered = rows.filter((r) => !r.deletedAt);
           } else {
             filtered = rows;
           }
@@ -109,19 +146,25 @@ export class CommunesComponent implements AfterViewInit {
           this.dataSource.data = filtered;
           this.total = res?.totalElements ?? filtered.length;
         },
-        error: (err) => console.error('Error cargando comunas:', err)
+        error: (err) => console.error('Error cargando comunas:', err),
       });
   }
 
   /** Ordenamiento en cliente */
   private getFieldValue(row: Commune, field: string): any {
     switch (field) {
-      case 'id':        return row.id;
-      case 'name':      return row.name;
-      case 'createdAt': return row.createdAt;
-      case 'updatedAt': return row.updatedAt;
-      case 'deletedAt': return row.deletedAt;
-      default:          return row.id;
+      case 'id':
+        return row.id;
+      case 'name':
+        return row.name;
+      case 'createdAt':
+        return row.createdAt;
+      case 'updatedAt':
+        return row.updatedAt;
+      case 'deletedAt':
+        return row.deletedAt;
+      default:
+        return row.id;
     }
   }
 
@@ -133,23 +176,25 @@ export class CommunesComponent implements AfterViewInit {
   }
 
   /** Cambiar estado */
-  setState(state: 'all'|'active'|'deleted'): void {
+  setState(state: 'all' | 'active' | 'deleted'): void {
     this.q = '';
     this.filterState = state;
     this.paginator.firstPage();
     this.load();
   }
 
-  refresh(): void { this.load(); }
+  refresh(): void {
+    this.load();
+  }
 
   openDialog(row?: Commune): void {
     setTimeout(() => {
       const ref = this.dialog.open(CommunesDialogComponent, {
-        width: '560px',
+        width: '500px',
         maxWidth: '95vw',
         panelClass: 'communes-dialog',
         backdropClass: 'app-backdrop',
-        data: row ?? null
+        data: row ?? null,
       });
 
       ref.afterClosed().subscribe((result?: Commune) => {
@@ -160,8 +205,11 @@ export class CommunesComponent implements AfterViewInit {
 
   softDelete(row: Commune): void {
     const ref = this.dialog.open(ConfirmDialogComponent, {
-      width: '420px',
+      width: '460px',
+      maxWidth: '95vw',
       disableClose: true,
+      panelClass: 'rda-confirm-dialog',
+      backdropClass: 'app-backdrop',
       data: {
         title: 'Eliminar comuna',
         message: `¿Seguro que deseas eliminar “${row.name}” (ID: ${row.id})?`,
@@ -169,12 +217,13 @@ export class CommunesComponent implements AfterViewInit {
         cancelText: 'Cancelar',
         color: 'warn',
         icon: 'delete',
-        dense: true
-      }
+        dense: true,
+      },
     });
-
     ref.afterClosed().subscribe((ok: boolean) => {
-      if (ok) this.api.delete(Number(row.id)).subscribe(() => this.load());
+      if (ok) {
+        this.api.delete(Number(row.id)).subscribe(() => this.load());
+      }
     });
   }
 

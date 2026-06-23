@@ -19,7 +19,11 @@
   </div>
 
   <div class="toolbar-card">
-    <mat-form-field appearance="outline">
+    <mat-form-field
+      appearance="outline"
+      class="admin-search-field"
+      floatLabel="always"
+    >
       <mat-label>Buscar mantenedor</mat-label>
       <mat-icon matPrefix>search</mat-icon>
       <input
@@ -47,7 +51,7 @@
         <mat-card
           class="maintainer-card"
           *ngFor="let item of group.items"
-          [routerLink]="item.route"
+          [class.disabled]="item.disabled"
         >
           <div class="card-top">
             <div class="card-icon">
@@ -60,9 +64,18 @@
           <h3>{{ item.title }}</h3>
           <p>{{ item.description }}</p>
 
-          <div class="card-action">
+          <a
+            class="card-action"
+            *ngIf="!item.disabled"
+            [routerLink]="item.route"
+          >
             <span>Abrir mantenedor</span>
             <mat-icon>arrow_forward</mat-icon>
+          </a>
+
+          <div class="card-action disabled-action" *ngIf="item.disabled">
+            <span>Pendiente backend</span>
+            <mat-icon>lock</mat-icon>
           </div>
         </mat-card>
       </div>

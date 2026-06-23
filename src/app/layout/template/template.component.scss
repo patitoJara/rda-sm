@@ -462,15 +462,16 @@ mat-sidenav,
     color: #ffffff !important;
   }
 }
-
 /* Botón Cambio de clave con texto */
 .change-password-btn {
   height: 36px !important;
-  padding: 0 12px !important;
+  min-width: auto !important;
+  padding: 0 10px !important;
   border-radius: 999px !important;
   border-color: rgba(255, 255, 255, 0.42) !important;
   background: rgba(255, 255, 255, 0.1);
   color: #ffffff !important;
+  font-size: 0.82rem;
   font-weight: 800 !important;
 
   display: inline-flex;
@@ -490,6 +491,7 @@ mat-sidenav,
     font-size: 18px;
     width: 18px;
     height: 18px;
+    line-height: 18px;
   }
 
   span {

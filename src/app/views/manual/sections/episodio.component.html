@@ -1,5 +1,4 @@
 <mat-card class="manual-section" id="episodio">
-
   <div class="section-header">
     <mat-icon>assignment</mat-icon>
     <h2>Episodio / Nueva demanda</h2>
@@ -8,8 +7,8 @@
   <div class="manual-box box-info">
     <mat-icon>folder_open</mat-icon>
     <div>
-      El Episodio representa una demanda de atención asociada a una persona.
-      Es la unidad central que agrupa etapas, eventos, referencias, sustancias,
+      El Episodio representa una demanda de atención asociada a una persona. Es
+      la unidad central que agrupa etapas, eventos, referencias, sustancias,
       documentos, alertas, auditoría y resultado final del proceso.
     </div>
   </div>
@@ -29,7 +28,10 @@
   <div class="manual-box box-neutral">
     <mat-icon>account_tree</mat-icon>
     <div>
-      <strong>Persona real → Episodio activo → Etapas → Eventos → Referencias → Egreso / Cierre</strong>
+      <strong
+        >Persona real → Episodio activo → Etapas → Eventos → Referencias →
+        Egreso / Cierre</strong
+      >
     </div>
   </div>
 
@@ -42,27 +44,66 @@
   <h3 class="manual-subtitle">Datos mínimos del episodio</h3>
 
   <ul class="manual-list">
-    <li><strong>Identificador del episodio:</strong> código único del registro de demanda.</li>
-    <li><strong>Identificador de la persona:</strong> relación directa con una persona real.</li>
-    <li><strong>Fecha original de solicitud:</strong> fecha base para calcular espera y criticidad.</li>
-    <li><strong>Tipo de episodio:</strong> clasificación del proceso de demanda.</li>
-    <li><strong>Programa inicial:</strong> programa donde se origina la demanda.</li>
+    <li>
+      <strong>Identificador del episodio:</strong> código único del registro de
+      demanda.
+    </li>
+    <li>
+      <strong>Identificador de la persona:</strong> relación directa con una
+      persona real.
+    </li>
+    <li>
+      <strong>Fecha original de solicitud:</strong> fecha base para calcular
+      espera y criticidad.
+    </li>
+    <li>
+      <strong>Tipo de episodio:</strong> clasificación del proceso de demanda.
+    </li>
+    <li>
+      <strong>Programa inicial:</strong> programa donde se origina la demanda.
+    </li>
     <li><strong>Programa actual:</strong> programa responsable vigente.</li>
     <li><strong>Estado actual:</strong> situación vigente del episodio.</li>
-    <li><strong>Resultado actual:</strong> cierre, egreso u otro resultado cuando exista.</li>
-    <li><strong>Observación inicial:</strong> antecedente administrativo o técnico de ingreso.</li>
+    <li>
+      <strong>Resultado actual:</strong> cierre, egreso u otro resultado cuando
+      exista.
+    </li>
+    <li>
+      <strong>Observación inicial:</strong> antecedente administrativo o técnico
+      de ingreso.
+    </li>
   </ul>
 
   <h3 class="manual-subtitle">Información operativa</h3>
 
   <ul class="manual-list">
-    <li><strong>Tipo de contacto:</strong> forma en que se origina la solicitud.</li>
-    <li><strong>Origen de la solicitud:</strong> fuente, institución o vía de ingreso.</li>
-    <li><strong>Derivador o institución remitente:</strong> entidad que deriva cuando corresponda.</li>
-    <li><strong>Número de tratamiento previo:</strong> antecedente histórico si existe.</li>
-    <li><strong>Estado clínico o administrativo inicial:</strong> clasificación inicial del caso.</li>
-    <li><strong>Fecha de ingreso a tratamiento:</strong> hito que detiene el KPI de espera.</li>
-    <li><strong>Fecha de cierre o egreso:</strong> fecha formal de término cuando corresponda.</li>
+    <li>
+      <strong>Tipo de contacto:</strong> forma en que se origina la solicitud.
+    </li>
+    <li>
+      <strong>Origen de la solicitud:</strong> fuente, institución o vía de
+      ingreso.
+    </li>
+    <li>
+      <strong>Derivador o institución remitente:</strong> entidad que deriva
+      cuando corresponda.
+    </li>
+    <li>
+      <strong>Número de tratamiento previo:</strong> antecedente histórico si
+      existe.
+    </li>
+    <li>
+      <strong>Estado clínico o administrativo inicial:</strong> clasificación
+      inicial del caso.
+    </li>
+    <li>
+      <strong>Fecha de ingreso a tratamiento:</strong> hito que detiene el KPI
+      de espera.
+    </li>
+    <li>
+      <strong>Fecha de cierre o egreso:</strong> fecha formal de término cuando
+      corresponda.
+    </li>
   </ul>
 
   <h3 class="manual-subtitle">Fecha original de solicitud</h3>
@@ -93,19 +134,29 @@
   <div class="manual-box box-warning">
     <mat-icon>priority_high</mat-icon>
     <div>
-      El KPI de espera se detiene únicamente cuando existe ingreso efectivo a
-      tratamiento registrado en el sistema. Una referencia, cambio de etapa o
-      derivación no debe detener por sí sola el conteo de espera.
+      <li>
+        <strong>KPI de espera:</strong>
+        mide los días transcurridos desde la fecha original de solicitud. Este
+        indicador se detiene únicamente cuando se registra el ingreso efectivo a
+        tratamiento. No se detiene por citaciones, entrevistas, observaciones ni
+        referencias entre programas.
+      </li>
     </div>
   </div>
 
   <h3 class="manual-subtitle">Cuando existe episodio activo</h3>
 
   <ul class="manual-list">
-    <li>Se muestra la tarjeta de episodio con información real entregada por backend.</li>
+    <li>
+      Se muestra la tarjeta de episodio con información real entregada por
+      backend.
+    </li>
     <li>Se bloquea la opción de preparar una nueva demanda.</li>
     <li>Se permite revisar la etapa vigente si existe información real.</li>
-    <li>Se permite consultar eventos, referencias y sustancias reales cuando estén disponibles.</li>
+    <li>
+      Se permite consultar eventos, referencias y sustancias reales cuando estén
+      disponibles.
+    </li>
     <li>No se crea un segundo episodio activo para la misma persona.</li>
     <li>No se reemplaza información real por datos locales o simulados.</li>
   </ul>
@@ -190,20 +241,29 @@
   <h3 class="manual-subtitle">Reglas especiales</h3>
 
   <ul class="manual-list">
-    <li><strong>No es perfil:</strong> puede cerrar inmediatamente cuando exista causal y avisos correspondientes.</li>
+    <li>
+      <strong>No es perfil:</strong> puede cerrar inmediatamente cuando exista
+      causal y avisos correspondientes.
+    </li>
     <li><strong>No corresponde:</strong> debe exigir causal formal.</li>
-    <li><strong>Inasistencias:</strong> dos inasistencias con el mismo profesional pueden generar cierre por inasistencias.</li>
-    <li><strong>Reversa:</strong> un episodio cerrado no se reabre salvo reversa excepcional autorizada por perfil superior.</li>
+    <li>
+      <strong>Inasistencias:</strong> dos inasistencias con el mismo profesional
+      pueden generar cierre por inasistencias.
+    </li>
+    <li>
+      <strong>Reversa:</strong> un episodio cerrado no se reabre salvo reversa
+      excepcional autorizada por perfil superior.
+    </li>
   </ul>
 
   <div class="manual-box box-warning">
-    <mat-icon>block</mat-icon>
+    <mat-icon>priority_high</mat-icon>
     <div>
-      <strong>Restricción actual:</strong>
-      mientras no estén disponibles las tablas nuevas del backend, el formulario
-      de episodio debe mantenerse como preparación visual o lectura de datos
-      reales existentes. No debe guardar información ficticia ni simular
-      persistencia.
+      <strong>KPI de espera:</strong>
+      indicador que mide los días de espera desde la fecha original de
+      solicitud. Se detiene solo cuando se registra el ingreso efectivo a
+      tratamiento. No se detiene por citaciones, entrevistas, observaciones ni
+      referencias entre programas.
     </div>
   </div>
 
@@ -211,9 +271,6 @@
 
   <div class="manual-box box-neutral">
     <mat-icon>info</mat-icon>
-    <div>
-      Sin episodio activo registrado para esta persona.
-    </div>
+    <div>Sin episodio activo registrado para esta persona.</div>
   </div>
-
 </mat-card>

@@ -17,10 +17,10 @@ import { MatIconModule } from '@angular/material/icon';
 export interface ConfirmDialogData {
   title?: string;
   message: string;
-  confirmText?: string;               // default: 'Aceptar'
-  cancelText?: string;                // default: 'Cancelar'
+  confirmText?: string; // default: 'Aceptar'
+  cancelText?: string; // default: 'Cancelar'
   color?: 'primary' | 'accent' | 'warn';
-  icon?: string;                      // ej: 'delete', 'warning', 'info'
+  icon?: string; // ej: 'delete', 'warning', 'info'
   dense?: boolean;
 }
 
@@ -34,11 +34,7 @@ export interface ConfirmDialogData {
       class="dialog-title"
       [ngClass]="'dialog-title-' + effectiveColor"
     >
-      <mat-icon
-        *ngIf="data.icon"
-        class="dialog-icon"
-        [color]="effectiveColor"
-      >
+      <mat-icon *ngIf="data.icon" class="dialog-icon" [color]="effectiveColor">
         {{ data.icon }}
       </mat-icon>
 
@@ -52,11 +48,7 @@ export interface ConfirmDialogData {
     </mat-dialog-content>
 
     <mat-dialog-actions align="end" [style.padding.px]="data.dense ? 8 : 16">
-      <button
-        mat-stroked-button
-        type="button"
-        (click)="onCancel()"
-      >
+      <button mat-stroked-button type="button" (click)="onCancel()">
         {{ data.cancelText || 'Cancelar' }}
       </button>
 
@@ -64,6 +56,7 @@ export interface ConfirmDialogData {
         mat-flat-button
         type="button"
         [color]="effectiveColor"
+        [class.confirm-warn]="effectiveColor === 'warn'"
         cdkFocusInitial
         (click)="onConfirm()"
         (keydown.enter)="onConfirm()"
@@ -78,7 +71,8 @@ export interface ConfirmDialogData {
         display: flex;
         align-items: center;
         gap: 8px;
-        font-weight: 500;
+        font-weight: 800;
+        margin: 0;
       }
 
       .dialog-icon {
@@ -88,20 +82,47 @@ export interface ConfirmDialogData {
       .dialog-message {
         margin: 0;
         white-space: pre-wrap;
+        color: #4b6268;
+        font-weight: 500;
+      }
+
+      mat-dialog-actions {
+        gap: 10px;
+      }
+
+      button {
+        border-radius: 999px !important;
+        font-weight: 800 !important;
       }
 
       /* Clases dinámicas por color */
 
       .dialog-title-primary {
-        color: var(--mdc-theme-primary, #3f51b5);
+        color: #0f6b75;
       }
 
       .dialog-title-accent {
-        color: var(--mdc-theme-secondary, #ff4081);
+        color: #7c3aed;
       }
 
       .dialog-title-warn {
-        color: #f44336;
+        color: #dc2626;
+      }
+
+      .dialog-title-warn .dialog-icon {
+        color: #dc2626 !important;
+      }
+
+      /* Botón confirmar en modo warn */
+      button.mat-warn,
+      button[color='warn'] {
+        background: #dc2626 !important;
+        color: #ffffff !important;
+      }
+
+      button.mat-warn:hover,
+      button[color='warn']:hover {
+        background: #b91c1c !important;
       }
     `,
   ],
@@ -109,7 +130,7 @@ export interface ConfirmDialogData {
 export class ConfirmDialogComponent {
   constructor(
     private ref: MatDialogRef<ConfirmDialogComponent, boolean>,
-    @Inject(MAT_DIALOG_DATA) public data: ConfirmDialogData
+    @Inject(MAT_DIALOG_DATA) public data: ConfirmDialogData,
   ) {}
 
   get effectiveColor(): 'primary' | 'accent' | 'warn' {

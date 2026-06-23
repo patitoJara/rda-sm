@@ -16,6 +16,7 @@ interface MaintainerItem {
   icon: string;
   route: string;
   tag: string;
+  disabled?: boolean;
 }
 
 interface MaintainerGroup {
@@ -48,7 +49,8 @@ export class AdminMaintainersComponent {
   groups: MaintainerGroup[] = [
     {
       title: 'Red y programas',
-      subtitle: 'Configuración territorial, programas y equipos asociados.',
+      subtitle:
+        'Configuración territorial, programas, modalidad y población objetivo.',
       icon: 'account_tree',
       items: [
         {
@@ -56,27 +58,72 @@ export class AdminMaintainersComponent {
           description: 'Programas de atención, modalidad, ubicación y estado.',
           icon: 'business',
           route: '/program',
-          tag: 'Red',
+          tag: 'Actual',
         },
         {
           title: 'Comunas',
-          description: 'Catálogo territorial utilizado en personas y programas.',
+          description:
+            'Catálogo territorial utilizado en personas y programas.',
           icon: 'location_city',
           route: '/commune',
-          tag: 'Territorio',
+          tag: 'Actual',
         },
         {
           title: 'Profesiones',
           description: 'Profesiones asociadas a usuarios y atenciones.',
           icon: 'badge',
           route: '/professions',
-          tag: 'Equipo',
+          tag: 'Actual',
+        },
+        {
+          title: 'Regiones',
+          description: 'Catálogo regional para ubicación de programas.',
+          icon: 'map',
+          route: '/regions',
+          tag: 'Nuevo',
+          disabled: true,
+        },
+        {
+          title: 'Ciudades',
+          description: 'Catálogo de ciudades asociado a regiones.',
+          icon: 'location_on',
+          route: '',
+          tag: 'Nuevo',
+          disabled: true,
+        },
+        {
+          title: 'Población objetivo',
+          description:
+            'Adulto, adolescente u otra población definida por programa.',
+          icon: 'supervised_user_circle',
+          route: '',
+          tag: 'Nuevo',
+          disabled: true,
+        },
+        {
+          title: 'Modalidades',
+          description:
+            'Ambulatorio, residencial u otra modalidad del programa.',
+          icon: 'home_work',
+          route: '',
+          tag: 'Nuevo',
+          disabled: true,
+        },
+        {
+          title: 'Planes o líneas',
+          description:
+            'Planes, líneas de atención o convenio asociado al programa.',
+          icon: 'schema',
+          route: '',
+          tag: 'Nuevo',
+          disabled: true,
         },
       ],
     },
     {
       title: 'Gestión de demanda',
-      subtitle: 'Catálogos clínico-operativos para el flujo de demanda.',
+      subtitle:
+        'Catálogos clínico-operativos para el flujo Persona → Episodio → Etapa → Evento.',
       icon: 'fact_check',
       items: [
         {
@@ -84,28 +131,60 @@ export class AdminMaintainersComponent {
           description: 'Estados generales de la demanda o episodio.',
           icon: 'flag',
           route: '/states',
-          tag: 'Estado',
+          tag: 'Actual',
         },
         {
           title: 'Resultados',
-          description: 'Resultados de evaluación, gestión o cierre.',
+          description: 'Resultados de evaluación, gestión, cierre o egreso.',
           icon: 'task_alt',
           route: '/results',
-          tag: 'Resultado',
+          tag: 'Actual',
         },
         {
           title: 'Sustancias',
           description: 'Catálogo de sustancias principales y secundarias.',
-          icon: 'medication',
+          icon: 'science',
           route: '/substances',
-          tag: 'Catálogo',
+          tag: 'Actual',
         },
         {
-          title: 'No relevantes',
-          description: 'Causales o registros asociados a no correspondencia.',
+          title: 'Motivos de cierre',
+          description:
+            'Causales de cierre, no corresponde, no es perfil e inasistencias.',
           icon: 'block',
           route: '/not-relevants',
-          tag: 'Cierre',
+          tag: 'Pendiente',
+        },
+        {
+          title: 'Tipos de episodio',
+          description:
+            'Primera solicitud, nueva demanda posterior a egreso o cierre.',
+          icon: 'folder_open',
+          route: '/episode-types',
+          tag: 'Nuevo',
+        },
+        {
+          title: 'Tipos de evento',
+          description:
+            'Citación, asistencia, observación, referencia, ingreso, egreso y cierre.',
+          icon: 'event_note',
+          route: '/event-types',
+          tag: 'Nuevo',
+        },
+        {
+          title: 'Estados de asistencia',
+          description:
+            'Agendado, se presentó, no se presentó, reprogramada o pendiente.',
+          icon: 'how_to_reg',
+          route: '/attendance-statuses',
+          tag: 'Nuevo',
+        },
+        {
+          title: 'Reglas de semáforo',
+          description: 'Configuración de días normales, alerta y criticidad.',
+          icon: 'traffic',
+          route: '/semaphore-rules',
+          tag: 'Nuevo',
         },
       ],
     },

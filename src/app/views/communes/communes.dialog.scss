@@ -1,0 +1,59 @@
+:host {
+  display: block;
+}
+
+h2[mat-dialog-title] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 22px 24px 8px;
+  color: #0f4d56;
+  font-weight: 900;
+
+  mat-icon {
+    color: #0f6b75;
+  }
+}
+
+div[mat-dialog-content] {
+  padding: 14px 24px 4px !important;
+}
+
+.form {
+  width: 100%;
+}
+
+.full {
+  width: 100%;
+}
+
+div[mat-dialog-actions] {
+  padding: 10px 24px 22px !important;
+  gap: 10px;
+
+  button {
+    border-radius: 999px !important;
+    font-weight: 800 !important;
+  }
+}
+
+::ng-deep .communes-dialog .mat-mdc-dialog-surface {
+  border-radius: 22px !important;
+  overflow: hidden !important;
+  box-shadow:
+    0 24px 70px rgba(15, 47, 61, 0.28),
+    0 0 0 1px rgba(216, 229, 232, 0.9) !important;
+}
+
+::ng-deep .communes-dialog .mat-mdc-dialog-surface::before {
+  content: "";
+  display: block;
+  height: 7px;
+  background: linear-gradient(90deg, #0f4d56 0%, #167386 48%, #28a3a4 100%);
+}
+
+::ng-deep .communes-dialog .mat-mdc-text-field-wrapper {
+  border-radius: 14px !important;
+  background: #f8fbfc !important;
+}

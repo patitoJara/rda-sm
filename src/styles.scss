@@ -405,3 +405,42 @@ mat-nav-list a.active mat-icon {
 .menu-section-title:hover mat-icon {
   transform: rotate(90deg);
 }
+
+/* ============================================================
+   🧨 CONFIRM DIALOG — ELIMINAR / WARN
+   ============================================================ */
+
+.cdk-overlay-container .rda-confirm-dialog .mat-mdc-dialog-surface {
+  border-radius: 22px !important;
+  overflow: hidden !important;
+  box-shadow:
+    0 24px 70px rgba(15, 47, 61, 0.28),
+    0 0 0 1px rgba(216, 229, 232, 0.9) !important;
+}
+
+.cdk-overlay-container .rda-confirm-dialog .mat-mdc-dialog-surface::before {
+  content: "";
+  display: block;
+  height: 7px;
+  background: linear-gradient(90deg, #dc2626 0%, #ef4444 48%, #f97316 100%);
+}
+
+.cdk-overlay-container button.confirm-warn {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border-radius: 999px !important;
+  font-weight: 800 !important;
+}
+
+.cdk-overlay-container button.confirm-warn:hover {
+  background: #b91c1c !important;
+}
+
+.cdk-overlay-container .rda-confirm-dialog .dialog-title-warn {
+  color: #dc2626 !important;
+}
+
+.cdk-overlay-container .rda-confirm-dialog .dialog-title-warn mat-icon,
+.cdk-overlay-container .rda-confirm-dialog .dialog-icon {
+  color: #dc2626 !important;
+}

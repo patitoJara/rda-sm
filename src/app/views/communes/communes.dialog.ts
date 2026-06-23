@@ -1,6 +1,8 @@
 // src/app/pages/communes/communes.dialog.ts
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
+import { MatIconModule } from '@angular/material/icon';
 import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -24,6 +26,7 @@ import { Commune } from '../../models/commune';
     MatInputModule,
     MatButtonModule,
     MatCardModule,
+    MatIconModule,
 ]
 })
 export class CommunesDialogComponent implements OnInit {
