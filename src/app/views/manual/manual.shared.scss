@@ -4,29 +4,36 @@
 ===================================================== */
 
 /* =====================================================
-   🎨 PALETA INSTITUCIONAL
+   🎨 PALETA INSTITUCIONAL RDA-SM
 ===================================================== */
-$color-primary: #1976d2;
-$color-info: #0288d1;
+$color-primary: #0f6b75;
+$color-primary-dark: #0f4d56;
+$color-info: #147180;
 $color-success: #2e7d32;
-$color-warning: #ed6c02;
+$color-warning: #c77700;
 $color-rule: #6a1b9a;
 
-$text-primary: #263238;
+$text-primary: #123b44;
 $text-body: #455a64;
-$text-muted: #607d8b;
+$text-muted: #60747b;
 
-$bg-soft: #f5f7fa;
-$bg-card: #fafafa;
+$bg-soft: #f4f7f8;
+$bg-card: #ffffff;
+$border-soft: #d8e5e8;
 
 /* =====================================================
    🧭 CABECERA DEL MANUAL
 ===================================================== */
+
 .manual-header {
-  border-radius: 16px;
-  padding: 22px 28px;
-  background: $bg-card;
+  border-radius: 22px;
+  padding: 26px 30px;
+  background:
+    linear-gradient(135deg, rgba(15, 77, 86, 0.96), rgba(20, 113, 128, 0.94)),
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.2), transparent 35%);
+  color: #ffffff;
   scroll-margin-top: 96px;
+  box-shadow: 0 18px 40px rgba(15, 77, 86, 0.22);
 }
 
 .header-row {
@@ -37,21 +44,22 @@ $bg-card: #fafafa;
 
 .header-icon {
   font-size: 38px;
-  color: $color-primary;
-  opacity: 0.9;
+  color: #d8f3f1;
+  opacity: 0.95;
 }
 
-.manual-header h1 {
+.manual-header h1,
+.manual-header h2 {
   margin: 0;
-  font-size: 22px;
-  font-weight: 600;
-  color: $text-primary;
+  font-size: 24px;
+  font-weight: 850;
+  color: #ffffff;
 }
 
 .manual-header p {
   margin: 6px 0 0;
   font-size: 14px;
-  color: $text-muted;
+  color: rgba(255, 255, 255, 0.82);
 }
 
 /* =====================================================
@@ -60,14 +68,14 @@ $bg-card: #fafafa;
 
 .manual-section {
   position: relative;
-  border-radius: 16px;
+  border-radius: 22px;
   padding: 32px 40px;
-  background: white;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  background: $bg-card;
+  border: 1px solid $border-soft;
+  box-shadow: 0 14px 34px rgba(22, 55, 65, 0.08);
   scroll-margin-top: 96px;
 }
 
-/* Línea decorativa sutil */
 .manual-section::before {
   content: '';
   position: absolute;
@@ -75,7 +83,7 @@ $bg-card: #fafafa;
   top: 28px;
   bottom: 28px;
   width: 2px;
-  background: rgba($color-primary, 0.04);
+  background: rgba($color-primary, 0.05);
 }
 
 /* =====================================================
@@ -92,7 +100,7 @@ $bg-card: #fafafa;
 .section-header h2 {
   margin: 0;
   font-size: 17px;
-  font-weight: 600;
+  font-weight: 700;
   color: $text-primary;
 }
 
@@ -121,11 +129,10 @@ $bg-card: #fafafa;
   margin-top: 26px;
   margin-bottom: 10px;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   color: $text-primary;
 }
 
-/* Sangría ligera estructural */
 .manual-section > p,
 .manual-section > ul,
 .manual-section > .manual-box,
@@ -159,9 +166,10 @@ $bg-card: #fafafa;
   padding: 14px 18px;
   margin-top: 14px;
   margin-left: 10px;
-  border-radius: 12px;
+  border-radius: 16px;
   font-size: 14px;
   line-height: 1.5;
+  border: 1px solid transparent;
 
   mat-icon {
     font-size: 20px;
@@ -170,45 +178,40 @@ $bg-card: #fafafa;
   }
 }
 
-/* 🔵 Información */
 .box-info {
-  background: rgba($color-info, 0.06);
-  border-left: 4px solid $color-info;
+  background: rgba($color-info, 0.07);
+  border-color: rgba($color-info, 0.18);
+  border-left: 5px solid $color-info;
 
   mat-icon {
     color: $color-info;
   }
 }
 
-.btn-indice {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-
-/* 🟡 Advertencia */
 .box-warning {
   background: rgba($color-warning, 0.1);
-  border-left: 4px solid $color-warning;
+  border-color: rgba($color-warning, 0.22);
+  border-left: 5px solid $color-warning;
 
   mat-icon {
     color: $color-warning;
   }
 }
 
-/* 🟣 Regla */
 .box-rule {
   background: rgba($color-rule, 0.08);
-  border-left: 4px solid $color-rule;
+  border-color: rgba($color-rule, 0.18);
+  border-left: 5px solid $color-rule;
 
   mat-icon {
     color: $color-rule;
   }
 }
 
-/* 🟢 Confirmación */
 .box-success {
   background: rgba($color-success, 0.08);
-  border-left: 4px solid $color-success;
+  border-color: rgba($color-success, 0.18);
+  border-left: 5px solid $color-success;
 
   mat-icon {
     color: $color-success;
@@ -240,10 +243,12 @@ $bg-card: #fafafa;
   padding: 6px 10px;
   border-radius: 8px;
   color: $color-primary;
-  font-weight: 500;
+  font-weight: 600;
   text-decoration: none;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.15s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease;
 }
 
 .manual-index a:hover {
@@ -267,6 +272,13 @@ $bg-card: #fafafa;
   background: rgba($color-primary, 0.06);
 }
 
+/* =====================================================
+   🔝 BOTÓN VOLVER AL ÍNDICE / INICIO
+===================================================== */
+
+.btn-indice {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
 
 /* =====================================================
    🧩 UTILIDADES
@@ -275,7 +287,6 @@ $bg-card: #fafafa;
 .icon-primary {
   color: $color-primary;
 }
-
 
 .box-flow {
   position: relative;
