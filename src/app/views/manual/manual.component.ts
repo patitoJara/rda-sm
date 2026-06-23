@@ -5,13 +5,17 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 
 import { IntroComponent } from './sections/intro.component';
-import { DemandaComponent } from './sections/demanda.component';
 import { ListadoComponent } from './sections/listado.component';
 import { MantenedoresComponent } from './sections/mantenedores.component';
 import { RolesComponent } from './sections/roles.component';
 import { SeguridadComponent } from './sections/seguridad.component';
-import { TransferComponent } from './sections/transfer.component';
+import { ReferenciaComponent } from './sections/referencia.component';
 import { PanelEstrategicoComponent } from './sections/panel-estrategico.component';
+import { PersonaComponent } from './sections/persona.component';
+import { EpisodioComponent } from './sections/episodio.component';
+import { EtapaComponent } from './sections/etapa.component';
+import { EventosComponent } from './sections/eventos.component';
+import { SustanciasComponent } from './sections/sustancias.component';
 
 import { Component, ViewChild, ElementRef } from '@angular/core';
 
@@ -27,13 +31,17 @@ import { Component, ViewChild, ElementRef } from '@angular/core';
     MatListModule,
     MatIconModule,
     IntroComponent,
-    DemandaComponent,
     ListadoComponent,
     MantenedoresComponent,
     RolesComponent,
     SeguridadComponent,
-    TransferComponent,
+    ReferenciaComponent,
     PanelEstrategicoComponent,
+    PersonaComponent,
+    EpisodioComponent,
+    EtapaComponent,
+    EventosComponent,
+    SustanciasComponent,
   ],
 })
 export class ManualComponent {

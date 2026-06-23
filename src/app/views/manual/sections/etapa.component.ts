@@ -4,16 +4,15 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-  selector: 'app-demanda',
+  selector: 'app-etapa',
   standalone: true,
-  //host: { id: 'modulo-demandas' },
-  templateUrl: './demanda.component.html',
+  //host: { id: 'mantenedores' },
+  templateUrl: './etapa.component.html',
   styleUrls: ['../manual.shared.scss'],
-  
   imports: [
     CommonModule,
     MatCardModule,
     MatIconModule,
   ],
 })
-export class DemandaComponent {}
+export class EtapaComponent {}

@@ -6,8 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 @Component({
   selector: 'app-referencia',
   standalone: true,
-  //host: { id: 'modulo-demandas' },
-  templateUrl: './transfer.component.html',
+  templateUrl: './referencia.component.html',
   styleUrls: ['../manual.shared.scss'],
   
   imports: [
@@ -16,4 +15,4 @@ import { MatIconModule } from '@angular/material/icon';
     MatIconModule,
   ],
 })
-export class TransferComponent {}
+export class ReferenciaComponent {}
