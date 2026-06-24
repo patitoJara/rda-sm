@@ -68,6 +68,7 @@
             type="button"
             class="card-action"
             *ngIf="!item.disabled"
+            (pointerdown)="openMaintainer(item, $event)"
             (click)="openMaintainer(item, $event)"
           >
             <span>Abrir mantenedor</span>

@@ -50,6 +50,7 @@ export class AdminMaintainersComponent {
   ) {}
 
   search = '';
+  private navigatingRoute: string | null = null;
 
   groups: MaintainerGroup[] = [
     {
@@ -284,10 +285,20 @@ export class AdminMaintainersComponent {
       return;
     }
 
+    const route = item.route;
+
+    if (this.navigatingRoute === route) {
+      return;
+    }
+
+    this.navigatingRoute = route;
+
     this.zone.run(() => {
-      setTimeout(() => {
-        void this.router.navigateByUrl(item.route);
-      }, 0);
+      Promise.resolve().then(() => {
+        void this.router.navigateByUrl(route).finally(() => {
+          this.navigatingRoute = null;
+        });
+      });
     });
   }
 
