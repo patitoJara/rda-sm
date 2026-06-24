@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 
@@ -44,7 +44,11 @@ interface MaintainerGroup {
   ],
 })
 export class AdminMaintainersComponent {
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private zone: NgZone,
+  ) {}
+
   search = '';
 
   groups: MaintainerGroup[] = [
@@ -272,13 +276,18 @@ export class AdminMaintainersComponent {
       .filter((group) => group.items.length > 0);
   }
 
-  openMaintainer(item: MaintainerItem): void {
+  openMaintainer(item: MaintainerItem, event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+
     if (item.disabled || !item.route) {
       return;
     }
 
-    queueMicrotask(() => {
-      this.router.navigateByUrl(item.route);
+    this.zone.run(() => {
+      setTimeout(() => {
+        void this.router.navigateByUrl(item.route);
+      }, 0);
     });
   }
 

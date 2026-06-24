@@ -1,21 +1,41 @@
-<!-- // src/app/pages/substances/substances.dialog.html -->
-
-<h6 mat-dialog-title>{{ form.value.id ? 'Editar Substance' : 'Nueva Substance' }}</h6>
+<h2 mat-dialog-title>
+  <mat-icon>science</mat-icon>
+  {{ form.value.id ? 'Editar sustancia' : 'Nueva sustancia' }}
+</h2>
 
 <div mat-dialog-content>
-  <mat-card class="dialog-card">
-    <mat-card-content>
-      <form [formGroup]="form" class="form">
-        <mat-form-field appearance="outline" class="full">
-          <mat-label>Sexo</mat-label>
-          <input matInput formControlName="name" autocomplete="off" (keydown.enter)="save()" />
-        </mat-form-field>
-      </form>
-    </mat-card-content>
-  </mat-card>
+  <form [formGroup]="form" class="form">
+    <mat-form-field appearance="outline" floatLabel="always" class="full">
+      <mat-label>Nombre de la sustancia</mat-label>
+
+      <input
+        matInput
+        formControlName="name"
+        autocomplete="off"
+        placeholder="Ej: Alcohol"
+        (keydown.enter)="save()"
+      />
+
+      <mat-error *ngIf="form.get('name')?.hasError('required')">
+        El nombre de la sustancia es obligatorio.
+      </mat-error>
+
+      <mat-error *ngIf="form.get('name')?.hasError('maxlength')">
+        El nombre no puede superar los 120 caracteres.
+      </mat-error>
+    </mat-form-field>
+  </form>
 </div>
 
 <div mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()">Cancelar</button>
-  <button mat-flat-button color="primary" (click)="save()" [disabled]="form.invalid">Guardar</button>
+  <button mat-button type="button" (click)="cancel()">Cancelar</button>
+
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="save()"
+    [disabled]="form.invalid">
+    Guardar
+  </button>
 </div>
