@@ -13,6 +13,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatCardModule } from '@angular/material/card';
+
 import { merge } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 
@@ -27,23 +29,31 @@ import { ProfessionsDialogComponent } from './professions.dialog';
   templateUrl: './professions.component.html',
   styleUrls: ['./professions.component.scss'],
   imports: [
-    CommonModule, FormsModule,
-    MatTableModule, MatPaginatorModule, MatSortModule,
-    MatIconModule, MatButtonModule, MatFormFieldModule, MatInputModule,
-    MatTooltipModule, MatProgressBarModule, MatChipsModule, MatDialogModule
-  ]
+    CommonModule,
+    FormsModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatIconModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatTooltipModule,
+    MatProgressBarModule,
+    MatChipsModule,
+    MatDialogModule,
+    MatCardModule,
+  ],
 })
 export class ProfessionsComponent implements AfterViewInit {
-  displayedColumns = ['id','name','createdAt','updatedAt','deletedAt','estado','acciones'];
+  displayedColumns = ['id', 'name', 'createdAt', 'updatedAt', 'deletedAt', 'estado', 'acciones'];
+
   dataSource = new MatTableDataSource<Profession>([]);
   loading = false;
   total = 0;
 
-  /** Filtro por nombre */
   q = '';
-
-  /** Estado: all = todos, active = no eliminados, deleted = eliminados */
-  filterState: 'all'|'active'|'deleted' = 'active';
+  filterState: 'all' | 'active' | 'deleted' = 'active';
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -66,19 +76,23 @@ export class ProfessionsComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
 
-  /** Mapeo de campos para ordenar */
   private mapSortField(active?: string): string {
     switch (active) {
-      case 'id': return 'id';
-      case 'name': return 'name';
-      case 'createdAt': return 'createdAt';
-      case 'updatedAt': return 'updatedAt';
-      case 'deletedAt': return 'deletedAt';
-      default: return 'id';
+      case 'id':
+        return 'id';
+      case 'name':
+        return 'name';
+      case 'createdAt':
+        return 'createdAt';
+      case 'updatedAt':
+        return 'updatedAt';
+      case 'deletedAt':
+        return 'deletedAt';
+      default:
+        return 'id';
     }
   }
 
-  /** Cargar Profession desde backend */
   load(): void {
     this.loading = true;
 
@@ -95,76 +109,88 @@ export class ProfessionsComponent implements AfterViewInit {
         next: (res: any) => {
           const allRows: Profession[] = Array.isArray(res) ? res : (res?.content ?? []);
 
-          // Filtro por estado
           let filtered = allRows;
+
           if (this.filterState === 'active') {
-            filtered = allRows.filter(r => !r.deletedAt);
+            filtered = allRows.filter((r) => !r.deletedAt);
           } else if (this.filterState === 'deleted') {
-            filtered = allRows.filter(r => !!r.deletedAt);
+            filtered = allRows.filter((r) => !!r.deletedAt);
           }
 
-          // Filtro por nombre
           const term = (this.q || '').toLowerCase();
+
           if (term) {
-            filtered = filtered.filter(r => (r.name ?? '').toLowerCase().includes(term));
+            filtered = filtered.filter((r) =>
+              (r.name ?? '').toLowerCase().includes(term)
+            );
           }
 
-          // Orden
           filtered.sort((a, b) => {
             const va = this.getFieldValue(a, sortField);
             const vb = this.getFieldValue(b, sortField);
+
             let cmp = 0;
-            if (va == null && vb != null) cmp = -1;
-            else if (va != null && vb == null) cmp = 1;
-            else if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
-            else cmp = String(va ?? '').localeCompare(String(vb ?? ''), 'es', { numeric: true, sensitivity: 'base' });
+
+            if (va == null && vb != null) {
+              cmp = -1;
+            } else if (va != null && vb == null) {
+              cmp = 1;
+            } else if (typeof va === 'number' && typeof vb === 'number') {
+              cmp = va - vb;
+            } else {
+              cmp = String(va ?? '').localeCompare(String(vb ?? ''), 'es', {
+                numeric: true,
+                sensitivity: 'base',
+              });
+            }
+
             return direction === 'asc' ? cmp : -cmp;
           });
 
-          // Paginación cliente
           const start = page * size;
           const slice = filtered.slice(start, start + size);
 
           this.dataSource.data = slice;
           this.total = filtered.length;
         },
-        error: (err) => console.error('Error cargando estado:', err)
+        error: (err) => console.error('Error cargando profesiones:', err),
       });
   }
 
-  /** Obtener valor para ordenar */
   private getFieldValue(row: Profession, field: string): any {
     switch (field) {
-      case 'id': return row.id;
-      case 'name': return row.name;
-      case 'createdAt': return row.createdAt;
-      case 'updatedAt': return row.updatedAt;
-      case 'deletedAt': return row.deletedAt;
-      default: return row.id;
+      case 'id':
+        return row.id;
+      case 'name':
+        return row.name;
+      case 'createdAt':
+        return row.createdAt;
+      case 'updatedAt':
+        return row.updatedAt;
+      case 'deletedAt':
+        return row.deletedAt;
+      default:
+        return row.id;
     }
   }
 
-  /** Buscar por nombre */
   applyFilter(term: string): void {
     this.q = term.trim();
     this.paginator.firstPage();
     this.load();
   }
 
-  /** Cambiar estado (Activos / Eliminados / Todos) */
-  setState(state: 'all'|'active'|'deleted'): void {
+  setState(state: 'all' | 'active' | 'deleted'): void {
     this.q = '';
     this.filterState = state;
     this.paginator.firstPage();
     this.load();
   }
 
-  /** Recargar tabla */
   refresh(): void {
     this.load();
   }
 
-  /** Diálogo crear / editar */
   openDialog(row?: Profession): void {
     setTimeout(() => {
       const ref = this.dialog.open(ProfessionsDialogComponent, {
@@ -172,37 +198,39 @@ export class ProfessionsComponent implements AfterViewInit {
         maxWidth: '95vw',
         panelClass: 'substances-dialog',
         backdropClass: 'app-backdrop',
-        data: row ?? null
+        data: row ?? null,
       });
 
       ref.afterClosed().subscribe((result?: Profession) => {
-        if (result) queueMicrotask(() => this.load());
+        if (result) {
+          queueMicrotask(() => this.load());
+        }
       });
     });
   }
 
-  /** Eliminar Profession */
   softDelete(row: Profession): void {
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       disableClose: true,
       data: {
-        title: 'Eliminar estado',
-        message: `¿Seguro que deseas eliminar “${row.name}” (ID: ${row.id})?`,
+        title: 'Eliminar profesión',
+        message: `¿Seguro que deseas eliminar la profesión “${row.name}” (ID: ${row.id})?`,
         confirmText: 'Eliminar',
         cancelText: 'Cancelar',
         color: 'warn',
         icon: 'delete',
-        dense: true
-      }
+        dense: true,
+      },
     });
 
     ref.afterClosed().subscribe((ok: boolean) => {
-      if (ok) this.api.delete(Number(row.id)).subscribe(() => this.load());
+      if (ok) {
+        this.api.delete(Number(row.id)).subscribe(() => this.load());
+      }
     });
   }
 
-  /** Restaurar Profession eliminada */
   restore(row: Profession): void {
     this.api.restore(Number(row.id)).subscribe(() => this.load());
   }

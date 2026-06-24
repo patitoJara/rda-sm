@@ -3,6 +3,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -25,6 +26,7 @@ import { ProfessionService } from '../../services/profession.service';
     MatInputModule,
     MatButtonModule,
     MatCardModule,
+    MatIconModule,
 ]
 })
 export class ProfessionsDialogComponent implements OnInit {
