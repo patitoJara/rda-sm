@@ -19,6 +19,7 @@ import { MatCardModule } from '@angular/material/card';
 import { ProgramService } from '../../services/program.service';
 import { Program } from '../../models/program';
 import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   standalone: true,
@@ -34,6 +35,7 @@ import { MatSelectModule } from '@angular/material/select';
     MatButtonModule,
     MatCardModule,
     MatSelectModule,
+    MatIconModule,
   ],
 })
 export class ProgramDialogComponent implements OnInit {
@@ -42,9 +44,21 @@ export class ProgramDialogComponent implements OnInit {
   uttOptions = ['ADOLESCENTE', 'ADULTO'];
   typeOptions = ['RESIDENCIAL', 'AMBULATORIO'];
 
-  c1Options = ['NINGUNA','POBLACION GENERAL', 'ESPECIFICO MUJERES', 'POBLACION INFRACTORA DE LEY', 'POBLACION ESPECIFICO MUJERES'];
+  c1Options = [
+    'NINGUNA',
+    'POBLACION GENERAL',
+    'ESPECIFICO MUJERES',
+    'POBLACION INFRACTORA DE LEY',
+    'POBLACION ESPECIFICO MUJERES',
+  ];
 
-  c2Options = ['NINGUNA','POBLACION GENERAL', 'ESPECIFICO MUJERES', 'POBLACION INFRACTORA DE LEY', 'POBLACION ESPECIFICO MUJERES'];
+  c2Options = [
+    'NINGUNA',
+    'POBLACION GENERAL',
+    'ESPECIFICO MUJERES',
+    'POBLACION INFRACTORA DE LEY',
+    'POBLACION ESPECIFICO MUJERES',
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -77,9 +91,16 @@ export class ProgramDialogComponent implements OnInit {
   }
 
   save(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.form.disable();
+
     const raw = this.form.getRawValue();
 
-    const payload = {
+    const payload: any = {
       ...raw,
       c1: raw.c1 || null,
       c2: raw.c2 || null,
@@ -91,7 +112,9 @@ export class ProgramDialogComponent implements OnInit {
 
     req.subscribe({
       next: (row: Program) => this.ref.close(row),
-      error: (err: unknown) => console.error(err),
+      error: () => {
+        this.form.enable();
+      },
     });
   }
 

@@ -1,158 +1,116 @@
-<div mat-dialog-content class="dialog-body">
+<h2 mat-dialog-title>
+  <mat-icon>business</mat-icon>
+  {{ form.value.id ? 'Editar programa' : 'Nuevo programa' }}
+</h2>
 
-  <div class="ficha">
+<div mat-dialog-content>
+  <form [formGroup]="form" class="form program-form">
+    <mat-form-field appearance="outline" floatLabel="always" class="full">
+      <mat-label>Nombre del programa</mat-label>
 
-    <!-- 🔵 HEADER -->
-    <div class="card-title-colored">
-      {{ form.value.id ? 'EDITAR PROGRAMA' : 'NUEVO PROGRAMA' }}
+      <input
+        matInput
+        formControlName="name"
+        autocomplete="off"
+        placeholder="Ej: PAI Adulto"
+      />
+
+      <mat-error *ngIf="form.get('name')?.hasError('required')">
+        El nombre del programa es obligatorio.
+      </mat-error>
+
+      <mat-error *ngIf="form.get('name')?.hasError('maxlength')">
+        El nombre no puede superar los 120 caracteres.
+      </mat-error>
+    </mat-form-field>
+
+    <div class="form-grid">
+      <mat-form-field appearance="outline" floatLabel="always">
+        <mat-label>Tipo población</mat-label>
+        <mat-select formControlName="utt">
+          <mat-option *ngFor="let u of uttOptions" [value]="u">
+            {{ u }}
+          </mat-option>
+        </mat-select>
+
+        <mat-error *ngIf="form.get('utt')?.hasError('required')">
+          El tipo de población es obligatorio.
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" floatLabel="always">
+        <mat-label>Tipo programa</mat-label>
+        <mat-select formControlName="type">
+          <mat-option *ngFor="let t of typeOptions" [value]="t">
+            {{ t }}
+          </mat-option>
+        </mat-select>
+
+        <mat-error *ngIf="form.get('type')?.hasError('required')">
+          El tipo de programa es obligatorio.
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" floatLabel="always">
+        <mat-label>Tipo de plan 1</mat-label>
+        <mat-select formControlName="c1">
+          <mat-option *ngFor="let c of c1Options" [value]="c">
+            {{ c }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" floatLabel="always">
+        <mat-label>Subtipo 2</mat-label>
+        <mat-select formControlName="c2">
+          <mat-option *ngFor="let c of c2Options" [value]="c">
+            {{ c }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" floatLabel="always">
+        <mat-label>Teléfono</mat-label>
+        <input matInput formControlName="cellphone" autocomplete="off" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" floatLabel="always">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" autocomplete="off" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" floatLabel="always">
+        <mat-label>Ciudad</mat-label>
+        <input matInput formControlName="city" autocomplete="off" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" floatLabel="always">
+        <mat-label>Dirección</mat-label>
+        <input matInput formControlName="address" autocomplete="off" />
+      </mat-form-field>
     </div>
 
-    <!-- 🧾 FORM -->
-    <form [formGroup]="form" class="form">
+    <mat-form-field appearance="outline" floatLabel="always" class="full">
+      <mat-label>Descripción</mat-label>
+      <textarea
+        matInput
+        formControlName="description"
+        rows="3"
+        placeholder="Descripción breve del programa"
+      ></textarea>
+    </mat-form-field>
+  </form>
+</div>
 
-      <!-- NOMBRE -->
-      <div class="fila-1">
-        <div class="field">
-          <label>NOMBRE</label>
-          <input type="text" formControlName="name" />
-        </div>
-      </div>
+<div mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Cancelar</button>
 
-      <!-- UTT + TYPE -->
-      <div class="fila-2">
-        <div class="field key">
-          <label>TIPO POBLACION</label>
-          <select formControlName="utt">
-            <option *ngFor="let u of uttOptions" [value]="u">{{ u }}</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="fila-2">
-        <div class="field key">
-          <label>TIPO PROGRAMA 1</label>
-          <select formControlName="type">
-            <option *ngFor="let t of typeOptions" [value]="t">{{ t }}</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>TIPO DE PLAN 1</label>
-          <select formControlName="c1">
-            <option *ngFor="let c of c1Options" [value]="c">{{ c }}</option>
-          </select>
-        </div>
-      </div>
-   
-      <div class="fila-2">
-        <div class="field key">
-          <label>TIPO PROGRAMA 2</label>
-          <select formControlName="type">
-            <option *ngFor="let t of typeOptions" [value]="t">{{ t }}</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>TIPO DE PLAN 2</label>
-          <select formControlName="c1">
-            <option *ngFor="let c of c1Options" [value]="c">{{ c }}</option>
-          </select>
-        </div>
-      </div>
-      <div class="fila-2">
-        <div class="field key">
-          <label>TIPO PROGRAMA 3</label>
-          <select formControlName="type">
-            <option *ngFor="let t of typeOptions" [value]="t">{{ t }}</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>TIPO DE PLAN 3</label>
-          <select formControlName="c1">
-            <option *ngFor="let c of c1Options" [value]="c">{{ c }}</option>
-          </select>
-        </div>
-
-      </div>
-
-      <div class="fila-2">
-        <div class="field key">
-          <label>TIPO PROGRAMA 4</label>
-          <select formControlName="type">
-            <option *ngFor="let t of typeOptions" [value]="t">{{ t }}</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>TIPO DE PLAN 4</label>
-          <select formControlName="c1">
-            <option *ngFor="let c of c1Options" [value]="c">{{ c }}</option>
-          </select>
-        </div>
-
-      </div>      
-
-
-      
-        <div class="field">
-          <label>SUBTIPO 2</label>
-          <select formControlName="c2">
-            <option *ngFor="let c of c2Options" [value]="c">{{ c }}</option>
-          </select>
-        </div>
-        
-        
-      <!-- CONTACTO -->
-      <div class="fila-2">
-        <div class="field">
-          <label>TELÉFONO</label>
-          <input type="text" formControlName="cellphone" />
-        </div>
-
-        <div class="field">
-          <label>EMAIL</label>
-          <input type="email" formControlName="email" />
-        </div>
-      </div>
-
-      <!-- UBICACIÓN -->
-      <div class="fila-2">
-        <div class="field">
-          <label>CIUDAD</label>
-          <input type="text" formControlName="city" />
-        </div>
-
-        <div class="field">
-          <label>DIRECCIÓN</label>
-          <input type="text" formControlName="address" />
-        </div>
-      </div>
-
-      <!-- DESCRIPCIÓN -->
-      <div class="fila-1">
-        <div class="field">
-          <label>DESCRIPCIÓN</label>
-          <input type="text" formControlName="description" />
-        </div>
-      </div>
-
-    </form>
-
-    <!-- 🔽 BOTONES DENTRO DE LA FICHA -->
-    <div class="dialog-actions">
-      <button mat-button (click)="cancel()">Cancelar</button>
-
-      <button
-        mat-flat-button
-        color="primary"
-        (click)="save()"
-        [disabled]="form.invalid"
-      >
-        Guardar
-      </button>
-    </div>
-
-  </div>
-
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="save()"
+    [disabled]="form.invalid">
+    Guardar
+  </button>
 </div>
