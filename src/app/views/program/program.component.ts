@@ -220,9 +220,10 @@ export class ProgramComponent implements AfterViewInit {
   openDialog(row?: Program): void {
     setTimeout(() => {
       const ref = this.dialog.open(ProgramDialogComponent, {
-        width: '760px',
-        maxWidth: '95vw',
-        panelClass: 'maintainer-dialog',
+        width: '1040px',
+        maxWidth: '96vw',
+        maxHeight: '94vh',
+        panelClass: ['maintainer-dialog', 'program-dialog'],
         backdropClass: 'app-backdrop',
         data: row ?? null,
       });

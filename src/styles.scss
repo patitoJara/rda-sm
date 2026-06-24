@@ -444,3 +444,54 @@ mat-nav-list a.active mat-icon {
 .cdk-overlay-container .rda-confirm-dialog .dialog-icon {
   color: #dc2626 !important;
 }
+
+/* Modal especial Programas */
+.cdk-overlay-container .program-dialog .mat-mdc-dialog-surface {
+  width: min(1040px, 96vw) !important;
+  max-width: 96vw !important;
+  max-height: 94vh !important;
+  border-radius: 22px !important;
+  overflow: hidden !important;
+}
+
+.cdk-overlay-container .program-dialog mat-dialog-content {
+  max-height: calc(94vh - 130px) !important;
+  overflow-y: auto !important;
+  padding: 18px 24px 8px !important;
+}
+
+.cdk-overlay-container .program-dialog h2[mat-dialog-title] {
+  padding: 24px 28px 8px !important;
+  margin: 0 !important;
+}
+
+.cdk-overlay-container .program-dialog .program-form {
+  gap: 12px !important;
+}
+
+.cdk-overlay-container .program-dialog .program-form .form-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px 16px !important;
+}
+
+.cdk-overlay-container .program-dialog .mat-mdc-form-field {
+  margin-bottom: 0 !important;
+}
+
+.cdk-overlay-container .program-dialog .mat-mdc-text-field-wrapper {
+  min-height: 48px !important;
+}
+
+.cdk-overlay-container .program-dialog textarea.mat-mdc-input-element {
+  min-height: 78px !important;
+}
+
+.cdk-overlay-container .program-dialog mat-dialog-actions {
+  padding: 10px 28px 20px !important;
+  margin: 0 !important;
+  position: sticky;
+  bottom: 0;
+  background: #fbf9fd;
+  z-index: 2;
+}
