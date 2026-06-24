@@ -1,6 +1,12 @@
 // src/app/pages/program/program.component.ts
 
-import { Component, AfterViewInit, ViewChild, inject, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  AfterViewInit,
+  ViewChild,
+  inject,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -17,6 +23,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { merge } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { MatCardModule } from '@angular/material/card';
 
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
 import { Sex } from '../../models/sex';
@@ -29,14 +36,32 @@ import { SexsDialogComponent } from './sexs.dialog';
   templateUrl: './sexs.component.html',
   styleUrls: ['./sexs.component.scss'],
   imports: [
-    CommonModule, FormsModule,
-    MatTableModule, MatPaginatorModule, MatSortModule,
-    MatIconModule, MatButtonModule, MatFormFieldModule, MatInputModule,
-    MatTooltipModule, MatProgressBarModule, MatChipsModule, MatDialogModule
-  ]
+    CommonModule,
+    FormsModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatIconModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatTooltipModule,
+    MatProgressBarModule,
+    MatChipsModule,
+    MatDialogModule,
+    MatCardModule,
+  ],
 })
 export class SexsComponent implements AfterViewInit {
-  displayedColumns = ['id','name','createdAt','updatedAt','deletedAt','estado','acciones'];
+  displayedColumns = [
+    'id',
+    'name',
+    'createdAt',
+    'updatedAt',
+    'deletedAt',
+    'estado',
+    'acciones',
+  ];
   dataSource = new MatTableDataSource<Sex>([]);
   loading = false;
   total = 0;
@@ -45,7 +70,7 @@ export class SexsComponent implements AfterViewInit {
   q = '';
 
   /** Estado: all = todos, active = no eliminados, deleted = eliminados */
-  filterState: 'all'|'active'|'deleted' = 'active';
+  filterState: 'all' | 'active' | 'deleted' = 'active';
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -62,7 +87,9 @@ export class SexsComponent implements AfterViewInit {
     this.sort.direction = 'asc' as SortDirection;
 
     this.sort.sortChange.subscribe(() => this.paginator.firstPage());
-    merge(this.sort.sortChange, this.paginator.page).subscribe(() => this.load());
+    merge(this.sort.sortChange, this.paginator.page).subscribe(() =>
+      this.load(),
+    );
 
     this.load();
     this.cdr.detectChanges();
@@ -70,12 +97,18 @@ export class SexsComponent implements AfterViewInit {
 
   private mapSortField(active?: string): string {
     switch (active) {
-      case 'id':        return 'id';
-      case 'name':      return 'name';
-      case 'createdAt': return 'createdAt';
-      case 'updatedAt': return 'updatedAt';
-      case 'deletedAt': return 'deletedAt';
-      default:          return 'id';
+      case 'id':
+        return 'id';
+      case 'name':
+        return 'name';
+      case 'createdAt':
+        return 'createdAt';
+      case 'updatedAt':
+        return 'updatedAt';
+      case 'deletedAt':
+        return 'deletedAt';
+      default:
+        return 'id';
     }
   }
 
@@ -90,25 +123,30 @@ export class SexsComponent implements AfterViewInit {
     const direction = (this.sort?.direction as '' | 'asc' | 'desc') || 'asc';
     const sortField = this.mapSortField(active);
 
-    this.api.getAllPaginated({ page, size })
+    this.api
+      .getAllPaginated({ page, size })
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (res: any) => {
           // Normalizo respuesta en array
-          const allRows: Sex[] = Array.isArray(res) ? res : (res?.content ?? []);
+          const allRows: Sex[] = Array.isArray(res)
+            ? res
+            : (res?.content ?? []);
 
           // 1) Filtro por estado
           let filtered = allRows;
           if (this.filterState === 'active') {
-            filtered = allRows.filter(r => !r.deletedAt);   // activos
+            filtered = allRows.filter((r) => !r.deletedAt); // activos
           } else if (this.filterState === 'deleted') {
-            filtered = allRows.filter(r => !!r.deletedAt);  // eliminados
+            filtered = allRows.filter((r) => !!r.deletedAt); // eliminados
           }
 
           // 2) Filtro por nombre
           const term = (this.q || '').toLowerCase();
           if (term) {
-            filtered = filtered.filter(r => (r.name ?? '').toLowerCase().includes(term));
+            filtered = filtered.filter((r) =>
+              (r.name ?? '').toLowerCase().includes(term),
+            );
           }
 
           // 3) Orden
@@ -118,8 +156,13 @@ export class SexsComponent implements AfterViewInit {
             let cmp = 0;
             if (va == null && vb != null) cmp = -1;
             else if (va != null && vb == null) cmp = 1;
-            else if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
-            else cmp = String(va ?? '').localeCompare(String(vb ?? ''), 'es', { numeric: true, sensitivity: 'base' });
+            else if (typeof va === 'number' && typeof vb === 'number')
+              cmp = va - vb;
+            else
+              cmp = String(va ?? '').localeCompare(String(vb ?? ''), 'es', {
+                numeric: true,
+                sensitivity: 'base',
+              });
             return direction === 'asc' ? cmp : -cmp;
           });
 
@@ -130,19 +173,28 @@ export class SexsComponent implements AfterViewInit {
           this.dataSource.data = slice;
           this.total = filtered.length;
         },
-        error: (err) => console.error('Error cargando programas:', err)
+        error: () => {
+          this.dataSource.data = [];
+          this.total = 0;
+        },
       });
   }
 
   /** Obtener valor para ordenamiento */
   private getFieldValue(row: Sex, field: string): any {
     switch (field) {
-      case 'id':        return row.id;
-      case 'name':      return row.name;
-      case 'createdAt': return row.createdAt;
-      case 'updatedAt': return row.updatedAt;
-      case 'deletedAt': return row.deletedAt;
-      default:          return row.id;
+      case 'id':
+        return row.id;
+      case 'name':
+        return row.name;
+      case 'createdAt':
+        return row.createdAt;
+      case 'updatedAt':
+        return row.updatedAt;
+      case 'deletedAt':
+        return row.deletedAt;
+      default:
+        return row.id;
     }
   }
 
@@ -154,52 +206,60 @@ export class SexsComponent implements AfterViewInit {
   }
 
   /** Cambiar estado */
-  setState(state: 'all'|'active'|'deleted'): void {
+  setState(state: 'all' | 'active' | 'deleted'): void {
     this.q = '';
     this.filterState = state;
     this.paginator.firstPage();
     this.load();
   }
 
-  refresh(): void { this.load(); }
+  refresh(): void {
+    this.load();
+  }
 
   openDialog(row?: Sex): void {
     setTimeout(() => {
       const ref = this.dialog.open(SexsDialogComponent, {
         width: '560px',
         maxWidth: '95vw',
-        panelClass: 'programs-dialog',
+        panelClass: 'maintainer-dialog',
         backdropClass: 'app-backdrop',
-        data: row ?? null
+        data: row ?? null,
       });
 
       ref.afterClosed().subscribe((result?: Sex) => {
-        if (result) queueMicrotask(() => this.load());
+        if (result) {
+          queueMicrotask(() => this.load());
+        }
       });
     });
   }
-
+  
   softDelete(row: Sex): void {
     const ref = this.dialog.open(ConfirmDialogComponent, {
-      width: '420px',
+      width: '460px',
+      maxWidth: '95vw',
       disableClose: true,
+      panelClass: 'rda-confirm-dialog',
+      backdropClass: 'app-backdrop',
       data: {
-        title: 'Eliminar sexo',
+        title: 'Eliminar género',
         message: `¿Seguro que deseas eliminar “${row.name}” (ID: ${row.id})?`,
         confirmText: 'Eliminar',
         cancelText: 'Cancelar',
         color: 'warn',
         icon: 'delete',
-        dense: true
-      }
+      },
     });
 
     ref.afterClosed().subscribe((ok: boolean) => {
-      if (ok) this.api.delete(Number(row.id)).subscribe(() => this.load());
-    });    
+      if (ok) {
+        this.api.delete(Number(row.id)).subscribe(() => this.load());
+      }
+    });
   }
 
-  restore(row: Sex): void { 
-    this.api.restore(Number(row.id)).subscribe(() => this.load()); 
+  restore(row: Sex): void {
+    this.api.restore(Number(row.id)).subscribe(() => this.load());
   }
 }
