@@ -93,7 +93,7 @@ export class ConvPrevComponent implements AfterViewInit {
     this.paginator.pageIndex = 0;
 
     merge(this.sort.sortChange, this.paginator.page).subscribe(() =>
-      this.load()
+      this.load(),
     );
 
     this.loadIntPrev();
@@ -115,7 +115,10 @@ export class ConvPrevComponent implements AfterViewInit {
 
         this.cdr.detectChanges();
       },
-      error: (e) => console.error('Error cargando IntPrev', e),
+      error: () => {
+        this.dataSource.data = [];
+        this.total = 0;
+      },
     });
   }
 
@@ -138,7 +141,7 @@ export class ConvPrevComponent implements AfterViewInit {
         next: (res: any) => {
           const rows: ConvPrev[] = Array.isArray(res)
             ? res
-            : res?.content ?? [];
+            : (res?.content ?? []);
 
           // Copia completa
           let filtered = [...rows];
@@ -152,7 +155,7 @@ export class ConvPrevComponent implements AfterViewInit {
           // Tipo (Fonasa / Isapre)
           if (this.filterIntPrev !== null) {
             filtered = filtered.filter(
-              (r) => r.intPrev?.id === this.filterIntPrev
+              (r) => r.intPrev?.id === this.filterIntPrev,
             );
           }
 
@@ -162,7 +165,7 @@ export class ConvPrevComponent implements AfterViewInit {
             filtered = filtered.filter(
               (r) =>
                 (r.name ?? '').toLowerCase().includes(t) ||
-                (r.intPrev?.name ?? '').toLowerCase().includes(t)
+                (r.intPrev?.name ?? '').toLowerCase().includes(t),
             );
           }
 
@@ -225,40 +228,48 @@ export class ConvPrevComponent implements AfterViewInit {
     this.load();
   }
 
-  openDialog(row?: ConvPrev) {
-    const selectedTypeId = this.filterIntPrev; // 👈 Tipo seleccionado arriba (Fonasa / Isapre)
+  openDialog(row?: ConvPrev): void {
+    const selectedTypeId = this.filterIntPrev;
 
     const ref = this.dialog.open(ConvPrevDialogComponent, {
       width: '560px',
       maxWidth: '95vw',
+      panelClass: 'maintainer-dialog',
+      backdropClass: 'app-backdrop',
       data: {
         row: row ?? null,
-        intPrevId: row?.intPrev?.id ?? selectedTypeId, // 👈 AQUÍ ESTA LA MAGIA
+        intPrevId: row?.intPrev?.id ?? selectedTypeId,
       },
     });
 
-    ref.afterClosed().subscribe((res) => {
-      if (res) this.load();
+    ref.afterClosed().subscribe((res?: ConvPrev) => {
+      if (res) {
+        queueMicrotask(() => this.load());
+      }
     });
   }
 
-  softDelete(row: ConvPrev) {
+  softDelete(row: ConvPrev): void {
     const ref = this.dialog.open(ConfirmDialogComponent, {
-      width: '420px',
+      width: '460px',
+      maxWidth: '95vw',
       disableClose: true,
+      panelClass: 'rda-confirm-dialog',
+      backdropClass: 'app-backdrop',
       data: {
-        title: 'Eliminar Previsión',
-        message: `¿Seguro que deseas eliminar “${row.name}”?`,
+        title: 'Eliminar previsión',
+        message: `¿Seguro que deseas eliminar “${row.name}” (ID: ${row.id})?`,
         confirmText: 'Eliminar',
         cancelText: 'Cancelar',
         color: 'warn',
         icon: 'delete',
-        dense: true,
       },
     });
 
-    ref.afterClosed().subscribe((ok) => {
-      if (ok) this.api.softDelete(row.id).subscribe(() => this.load());
+    ref.afterClosed().subscribe((ok: boolean) => {
+      if (ok) {
+        this.api.softDelete(row.id).subscribe(() => this.load());
+      }
     });
   }
 

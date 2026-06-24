@@ -1,36 +1,55 @@
-<mat-card class="dialog-card">
-  <!-- Encabezado azul institucional -->
-  <div class="header-azul-dialog">
-    <div class="title-main">
-      Tipo de Previsión:
-      <strong>{{ getIntPrevName() }}</strong>
-    </div>
+<h2 mat-dialog-title>
+  <mat-icon>handshake</mat-icon>
+  {{ form.value.id ? 'Editar previsión' : 'Nueva previsión' }}
+</h2>
 
-    <div class="title-sub">
-      {{ form.value.id ? 'Modificar Previsión' : 'Nueva Previsión' }}
-    </div>
-  </div>
+<div mat-dialog-content>
+  <form [formGroup]="form" class="form">
+    <mat-form-field appearance="outline" floatLabel="always" class="full">
+      <mat-label>Tipo de previsión</mat-label>
 
-  <form [formGroup]="form" class="dialog-body">
-    <!-- Campo para escribir o editar la previsión -->
-    <mat-form-field appearance="fill" class="full">
-      <mat-label>Previsión</mat-label>
+      <mat-select formControlName="intPrevId">
+        <mat-option *ngFor="let item of intPrevList" [value]="item.id">
+          {{ item.name }}
+        </mat-option>
+      </mat-select>
+
+      <mat-error *ngIf="form.get('intPrevId')?.hasError('required')">
+        El tipo de previsión es obligatorio.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" floatLabel="always" class="full">
+      <mat-label>Nombre de la previsión</mat-label>
+
       <input
         matInput
         formControlName="name"
-        placeholder=""
+        autocomplete="off"
+        placeholder="Ej: Fonasa A"
+        (keydown.enter)="save()"
       />
+
+      <mat-error *ngIf="form.get('name')?.hasError('required')">
+        El nombre de la previsión es obligatorio.
+      </mat-error>
+
+      <mat-error *ngIf="form.get('name')?.hasError('maxlength')">
+        El nombre no puede superar los 120 caracteres.
+      </mat-error>
     </mat-form-field>
-
-    <!-- Botones -->
-    <div class="actions">
-      <button mat-stroked-button color="warn" type="button" (click)="cancel()">
-        Cancelar
-      </button>
-
-      <button mat-flat-button color="primary" type="button" (click)="save()">
-        {{ form.value.id ? 'Guardar Cambios' : 'Crear Previsión' }}
-      </button>
-    </div>
   </form>
-</mat-card>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Cancelar</button>
+
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="save()"
+    [disabled]="form.invalid">
+    Guardar
+  </button>
+</div>

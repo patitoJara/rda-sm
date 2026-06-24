@@ -1,133 +1,194 @@
+<section class="maintainer-page">
+  <div class="maintainer-hero">
+    <div>
+      <span class="eyebrow">
+        <mat-icon>handshake</mat-icon>
+        Vía de ingreso
+      </span>
 
- <h3 class="titulo-genero">
-  <mat-icon>medical_services</mat-icon>
-  <span>Tipo de Previsión</span>
-</h3>
+      <h1>Convenios previos</h1>
 
-<mat-card appearance="outlined" class="section-card mt-24">
-  <div class="block5-row">
-    <mat-form-field appearance="fill">
-      <mat-label>Tipo de Previsión</mat-label>
-      <mat-select
-        [(ngModel)]="selectedIntPrev"
-        (selectionChange)="setIntPrevFilter($event)"
-      >
-        <mat-option *ngFor="let s of intPrevList" [value]="s.id">
-          {{ s.name }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+      <p>
+        Administre las previsiones o convenios previos asociados al tipo de
+        previsión seleccionado para el registro de personas y episodios.
+      </p>
+    </div>
 
-    <button
-      mat-flat-button
-      color="primary"
-      class="new-btn"
-      (click)="openDialog()"
-    >
+    <button mat-flat-button class="primary-action" (click)="openDialog()">
       <mat-icon>add</mat-icon>
-      Nueva Previsión
+      Nueva previsión
     </button>
   </div>
-</mat-card>
 
-<mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
-<div class="table-wrapper" style="overflow: auto">
-  <table
-    mat-table
-    [dataSource]="dataSource"
-    matSort
-    class="mat-elevation-z1"
-    style="min-width: 900px; width: 100%"
-  >
-    <ng-container matColumnDef="id">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
-      <td mat-cell *matCellDef="let row">{{ row.id }}</td>
-    </ng-container>
+  <mat-card class="toolbar-card">
+    <div class="filters">
+      <mat-form-field appearance="outline" floatLabel="always" class="search-field">
+        <mat-label>Tipo de previsión</mat-label>
 
-    <ng-container matColumnDef="name">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
-      <td mat-cell *matCellDef="let row">{{ row.name }}</td>
-    </ng-container>
+        <mat-icon matPrefix>medical_services</mat-icon>
 
-    <ng-container matColumnDef="intPrev">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
-      <td mat-cell *matCellDef="let row">{{ row.intPrev?.name || "—" }}</td>
-    </ng-container>
+        <mat-select
+          [(ngModel)]="selectedIntPrev"
+          (selectionChange)="setIntPrevFilter($event)"
+        >
+          <mat-option *ngFor="let s of intPrevList" [value]="s.id">
+            {{ s.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
 
-    <ng-container matColumnDef="createdAt">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Creado</th>
-      <td mat-cell *matCellDef="let row">
-        {{ row.createdAt | date : "short" }}
-      </td>
-    </ng-container>
+      <mat-form-field appearance="outline" floatLabel="always" class="search-field">
+        <mat-label>Buscar previsión</mat-label>
 
-    <ng-container matColumnDef="updatedAt">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Actualizado</th>
-      <td mat-cell *matCellDef="let row">
-        {{ row.updatedAt | date : "short" }}
-      </td>
-    </ng-container>
+        <mat-icon matPrefix>search</mat-icon>
 
-    <ng-container matColumnDef="deletedAt">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Eliminado</th>
-      <td mat-cell *matCellDef="let row">
-        {{ row.deletedAt ? (row.deletedAt | date : "short") : "—" }}
-      </td>
-    </ng-container>
+        <input
+          #search
+          matInput
+          type="text"
+          placeholder="Ej: Fonasa, Isapre, convenio..."
+          [value]="q"
+          (keyup.enter)="applyFilter(search.value)"
+        />
+      </mat-form-field>
 
-    <ng-container matColumnDef="estado">
-      <th mat-header-cell *matHeaderCellDef>Estado</th>
-      <td mat-cell *matCellDef="let row">
-        <mat-chip [color]="row.deletedAt ? 'warn' : 'primary'">
-          {{ row.deletedAt ? "Eliminado" : "Activo" }}
-        </mat-chip>
-      </td>
-    </ng-container>
-
-    <ng-container matColumnDef="acciones">
-      <th mat-header-cell *matHeaderCellDef>Acciones</th>
-      <td mat-cell *matCellDef="let row">
-        <button mat-icon-button matTooltip="Editar" (click)="openDialog(row)">
-          <mat-icon>edit</mat-icon>
+      <div class="state-buttons">
+        <button
+          type="button"
+          [class.active]="filterState === 'active'"
+          (click)="setState('active')">
+          Activos
         </button>
 
         <button
-          *ngIf="!row.deletedAt"
-          mat-icon-button
-          color="warn"
-          matTooltip="Eliminar"
-          (click)="softDelete(row)"
-        >
-          <mat-icon>delete</mat-icon>
+          type="button"
+          [class.active]="filterState === 'deleted'"
+          (click)="setState('deleted')">
+          Eliminados
         </button>
 
         <button
-          *ngIf="row.deletedAt"
-          mat-icon-button
-          color="primary"
-          matTooltip="Restaurar"
-          (click)="restore(row)"
-        >
-          <mat-icon>settings_backup_restore</mat-icon>
+          type="button"
+          [class.active]="filterState === 'all'"
+          (click)="setState('all')">
+          Todos
         </button>
-      </td>
-    </ng-container>
+      </div>
+    </div>
+  </mat-card>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
 
-    <tr class="mat-row" *matNoDataRow>
-      <td class="mat-cell" [attr.colspan]="displayedColumns.length">
-        No hay resultados.
-      </td>
-    </tr>
-  </table>
-</div>
+  <mat-card class="table-card">
+    <div class="table-header">
+      <div>
+        <h2>Listado de convenios previos</h2>
+        <p>Total registros encontrados: {{ total }}</p>
+      </div>
 
-<mat-paginator
-  [length]="total"
-  pageSize="10"
-  [pageSizeOptions]="[5, 10, 20]"
-  showFirstLastButtons
->
-</mat-paginator>
+      <button type="button" mat-icon-button matTooltip="Actualizar" (click)="refresh()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+
+    <div class="table-wrapper">
+      <table mat-table [dataSource]="dataSource" matSort>
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+          <td mat-cell *matCellDef="let row">{{ row.id }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Previsión</th>
+          <td mat-cell *matCellDef="let row">
+            <strong>{{ row.name || '—' }}</strong>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="intPrev">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
+          <td mat-cell *matCellDef="let row">{{ row.intPrev?.name || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Creado</th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.createdAt ? (row.createdAt | date: 'short') : '—' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="updatedAt">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Actualizado</th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.updatedAt ? (row.updatedAt | date: 'short') : '—' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="deletedAt">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Eliminado</th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.deletedAt ? (row.deletedAt | date: 'short') : '—' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef>Estado registro</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="status-badge" [class.deleted]="row.deletedAt">
+              {{ row.deletedAt ? 'Eliminado' : 'Activo' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let row">
+            <div class="action-buttons">
+              <button
+                mat-icon-button
+                class="edit-btn"
+                matTooltip="Editar previsión"
+                (click)="openDialog(row)">
+                <mat-icon>edit</mat-icon>
+              </button>
+
+              <button
+                *ngIf="!row.deletedAt"
+                mat-icon-button
+                class="delete-btn"
+                matTooltip="Eliminar previsión"
+                (click)="softDelete(row)">
+                <mat-icon>delete</mat-icon>
+              </button>
+
+              <button
+                *ngIf="row.deletedAt"
+                mat-icon-button
+                class="restore-btn"
+                matTooltip="Restaurar previsión"
+                (click)="restore(row)">
+                <mat-icon>settings_backup_restore</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+        <tr class="mat-row no-data-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+            No hay resultados.
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="total"
+      pageSize="10"
+      [pageSizeOptions]="[5, 10, 20]"
+      showFirstLastButtons>
+    </mat-paginator>
+  </mat-card>
+</section>

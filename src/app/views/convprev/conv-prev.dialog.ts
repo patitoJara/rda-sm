@@ -17,12 +17,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
+import { MatIconModule } from '@angular/material/icon';
 
 import { ConvPrevService } from '../../services/conv-prev.service';
 import { ConvPrev } from '../../models/conv-prev';
 import { IntPrevService } from '../../services/int-prev.service';
 import { IntPrev } from '../../models/int-prev';
-
 
 @Component({
   standalone: true,
@@ -39,10 +39,10 @@ import { IntPrev } from '../../models/int-prev';
     MatCardModule,
     MatSelectModule,
     MatOptionModule,
+    MatIconModule,
   ],
 })
 export class ConvPrevDialogComponent implements OnInit {
-
   form!: FormGroup;
   intPrevList: IntPrev[] = [];
 
@@ -54,11 +54,10 @@ export class ConvPrevDialogComponent implements OnInit {
 
     // ⭐⭐ CORRECTO: recibimos row y el intPrevId
     @Inject(MAT_DIALOG_DATA)
-    public data: { row: ConvPrev | null; intPrevId: number | null }
+    public data: { row: ConvPrev | null; intPrevId: number | null },
   ) {}
 
   ngOnInit(): void {
-
     const row = this.data.row;
 
     // ⭐ CREAR FORM
@@ -66,7 +65,7 @@ export class ConvPrevDialogComponent implements OnInit {
       id: [row?.id ?? null],
       name: [row?.name ?? '', [Validators.required, Validators.maxLength(120)]],
       intPrevId: [
-        row?.intPrev?.id ?? this.data.intPrevId,  // ⭐ SIEMPRE LLEGA
+        row?.intPrev?.id ?? this.data.intPrevId, // ⭐ SIEMPRE LLEGA
         Validators.required,
       ],
     });
@@ -91,19 +90,35 @@ export class ConvPrevDialogComponent implements OnInit {
   }
 
   save(): void {
-    const v = this.form.getRawValue();
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
-    const payload = {
-      id: v.id,
+    this.form.disable();
+
+    const v = this.form.getRawValue() as {
+      id: number | null;
+      name: string;
+      intPrevId: number;
+    };
+
+    const payload: any = {
       name: v.name,
       intPrev: { id: v.intPrevId },
     };
+
+    if (v.id !== null) {
+      payload.id = v.id;
+    }
 
     const req = v.id ? this.api.update(v.id, payload) : this.api.save(payload);
 
     req.subscribe({
       next: (row: ConvPrev) => this.ref.close(row),
-      error: (err: unknown) => console.error(err),
+      error: () => {
+        this.form.enable();
+      },
     });
   }
 
