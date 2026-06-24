@@ -1,6 +1,12 @@
 // quien deriva component
 
-import { Component, AfterViewInit, ViewChild, inject, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  AfterViewInit,
+  ViewChild,
+  inject,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -17,13 +23,13 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { merge } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { MatCardModule } from '@angular/material/card';
 
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
-import { Sender } from '../../models/sender';
+
 import { DiverterService } from '../../services/diverter.service';
 import { DiverterDialogComponent } from './diverter.dialog';
 import { Diverter } from '../../models/diverter';
-
 
 @Component({
   standalone: true,
@@ -31,14 +37,32 @@ import { Diverter } from '../../models/diverter';
   templateUrl: './diverter.component.html',
   styleUrls: ['./diverter.component.scss'],
   imports: [
-    CommonModule, FormsModule,
-    MatTableModule, MatPaginatorModule, MatSortModule,
-    MatIconModule, MatButtonModule, MatFormFieldModule, MatInputModule,
-    MatTooltipModule, MatProgressBarModule, MatChipsModule, MatDialogModule
-  ]
+    CommonModule,
+    FormsModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatIconModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatTooltipModule,
+    MatProgressBarModule,
+    MatChipsModule,
+    MatDialogModule,
+    MatCardModule,
+  ],
 })
 export class DiverterComponent implements AfterViewInit {
-  displayedColumns = ['id','name','createdAt','updatedAt','deletedAt','estado','acciones'];
+  displayedColumns = [
+    'id',
+    'name',
+    'createdAt',
+    'updatedAt',
+    'deletedAt',
+    'estado',
+    'acciones',
+  ];
   dataSource = new MatTableDataSource<Diverter>([]);
   loading = false;
   total = 0;
@@ -47,7 +71,7 @@ export class DiverterComponent implements AfterViewInit {
   q = '';
 
   /** Estado: all = todos, active = no eliminados, deleted = eliminados */
-  filterState: 'all'|'active'|'deleted' = 'active';
+  filterState: 'all' | 'active' | 'deleted' = 'active';
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -64,7 +88,9 @@ export class DiverterComponent implements AfterViewInit {
     this.sort.direction = 'asc' as SortDirection;
 
     this.sort.sortChange.subscribe(() => this.paginator.firstPage());
-    merge(this.sort.sortChange, this.paginator.page).subscribe(() => this.load());
+    merge(this.sort.sortChange, this.paginator.page).subscribe(() =>
+      this.load(),
+    );
 
     this.load();
     this.cdr.detectChanges();
@@ -73,12 +99,18 @@ export class DiverterComponent implements AfterViewInit {
   /** Mapeo de campos para ordenar */
   private mapSortField(active?: string): string {
     switch (active) {
-      case 'id': return 'id';
-      case 'name': return 'name';
-      case 'createdAt': return 'createdAt';
-      case 'updatedAt': return 'updatedAt';
-      case 'deletedAt': return 'deletedAt';
-      default: return 'id';
+      case 'id':
+        return 'id';
+      case 'name':
+        return 'name';
+      case 'createdAt':
+        return 'createdAt';
+      case 'updatedAt':
+        return 'updatedAt';
+      case 'deletedAt':
+        return 'deletedAt';
+      default:
+        return 'id';
     }
   }
 
@@ -93,24 +125,29 @@ export class DiverterComponent implements AfterViewInit {
     const direction = (this.sort?.direction as '' | 'asc' | 'desc') || 'asc';
     const sortField = this.mapSortField(active);
 
-    this.api.getAllPaginated({ page, size })
+    this.api
+      .getAllPaginated({ page, size })
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (res: any) => {
-          const allRows: Sender[] = Array.isArray(res) ? res : (res?.content ?? []);
+          const allRows: Diverter[] = Array.isArray(res)
+            ? res
+            : (res?.content ?? []);
 
           // Filtro por estado
           let filtered = allRows;
           if (this.filterState === 'active') {
-            filtered = allRows.filter(r => !r.deletedAt);
+            filtered = allRows.filter((r) => !r.deletedAt);
           } else if (this.filterState === 'deleted') {
-            filtered = allRows.filter(r => !!r.deletedAt);
+            filtered = allRows.filter((r) => !!r.deletedAt);
           }
 
           // Filtro por nombre
           const term = (this.q || '').toLowerCase();
           if (term) {
-            filtered = filtered.filter(r => (r.name ?? '').toLowerCase().includes(term));
+            filtered = filtered.filter((r) =>
+              (r.name ?? '').toLowerCase().includes(term),
+            );
           }
 
           // Orden
@@ -120,8 +157,13 @@ export class DiverterComponent implements AfterViewInit {
             let cmp = 0;
             if (va == null && vb != null) cmp = -1;
             else if (va != null && vb == null) cmp = 1;
-            else if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
-            else cmp = String(va ?? '').localeCompare(String(vb ?? ''), 'es', { numeric: true, sensitivity: 'base' });
+            else if (typeof va === 'number' && typeof vb === 'number')
+              cmp = va - vb;
+            else
+              cmp = String(va ?? '').localeCompare(String(vb ?? ''), 'es', {
+                numeric: true,
+                sensitivity: 'base',
+              });
             return direction === 'asc' ? cmp : -cmp;
           });
 
@@ -132,19 +174,28 @@ export class DiverterComponent implements AfterViewInit {
           this.dataSource.data = slice;
           this.total = filtered.length;
         },
-        error: (err) => console.error('Error cargando quien deriva:', err)
+        error: () => {
+          this.dataSource.data = [];
+          this.total = 0;
+        },
       });
   }
 
   /** Obtener valor para ordenar */
   private getFieldValue(row: Diverter, field: string): any {
     switch (field) {
-      case 'id': return row.id;
-      case 'name': return row.name;
-      case 'createdAt': return row.createdAt;
-      case 'updatedAt': return row.updatedAt;
-      case 'deletedAt': return row.deletedAt;
-      default: return row.id;
+      case 'id':
+        return row.id;
+      case 'name':
+        return row.name;
+      case 'createdAt':
+        return row.createdAt;
+      case 'updatedAt':
+        return row.updatedAt;
+      case 'deletedAt':
+        return row.deletedAt;
+      default:
+        return row.id;
     }
   }
 
@@ -156,7 +207,7 @@ export class DiverterComponent implements AfterViewInit {
   }
 
   /** Cambiar estado (Activos / Eliminados / Todos) */
-  setState(state: 'all'|'active'|'deleted'): void {
+  setState(state: 'all' | 'active' | 'deleted'): void {
     this.q = '';
     this.filterState = state;
     this.paginator.firstPage();
@@ -169,18 +220,20 @@ export class DiverterComponent implements AfterViewInit {
   }
 
   /** Diálogo crear / editar */
-  openDialog(row?: Sender): void {
+  openDialog(row?: Diverter): void {
     setTimeout(() => {
       const ref = this.dialog.open(DiverterDialogComponent, {
         width: '560px',
         maxWidth: '95vw',
-        panelClass: 'diverter-dialog',
+        panelClass: 'maintainer-dialog',
         backdropClass: 'app-backdrop',
-        data: row ?? null
+        data: row ?? null,
       });
 
       ref.afterClosed().subscribe((result?: Diverter) => {
-        if (result) queueMicrotask(() => this.load());
+        if (result) {
+          queueMicrotask(() => this.load());
+        }
       });
     });
   }
@@ -188,21 +241,25 @@ export class DiverterComponent implements AfterViewInit {
   /** Eliminar quien solicita */
   softDelete(row: Diverter): void {
     const ref = this.dialog.open(ConfirmDialogComponent, {
-      width: '420px',
+      width: '460px',
+      maxWidth: '95vw',
       disableClose: true,
+      panelClass: 'rda-confirm-dialog',
+      backdropClass: 'app-backdrop',
       data: {
-        title: 'Eliminar quien Deriva',
+        title: 'Eliminar derivador',
         message: `¿Seguro que deseas eliminar “${row.name}” (ID: ${row.id})?`,
         confirmText: 'Eliminar',
         cancelText: 'Cancelar',
         color: 'warn',
         icon: 'delete',
-        dense: true
-      }
+      },
     });
 
     ref.afterClosed().subscribe((ok: boolean) => {
-      if (ok) this.api.delete(Number(row.id)).subscribe(() => this.load());
+      if (ok) {
+        this.api.delete(Number(row.id)).subscribe(() => this.load());
+      }
     });
   }
 

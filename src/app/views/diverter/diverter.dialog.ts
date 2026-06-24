@@ -1,17 +1,25 @@
 // src/app/pages/senders/senders.dialog.ts
 
-
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import {
+  FormBuilder,
+  ReactiveFormsModule,
+  Validators,
+  FormGroup,
+} from '@angular/forms';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { DiverterService } from '../../services/diverter.service';
 import { Diverter } from '../../models/diverter';
-
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   standalone: true,
@@ -26,7 +34,8 @@ import { Diverter } from '../../models/diverter';
     MatInputModule,
     MatButtonModule,
     MatCardModule,
-]
+    MatIconModule,
+  ],
 })
 export class DiverterDialogComponent implements OnInit {
   form!: FormGroup;
@@ -35,29 +44,48 @@ export class DiverterDialogComponent implements OnInit {
     private fb: FormBuilder,
     private api: DiverterService,
     private ref: MatDialogRef<DiverterDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: Diverter | null
-  ) { }
+    @Inject(MAT_DIALOG_DATA) public data: Diverter | null,
+  ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
       id: [this.data?.id ?? null],
-      name: [this.data?.name ?? '', [Validators.required, Validators.maxLength(120)]],
+      name: [
+        this.data?.name ?? '',
+        [Validators.required, Validators.maxLength(120)],
+      ],
     });
   }
 
   save(): void {
-    const v = this.form.getRawValue() as { id: number | null; name: string };
-    const req = v.id
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
-      ? this.api.update(this.form.value.id, this.form.value)
-      : this.api.save(this.form.value);
+    this.form.disable();
+
+    const v = this.form.getRawValue() as { id: number | null; name: string };
+
+    const payload: any = {
+      name: v.name,
+    };
+
+    if (v.id !== null) {
+      payload.id = v.id;
+    }
+
+    const req = v.id ? this.api.update(v.id, payload) : this.api.save(payload);
 
     req.subscribe({
       next: (row: Diverter) => this.ref.close(row),
-      error: (err: unknown) => console.error(err)
-    });    
+      error: () => {
+        this.form.enable();
+      },
+    });
   }
 
-  cancel(): void { this.ref.close(); }
-
+  cancel(): void {
+    this.ref.close();
+  }
 }
