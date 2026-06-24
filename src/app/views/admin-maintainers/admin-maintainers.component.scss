@@ -232,12 +232,21 @@ mat-chip {
 .card-action {
   display: inline-flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 6px;
   margin-top: 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: #0f6b75;
+  font-family: inherit;
+  font-size: inherit;
   font-weight: 900;
+  line-height: 1.2;
+  text-align: left;
   text-decoration: none;
   cursor: pointer;
+  appearance: none;
   transition:
     color 0.18s ease,
     transform 0.18s ease;
@@ -251,6 +260,12 @@ mat-chip {
   &:hover {
     color: #0f4d56;
     transform: translateX(3px);
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba(15, 107, 117, 0.22);
+    outline-offset: 4px;
+    border-radius: 999px;
   }
 }
 

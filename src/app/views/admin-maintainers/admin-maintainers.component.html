@@ -64,14 +64,15 @@
           <h3>{{ item.title }}</h3>
           <p>{{ item.description }}</p>
 
-          <a
+          <button
+            type="button"
             class="card-action"
             *ngIf="!item.disabled"
-            [routerLink]="item.route"
+            (click)="openMaintainer(item)"
           >
             <span>Abrir mantenedor</span>
             <mat-icon>arrow_forward</mat-icon>
-          </a>
+          </button>
 
           <div class="card-action disabled-action" *ngIf="item.disabled">
             <span>Pendiente backend</span>

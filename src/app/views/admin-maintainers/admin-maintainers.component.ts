@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -44,6 +44,7 @@ interface MaintainerGroup {
   ],
 })
 export class AdminMaintainersComponent {
+  constructor(private router: Router) {}
   search = '';
 
   groups: MaintainerGroup[] = [
@@ -269,6 +270,16 @@ export class AdminMaintainersComponent {
         }),
       }))
       .filter((group) => group.items.length > 0);
+  }
+
+  openMaintainer(item: MaintainerItem): void {
+    if (item.disabled || !item.route) {
+      return;
+    }
+
+    queueMicrotask(() => {
+      this.router.navigateByUrl(item.route);
+    });
   }
 
   private normalize(value: string): string {
