@@ -1,54 +1,42 @@
-<div class="profession-dialog">
-  <div class="dialog-header">
-    <div class="dialog-icon">
-      <mat-icon>work</mat-icon>
-    </div>
+<h2 mat-dialog-title>
+  <mat-icon>work</mat-icon>
+  {{ form.value.id ? 'Editar profesión' : 'Nueva profesión' }}
+</h2>
 
-    <div>
-      <h2 mat-dialog-title>
-        {{ form.value.id ? 'Editar profesión' : 'Nueva profesión' }}
-      </h2>
-      <p>
-        Registra o actualiza una profesión disponible para el sistema.
-      </p>
-    </div>
-  </div>
+<div mat-dialog-content>
+  <form [formGroup]="form" class="form">
+    <mat-form-field appearance="outline" floatLabel="always" class="full">
+      <mat-label>Nombre de la profesión</mat-label>
 
-  <div mat-dialog-content>
-    <form [formGroup]="form" class="form">
-      <mat-form-field appearance="outline" floatLabel="always" class="full">
-        <mat-label>Nombre de la profesión</mat-label>
-        <input
-          matInput
-          formControlName="name"
-          autocomplete="off"
-          placeholder="Ej: Psicólogo"
-          (keydown.enter)="save()"
-        />
+      <input
+        matInput
+        formControlName="name"
+        autocomplete="off"
+        placeholder="Ej: Psicólogo"
+        (keydown.enter)="save()"
+      />
 
-        <mat-error *ngIf="form.get('name')?.hasError('required')">
-          El nombre de la profesión es obligatorio.
-        </mat-error>
+      <mat-error *ngIf="form.get('name')?.hasError('required')">
+        El nombre de la profesión es obligatorio.
+      </mat-error>
 
-        <mat-error *ngIf="form.get('name')?.hasError('maxlength')">
-          El nombre no puede superar los 120 caracteres.
-        </mat-error>
-      </mat-form-field>
-    </form>
-  </div>
+      <mat-error *ngIf="form.get('name')?.hasError('maxlength')">
+        El nombre no puede superar los 120 caracteres.
+      </mat-error>
+    </mat-form-field>
+  </form>
+</div>
 
-  <div mat-dialog-actions align="end">
-    <button mat-button type="button" (click)="cancel()">
-      Cancelar
-    </button>
+<div mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Cancelar</button>
 
-    <button
-      mat-flat-button
-      color="primary"
-      type="button"
-      (click)="save()"
-      [disabled]="form.invalid">
-      Guardar
-    </button>
-  </div>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="save()"
+    [disabled]="form.invalid"
+  >
+    Guardar
+  </button>
 </div>

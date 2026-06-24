@@ -1,4 +1,10 @@
-import { Component, AfterViewInit, ViewChild, inject, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  AfterViewInit,
+  ViewChild,
+  inject,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -46,7 +52,15 @@ import { ProfessionsDialogComponent } from './professions.dialog';
   ],
 })
 export class ProfessionsComponent implements AfterViewInit {
-  displayedColumns = ['id', 'name', 'createdAt', 'updatedAt', 'deletedAt', 'estado', 'acciones'];
+  displayedColumns = [
+    'id',
+    'name',
+    'createdAt',
+    'updatedAt',
+    'deletedAt',
+    'estado',
+    'acciones',
+  ];
 
   dataSource = new MatTableDataSource<Profession>([]);
   loading = false;
@@ -70,7 +84,9 @@ export class ProfessionsComponent implements AfterViewInit {
     this.sort.direction = 'asc' as SortDirection;
 
     this.sort.sortChange.subscribe(() => this.paginator.firstPage());
-    merge(this.sort.sortChange, this.paginator.page).subscribe(() => this.load());
+    merge(this.sort.sortChange, this.paginator.page).subscribe(() =>
+      this.load(),
+    );
 
     this.load();
     this.cdr.detectChanges();
@@ -103,11 +119,14 @@ export class ProfessionsComponent implements AfterViewInit {
     const direction = (this.sort?.direction as '' | 'asc' | 'desc') || 'asc';
     const sortField = this.mapSortField(active);
 
-    this.api.getAllPaginated({ page, size })
+    this.api
+      .getAllPaginated({ page, size })
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (res: any) => {
-          const allRows: Profession[] = Array.isArray(res) ? res : (res?.content ?? []);
+          const allRows: Profession[] = Array.isArray(res)
+            ? res
+            : (res?.content ?? []);
 
           let filtered = allRows;
 
@@ -121,7 +140,7 @@ export class ProfessionsComponent implements AfterViewInit {
 
           if (term) {
             filtered = filtered.filter((r) =>
-              (r.name ?? '').toLowerCase().includes(term)
+              (r.name ?? '').toLowerCase().includes(term),
             );
           }
 
@@ -196,9 +215,9 @@ export class ProfessionsComponent implements AfterViewInit {
       const ref = this.dialog.open(ProfessionsDialogComponent, {
         width: '560px',
         maxWidth: '95vw',
-        panelClass: 'substances-dialog',
+        panelClass: 'maintainer-dialog',
         backdropClass: 'app-backdrop',
-        data: row ?? null,
+        data: row ?? null, 
       });
 
       ref.afterClosed().subscribe((result?: Profession) => {
@@ -211,16 +230,16 @@ export class ProfessionsComponent implements AfterViewInit {
 
   softDelete(row: Profession): void {
     const ref = this.dialog.open(ConfirmDialogComponent, {
-      width: '420px',
+      width: '460px',
       disableClose: true,
+      panelClass: 'rda-confirm-dialog',
       data: {
         title: 'Eliminar profesión',
-        message: `¿Seguro que deseas eliminar la profesión “${row.name}” (ID: ${row.id})?`,
+        message: `¿Seguro que deseas eliminar “${row.name}” (ID: ${row.id})?`,
         confirmText: 'Eliminar',
         cancelText: 'Cancelar',
         color: 'warn',
         icon: 'delete',
-        dense: true,
       },
     });
 

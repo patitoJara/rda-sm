@@ -5,19 +5,23 @@
 
 <div mat-dialog-content>
   <form [formGroup]="form" class="form">
-    <mat-form-field appearance="outline" class="full">
-      <mat-label>Nombre</mat-label>
+    <mat-form-field appearance="outline" floatLabel="always" class="full">
+      <mat-label>Nombre de la comuna</mat-label>
+
       <input
         matInput
         formControlName="name"
         autocomplete="off"
+        placeholder="Ej: Punta Arenas"
         (keydown.enter)="save()"
       />
+
       <mat-error *ngIf="form.get('name')?.hasError('required')">
-        El nombre es obligatorio.
+        El nombre de la comuna es obligatorio.
       </mat-error>
+
       <mat-error *ngIf="form.get('name')?.hasError('maxlength')">
-        Máximo 120 caracteres.
+        El nombre no puede superar los 120 caracteres.
       </mat-error>
     </mat-form-field>
   </form>
@@ -25,7 +29,12 @@
 
 <div mat-dialog-actions align="end">
   <button mat-button (click)="cancel()">Cancelar</button>
-  <button mat-flat-button color="primary" (click)="save()" [disabled]="form.invalid">
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="save()"
+    [disabled]="form.invalid"
+  >
     Guardar
   </button>
 </div>

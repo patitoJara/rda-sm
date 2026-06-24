@@ -190,15 +190,17 @@ export class CommunesComponent implements AfterViewInit {
   openDialog(row?: Commune): void {
     setTimeout(() => {
       const ref = this.dialog.open(CommunesDialogComponent, {
-        width: '500px',
+        width: '560px',
         maxWidth: '95vw',
-        panelClass: 'communes-dialog',
+        panelClass: 'maintainer-dialog',
         backdropClass: 'app-backdrop',
         data: row ?? null,
       });
 
       ref.afterClosed().subscribe((result?: Commune) => {
-        if (result) queueMicrotask(() => this.load());
+        if (result) {
+          queueMicrotask(() => this.load());
+        }
       });
     });
   }
