@@ -178,8 +178,8 @@ export class UsersRelationsService {
     return this.http.post(this.usersRolesUrl, {
       user: { id: userId },
       role: { id: roleId },
-      isActive: true,
       active: true,
+      assignedByUser: { id: 1 },
     });
   }
 
@@ -213,11 +213,11 @@ export class UsersRelationsService {
       user: { id: userId },
       program: { id: programId },
       isActive: true,
-      active: true,
       isSupervisor: false,
-      canManageDemands: true,
       canReceiveReferences: true,
+      canManageDemands: true,
       canViewDashboard: true,
+      roleInProgram: 'PROFESIONAL',
     });
   }
 
