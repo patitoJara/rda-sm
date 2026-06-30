@@ -1,0 +1,66 @@
+.dialog-shell {
+  background: #fff;
+  border-radius: 22px;
+  overflow: hidden;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px 26px;
+  background: linear-gradient(135deg, #0f3d5e, #176b87);
+  color: #fff;
+
+  .eyebrow {
+    display: inline-block;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    opacity: 0.82;
+    margin-bottom: 6px;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 800;
+  }
+
+  p {
+    margin: 6px 0 0;
+    opacity: 0.88;
+  }
+
+  button {
+    color: #fff;
+  }
+}
+
+.dialog-body {
+  padding: 24px 26px 22px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 18px;
+
+  .full {
+    grid-column: 1 / -1;
+  }
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid #e7edf3;
+}
+
+@media (max-width: 720px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

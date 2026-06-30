@@ -186,7 +186,7 @@ export const routes: Routes = [
           iconColor: '#ef6c00',
         },
       },
-            
+
       {
         path: 'demand-list',
         loadComponent: () =>
@@ -340,6 +340,24 @@ export const routes: Routes = [
           section: 'maintainer',
           title: 'Resultados',
           icon: 'flag',
+          roles: ['ADMIN'],
+          iconColor: '#455a64',
+        },
+      },
+
+      {
+        path: 'episode-types',
+        loadComponent: () =>
+          import('./views/episode-types/episode-types.component').then(
+            (m) => m.EpisodeTypesComponent,
+          ),
+        canActivate: [roleGuard],
+        data: {
+          module: 'administracion',
+          group: 'Mantenedores',
+          section: 'maintainer',
+          title: 'Tipos de episodio',
+          icon: 'dynamic_feed',
           roles: ['ADMIN'],
           iconColor: '#455a64',
         },

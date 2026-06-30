@@ -1,0 +1,120 @@
+<section class="maintainer-page">
+  <header class="page-hero">
+    <div>
+      <span class="eyebrow">Catálogos RDA-SM</span>
+      <h1>Tipos de episodio</h1>
+      <p>
+        Administra los tipos de demanda o episodio utilizados al crear una nueva
+        atención.
+      </p>
+    </div>
+
+    <div class="hero-actions">
+      <button
+        mat-stroked-button
+        type="button"
+        class="btn-secondary"
+        (click)="toggleDeleted()"
+      >
+        <mat-icon>{{ showDeleted ? 'visibility' : 'delete_outline' }}</mat-icon>
+        {{ showDeleted ? 'Ver activos' : 'Ver eliminados' }}
+      </button>
+
+      <button
+        mat-raised-button
+        type="button"
+        class="btn-primary"
+        (click)="openDialog()"
+      >
+        <mat-icon>add</mat-icon>
+        Nuevo tipo
+      </button>
+    </div>
+  </header>
+
+  <section class="table-card">
+    <div class="table-header">
+      <div>
+        <h2>Listado</h2>
+        <p>{{ items.length }} registro(s)</p>
+      </div>
+
+      <button mat-icon-button type="button" matTooltip="Actualizar" (click)="loadItems()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+      <mat-spinner diameter="36"></mat-spinner>
+      <span>Cargando tipos de episodio...</span>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && !items.length">
+      <mat-icon>inventory_2</mat-icon>
+      <h3>Sin registros</h3>
+      <p>No hay tipos de episodio para mostrar.</p>
+    </div>
+
+    <div class="table-wrap" *ngIf="!loading && items.length">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Estado</th>
+            <th class="actions-col">Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let item of items" [class.deleted]="isDeleted(item)">
+            <td>{{ item.id }}</td>
+            <td>
+              <span class="code-badge">{{ item.code || '—' }}</span>
+            </td>
+            <td class="strong">{{ item.name }}</td>
+            <td>{{ item.description || '—' }}</td>
+            <td>
+              <span class="status-badge" [class.off]="isDeleted(item) || item.active === false">
+                {{ isDeleted(item) ? 'Eliminado' : item.active === false ? 'Inactivo' : 'Activo' }}
+              </span>
+            </td>
+            <td class="actions-col">
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Editar"
+                [disabled]="isDeleted(item)"
+                (click)="openDialog(item)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+
+              <button
+                *ngIf="!isDeleted(item)"
+                mat-icon-button
+                type="button"
+                matTooltip="Eliminar"
+                (click)="deleteItem(item)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+
+              <button
+                *ngIf="isDeleted(item)"
+                mat-icon-button
+                type="button"
+                matTooltip="Restaurar"
+                (click)="restoreItem(item)"
+              >
+                <mat-icon>restore</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
