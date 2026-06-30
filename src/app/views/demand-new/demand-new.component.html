@@ -42,6 +42,27 @@
     </aside>
   </section>
 
+  <!-- ESTADO CATÁLOGOS DEMANDA -->
+  <div class="catalog-status" *ngIf="isLoadingDemandCatalogs">
+    Cargando catálogos de demanda...
+  </div>
+
+  <div class="catalog-error" *ngIf="demandCatalogsError">
+    {{ demandCatalogsError }}
+  </div>
+
+  <div
+    class="catalog-status success"
+    *ngIf="demandCatalogs && !demandCatalogsError"
+  >
+    Catálogos de demanda cargados:
+    {{ episodeTypes.length }} tipos de episodio,
+    {{ eventTypes.length }} tipos de evento,
+    {{ attendanceStatuses.length }} estados de asistencia,
+    {{ closureReasons.length }} motivos de cierre.
+  </div>
+
+
   <!-- BUSCADOR -->
   <mat-card class="search-card">
     <div class="section-heading">

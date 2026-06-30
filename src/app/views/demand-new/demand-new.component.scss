@@ -1101,3 +1101,28 @@
     color: #755c20;
   }
 }
+
+.catalog-status {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #eef4ff;
+  color: #1f3b6d;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.catalog-status.success {
+  background: #ecfdf3;
+  color: #166534;
+}
+
+.catalog-error {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 0.88rem;
+  font-weight: 600;
+}

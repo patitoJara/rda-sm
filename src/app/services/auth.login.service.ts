@@ -21,13 +21,42 @@ export interface AuthProfile {
 }
 
 export interface AuthResponse {
+  authenticated?: boolean;
+  result?: string;
+  message?: string;
   token: string;
   refreshToken: string;
   tokenType: string;
-  expiresIn: number;
-  roles: Array<{ id: number; name: string }>;
-  programs: Array<{ id: number; name: string }>;  
-  profile: AuthProfile;
+  expiresIn?: number;
+  expiresInMs?: number;
+  expiresAt?: string;
+
+  user: {
+    id: number;
+    firstName?: string | null;
+    secondName?: string | null;
+    firstLastName?: string | null;
+    secondLastName?: string | null;
+    fullName?: string | null;
+    email: string;
+    username: string;
+    rut?: string | null;
+  };
+
+  roles: Array<{
+    id: number;
+    name: string;
+    code?: string;
+    active?: boolean;
+    description?: string | null;
+    assignedByUserId?: number | null;
+  }>;
+
+  programs: Array<{ id: number; name: string }>;
+
+  authorities?: string[];
+
+  claims?: any;
 }
 
 // ------------------------------------------------------------
@@ -75,13 +104,44 @@ export class AuthLoginService {
         // ---------------------------------------------------------
         // 🟦 GUARDAR ROLES, PROGRAMAS Y PERFIL EN SESSIONSTORAGE
         // ---------------------------------------------------------
-        this.roles = (res.roles || []).map((r) => r.name);
+        this.roles = (res.roles || []).map((r) => r.code ?? r.name);
         this.programs = res.programs || [];
-        this.profile = res.profile || null;
+
+        const user = res.user;
+
+        if (!user) {
+          throw new Error('Login sin datos de usuario');
+        }
+
+        this.profile = {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          fullName:
+            user.fullName ||
+            [user.firstName, user.firstLastName].filter(Boolean).join(' ') ||
+            user.username,
+        };
+
+        const profileForStorage = {
+          ...this.profile,
+          firstName: user.firstName,
+          secondName: user.secondName,
+          firstLastName: user.firstLastName,
+          secondLastName: user.secondLastName,
+          rut: user.rut,
+          roles: res.roles ?? [],
+          programs: res.programs ?? [],
+          authorities: res.authorities ?? [],
+        };
 
         sessionStorage.setItem('roles', JSON.stringify(this.roles));
         sessionStorage.setItem('programs', JSON.stringify(this.programs));
-        sessionStorage.setItem('profile', JSON.stringify(this.profile));
+        sessionStorage.setItem(
+          'authorities',
+          JSON.stringify(res.authorities ?? []),
+        );
+        sessionStorage.setItem('profile', JSON.stringify(profileForStorage));
 
         console.log('[AuthLoginService] 💾 Roles/Programas/Profile guardados.');
         console.log('[AuthLoginService] ✅ Tokens almacenados correctamente.');

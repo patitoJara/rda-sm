@@ -109,10 +109,11 @@ export class LoginComponent implements AfterViewInit {
         }
 
         // =========================
-        // GUARDAR TOKEN
+        // NO GUARDAR TOKEN AQUÍ
         // =========================
-        this.tokenService.setTokens(res.token, res.refreshToken);
-        console.log('[login] Token guardado correctamente');
+        // AuthLoginService ya guardó token, refreshToken, roles, programs y profile.
+        // Si volvemos a llamar setTokens(), se puede borrar el perfil del usuario.
+        console.log('[login] Sesión ya guardada por AuthLoginService');
 
         // Guardar email si corresponde
         if (remember) localStorage.setItem('last_email', email);

@@ -67,6 +67,9 @@ export class TemplateComponent implements OnInit {
   mantenedoresOpen = true;
   private navState = inject(NavigationStateService);
   private restored = false;
+  isAdminUser = false;
+  needsContextSelection = false;
+
   constructor() {}
 
   private router = inject(Router);
@@ -135,85 +138,132 @@ export class TemplateComponent implements OnInit {
     this.userFullName = profile.fullName || profile.firstName || 'Usuario';
 
     // =============================================
-    // 🟦 ROLES → prioridad: tokenService → profile → []
+    // 🟦 ROLES
     // =============================================
     const rolesFromToken = this.tokenService.getUserRoles();
 
-    this.userRoles =
+    const rawRoles =
       rolesFromToken.length > 0 ? rolesFromToken : (profile.roles ?? []);
 
+    this.userRoles = rawRoles
+      .map((role: any) => role?.code ?? role?.name ?? role)
+      .filter((role: any) => !!role);
+
     // =============================================
-    // 🟦 PROGRAMAS → prioridad: profile → tokenService
+    // 🟦 AUTHORITIES / ADMIN
+    // =============================================
+    const authorities = profile.authorities ?? [];
+
+    this.isAdminUser =
+      this.userRoles.some(
+        (role) => role === 'ADMIN' || role === 'ROLE_ADMIN',
+      ) ||
+      authorities.includes('ROLE_ADMIN') ||
+      profile?.email === 'admin@demo.com';
+
+    // =============================================
+    // 🟦 PROGRAMAS
     // =============================================
     const rawPrograms =
       profile.programs && profile.programs.length > 0
-        ? profile.programs // objetos con id
-        : this.tokenService.getUserPrograms(); // strings del token
+        ? profile.programs
+        : this.tokenService.getUserPrograms();
 
-    // Normalizamos a nombres (string)
-    this.userPrograms = rawPrograms.map((p: any) => p.name ?? p);
+    this.userPrograms = rawPrograms
+      .map((p: any) => p?.name ?? p)
+      .filter((p: any) => !!p);
 
     // =============================================
-    // 🟦 ACTIVO (rol + programa)
+    // 👑 ADMIN ESTRUCTURAL
+    // Entra directo sin programa
     // =============================================
+    if (this.isAdminUser) {
+      this.activeRole = 'ADMIN';
+      this.activeProgram = null;
+
+      this.tokenService.setActiveRole('ADMIN');
+      this.tokenService.setActiveProgram('');
+      this.tokenService.setActiveProgramId(null);
+
+      this.needsContextSelection = false;
+      this.menuVisible = true;
+
+      this.buildMenu();
+
+      this.isSessionReady = true;
+      this.sessionService.startSessionFromToken();
+      this.startRealExpirationTimer();
+
+      this.cdr.detectChanges();
+
+      console.log('[TemplateComponent] 👑 ADMIN entra sin programa.');
+      return;
+    }
+
+    // =============================================
+    // 🟦 USUARIO NORMAL
+    // =============================================
+    const storedActiveRole = this.tokenService.getActiveRole();
+    const storedActiveProgram = this.tokenService.getActiveProgram();
+
     this.activeRole =
-      this.tokenService.getActiveRole() || this.userRoles[0] || null;
+      storedActiveRole && this.userRoles.includes(storedActiveRole)
+        ? storedActiveRole
+        : this.userRoles.length === 1
+          ? this.userRoles[0]
+          : null;
 
     this.activeProgram =
-      this.tokenService.getActiveProgram() || this.userPrograms[0] || null;
+      storedActiveProgram && this.userPrograms.includes(storedActiveProgram)
+        ? storedActiveProgram
+        : this.userPrograms.length === 1
+          ? this.userPrograms[0]
+          : null;
 
-    // =============================================
-    // 🆕 SINCRONIZAR ID DEL PROGRAMA ACTIVO
-    // =============================================
+    if (this.activeRole) {
+      this.tokenService.setActiveRole(this.activeRole);
+    }
 
-    console.log(
-      '🔎 DEBUG — profile.programs 167:',
-      this.tokenService.getActiveProgramId(),
-    );
-    console.log('🔎 DEBUG — activeProgram actual:', this.activeProgram);
+    if (this.activeProgram) {
+      this.tokenService.setActiveProgram(this.activeProgram);
 
-    if (profile?.programs?.length && this.activeProgram) {
-      const selectedProgram = profile.programs.find(
-        (p: any) => p.name === this.activeProgram,
+      const selectedProgram = rawPrograms.find(
+        (p: any) => p?.name === this.activeProgram || p === this.activeProgram,
       );
 
       if (selectedProgram?.id) {
         this.tokenService.setActiveProgramId(selectedProgram.id);
-
-        console.log(
-          '💾 ID sincronizado automáticamente:',
-          this.tokenService.getActiveProgramId(),
-        );
-      } else {
-        console.warn('⚠️ No se encontró ID, aplicando fallback');
-
-        const firstProgram = profile.programs[0];
-
-        if (firstProgram?.id) {
-          this.tokenService.setActiveProgramId(firstProgram.id);
-          this.tokenService.setActiveProgram(firstProgram.name);
-          this.activeProgram = firstProgram.name;
-
-          console.log(
-            '💾 ID guardado por fallback:',
-            this.tokenService.getActiveProgramId(),
-          );
-        } else {
-          console.error('❌ No existen programas válidos en profile');
-        }
       }
     }
 
     // =============================================
-    // 🟦 CONTINUAR FLUJO NORMAL
+    // 🧭 SOLO MOSTRAR SELECTOR SI HAY MÁS DE UNA OPCIÓN
     // =============================================
-    this.isSessionReady = true;
-    this.restoreLastRoute();
+    this.needsContextSelection =
+      this.userRoles.length > 1 || this.userPrograms.length > 1;
 
+    if (!this.needsContextSelection && this.activeRole && this.activeProgram) {
+      this.menuVisible = true;
+      this.buildMenu();
+    } else {
+      this.menuVisible = false;
+    }
+
+    this.isSessionReady = true;
     this.sessionService.startSessionFromToken();
     this.startRealExpirationTimer();
 
     this.cdr.detectChanges();
+
+    console.log('[TemplateComponent] userRoles:', this.userRoles);
+    console.log('[TemplateComponent] userPrograms:', this.userPrograms);
+    console.log('[TemplateComponent] activeRole:', this.activeRole);
+    console.log('[TemplateComponent] activeProgram:', this.activeProgram);
+    console.log('[TemplateComponent] isAdminUser:', this.isAdminUser);
+    console.log(
+      '[TemplateComponent] needsContextSelection:',
+      this.needsContextSelection,
+    );
   }
 
   startTimer(minutes: number): void {
@@ -278,79 +328,75 @@ export class TemplateComponent implements OnInit {
     console.log('================= 🚀 ON CONTINUE =================');
 
     if (this.isLoading) {
-      console.log('⛔ Ya está cargando, se ignora click.');
       return;
     }
 
     this.isLoading = true;
 
-    console.log('👤 Usuario:', this.userFullName);
-    console.log('🎭 Rol seleccionado:', this.activeRole);
-    console.log('🏥 Programa seleccionado:', this.activeProgram);
+    // =============================================
+    // 👑 ADMIN ESTRUCTURAL
+    // =============================================
+    if (this.isAdminUser) {
+      this.activeRole = 'ADMIN';
+      this.activeProgram = null;
 
-    const profile = this.tokenService.getUserProfile();
-    const isSystemAdmin = profile?.email === 'admin@demo.com';
-
-    // ===================================================
-    // 💾 GUARDAR ROL Y PROGRAMA (NOMBRE PRIMERO)
-    // ===================================================
-    this.tokenService.setActiveRole(this.activeRole || '');
-    this.tokenService.setActiveProgram(this.activeProgram || '');
-
-    console.log('💾 Rol guardado:', this.tokenService.getActiveRole());
-    console.log('💾 Programa guardado:', this.tokenService.getActiveProgram());
-
-    // ===================================================
-    // 🔎 VALIDACIÓN + ASIGNACIÓN ID
-    // ===================================================
-    if (!isSystemAdmin) {
-      if (!this.activeRole || !this.activeProgram) {
-        console.warn('⚠️ Falta rol o programa.');
-        alert('⚠️ Debes seleccionar un rol y un programa para continuar.');
-        this.isLoading = false;
-        return;
-      }
-
-      const programs = this.tokenService.getUserPrograms();
-
-      const selectedProgram = programs.find(
-        (p) => p.name === this.activeProgram,
-      );
-
-      if (selectedProgram?.id) {
-        this.tokenService.setActiveProgramId(selectedProgram.id);
-        console.log('🆔 ID guardado correctamente:', selectedProgram.id);
-      } else {
-        console.warn('⚠️ No se encontró ID para el programa.');
-        this.tokenService.setActiveProgramId(null);
-      }
-    } else {
-      // 🔵 ADMIN ESTRUCTURAL
+      this.tokenService.setActiveRole('ADMIN');
+      this.tokenService.setActiveProgram('');
       this.tokenService.setActiveProgramId(null);
-      console.log('👑 Admin estructural sin programa.');
-    }
 
-    // ===================================================
-    // 🔍 VALIDACIÓN FINAL
-    // ===================================================
-    console.log(
-      '📦 activeProgramId final:',
-      this.tokenService.getActiveProgramId(),
-    );
-
-    console.log('================= ✅ CONTEXTO LISTO =================');
-
-    // ===================================================
-    // 🚀 CONTINUAR AL SISTEMA
-    // ===================================================
-    this.buildMenu();
-
-    setTimeout(() => {
+      this.buildMenu();
       this.menuVisible = true;
       this.isLoading = false;
+
       this.cdr.detectChanges();
-      console.log('🎉 Menú visible, sesión inicializada correctamente.');
-    }, 250);
+
+      console.log('👑 ADMIN ingresó sin programa.');
+      return;
+    }
+
+    // =============================================
+    // USUARIO NORMAL
+    // =============================================
+    if (!this.activeRole) {
+      alert('⚠️ Debes seleccionar un rol para continuar.');
+      this.isLoading = false;
+      return;
+    }
+
+    if (!this.activeProgram) {
+      alert('⚠️ Debes seleccionar un programa para continuar.');
+      this.isLoading = false;
+      return;
+    }
+
+    this.tokenService.setActiveRole(this.activeRole);
+    this.tokenService.setActiveProgram(this.activeProgram);
+
+    const profile = this.tokenService.getUserProfile();
+
+    const programs =
+      profile?.programs?.length > 0
+        ? profile.programs
+        : this.tokenService.getUserPrograms();
+
+    const selectedProgram = programs.find(
+      (p: any) => p?.name === this.activeProgram || p === this.activeProgram,
+    );
+
+    if (selectedProgram?.id) {
+      this.tokenService.setActiveProgramId(selectedProgram.id);
+    } else {
+      this.tokenService.setActiveProgramId(null);
+    }
+
+    this.buildMenu();
+
+    this.menuVisible = true;
+    this.isLoading = false;
+
+    this.cdr.detectChanges();
+
+    console.log('🎉 Contexto listo.');
   }
 
   buildMenu(): void {
@@ -372,6 +418,8 @@ export class TemplateComponent implements OnInit {
       const allowedRoles = (data['roles'] ?? []) as string[];
 
       const visible =
+        role === 'ADMIN' ||
+        role === 'ROLE_ADMIN' ||
         allowedRoles.length === 0 ||
         allowedRoles.some((r) => r.trim().toUpperCase() === role);
 

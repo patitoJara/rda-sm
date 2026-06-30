@@ -2,7 +2,7 @@
      🧭 LAYOUT PRINCIPAL — SERVICIO DE SALUD MAGALLANES
      Selección de rol/programa antes de mostrar menú
      ======================================================= -->
-<ng-container *ngIf="!menuVisible; else mainLayout">
+<ng-container *ngIf="!menuVisible && needsContextSelection; else mainLayout">
   <div class="login-wrapper role-select-wrapper">
     <mat-card class="login-card role-select-card" appearance="outlined">
       <div class="card-topline"></div>
@@ -17,36 +17,53 @@
 
         <h2>Bienvenido/a, {{ userFullName }}</h2>
 
-        <p>
+        <p *ngIf="!isAdminUser">
           Selecciona el rol y programa con el cual deseas trabajar en esta
           sesión.
         </p>
+
+        <p *ngIf="isAdminUser">
+          Acceso administrador inicial. Puedes ingresar sin programa para
+          configurar el sistema y asignar roles/programas a los demás usuarios.
+        </p>
       </div>
 
-      <div class="role-program-row">
-        <div class="role-program-item">
+      <div class="role-program-row" *ngIf="!isAdminUser">
+        <div class="role-program-item" *ngIf="userRoles.length > 1">
           <mat-form-field appearance="fill">
             <mat-label>Rol</mat-label>
             <mat-select [(ngModel)]="activeRole">
-              <mat-option *ngFor="let r of userRoles" [value]="r">{{
-                r
-              }}</mat-option>
+              <mat-option *ngFor="let r of userRoles" [value]="r">
+                {{ r }}
+              </mat-option>
             </mat-select>
           </mat-form-field>
         </div>
 
-        <div class="role-program-item">
+        <div class="role-program-item" *ngIf="userPrograms.length > 1">
           <mat-form-field appearance="fill">
             <mat-label>Programa</mat-label>
             <mat-select
               [(ngModel)]="activeProgram"
               (selectionChange)="onProgramChange($event.value)"
             >
-              <mat-option *ngFor="let p of userPrograms" [value]="p">{{
-                p
-              }}</mat-option>
+              <mat-option *ngFor="let p of userPrograms" [value]="p">
+                {{ p }}
+              </mat-option>
             </mat-select>
           </mat-form-field>
+        </div>
+      </div>
+
+      <div class="admin-context-card" *ngIf="isAdminUser">
+        <mat-icon>admin_panel_settings</mat-icon>
+
+        <div>
+          <strong>Administrador del sistema</strong>
+          <span>
+            Este usuario puede ingresar sin programa activo para iniciar la
+            configuración del sistema.
+          </span>
         </div>
       </div>
 
@@ -78,22 +95,18 @@
         <!-- Sin roles o programas -->
 
         <div
-          *ngIf="userRoles.length === 0 || userPrograms.length === 0"
+          *ngIf="
+            !isAdminUser &&
+            (userRoles.length === 0 || userPrograms.length === 0)
+          "
           class="alert-msg"
         >
           <mat-icon>error_outline</mat-icon>
           <span>
             No tienes roles o programas asociados.<br />
-            Puedes continuar con acceso completo como Administrador.
+            Solicita al administrador que revise tu configuración.
           </span>
         </div>
-
-        <!-- ADMIN -->
-
-        <p *ngIf="userFullName?.toUpperCase() === 'ADMIN'" class="admin-msg">
-          Eres administrador del sistema. Puedes continuar sin seleccionar un
-          rol o programa.
-        </p>
 
         <!-- BOTONES (click)="logout()"  -->
         <div class="login-actions">

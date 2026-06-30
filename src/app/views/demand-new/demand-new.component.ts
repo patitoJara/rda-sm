@@ -25,6 +25,12 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatRadioModule } from '@angular/material/radio';
 
+import {
+  DemandCatalogItem,
+  DemandCatalogsDTO,
+  DemandService,
+} from '../../core/services/demand.service';
+
 @Component({
   selector: 'app-demand-new',
   standalone: true,
@@ -50,6 +56,22 @@ export class DemandNewComponent implements OnInit {
   private postulantService = inject(PostulantService);
   private preloadCatalogs = inject(PreloadCatalogsService);
   private readonly tokenService = inject(TokenService);
+  private readonly demandService = inject(DemandService);
+
+  demandCatalogs: DemandCatalogsDTO | null = null;
+
+  episodeTypes: DemandCatalogItem[] = [];
+  eventTypes: DemandCatalogItem[] = [];
+  attendanceStatuses: DemandCatalogItem[] = [];
+  closureReasons: DemandCatalogItem[] = [];
+  programPopulations: DemandCatalogItem[] = [];
+  programModalities: DemandCatalogItem[] = [];
+  programPlans: DemandCatalogItem[] = [];
+  regions: DemandCatalogItem[] = [];
+  cities: DemandCatalogItem[] = [];
+
+  isLoadingDemandCatalogs = false;
+  demandCatalogsError = '';
 
   sexes: any[] = [];
   communes: any[] = [];
@@ -329,9 +351,40 @@ export class DemandNewComponent implements OnInit {
   ngOnInit(): void {
     this.loadCatalogs();
     this.loadActiveProgramContext();
+    this.loadDemandCatalogs();
 
     this.personForm.get('intPrev')?.valueChanges.subscribe((id) => {
       this.filterConvPrevByIntPrev(Number(id));
+    });
+  }
+
+  private loadDemandCatalogs(): void {
+    this.isLoadingDemandCatalogs = true;
+    this.demandCatalogsError = '';
+
+    this.demandService.getCatalogs().subscribe({
+      next: (catalogs) => {
+        this.demandCatalogs = catalogs;
+
+        this.episodeTypes = catalogs.episodeTypes ?? [];
+        this.eventTypes = catalogs.eventTypes ?? [];
+        this.attendanceStatuses = catalogs.attendanceStatuses ?? [];
+        this.closureReasons = catalogs.closureReasons ?? [];
+        this.programPopulations = catalogs.programPopulations ?? [];
+        this.programModalities = catalogs.programModalities ?? [];
+        this.programPlans = catalogs.programPlans ?? [];
+        this.regions = catalogs.regions ?? [];
+        this.cities = catalogs.cities ?? [];
+
+        this.isLoadingDemandCatalogs = false;
+      },
+      error: (error) => {
+        console.error('Error cargando catálogos de demanda', error);
+        this.demandCatalogsError =
+          'No fue posible cargar los catálogos de demanda desde el backend.';
+
+        this.isLoadingDemandCatalogs = false;
+      },
     });
   }
 

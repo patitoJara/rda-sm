@@ -2,6 +2,7 @@
 
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatSelectModule } from '@angular/material/select';
 import {
   FormBuilder,
   ReactiveFormsModule,
@@ -52,6 +53,7 @@ import { UsersRelationsService } from '../../services/users-relations.service';
     MatListModule,
     MatIconModule, // 👁️ necesario para los íconos de visibilidad
     MatTooltipModule, // 👁️ necesario para los íconos de visibilidad
+    MatSelectModule,
   ],
 })
 export class UsersDialogComponent implements OnInit {
@@ -117,10 +119,9 @@ export class UsersDialogComponent implements OnInit {
         this.isEditing ? [] : [Validators.required, Validators.minLength(6)],
       ],
       rut: [userData.rut, [Validators.required, rutValidator()]],
-      programs: [
-        userData.programs?.map((p) => p.id) ?? [],
-        [Validators.required],
-      ],
+      // Programas se validan en save(): usuarios normales requieren programa,
+      // pero ADMIN puede quedar sin programa activo.
+      programs: [userData.programs?.map((p) => p.id) ?? []],
       roles: [userData.roles?.map((r) => r.id) ?? [], [Validators.required]],
     });
 
@@ -269,7 +270,7 @@ export class UsersDialogComponent implements OnInit {
     // ⚠ no emitir evento para no romper el cursor
     control.setValue(formattedRut, { emitEvent: false });
   }
-  
+
   checkRutDuplicate(): void {
     if (this.isEditing) return;
 
@@ -301,7 +302,10 @@ export class UsersDialogComponent implements OnInit {
 
       control.markAsTouched();
 
-      this.showWarning('El RUT ingresado ya está registrado en el sistema.');
+      this.showWarning(
+        'El RUT ingresado ya está registrado en el sistema.',
+        'RUT duplicado',
+      );
     }
   }
 
@@ -317,35 +321,72 @@ export class UsersDialogComponent implements OnInit {
   }
 
   async createUser(): Promise<void> {
-    const formValue = this.form.value;
+    const formValue = this.form.getRawValue();
 
-    const payload: User = {
-      ...formValue,
-      roles: [],
-      programs: [],
+    const selectedRoles = (formValue.roles || [])
+      .map((id: number) => ({ id: Number(id) }))
+      .filter((item: any) => !!item.id);
+
+    const selectedPrograms = (formValue.programs || [])
+      .map((id: number) => ({ id: Number(id) }))
+      .filter((item: any) => !!item.id);
+
+    if (!selectedRoles.length) {
+      this.showWarning('Debe seleccionar al menos un rol.');
+      return;
+    }
+
+    if (!this.isAdminSelected(selectedRoles) && !selectedPrograms.length) {
+      this.showWarning('Debe seleccionar al menos un programa.');
+      return;
+    }
+
+    const payload: any = {
+      id: formValue.id,
+      firstName: formValue.firstName,
+      secondName: formValue.secondName,
+      firstLastName: formValue.firstLastName,
+      secondLastName: formValue.secondLastName,
+      email: formValue.email,
+      username: formValue.username,
+      password: formValue.password,
+      rut: formValue.rut,
     };
+
+    console.log('[UsersDialog] Payload crear usuario:', payload);
 
     const savedUser = await firstValueFrom(this.usersService.save(payload));
 
     const userId = savedUser.id!;
 
-    await this.relationsService.updateRoles(
-      userId,
-      formValue.roles.map((id: number) => ({ id })),
-    );
+    await this.relationsService.updateRoles(userId, selectedRoles);
+    await this.relationsService.updatePrograms(userId, selectedPrograms);
 
-    await this.relationsService.updatePrograms(
-      userId,
-      formValue.programs.map((id: number) => ({ id })),
-    );
-
-    console.log('✅ Usuario creado');
+    console.log('✅ Usuario creado con roles y programas sincronizados');
 
     this.ref.close(true);
   }
 
   async updateUser(): Promise<void> {
-    const formValue = this.form.value;
+    const formValue = this.form.getRawValue();
+
+    const selectedRoles = (formValue.roles || [])
+      .map((id: number) => ({ id: Number(id) }))
+      .filter((item: any) => !!item.id);
+
+    const selectedPrograms = (formValue.programs || [])
+      .map((id: number) => ({ id: Number(id) }))
+      .filter((item: any) => !!item.id);
+
+    if (!selectedRoles.length) {
+      this.showWarning('Debe seleccionar al menos un rol.');
+      return;
+    }
+
+    if (!this.isAdminSelected(selectedRoles) && !selectedPrograms.length) {
+      this.showWarning('Debe seleccionar al menos un programa.');
+      return;
+    }
 
     if (!formValue.password) {
       delete formValue.password;
@@ -353,9 +394,11 @@ export class UsersDialogComponent implements OnInit {
 
     const payload: User = {
       ...formValue,
-      roles: [],
-      programs: [],
+      roles: selectedRoles as any,
+      programs: selectedPrograms as any,
     };
+
+    console.log('[UsersDialog] Payload actualizar usuario:', payload);
 
     const savedUser = await firstValueFrom(
       this.usersService.update(payload.id!, payload),
@@ -363,19 +406,24 @@ export class UsersDialogComponent implements OnInit {
 
     const userId = savedUser.id!;
 
-    await this.relationsService.updateRoles(
-      userId,
-      formValue.roles.map((id: number) => ({ id })),
-    );
+    await this.relationsService.updateRoles(userId, selectedRoles);
+    await this.relationsService.updatePrograms(userId, selectedPrograms);
 
-    await this.relationsService.updatePrograms(
-      userId,
-      formValue.programs.map((id: number) => ({ id })),
-    );
-
-    console.log('✅ Usuario actualizado');
+    console.log('✅ Usuario actualizado con roles y programas sincronizados');
 
     this.ref.close(true);
+  }
+
+  private isAdminSelected(selectedRoles: Array<{ id: number }>): boolean {
+    return selectedRoles.some((selectedRole) => {
+      const role = this.roles.find(
+        (item) => Number(item.id) === Number(selectedRole.id),
+      );
+
+      const roleName = String(role?.name ?? '').toUpperCase();
+
+      return roleName === 'ADMIN' || roleName === 'ROLE_ADMIN';
+    });
   }
 
   cancel(): void {
@@ -446,13 +494,13 @@ export class UsersDialogComponent implements OnInit {
     control?.setValue(value);
   }
 
-  showWarning(message: string) {
+  showWarning(message: string, title = 'Validación requerida') {
     this.dialog.open(ConfirmDialogOkComponent, {
       width: '420px',
       disableClose: true,
       data: {
-        title: 'RUT duplicado',
-        message: message,
+        title,
+        message,
         icon: 'warning',
         color: 'warn',
         confirmText: 'Aceptar',
