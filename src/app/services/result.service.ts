@@ -15,7 +15,6 @@ export interface Page<T> {
 }
 
 @Injectable({ providedIn: 'root' })
-
 export class ResultService {
   private http = inject(HttpClient);
 
@@ -44,6 +43,16 @@ export class ResultService {
     return this.http.get<Result[]>(this.resourceUrl);
   }
 
+  /** GET /api/v1/results/all */
+  getAll(): Observable<Result[]> {
+    return this.http.get<Result[]>(`${this.resourceUrl}/all`);
+  }
+
+  /** GET /api/v1/results/deleted */
+  getDeleted(): Observable<Result[]> {
+    return this.http.get<Result[]>(`${this.resourceUrl}/deleted`);
+  }
+
   /** POST /Result */
   save(result: Result): Observable<Result> {
     return this.http.post<Result>(this.resourceUrl, result);
@@ -56,35 +65,37 @@ export class ResultService {
 
   /** GET /Result/getAllPaginated?page=&size=&q=&state=&sort= */
 
-  getAllPaginated(opts: { page?: number; size?: number; q?: string; state?: string; sort?: string } = {}): Observable<Page<Result>> {
-  const { page = 0, size = 10, q, state, sort } = opts;
+  getAllPaginated(
+    opts: {
+      page?: number;
+      size?: number;
+      q?: string;
+      state?: string;
+      sort?: string;
+    } = {},
+  ): Observable<Page<Result>> {
+    const { page = 0, size = 10, q, state, sort } = opts;
 
-  let params = new HttpParams()
-    .set('page', page)
-    .set('size', size);
+    let params = new HttpParams().set('page', page).set('size', size);
 
-  if (q)     params = params.set('q', q);
-  if (state) params = params.set('state', state);
-  if (sort)  params = params.set('sort', sort);
+    if (q) params = params.set('q', q);
+    if (state) params = params.set('state', state);
+    if (sort) params = params.set('sort', sort);
 
-  return this.http.get<Page<Result>>(
-    `${this.resourceUrl}/getAllPaginated`,
-    { params, headers: {} }   // 🔥 IMPORTANTE: limpia headers heredados
-  );
-}
+    return this.http.get<Page<Result>>(
+      `${this.resourceUrl}/getAllPaginated`,
+      { params, headers: {} }, // 🔥 IMPORTANTE: limpia headers heredados
+    );
+  }
 
-
-
-//  ESTE ESUN GRAN ERROR PARA TENER ENCUENTA
-//   return this.http.get<Page<Result>>(`${this.resourceUrl}/all`);
-
-
+  //  ESTE ESUN GRAN ERROR PARA TENER ENCUENTA
+  //   return this.http.get<Page<Result>>(`${this.resourceUrl}/all`);
 
   /** DELETE /sexs/all (si tu API lo soporta) */
   deleteAll(): Observable<void> {
     return this.http.delete<void>(`${this.resourceUrl}/all`);
   }
-          /*
+  /*
             GET /api/v1/results/{id}
             PUT /api/v1/results/{id}
             DELETE /api/v1/results/{id}
@@ -95,7 +106,5 @@ export class ResultService {
             GET /api/v1/results/deleted
             GET /api/v1/results/all
 
-        */  
+        */
 }
-
-

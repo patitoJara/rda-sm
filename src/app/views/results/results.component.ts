@@ -123,60 +123,67 @@ export class ResultsComponent implements AfterViewInit {
     const direction = (this.sort?.direction as '' | 'asc' | 'desc') || 'asc';
     const sortField = this.mapSortField(active);
 
-    this.api
-      .getAllPaginated({ page, size })
-      .pipe(finalize(() => (this.loading = false)))
-      .subscribe({
-        next: (res: any) => {
-          const allRows: Result[] = Array.isArray(res)
-            ? res
-            : (res?.content ?? []);
+    const request$ =
+      this.filterState === 'deleted'
+        ? this.api.getDeleted()
+        : this.filterState === 'all'
+          ? this.api.getAll()
+          : this.api.listAll();
 
-          // Filtro por estado
-          let filtered = allRows;
-          if (this.filterState === 'active') {
-            filtered = allRows.filter((r) => !r.deletedAt);
-          } else if (this.filterState === 'deleted') {
-            filtered = allRows.filter((r) => !!r.deletedAt);
+    request$.pipe(finalize(() => (this.loading = false))).subscribe({
+      next: (res: any) => {
+        const allRows: Result[] = Array.isArray(res)
+          ? res
+          : (res?.content ?? []);
+
+        let filtered = allRows;
+
+        if (this.filterState === 'active') {
+          filtered = allRows.filter((r) => !r.deletedAt);
+        } else if (this.filterState === 'deleted') {
+          filtered = allRows.filter((r) => !!r.deletedAt);
+        }
+
+        const term = (this.q || '').toLowerCase();
+        if (term) {
+          filtered = filtered.filter((r) =>
+            (r.name ?? '').toLowerCase().includes(term),
+          );
+        }
+
+        filtered.sort((a, b) => {
+          const va = this.getFieldValue(a, sortField);
+          const vb = this.getFieldValue(b, sortField);
+
+          let cmp = 0;
+
+          if (va == null && vb != null) {
+            cmp = -1;
+          } else if (va != null && vb == null) {
+            cmp = 1;
+          } else if (typeof va === 'number' && typeof vb === 'number') {
+            cmp = va - vb;
+          } else {
+            cmp = String(va ?? '').localeCompare(String(vb ?? ''), 'es', {
+              numeric: true,
+              sensitivity: 'base',
+            });
           }
 
-          // Filtro por nombre
-          const term = (this.q || '').toLowerCase();
-          if (term) {
-            filtered = filtered.filter((r) =>
-              (r.name ?? '').toLowerCase().includes(term),
-            );
-          }
+          return direction === 'asc' ? cmp : -cmp;
+        });
 
-          // Orden
-          filtered.sort((a, b) => {
-            const va = this.getFieldValue(a, sortField);
-            const vb = this.getFieldValue(b, sortField);
-            let cmp = 0;
-            if (va == null && vb != null) cmp = -1;
-            else if (va != null && vb == null) cmp = 1;
-            else if (typeof va === 'number' && typeof vb === 'number')
-              cmp = va - vb;
-            else
-              cmp = String(va ?? '').localeCompare(String(vb ?? ''), 'es', {
-                numeric: true,
-                sensitivity: 'base',
-              });
-            return direction === 'asc' ? cmp : -cmp;
-          });
+        const start = page * size;
+        const slice = filtered.slice(start, start + size);
 
-          // Paginación cliente
-          const start = page * size;
-          const slice = filtered.slice(start, start + size);
-
-          this.dataSource.data = slice;
-          this.total = filtered.length;
-        },
-        error: () => {
-          this.dataSource.data = [];
-          this.total = 0;
-        },
-      });
+        this.dataSource.data = slice;
+        this.total = filtered.length;
+      },
+      error: () => {
+        this.dataSource.data = [];
+        this.total = 0;
+      },
+    });
   }
 
   /** Obtener valor para ordenar */
