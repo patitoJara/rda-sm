@@ -320,6 +320,28 @@ export class UsersDialogComponent implements OnInit {
     }
   }
 
+  private buildUserPayload(includePassword = true): any {
+    const formValue = this.form.getRawValue();
+
+    const payload: any = {
+      firstName: String(formValue.firstName ?? '').trim(),
+      secondName: String(formValue.secondName ?? '').trim(),
+      firstLastName: String(formValue.firstLastName ?? '').trim(),
+      secondLastName: String(formValue.secondLastName ?? '').trim(),
+      email: String(formValue.email ?? '')
+        .trim()
+        .toLowerCase(),
+      username: String(formValue.username ?? '').trim(),
+      rut: String(formValue.rut ?? '').trim(),
+    };
+
+    if (includePassword && formValue.password) {
+      payload.password = formValue.password;
+    }
+
+    return payload;
+  }
+
   async createUser(): Promise<void> {
     const formValue = this.form.getRawValue();
 
@@ -341,24 +363,21 @@ export class UsersDialogComponent implements OnInit {
       return;
     }
 
-    const payload: any = {
-      id: formValue.id,
-      firstName: formValue.firstName,
-      secondName: formValue.secondName,
-      firstLastName: formValue.firstLastName,
-      secondLastName: formValue.secondLastName,
-      email: formValue.email,
-      username: formValue.username,
-      password: formValue.password,
-      rut: formValue.rut,
-    };
+    // ✅ Crear usuario base SIN id, SIN roles, SIN programs
+    const payload = this.buildUserPayload(true);
 
     console.log('[UsersDialog] Payload crear usuario:', payload);
 
     const savedUser = await firstValueFrom(this.usersService.save(payload));
 
-    const userId = savedUser.id!;
+    const userId = savedUser.id;
 
+    if (!userId) {
+      this.showWarning('El backend no devolvió el ID del usuario creado.');
+      return;
+    }
+
+    // ✅ Relaciones en endpoints separados
     await this.relationsService.updateRoles(userId, selectedRoles);
     await this.relationsService.updatePrograms(userId, selectedPrograms);
 
@@ -388,26 +407,31 @@ export class UsersDialogComponent implements OnInit {
       return;
     }
 
-    if (!formValue.password) {
-      delete formValue.password;
+    const userId = this.data?.id;
+
+    if (!userId) {
+      this.showWarning('No se encontró el ID del usuario a actualizar.');
+      return;
     }
 
-    const payload: User = {
-      ...formValue,
-      roles: selectedRoles as any,
-      programs: selectedPrograms as any,
-    };
+    // ✅ Actualizar usuario base SIN id, SIN roles, SIN programs
+    // Solo manda password si viene escrita
+    const payload = this.buildUserPayload(!!formValue.password);
 
-    console.log('[UsersDialog] Payload actualizar usuario:', payload);
+    console.log('[UsersDialog] Payload actualizar usuario:', {
+      id: userId,
+      ...payload,
+    });
 
     const savedUser = await firstValueFrom(
-      this.usersService.update(payload.id!, payload),
+      this.usersService.update(userId, payload),
     );
 
-    const userId = savedUser.id!;
+    const finalUserId = savedUser?.id ?? userId;
 
-    await this.relationsService.updateRoles(userId, selectedRoles);
-    await this.relationsService.updatePrograms(userId, selectedPrograms);
+    // ✅ Relaciones separadas
+    await this.relationsService.updateRoles(finalUserId, selectedRoles);
+    await this.relationsService.updatePrograms(finalUserId, selectedPrograms);
 
     console.log('✅ Usuario actualizado con roles y programas sincronizados');
 
@@ -421,8 +445,15 @@ export class UsersDialogComponent implements OnInit {
       );
 
       const roleName = String(role?.name ?? '').toUpperCase();
+      const roleCode = String((role as any)?.code ?? '').toUpperCase();
 
-      return roleName === 'ADMIN' || roleName === 'ROLE_ADMIN';
+      return (
+        Number(selectedRole.id) === 1 ||
+        roleName === 'ADMIN' ||
+        roleName === 'ROLE_ADMIN' ||
+        roleCode === 'ADMIN' ||
+        roleCode === 'ROLE_ADMIN'
+      );
     });
   }
 

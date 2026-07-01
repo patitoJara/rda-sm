@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom, Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { firstValueFrom, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -45,7 +44,13 @@ export class UsersRelationsService {
     const toDelete = activeIds.filter((id) => !newIds.includes(id));
 
     for (const roleId of toRestore) {
-      await firstValueFrom(this.restoreUserRole(userId, roleId));
+      const relation = deletedRelations.find(
+        (item) => Number(this.getRoleIdFromRelation(item)) === Number(roleId),
+      );
+
+      if (relation?.id) {
+        await this.restoreUserRoleByRelationId(Number(relation.id));
+      }
     }
 
     for (const roleId of toCreate) {
@@ -95,9 +100,15 @@ export class UsersRelationsService {
     const toDelete = activeIds.filter((id) => !newIds.includes(id));
 
     for (const programId of toRestore) {
-      await firstValueFrom(this.restoreUserProgram(userId, programId));
-    }
+      const relation = deletedRelations.find(
+        (item) =>
+          Number(this.getProgramIdFromRelation(item)) === Number(programId),
+      );
 
+      if (relation?.id) {
+        await this.restoreUserProgramByRelationId(Number(relation.id));
+      }
+    }
     for (const programId of toCreate) {
       await firstValueFrom(this.addUserProgram(userId, programId));
     }
@@ -122,21 +133,35 @@ export class UsersRelationsService {
   // Si ninguno existe, cae al endpoint activo actual.
   // ============================================================
   private async getUserRoleRelations(userId: number): Promise<any[]> {
-    return this.tryGetMany([
-      `${this.usersRolesUrl}/user/${userId}/all`,
-      `${this.usersRolesUrl}/user/${userId}?includeDeleted=true`,
-      `${this.usersRolesUrl}/user/${userId}?state=all`,
+    const active = await this.tryGetMany([
       `${this.usersRolesUrl}/user/${userId}`,
+      `${this.usersRolesUrl}`,
     ]);
+
+    const deleted = await this.tryGetMany([
+      `${this.usersRolesUrl}/deleted`,
+      `${this.usersRolesUrl}/all`,
+    ]);
+
+    return [...active, ...deleted].filter((relation: any) => {
+      return Number(relation?.user?.id) === Number(userId);
+    });
   }
 
   private async getUserProgramRelations(userId: number): Promise<any[]> {
-    return this.tryGetMany([
-      `${this.usersProgramsUrl}/user/${userId}/all`,
-      `${this.usersProgramsUrl}/user/${userId}?includeDeleted=true`,
-      `${this.usersProgramsUrl}/user/${userId}?state=all`,
+    const active = await this.tryGetMany([
       `${this.usersProgramsUrl}/user/${userId}`,
+      `${this.usersProgramsUrl}`,
     ]);
+
+    const deleted = await this.tryGetMany([
+      `${this.usersProgramsUrl}/deleted`,
+      `${this.usersProgramsUrl}/all`,
+    ]);
+
+    return [...active, ...deleted].filter((relation: any) => {
+      return Number(relation?.user?.id) === Number(userId);
+    });
   }
 
   private async tryGetMany(urls: string[]): Promise<any[]> {
@@ -144,27 +169,23 @@ export class UsersRelationsService {
       try {
         const res = await firstValueFrom(this.http.get<any>(url));
 
-        if (!res) {
-          return [];
-        }
-
         if (Array.isArray(res)) {
           return res;
         }
 
-        if (Array.isArray(res.content)) {
-          return res.content;
+        if (res) {
+          return [res];
         }
 
-        return [res];
+        return [];
       } catch (error: any) {
-        const status = error?.status;
+        console.warn(
+          '[UsersRelationsService] Endpoint no disponible:',
+          url,
+          error?.status,
+        );
 
-        if (status === 404 || status === 403 || status === 405) {
-          continue;
-        }
-
-        throw error;
+        continue;
       }
     }
 
@@ -189,20 +210,10 @@ export class UsersRelationsService {
     );
   }
 
-  restoreUserRole(userId: number, roleId: number): Observable<any> {
-    return this.http
-      .post(`${this.usersRolesUrl}/user/${userId}/role/${roleId}/restore`, {})
-      .pipe(
-        catchError((firstError) => {
-          // Fallback por si backend implementa restore como recurso general.
-          return this.http
-            .post(`${this.usersRolesUrl}/restore`, {
-              user: { id: userId },
-              role: { id: roleId },
-            })
-            .pipe(catchError(() => throwError(() => firstError)));
-        }),
-      );
+  private async restoreUserRoleByRelationId(relationId: number): Promise<void> {
+    await firstValueFrom(
+      this.http.post(`${this.usersRolesUrl}/${relationId}/restore`, {}),
+    );
   }
 
   // ============================================================
@@ -227,23 +238,12 @@ export class UsersRelationsService {
     );
   }
 
-  restoreUserProgram(userId: number, programId: number): Observable<any> {
-    return this.http
-      .post(
-        `${this.usersProgramsUrl}/user/${userId}/program/${programId}/restore`,
-        {},
-      )
-      .pipe(
-        catchError((firstError) => {
-          // Fallback por si backend implementa restore como recurso general.
-          return this.http
-            .post(`${this.usersProgramsUrl}/restore`, {
-              user: { id: userId },
-              program: { id: programId },
-            })
-            .pipe(catchError(() => throwError(() => firstError)));
-        }),
-      );
+  private async restoreUserProgramByRelationId(
+    relationId: number,
+  ): Promise<void> {
+    await firstValueFrom(
+      this.http.post(`${this.usersProgramsUrl}/${relationId}/restore`, {}),
+    );
   }
 
   // ============================================================
@@ -275,8 +275,7 @@ export class UsersRelationsService {
           item?.roleId ??
           item?.role_id ??
           item?.idRole ??
-          item?.id_role ??
-          item?.id,
+          item?.id_role,
       ) || null
     );
   }
@@ -288,8 +287,7 @@ export class UsersRelationsService {
           item?.programId ??
           item?.program_id ??
           item?.idProgram ??
-          item?.id_program ??
-          item?.id,
+          item?.id_program,
       ) || null
     );
   }
