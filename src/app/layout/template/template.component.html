@@ -17,18 +17,18 @@
 
         <h2>Bienvenido/a, {{ userFullName }}</h2>
 
-        <p *ngIf="!isAdminUser">
+        <p *ngIf="!isStructuralAdmin">
           Selecciona el rol y programa con el cual deseas trabajar en esta
           sesión.
         </p>
 
-        <p *ngIf="isAdminUser">
+        <p *ngIf="isStructuralAdmin">
           Acceso administrador inicial. Puedes ingresar sin programa para
           configurar el sistema y asignar roles/programas a los demás usuarios.
         </p>
       </div>
 
-      <div class="role-program-row" *ngIf="!isAdminUser">
+      <div class="role-program-row" *ngIf="!isStructuralAdmin">
         <div class="role-program-item" *ngIf="userRoles.length > 1">
           <mat-form-field appearance="fill">
             <mat-label>Rol</mat-label>
@@ -55,7 +55,7 @@
         </div>
       </div>
 
-      <div class="admin-context-card" *ngIf="isAdminUser">
+      <div class="admin-context-card" *ngIf="isStructuralAdmin">
         <mat-icon>admin_panel_settings</mat-icon>
 
         <div>
@@ -96,7 +96,7 @@
 
         <div
           *ngIf="
-            !isAdminUser &&
+            !isStructuralAdmin &&
             (userRoles.length === 0 || userPrograms.length === 0)
           "
           class="alert-msg"
@@ -124,7 +124,7 @@
           <button
             color="primary"
             class="login-btn"
-            [disabled]="isLoading"
+            [disabled]="!canContinue"
             (click)="onContinue()"
           >
             <ng-container *ngIf="!isLoading; else loadingTpl">

@@ -69,6 +69,7 @@ export class TemplateComponent implements OnInit {
   private restored = false;
   isAdminUser = false;
   needsContextSelection = false;
+  isStructuralAdmin = false;
 
   constructor() {}
 
@@ -175,9 +176,14 @@ export class TemplateComponent implements OnInit {
 
     // =============================================
     // 👑 ADMIN ESTRUCTURAL
-    // Entra directo sin programa
+    // Solo entra directo si es admin@demo.com o ADMIN sin programas.
+    // Un usuario real con ADMIN + programas debe elegir contexto.
     // =============================================
-    if (this.isAdminUser) {
+    this.isStructuralAdmin =
+      profile?.email === 'admin@demo.com' ||
+      (this.isAdminUser && this.userPrograms.length === 0);
+
+    if (this.isStructuralAdmin) {
       this.activeRole = 'ADMIN';
       this.activeProgram = null;
 
@@ -196,7 +202,9 @@ export class TemplateComponent implements OnInit {
 
       this.cdr.detectChanges();
 
-      console.log('[TemplateComponent] 👑 ADMIN entra sin programa.');
+      console.log(
+        '[TemplateComponent] 👑 ADMIN estructural entra sin programa.',
+      );
       return;
     }
 
@@ -240,7 +248,8 @@ export class TemplateComponent implements OnInit {
     // 🧭 SOLO MOSTRAR SELECTOR SI HAY MÁS DE UNA OPCIÓN
     // =============================================
     this.needsContextSelection =
-      this.userRoles.length > 1 || this.userPrograms.length > 1;
+      !this.isStructuralAdmin &&
+      (this.userRoles.length > 1 || this.userPrograms.length > 1);
 
     if (!this.needsContextSelection && this.activeRole && this.activeProgram) {
       this.menuVisible = true;
@@ -324,6 +333,23 @@ export class TemplateComponent implements OnInit {
     this.logout();
   }
 
+  private showContextWarning(message: string): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      disableClose: true,
+      panelClass: 'rda-confirm-dialog',
+      data: {
+        title: 'Selección requerida',
+        message,
+        confirmText: 'Aceptar',
+        cancelText: '',
+        icon: 'warning',
+        color: 'warn',
+        onlyConfirm: true,
+      },
+    });
+  }
+
   onContinue(): void {
     console.log('================= 🚀 ON CONTINUE =================');
 
@@ -336,7 +362,7 @@ export class TemplateComponent implements OnInit {
     // =============================================
     // 👑 ADMIN ESTRUCTURAL
     // =============================================
-    if (this.isAdminUser) {
+    if (this.isStructuralAdmin) {
       this.activeRole = 'ADMIN';
       this.activeProgram = null;
 
@@ -350,7 +376,7 @@ export class TemplateComponent implements OnInit {
 
       this.cdr.detectChanges();
 
-      console.log('👑 ADMIN ingresó sin programa.');
+      console.log('👑 ADMIN estructural ingresó sin programa.');
       return;
     }
 
@@ -358,17 +384,16 @@ export class TemplateComponent implements OnInit {
     // USUARIO NORMAL
     // =============================================
     if (!this.activeRole) {
-      alert('⚠️ Debes seleccionar un rol para continuar.');
+      this.showContextWarning('Debes seleccionar un rol para continuar.');
       this.isLoading = false;
       return;
     }
 
     if (!this.activeProgram) {
-      alert('⚠️ Debes seleccionar un programa para continuar.');
+      this.showContextWarning('Debes seleccionar un programa para continuar.');
       this.isLoading = false;
       return;
     }
-
     this.tokenService.setActiveRole(this.activeRole);
     this.tokenService.setActiveProgram(this.activeProgram);
 
@@ -593,5 +618,21 @@ export class TemplateComponent implements OnInit {
     } else {
       console.warn('⚠️ No se pudo encontrar ID para el programa');
     }
+  }
+
+  get canContinue(): boolean {
+    if (this.isLoading) {
+      return false;
+    }
+
+    if (this.isStructuralAdmin) {
+      return true;
+    }
+
+    if (!this.userRoles.length || !this.userPrograms.length) {
+      return false;
+    }
+
+    return !!this.activeRole && !!this.activeProgram;
   }
 }
