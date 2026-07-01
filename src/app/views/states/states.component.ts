@@ -111,7 +111,7 @@ export class StatesComponent implements AfterViewInit {
     }
   }
 
-  /** Cargar sustancias desde backend */
+/** Cargar estados desde backend */
   load(): void {
     this.loading = true;
 
@@ -236,7 +236,7 @@ export class StatesComponent implements AfterViewInit {
     });
   }
 
-  /** Eliminar sustancia */
+  /** Eliminar estado */
   softDelete(row: State): void {
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '460px',
@@ -261,7 +261,7 @@ export class StatesComponent implements AfterViewInit {
     });
   }
 
-  /** Restaurar sustancia eliminada */
+  /** Restaurar estado eliminado */
   restore(row: State): void {
     this.api.restore(Number(row.id)).subscribe(() => this.load());
   }

@@ -1,4 +1,6 @@
-// src/app/pages/states/states.dialog.ts
+// src/app/views/states/states.dialog.ts
+
+
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -15,7 +17,6 @@ import {
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { StateService } from '../../services/state.service';
 import { State } from '../../models/state';
@@ -32,7 +33,6 @@ import { State } from '../../models/state';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatCardModule,
     MatIconModule,
   ],
 })
