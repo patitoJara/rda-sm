@@ -215,11 +215,15 @@ export const routes: Routes = [
         data: {
           module: 'administracion',
           group: 'Mantenedores',
+          maintainerGroup: 'Red y programas',
           section: 'maintainer',
           title: 'Programas',
+          description: 'Programas de atención, modalidad, ubicación y estado.',
           icon: 'apps',
           roles: ['ADMIN'],
           iconColor: '#455a64',
+          tag: 'Actual',
+          order: 10,
         },
       },
 
@@ -231,11 +235,16 @@ export const routes: Routes = [
         data: {
           module: 'administracion',
           group: 'Mantenedores',
+          maintainerGroup: 'Usuarios y permisos',
           section: 'maintainer',
           title: 'Usuarios',
+          description:
+            'Usuarios del sistema, datos de acceso, roles y programas.',
           icon: 'group',
           roles: ['ADMIN'],
           iconColor: '#455a64',
+          tag: 'Acceso',
+          order: 300,
         },
       },
 
@@ -247,11 +256,15 @@ export const routes: Routes = [
         data: {
           module: 'administracion',
           group: 'Mantenedores',
+          maintainerGroup: 'Usuarios y permisos',
           section: 'maintainer',
           title: 'Roles',
+          description: 'Perfiles y permisos disponibles en el sistema.',
           icon: 'admin_panel_settings',
           roles: ['ADMIN'],
           iconColor: '#455a64',
+          tag: 'Permisos',
+          order: 310,
         },
       },
 
@@ -265,11 +278,16 @@ export const routes: Routes = [
         data: {
           module: 'administracion',
           group: 'Mantenedores',
+          maintainerGroup: 'Red y programas',
           section: 'maintainer',
           title: 'Comunas',
+          description:
+            'Catálogo territorial utilizado en personas y programas.',
           icon: 'location_city',
           roles: ['ADMIN'],
           iconColor: '#455a64',
+          tag: 'Actual',
+          order: 20,
         },
       },
 
@@ -283,11 +301,15 @@ export const routes: Routes = [
         data: {
           module: 'administracion',
           group: 'Mantenedores',
+          maintainerGroup: 'Red y programas',
           section: 'maintainer',
-          title: 'Profesionales',
-          icon: 'medication_liquid',
+          title: 'Profesiones',
+          description: 'Profesiones asociadas a usuarios y atenciones.',
+          icon: 'badge',
           roles: ['ADMIN'],
           iconColor: '#455a64',
+          tag: 'Actual',
+          order: 30,
         },
       },
 
@@ -301,11 +323,15 @@ export const routes: Routes = [
         data: {
           module: 'administracion',
           group: 'Mantenedores',
+          maintainerGroup: 'Gestión de demanda',
           section: 'maintainer',
           title: 'Sustancias',
+          description: 'Catálogo de sustancias principales y secundarias.',
           icon: 'science',
           roles: ['ADMIN'],
           iconColor: '#455a64',
+          tag: 'Actual',
+          order: 120,
         },
       },
 
@@ -319,11 +345,15 @@ export const routes: Routes = [
         data: {
           module: 'administracion',
           group: 'Mantenedores',
+          maintainerGroup: 'Gestión de demanda',
           section: 'maintainer',
           title: 'Estados',
+          description: 'Estados generales de la demanda o episodio.',
           icon: 'fact_check',
           roles: ['ADMIN'],
           iconColor: '#455a64',
+          tag: 'Actual',
+          order: 100,
         },
       },
 
@@ -337,11 +367,15 @@ export const routes: Routes = [
         data: {
           module: 'administracion',
           group: 'Mantenedores',
+          maintainerGroup: 'Gestión de demanda',
           section: 'maintainer',
           title: 'Resultados',
+          description: 'Resultados de evaluación, gestión, cierre o egreso.',
           icon: 'flag',
           roles: ['ADMIN'],
           iconColor: '#455a64',
+          tag: 'Actual',
+          order: 110,
         },
       },
 
@@ -355,11 +389,16 @@ export const routes: Routes = [
         data: {
           module: 'administracion',
           group: 'Mantenedores',
+          maintainerGroup: 'Gestión de demanda',
           section: 'maintainer',
           title: 'Tipos de episodio',
+          description:
+            'Primera solicitud, nueva demanda posterior a egreso o cierre.',
           icon: 'dynamic_feed',
           roles: ['ADMIN'],
           iconColor: '#455a64',
+          tag: 'Nuevo',
+          order: 140,
         },
       },
 
@@ -373,11 +412,15 @@ export const routes: Routes = [
         data: {
           module: 'administracion',
           group: 'Mantenedores',
+          maintainerGroup: 'Vía de ingreso',
           section: 'maintainer',
           title: 'Quién deriva',
+          description: 'Catálogo de entidades o personas derivadoras.',
           icon: 'psychology',
           roles: ['ADMIN'],
           iconColor: '#455a64',
+          tag: 'Derivación',
+          order: 210,
         },
       },
 
@@ -391,11 +434,15 @@ export const routes: Routes = [
         data: {
           module: 'administracion',
           group: 'Mantenedores',
+          maintainerGroup: 'Vía de ingreso',
           section: 'maintainer',
           title: 'Cobertura de salud',
+          description: 'Antecedentes de convenio o coordinación previa.',
           icon: 'medical_services',
           roles: ['ADMIN'],
           iconColor: '#455a64',
+          tag: 'Convenio',
+          order: 230,
         },
       },
 
@@ -409,11 +456,15 @@ export const routes: Routes = [
         data: {
           module: 'administracion',
           group: 'Mantenedores',
+          maintainerGroup: 'Vía de ingreso',
           section: 'maintainer',
           title: 'Quién solicita',
+          description: 'Catálogo de solicitantes o remitentes.',
           icon: 'diversity_3',
           roles: ['ADMIN'],
           iconColor: '#455a64',
+          tag: 'Solicitud',
+          order: 220,
         },
       },
 
@@ -427,11 +478,15 @@ export const routes: Routes = [
         data: {
           module: 'administracion',
           group: 'Mantenedores',
+          maintainerGroup: 'Vía de ingreso',
           section: 'maintainer',
           title: 'Tipo de contacto',
+          description: 'Canales o formas de contacto con la red.',
           icon: 'support_agent',
           roles: ['ADMIN'],
           iconColor: '#455a64',
+          tag: 'Ingreso',
+          order: 200,
         },
       },
 
@@ -445,11 +500,16 @@ export const routes: Routes = [
         data: {
           module: 'administracion',
           group: 'Mantenedores',
+          maintainerGroup: 'Gestión de demanda',
           section: 'maintainer',
           title: 'No relevantes',
+          description:
+            'Causales para solicitudes que no corresponden al flujo de demanda.',
           icon: 'block',
           roles: ['ADMIN'],
           iconColor: '#455a64',
+          tag: 'Actual',
+          order: 130,
         },
       },
 
@@ -461,11 +521,15 @@ export const routes: Routes = [
         data: {
           module: 'administracion',
           group: 'Mantenedores',
+          maintainerGroup: 'Usuarios y permisos',
           section: 'maintainer',
           title: 'Género',
+          description: 'Catálogo base de género/sexo para datos de persona.',
           icon: 'wc',
           roles: ['ADMIN'],
           iconColor: '#455a64',
+          tag: 'Persona',
+          order: 320,
         },
       },
       // ℹ️ ABOUT PRIVADO

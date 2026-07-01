@@ -11,6 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { NotRelevantService } from '../../services/not-relevant.service';
 import { NotRelevant } from '../../models/not-relevant';
+import { MatIconModule } from '@angular/material/icon';
 
 
 @Component({
@@ -26,6 +27,7 @@ import { NotRelevant } from '../../models/not-relevant';
     MatInputModule,
     MatButtonModule,
     MatCardModule,
+    MatIconModule,
 ]
 })
 export class NotRelevantsDialogComponent implements OnInit {

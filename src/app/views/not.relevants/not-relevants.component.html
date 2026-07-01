@@ -1,126 +1,188 @@
-<h3 class="titulo-genero">
-  <mat-icon>block</mat-icon>
-  <span>No Relevante</span>
-</h3>
+<section class="maintainer-page">
+  <div class="maintainer-hero">
+    <div>
+      <span class="eyebrow">
+        <mat-icon>block</mat-icon>
+        Catálogo de demanda
+      </span>
 
+      <h1>No relevantes</h1>
 
-<!-- === Toolbar: buscador + filtros + botón nuevo === -->
-<div class="list-toolbar">
-  <!-- 🔍 Filtros -->
-  <div class="filters">
-    <!-- Campo de búsqueda -->
-    <input
-      #search
-      type="text"
-      placeholder="Buscar por No Relevante..."
-      [value]="q"
-      (keyup.enter)="applyFilter(search.value)" />
+      <p>
+        Administre las causales utilizadas para registrar solicitudes que no corresponden
+        al flujo de demanda.
+      </p>
+    </div>
 
-    <!-- Botones de filtro de estado -->
-    <button [class.active]="filterState === 'active'" (click)="setState('active')">Activos</button>
-    <button [class.active]="filterState === 'deleted'" (click)="setState('deleted')">Eliminados</button>
-    <button [class.active]="filterState === 'all'" (click)="setState('all')">Todos</button>
-  </div>
-
-  <!-- ➕ Botón principal -->
-  <div class="right-actions">
-    <button mat-flat-button color="primary" (click)="openDialog()">
+    <button
+      mat-flat-button
+      class="primary-action"
+      type="button"
+      (click)="openDialog()"
+    >
       <mat-icon>add</mat-icon>
-      Nuevo No Relevante
+      Nuevo no relevante
     </button>
   </div>
-</div>
-<!-- Loader -->
-<mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
 
-<!-- Tabla (con scroll horizontal si hay muchas columnas) -->
-<div class="table-wrapper" style="overflow:auto;">
-  <table
-    mat-table
-    [dataSource]="dataSource"
-    matSort
-    class="mat-elevation-z1"
-    style="min-width:800px; width:100%;">
+  <mat-card class="toolbar-card">
+    <div class="filters">
+      <mat-form-field appearance="outline" floatLabel="always" class="search-field">
+        <mat-label>Buscar causal</mat-label>
 
-    <!-- ID -->
-    <ng-container matColumnDef="id">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
-      <td mat-cell *matCellDef="let row">{{ row.id }}</td>
-    </ng-container>
+        <mat-icon matPrefix>search</mat-icon>
 
-    <!-- Nombre -->
-    <ng-container matColumnDef="name">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
-      <td mat-cell *matCellDef="let row">{{ row.name }}</td>
-    </ng-container>
+        <input
+          #search
+          matInput
+          type="text"
+          placeholder="Ej: no corresponde, no es perfil..."
+          [value]="q"
+          (keyup.enter)="applyFilter(search.value)"
+        />
+      </mat-form-field>
 
-    <!-- Creado -->
-    <ng-container matColumnDef="createdAt">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Creado</th>
-      <td mat-cell *matCellDef="let row">{{ row.createdAt || '—' }}</td>
-    </ng-container>
-
-    <!-- Actualizado -->
-    <ng-container matColumnDef="updatedAt">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Actualizado</th>
-      <td mat-cell *matCellDef="let row">{{ row.updatedAt || '—' }}</td>
-    </ng-container>
-
-    <!-- Eliminado -->
-    <ng-container matColumnDef="deletedAt">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Eliminado</th>
-      <td mat-cell *matCellDef="let row">{{ row.deletedAt || '—' }}</td>
-    </ng-container>
-
-    <!-- Estado -->
-    <ng-container matColumnDef="estado">
-      <th mat-header-cell *matHeaderCellDef>Estado</th>
-      <td mat-cell *matCellDef="let row">
-        <mat-chip [color]="row.deletedAt ? 'warn' : 'primary'" variant="outlined">
-          {{ row.deletedAt ? 'Eliminado' : 'Activo' }}
-        </mat-chip>
-      </td>
-    </ng-container>
-
-    <!-- Acciones -->
-    <ng-container matColumnDef="acciones">
-      <th mat-header-cell *matHeaderCellDef>Acciones</th>
-      <td mat-cell *matCellDef="let row">
-        <button mat-icon-button matTooltip="Editar" (click)="openDialog(row)">
-          <mat-icon>edit</mat-icon>
+      <div class="state-buttons">
+        <button
+          type="button"
+          [class.active]="filterState === 'active'"
+          (click)="setState('active')"
+        >
+          Activos
         </button>
 
-        <button *ngIf="!row.deletedAt"
-                mat-icon-button color="warn" matTooltip="Eliminar"
-                (click)="softDelete(row)">
-          <mat-icon>delete</mat-icon>
+        <button
+          type="button"
+          [class.active]="filterState === 'deleted'"
+          (click)="setState('deleted')"
+        >
+          Eliminados
         </button>
 
-        <button *ngIf="row.deletedAt"
-                mat-icon-button color="primary" matTooltip="Restaurar"
-                (click)="restore(row)">
-          <mat-icon>settings_backup_restore</mat-icon>
+        <button
+          type="button"
+          [class.active]="filterState === 'all'"
+          (click)="setState('all')"
+        >
+          Todos
         </button>
-      </td>
-    </ng-container>
+      </div>
+    </div>
+  </mat-card>
 
-    <!-- Header y filas -->
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row        *matRowDef="let row; columns: displayedColumns;"></tr>
+  <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
 
-    <!-- Fila sin datos -->
-    <tr class="mat-row" *matNoDataRow>
-      <td class="mat-cell" [attr.colspan]="displayedColumns.length">
-        Sin resultados para "{{ q }}"
-      </td>
-    </tr>
-  </table>
-</div>
+  <mat-card class="table-card">
+    <div class="table-header">
+      <div>
+        <h2>Listado de no relevantes</h2>
+        <p>Total registros encontrados: {{ total }}</p>
+      </div>
 
-<!-- Paginador -->
-<mat-paginator
-  [length]="total"
-  pageSize="10"
-  [pageSizeOptions]="[5,10,20]"
-  showFirstLastButtons>
-</mat-paginator>
+      <button
+        type="button"
+        mat-icon-button
+        matTooltip="Actualizar"
+        (click)="refresh()"
+      >
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+
+    <div class="table-wrapper">
+      <table mat-table [dataSource]="dataSource" matSort>
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+          <td mat-cell *matCellDef="let row">{{ row.id }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>No relevante</th>
+          <td mat-cell *matCellDef="let row">
+            <strong>{{ row.name || '—' }}</strong>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Creado</th>
+          <td mat-cell *matCellDef="let row">{{ row.createdAt || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="updatedAt">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Actualizado</th>
+          <td mat-cell *matCellDef="let row">{{ row.updatedAt || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="deletedAt">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Eliminado</th>
+          <td mat-cell *matCellDef="let row">{{ row.deletedAt || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="status-badge" [class.deleted]="row.deletedAt">
+              {{ row.deletedAt ? 'Eliminado' : 'Activo' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let row">
+            <div class="action-buttons">
+              <button
+                mat-icon-button
+                class="edit-btn"
+                matTooltip="Editar no relevante"
+                type="button"
+                (click)="openDialog(row)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+
+              <button
+                *ngIf="!row.deletedAt"
+                mat-icon-button
+                class="delete-btn"
+                matTooltip="Eliminar no relevante"
+                type="button"
+                (click)="softDelete(row)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+
+              <button
+                *ngIf="row.deletedAt"
+                mat-icon-button
+                class="restore-btn"
+                matTooltip="Restaurar no relevante"
+                type="button"
+                (click)="restore(row)"
+              >
+                <mat-icon>settings_backup_restore</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+        <tr class="mat-row no-data-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+            Sin resultados para "{{ q }}"
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="total"
+      pageSize="10"
+      [pageSizeOptions]="[5, 10, 20]"
+      showFirstLastButtons
+    >
+    </mat-paginator>
+  </mat-card>
+</section>
