@@ -1,10 +1,10 @@
 <h2 mat-dialog-title>
   <mat-icon>category</mat-icon>
-  {{ form.value.id ? 'Editar tipo de contacto' : 'Nuevo tipo de contacto' }}
+  <span>{{ form.value.id ? 'Editar tipo de contacto' : 'Nuevo tipo de contacto' }}</span>
 </h2>
 
 <div mat-dialog-content>
-  <form [formGroup]="form" class="form">
+  <form [formGroup]="form" class="dialog-form">
     <mat-form-field appearance="outline" floatLabel="always" class="full">
       <mat-label>Nombre del tipo de contacto</mat-label>
 
@@ -28,14 +28,17 @@
 </div>
 
 <div mat-dialog-actions align="end">
-  <button mat-button type="button" (click)="cancel()">Cancelar</button>
+  <button mat-stroked-button type="button" (click)="cancel()">
+    Cancelar
+  </button>
 
   <button
     mat-flat-button
     color="primary"
     type="button"
     (click)="save()"
-    [disabled]="form.invalid">
+    [disabled]="form.invalid"
+  >
     Guardar
   </button>
 </div>

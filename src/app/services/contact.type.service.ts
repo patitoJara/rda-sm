@@ -15,7 +15,6 @@ export interface Page<T> {
 }
 
 @Injectable({ providedIn: 'root' })
-
 export class ContactTypeService {
   private http = inject(HttpClient);
 
@@ -42,6 +41,16 @@ export class ContactTypeService {
     return this.http.get<ContactType[]>(this.resourceUrl);
   }
 
+  /** GET /contact-types/all */
+  getAll(): Observable<ContactType[]> {
+    return this.http.get<ContactType[]>(`${this.resourceUrl}/all`);
+  }
+
+  /** GET /contact-types/deleted */
+  getDeleted(): Observable<ContactType[]> {
+    return this.http.get<ContactType[]>(`${this.resourceUrl}/deleted`);
+  }
+
   /** POST /contacts_Types */
   save(data: ContactType): Observable<ContactType> {
     return this.http.post<ContactType>(this.resourceUrl, data);
@@ -53,18 +62,27 @@ export class ContactTypeService {
   }
 
   /** GET /contacts_Types/getAllPaginated?page=&size=&q=&state=&sort= */
-  listPaginated(opts: { page?: number; size?: number; q?: string; state?: string; sort?: string } = {}): Observable<Page<ContactType>> {
+  listPaginated(
+    opts: {
+      page?: number;
+      size?: number;
+      q?: string;
+      state?: string;
+      sort?: string;
+    } = {},
+  ): Observable<Page<ContactType>> {
     const { page = 0, size = 10, q, state, sort } = opts;
 
-    let params = new HttpParams()
-      .set('page', page)
-      .set('size', size);
+    let params = new HttpParams().set('page', page).set('size', size);
 
-    if (q)     params = params.set('q', q);
+    if (q) params = params.set('q', q);
     if (state) params = params.set('state', state);
-    if (sort)  params = params.set('sort', sort);
+    if (sort) params = params.set('sort', sort);
 
-    return this.http.get<Page<ContactType>>(`${this.resourceUrl}/getAllPaginated`, { params });
+    return this.http.get<Page<ContactType>>(
+      `${this.resourceUrl}/getAllPaginated`,
+      { params },
+    );
   }
 
   /** DELETE /contacts_Types/all (si tu API lo soporta) */

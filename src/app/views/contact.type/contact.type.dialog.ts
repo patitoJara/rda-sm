@@ -1,4 +1,4 @@
-// src/app/pages/contact.types/contact.types.dialog.ts
+// src/app/views/contact.types/contact.type.dialog.ts
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -15,7 +15,6 @@ import {
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 
 import { ContactTypeService } from '../../services/contact.type.service';
@@ -33,17 +32,16 @@ import { ContactType } from '../../models/contact.type';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatCardModule,
     MatIconModule,
   ],
 })
-export class contacttypesDialogComponent implements OnInit {
+export class ContactTypesDialogComponent implements OnInit {
   form!: FormGroup;
 
   constructor(
     private fb: FormBuilder,
     private api: ContactTypeService,
-    private ref: MatDialogRef<contacttypesDialogComponent>,
+    private ref: MatDialogRef<ContactTypesDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ContactType | null,
   ) {}
 
@@ -67,7 +65,7 @@ export class contacttypesDialogComponent implements OnInit {
 
     const v = this.form.getRawValue() as { id: number | null; name: string };
 
-    const payload: any = {
+    const payload: ContactType = {
       name: v.name,
     };
 
@@ -84,6 +82,7 @@ export class contacttypesDialogComponent implements OnInit {
       },
     });
   }
+
   cancel(): void {
     this.ref.close();
   }

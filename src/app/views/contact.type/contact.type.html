@@ -9,12 +9,17 @@
       <h1>Tipos de contacto</h1>
 
       <p>
-        Administre los canales o formas de contacto utilizados para registrar
-        el origen de una solicitud dentro del flujo de demanda.
+        Administre los canales o formas de contacto utilizados para registrar el
+        origen de una solicitud dentro del flujo de demanda.
       </p>
     </div>
 
-    <button mat-flat-button class="primary-action" (click)="openDialog()">
+    <button
+      mat-flat-button
+      class="primary-action"
+      type="button"
+      (click)="openDialog()"
+    >
       <mat-icon>add</mat-icon>
       Nuevo tipo de contacto
     </button>
@@ -22,7 +27,11 @@
 
   <mat-card class="toolbar-card">
     <div class="filters">
-      <mat-form-field appearance="outline" floatLabel="always" class="search-field">
+      <mat-form-field
+        appearance="outline"
+        floatLabel="always"
+        class="search-field"
+      >
         <mat-label>Buscar tipo de contacto</mat-label>
 
         <mat-icon matPrefix>search</mat-icon>
@@ -41,21 +50,24 @@
         <button
           type="button"
           [class.active]="filterState === 'active'"
-          (click)="setState('active')">
+          (click)="setState('active')"
+        >
           Activos
         </button>
 
         <button
           type="button"
           [class.active]="filterState === 'deleted'"
-          (click)="setState('deleted')">
+          (click)="setState('deleted')"
+        >
           Eliminados
         </button>
 
         <button
           type="button"
           [class.active]="filterState === 'all'"
-          (click)="setState('all')">
+          (click)="setState('all')"
+        >
           Todos
         </button>
       </div>
@@ -71,7 +83,12 @@
         <p>Total registros encontrados: {{ total }}</p>
       </div>
 
-      <button type="button" mat-icon-button matTooltip="Actualizar" (click)="refresh()">
+      <button
+        type="button"
+        mat-icon-button
+        matTooltip="Actualizar"
+        (click)="refresh()"
+      >
         <mat-icon>refresh</mat-icon>
       </button>
     </div>
@@ -84,7 +101,9 @@
         </ng-container>
 
         <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo de contacto</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            Tipo de contacto
+          </th>
           <td mat-cell *matCellDef="let row">
             <strong>{{ row.name || '—' }}</strong>
           </td>
@@ -121,8 +140,10 @@
               <button
                 mat-icon-button
                 class="edit-btn"
+                type="button"
                 matTooltip="Editar tipo de contacto"
-                (click)="openDialog(row)">
+                (click)="openDialog(row)"
+              >
                 <mat-icon>edit</mat-icon>
               </button>
 
@@ -130,8 +151,10 @@
                 *ngIf="!row.deletedAt"
                 mat-icon-button
                 class="delete-btn"
+                type="button"
                 matTooltip="Eliminar tipo de contacto"
-                (click)="softDelete(row)">
+                (click)="softDelete(row)"
+              >
                 <mat-icon>delete</mat-icon>
               </button>
 
@@ -139,8 +162,10 @@
                 *ngIf="row.deletedAt"
                 mat-icon-button
                 class="restore-btn"
+                type="button"
                 matTooltip="Restaurar tipo de contacto"
-                (click)="restore(row)">
+                (click)="restore(row)"
+              >
                 <mat-icon>settings_backup_restore</mat-icon>
               </button>
             </div>
@@ -162,7 +187,8 @@
       [length]="total"
       pageSize="10"
       [pageSizeOptions]="[5, 10, 20]"
-      showFirstLastButtons>
+      showFirstLastButtons
+    >
     </mat-paginator>
   </mat-card>
 </section>

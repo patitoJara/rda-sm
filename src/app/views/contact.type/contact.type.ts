@@ -13,19 +13,20 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule, SortDirection } from '@angular/material/sort';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { merge } from 'rxjs';
-import { MatCardModule } from '@angular/material/card';
 
+import { merge } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
 import { ContactType } from '../../models/contact.type';
-import { contacttypesDialogComponent } from './contact.type.dialog';
+import { ContactTypesDialogComponent } from './contact.type.dialog';
 import { ContactTypeService } from '../../services/contact.type.service';
 
 @Component({
@@ -41,13 +42,13 @@ import { ContactTypeService } from '../../services/contact.type.service';
     MatSortModule,
     MatIconModule,
     MatButtonModule,
+    MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatTooltipModule,
     MatProgressBarModule,
     MatChipsModule,
     MatDialogModule,
-    MatCardModule,
   ],
 })
 export class TypeContactComponent implements AfterViewInit {
@@ -111,6 +112,7 @@ export class TypeContactComponent implements AfterViewInit {
   }
 
   /** ÚNICO lugar que pega a la API y pinta la tabla */
+  /** Cargar tipos de contacto desde backend */
   load(): void {
     this.loading = true;
 
@@ -120,95 +122,64 @@ export class TypeContactComponent implements AfterViewInit {
     const active = this.sort?.active;
     const direction = (this.sort?.direction as '' | 'asc' | 'desc') || 'asc';
     const sortField = this.mapSortField(active);
-    const sortParam = `${sortField},${direction}`;
 
-    if (this.filterState === 'active') {
-      // Server-side: paginado + filtro por nombre en el backend
+    const request$ =
+      this.filterState === 'deleted'
+        ? this.api.getDeleted()
+        : this.filterState === 'all'
+          ? this.api.getAll()
+          : this.api.listAll();
 
-      this.api
-        .listPaginated({
-          state: 'active',
-          page,
-          size,
-          sort: sortParam,
-          //name: this.q, // o q: this.q si prefieres el mapeo
-          q: this.q,
-        })
-        .pipe(finalize(() => (this.loading = false)))
-        .subscribe({
-          next: (res: any) => {
-            const rows: ContactType[] = Array.isArray(res)
-              ? (res as ContactType[])
-              : ((res?.content ?? []) as ContactType[]);
+    request$.pipe(finalize(() => (this.loading = false))).subscribe({
+      next: (allRows: ContactType[]) => {
+        let filtered = allRows;
 
-            this.dataSource.data = rows;
-            this.total = Array.isArray(res)
-              ? rows.length
-              : (res?.totalElements ??
-                res?.total ??
-                res?.totalCount ??
-                res?.totalRecords ??
-                rows.length);
-          },
-          error: () => {
-            /* manejar error si quieres */
-          },
+        if (this.filterState === 'active') {
+          filtered = allRows.filter((r) => !r.deletedAt);
+        } else if (this.filterState === 'deleted') {
+          filtered = allRows.filter((r) => !!r.deletedAt);
+        }
+
+        const term = (this.q || '').toLowerCase();
+        if (term) {
+          filtered = filtered.filter((r) =>
+            (r.name ?? '').toLowerCase().includes(term),
+          );
+        }
+
+        filtered.sort((a, b) => {
+          const va = this.getFieldValue(a, sortField);
+          const vb = this.getFieldValue(b, sortField);
+
+          let cmp = 0;
+
+          if (va == null && vb != null) {
+            cmp = -1;
+          } else if (va != null && vb == null) {
+            cmp = 1;
+          } else if (typeof va === 'number' && typeof vb === 'number') {
+            cmp = va - vb;
+          } else {
+            cmp = String(va ?? '').localeCompare(String(vb ?? ''), 'es', {
+              numeric: true,
+              sensitivity: 'base',
+            });
+          }
+
+          return direction === 'asc' ? cmp : -cmp;
         });
-    } else {
-      // Client-side: traer ALL o DELETED y aplicar nombre + orden + paginado en cliente
-      const src$ =
-        this.filterState === 'deleted'
-          ? this.api.listPaginated({ state: 'deleted' })
-          : this.api.listPaginated({ state: 'all' });
 
-      src$.pipe(finalize(() => (this.loading = false))).subscribe({
-        next: (res: any) => {
-          const allRows: ContactType[] = Array.isArray(res)
-            ? (res as ContactType[])
-            : ((res?.content ?? []) as ContactType[]);
+        const start = page * size;
+        const slice = filtered.slice(start, start + size);
 
-          // 1) Estado (seguridad, aunque el endpoint ya lo refleja)
-          let filtered =
-            this.filterState === 'deleted'
-              ? allRows.filter((r) => !!r.deletedAt)
-              : allRows;
-
-          // 2) Nombre (independiente del estado)
-          const term = (this.q || '').toLowerCase();
-          if (term)
-            filtered = filtered.filter((r) =>
-              (r.name ?? '').toLowerCase().includes(term),
-            );
-
-          // 3) Orden cliente
-          filtered.sort((a, b) => {
-            const va = this.getFieldValue(a, sortField);
-            const vb = this.getFieldValue(b, sortField);
-            let cmp = 0;
-            if (va == null && vb != null) cmp = -1;
-            else if (va != null && vb == null) cmp = 1;
-            else if (typeof va === 'number' && typeof vb === 'number')
-              cmp = va - vb;
-            else
-              cmp = String(va ?? '').localeCompare(String(vb ?? ''), 'es', {
-                numeric: true,
-                sensitivity: 'base',
-              });
-            return direction === 'asc' ? cmp : -cmp;
-          });
-
-          // 4) Paginado cliente
-          const start = page * size;
-          const slice = filtered.slice(start, start + size);
-
-          this.dataSource.data = slice;
-          this.total = filtered.length;
-        },
-        error: () => {
-          /* manejar error si quieres */
-        },
-      });
-    }
+        this.dataSource.data = slice;
+        this.total = filtered.length;
+      },
+      error: () => {
+        this.dataSource.data = [];
+        this.total = 0;
+      },
+    });
   }
 
   /** Obtener el valor de campo para ordenar en cliente */
@@ -251,7 +222,7 @@ export class TypeContactComponent implements AfterViewInit {
 
   openDialog(row?: ContactType): void {
     setTimeout(() => {
-      const ref = this.dialog.open(contacttypesDialogComponent, {
+      const ref = this.dialog.open(ContactTypesDialogComponent, {
         width: '560px',
         maxWidth: '95vw',
         panelClass: 'maintainer-dialog',
