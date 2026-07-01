@@ -1,26 +1,17 @@
-<section class="dialog-shell">
-  <header class="dialog-header">
-    <div>
-      <span class="eyebrow">Catálogo RDA-SM</span>
-      <h2>{{ isEdit ? 'Editar tipo de episodio' : 'Nuevo tipo de episodio' }}</h2>
-      <p>
-        Define el código y nombre utilizado al crear episodios o nuevas demandas.
-      </p>
-    </div>
+<h2 mat-dialog-title>
+  <mat-icon>{{ isEdit ? 'edit' : 'add_circle' }}</mat-icon>
+  <span>{{ isEdit ? 'Editar tipo de episodio' : 'Nuevo tipo de episodio' }}</span>
+</h2>
 
-    <button mat-icon-button type="button" aria-label="Cerrar" (click)="close()">
-      <mat-icon>close</mat-icon>
-    </button>
-  </header>
-
-  <form class="dialog-body" [formGroup]="form" (ngSubmit)="save()">
+<div mat-dialog-content>
+  <form [formGroup]="form" class="dialog-form">
     <div class="form-grid">
       <mat-form-field appearance="outline">
         <mat-label>Código</mat-label>
         <input
           matInput
           formControlName="code"
-          placeholder="PRIMERA_SOLICITUD"
+          placeholder="Ej: PRIMERA_SOLICITUD"
           autocomplete="off"
         />
         <mat-error *ngIf="form.controls['code'].hasError('required')">
@@ -33,7 +24,7 @@
         <input
           matInput
           formControlName="name"
-          placeholder="Primera solicitud"
+          placeholder="Ej: Primera solicitud"
           autocomplete="off"
         />
         <mat-error *ngIf="form.controls['name'].hasError('required')">
@@ -55,16 +46,27 @@
         Registro activo
       </mat-checkbox>
     </div>
-
-    <footer class="dialog-actions">
-      <button mat-stroked-button type="button" (click)="close()" [disabled]="saving">
-        Cancelar
-      </button>
-
-      <button mat-raised-button color="primary" type="submit" [disabled]="saving">
-        <mat-icon>{{ saving ? 'hourglass_empty' : 'save' }}</mat-icon>
-        {{ saving ? 'Guardando...' : 'Guardar' }}
-      </button>
-    </footer>
   </form>
-</section>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button
+    mat-stroked-button
+    type="button"
+    (click)="close()"
+    [disabled]="saving"
+  >
+    Cancelar
+  </button>
+
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="save()"
+    [disabled]="saving"
+  >
+    <mat-icon>{{ saving ? 'hourglass_empty' : 'save' }}</mat-icon>
+    {{ saving ? 'Guardando...' : 'Guardar' }}
+  </button>
+</div>

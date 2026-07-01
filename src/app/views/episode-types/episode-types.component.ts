@@ -1,15 +1,14 @@
-// ============================================================
-// ✅ EPISODE TYPES COMPONENT
-// Mantenedor de tipos de episodio
-// ============================================================
-
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
+
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 import { firstValueFrom } from 'rxjs';
 
 import {
@@ -18,6 +17,8 @@ import {
 } from '../../services/catalog-maintainer.service';
 
 import { EpisodeTypesDialogComponent } from './episode-types.dialog';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
+
 
 @Component({
   selector: 'app-episode-types',
@@ -29,6 +30,8 @@ import { EpisodeTypesDialogComponent } from './episode-types.dialog';
     MatIconModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
+    MatCardModule,
+    MatTableModule,
   ],
   templateUrl: './episode-types.component.html',
   styleUrls: ['./episode-types.component.scss'],
@@ -41,7 +44,18 @@ export class EpisodeTypesComponent implements OnInit {
 
   items: CatalogItem[] = [];
   loading = false;
-  showDeleted = false;
+
+  filterState: 'active' | 'deleted' | 'all' = 'active';
+
+  displayedColumns = [
+    'id',
+    'code',
+    'name',
+    'description',
+    'estado',
+    'acciones',
+  ];
+  dataSource = new MatTableDataSource<CatalogItem>([]);
 
   ngOnInit(): void {
     this.loadItems();
@@ -51,19 +65,30 @@ export class EpisodeTypesComponent implements OnInit {
     this.loading = true;
 
     try {
-      this.items = await firstValueFrom(
+      const rows = await firstValueFrom(
         this.catalogService.getDemandCatalog('episodeTypes'),
       );
+
+      if (this.filterState === 'active') {
+        this.items = rows.filter((item) => !this.isDeleted(item));
+      } else if (this.filterState === 'deleted') {
+        this.items = rows.filter((item) => this.isDeleted(item));
+      } else {
+        this.items = rows;
+      }
+
+      this.dataSource.data = this.items;
     } catch (error) {
       console.error('[EpisodeTypes] Error cargando registros:', error);
       this.items = [];
+      this.dataSource.data = [];
     } finally {
       this.loading = false;
     }
   }
 
-  toggleDeleted(): void {
-    this.showDeleted = !this.showDeleted;
+  setState(state: 'active' | 'deleted' | 'all'): void {
+    this.filterState = state;
     this.loadItems();
   }
 
@@ -72,7 +97,8 @@ export class EpisodeTypesComponent implements OnInit {
       width: '760px',
       maxWidth: '96vw',
       maxHeight: '94vh',
-      panelClass: ['maintainer-dialog'],
+      panelClass: 'maintainer-dialog',
+      backdropClass: 'app-backdrop',
       data: {
         item: item ?? null,
         resource: this.resource,
@@ -87,34 +113,74 @@ export class EpisodeTypesComponent implements OnInit {
   }
 
   async deleteItem(item: CatalogItem): Promise<void> {
-    if (!item.id) return;
-
-    const ok = confirm(`¿Eliminar el tipo de episodio "${item.name}"?`);
-
-    if (!ok) return;
-
-    try {
-      await firstValueFrom(this.catalogService.delete(this.resource, item.id));
-      await this.loadItems();
-    } catch (error) {
-      console.error('[EpisodeTypes] Error eliminando:', error);
-      alert('No fue posible eliminar el registro.');
+    if (!item.id) {
+      return;
     }
+
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      disableClose: true,
+      panelClass: 'rda-confirm-dialog',
+      data: {
+        title: 'Eliminar tipo de episodio',
+        message: `¿Seguro que deseas eliminar “${item.name}” (ID: ${item.id})?`,
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar',
+        color: 'warn',
+        icon: 'delete',
+        dense: true,
+      },
+    });
+
+    ref.afterClosed().subscribe(async (ok: boolean) => {
+      if (!ok || !item.id) {
+        return;
+      }
+
+      try {
+        await firstValueFrom(
+          this.catalogService.delete(this.resource, item.id),
+        );
+        await this.loadItems();
+      } catch (error) {
+        console.error('[EpisodeTypes] Error eliminando:', error);
+        this.showWarning('No fue posible eliminar el registro.');
+      }
+    });
   }
 
   async restoreItem(item: CatalogItem): Promise<void> {
-    if (!item.id) return;
+    if (!item.id) {
+      return;
+    }
 
     try {
       await firstValueFrom(this.catalogService.restore(this.resource, item.id));
       await this.loadItems();
     } catch (error) {
       console.error('[EpisodeTypes] Error restaurando:', error);
-      alert('No fue posible restaurar el registro.');
+      this.showWarning('No fue posible restaurar el registro.');
     }
   }
 
   isDeleted(item: CatalogItem): boolean {
     return !!item.deletedAt;
+  }
+
+  private showWarning(message: string): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      disableClose: true,
+      panelClass: 'rda-confirm-dialog',
+      data: {
+        title: 'Aviso',
+        message,
+        confirmText: 'Aceptar',
+        cancelText: '',
+        icon: 'warning',
+        color: 'warn',
+        onlyConfirm: true,
+      },
+    });
   }
 }
