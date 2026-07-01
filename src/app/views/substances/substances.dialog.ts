@@ -1,4 +1,5 @@
-// src/app/pages/substances/substances.dialog.tsDangerConfirmDialogComponent
+// src/app/views/substances/substances.dialog.ts
+
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -15,7 +16,6 @@ import {
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 
 import { SubstanceService } from '../../services/substance.service';
@@ -33,7 +33,6 @@ import { Substance } from '../../models/substance';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatCardModule,
     MatIconModule,
   ],
 })
