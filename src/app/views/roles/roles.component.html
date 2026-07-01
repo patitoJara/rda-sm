@@ -14,7 +14,12 @@
       </p>
     </div>
 
-    <button mat-flat-button class="primary-action" (click)="openDialog()">
+    <button
+      mat-flat-button
+      class="primary-action"
+      type="button"
+      (click)="openDialog()"
+    >
       <mat-icon>add</mat-icon>
       Nuevo rol
     </button>
@@ -22,7 +27,11 @@
 
   <mat-card class="toolbar-card">
     <div class="filters">
-      <mat-form-field appearance="outline" floatLabel="always" class="search-field">
+      <mat-form-field
+        appearance="outline"
+        floatLabel="always"
+        class="search-field"
+      >
         <mat-label>Buscar rol</mat-label>
 
         <mat-icon matPrefix>search</mat-icon>
@@ -41,21 +50,24 @@
         <button
           type="button"
           [class.active]="filterState === 'active'"
-          (click)="setState('active')">
+          (click)="setState('active')"
+        >
           Activos
         </button>
 
         <button
           type="button"
           [class.active]="filterState === 'deleted'"
-          (click)="setState('deleted')">
+          (click)="setState('deleted')"
+        >
           Eliminados
         </button>
 
         <button
           type="button"
           [class.active]="filterState === 'all'"
-          (click)="setState('all')">
+          (click)="setState('all')"
+        >
           Todos
         </button>
       </div>
@@ -71,7 +83,12 @@
         <p>Total registros encontrados: {{ total }}</p>
       </div>
 
-      <button type="button" mat-icon-button matTooltip="Actualizar" (click)="refresh()">
+      <button
+        type="button"
+        mat-icon-button
+        matTooltip="Actualizar"
+        (click)="refresh()"
+      >
         <mat-icon>refresh</mat-icon>
       </button>
     </div>
@@ -86,30 +103,30 @@
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Rol</th>
           <td mat-cell *matCellDef="let row">
-            <strong>{{ row.name || '—' }}</strong>
+            <strong>{{ row.name || "—" }}</strong>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="createdAt">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Creado</th>
-          <td mat-cell *matCellDef="let row">{{ row.createdAt || '—' }}</td>
+          <td mat-cell *matCellDef="let row">{{ row.createdAt || "—" }}</td>
         </ng-container>
 
         <ng-container matColumnDef="updatedAt">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Actualizado</th>
-          <td mat-cell *matCellDef="let row">{{ row.updatedAt || '—' }}</td>
+          <td mat-cell *matCellDef="let row">{{ row.updatedAt || "—" }}</td>
         </ng-container>
 
         <ng-container matColumnDef="deletedAt">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Eliminado</th>
-          <td mat-cell *matCellDef="let row">{{ row.deletedAt || '—' }}</td>
+          <td mat-cell *matCellDef="let row">{{ row.deletedAt || "—" }}</td>
         </ng-container>
 
         <ng-container matColumnDef="estado">
           <th mat-header-cell *matHeaderCellDef>Estado registro</th>
           <td mat-cell *matCellDef="let row">
             <span class="status-badge" [class.deleted]="row.deletedAt">
-              {{ row.deletedAt ? 'Eliminado' : 'Activo' }}
+              {{ row.deletedAt ? "Eliminado" : "Activo" }}
             </span>
           </td>
         </ng-container>
@@ -121,8 +138,10 @@
               <button
                 mat-icon-button
                 class="edit-btn"
+                type="button"
                 matTooltip="Editar rol"
-                (click)="openDialog(row)">
+                (click)="openDialog(row)"
+              >
                 <mat-icon>edit</mat-icon>
               </button>
 
@@ -130,8 +149,10 @@
                 *ngIf="!row.deletedAt"
                 mat-icon-button
                 class="delete-btn"
+                type="button"
                 matTooltip="Eliminar rol"
-                (click)="softDelete(row)">
+                (click)="softDelete(row)"
+              >
                 <mat-icon>delete</mat-icon>
               </button>
 
@@ -139,8 +160,10 @@
                 *ngIf="row.deletedAt"
                 mat-icon-button
                 class="restore-btn"
+                type="button"
                 matTooltip="Restaurar rol"
-                (click)="restore(row)">
+                (click)="restore(row)"
+              >
                 <mat-icon>settings_backup_restore</mat-icon>
               </button>
             </div>
@@ -162,7 +185,8 @@
       [length]="total"
       pageSize="10"
       [pageSizeOptions]="[5, 10, 20]"
-      showFirstLastButtons>
+      showFirstLastButtons
+    >
     </mat-paginator>
   </mat-card>
 </section>

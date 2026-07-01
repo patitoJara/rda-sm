@@ -1,10 +1,10 @@
 <h2 mat-dialog-title>
   <mat-icon>verified_user</mat-icon>
-  {{ form.value.id ? 'Editar rol' : 'Nuevo rol' }}
+  <span>{{ form.value.id ? 'Editar rol' : 'Nuevo rol' }}</span>
 </h2>
 
 <div mat-dialog-content>
-  <form [formGroup]="form" class="form">
+  <form [formGroup]="form" class="dialog-form">
     <mat-form-field appearance="outline" floatLabel="always" class="full">
       <mat-label>Nombre del rol</mat-label>
 
@@ -28,14 +28,15 @@
 </div>
 
 <div mat-dialog-actions align="end">
-  <button mat-button type="button" (click)="cancel()">Cancelar</button>
+  <button mat-stroked-button type="button" (click)="cancel()">Cancelar</button>
 
   <button
     mat-flat-button
     color="primary"
     type="button"
     (click)="save()"
-    [disabled]="form.invalid">
+    [disabled]="form.invalid"
+  >
     Guardar
   </button>
 </div>
