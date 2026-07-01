@@ -1,4 +1,4 @@
-// src/app/pages/program/program.component.ts
+// src/app/views/sexs/sexs.component.ts
 
 import {
   Component,
@@ -66,7 +66,8 @@ export class SexsComponent implements AfterViewInit {
   loading = false;
   total = 0;
 
-  /** Filtro por nombre de programa */
+  /** Filtro por nombre de género */
+
   q = '';
 
   /** Estado: all = todos, active = no eliminados, deleted = eliminados */
@@ -112,7 +113,8 @@ export class SexsComponent implements AfterViewInit {
     }
   }
 
-  /** Carga programas desde backend y aplica filtros en cliente */
+  /** Carga géneros desde backend y aplica filtros en cliente */
+  
   load(): void {
     this.loading = true;
 

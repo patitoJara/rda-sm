@@ -121,6 +121,7 @@
               <button
                 mat-icon-button
                 class="edit-btn"
+                type="button"
                 matTooltip="Editar género"
                 (click)="openDialog(row)">
                 <mat-icon>edit</mat-icon>
@@ -130,6 +131,7 @@
                 *ngIf="!row.deletedAt"
                 mat-icon-button
                 class="delete-btn"
+                type="button"
                 matTooltip="Eliminar género"
                 (click)="softDelete(row)">
                 <mat-icon>delete</mat-icon>
@@ -139,6 +141,7 @@
                 *ngIf="row.deletedAt"
                 mat-icon-button
                 class="restore-btn"
+                type="button"
                 matTooltip="Restaurar género"
                 (click)="restore(row)">
                 <mat-icon>settings_backup_restore</mat-icon>
