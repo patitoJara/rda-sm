@@ -13,15 +13,16 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule, SortDirection } from '@angular/material/sort';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+
 import { merge } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { MatCardModule } from '@angular/material/card';
 
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
 import { Result } from '../../models/result';
@@ -41,13 +42,13 @@ import { ResultsDialogComponent } from './results.dialog';
     MatSortModule,
     MatIconModule,
     MatButtonModule,
+    MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatTooltipModule,
     MatProgressBarModule,
     MatChipsModule,
     MatDialogModule,
-    MatCardModule,
   ],
 })
 export class ResultsComponent implements AfterViewInit {
@@ -111,7 +112,7 @@ export class ResultsComponent implements AfterViewInit {
     }
   }
 
-  /** Cargar sustancias desde backend */
+  /** Cargar resultados desde backend */
   load(): void {
     this.loading = true;
 
@@ -259,7 +260,7 @@ export class ResultsComponent implements AfterViewInit {
     });
   }
 
-  /** Restaurar sustancia eliminada */
+  /** Restaurar resultado eliminado */
   restore(row: Result): void {
     this.api.restore(Number(row.id)).subscribe(() => this.load());
   }

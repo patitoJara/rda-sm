@@ -1,4 +1,4 @@
-// src/app/pages/results/results.dialog.ts
+// src/app/views/results/results.dialog.ts
 
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -16,7 +16,6 @@ import {
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 
 import { ResultService } from '../../services/result.service';
@@ -34,7 +33,6 @@ import { Result } from '../../models/result';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatCardModule,
     MatIconModule,
   ],
 })
