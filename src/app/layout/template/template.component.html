@@ -122,8 +122,10 @@
           </button>
 
           <button
+            mat-raised-button
             color="primary"
             class="login-btn"
+            type="button"
             [disabled]="!canContinue"
             (click)="onContinue()"
           >
@@ -131,6 +133,7 @@
               <mat-icon>arrow_forward</mat-icon>
               INGRESAR AL SISTEMA
             </ng-container>
+
             <ng-template #loadingTpl>
               <mat-icon>hourglass_empty</mat-icon>
               Cargando...
