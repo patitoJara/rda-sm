@@ -1,23 +1,27 @@
-export type UTT = 'ADOLESCENTE' | 'ADULTO';
-export type ProgramType = 'RESIDENCIAL' | 'AMBULATORIO';
-
 export interface Program {
-  id: number;
+  id?: number | null;
   name: string;
 
-  utt: UTT;
-  type: ProgramType;
+  populationTypeId?: number | null;
+  modalityId?: number | null;
+  planId?: number | null;
+  regionId?: number | null;
+  cityId?: number | null;
 
-  c1: string | null;
-  c2: string | null;
+  address?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  description?: string | null;
 
-  address: string;
-  cellphone: string;
-  email: string;
-  city: string;
-  description: string;
+  active?: boolean;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  deletedAt?: string | null;
 
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
+  // Opcionales por si el backend después devuelve nombres relacionados
+  populationTypeName?: string | null;
+  modalityName?: string | null;
+  planName?: string | null;
+  regionName?: string | null;
+  cityName?: string | null;
 }

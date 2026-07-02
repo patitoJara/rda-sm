@@ -113,6 +113,7 @@ export class ProgramComponent implements AfterViewInit {
   }
 
   /** Carga programas desde backend y aplica filtros en cliente */
+  /** Carga programas desde backend y aplica filtros en cliente */
   load(): void {
     this.loading = true;
 
@@ -123,61 +124,65 @@ export class ProgramComponent implements AfterViewInit {
     const direction = (this.sort?.direction as '' | 'asc' | 'desc') || 'asc';
     const sortField = this.mapSortField(active);
 
-    this.api
-      .getAllPaginated({ page, size })
-      .pipe(finalize(() => (this.loading = false)))
-      .subscribe({
-        next: (res: any) => {
-          // Normalizo respuesta en array
-          const allRows: Program[] = Array.isArray(res)
-            ? res
-            : (res?.content ?? []);
+    const request$ =
+      this.filterState === 'deleted'
+        ? this.api.getDeleted()
+        : this.filterState === 'all'
+          ? this.api.getAll()
+          : this.api.listAll();
 
-          // 1) Filtro por estado
-          let filtered = allRows;
-          if (this.filterState === 'active') {
-            filtered = allRows.filter((r) => !r.deletedAt); // activos
-          } else if (this.filterState === 'deleted') {
-            filtered = allRows.filter((r) => !!r.deletedAt); // eliminados
+    request$.pipe(finalize(() => (this.loading = false))).subscribe({
+      next: (allRows: Program[]) => {
+        let filtered = allRows;
+
+        if (this.filterState === 'active') {
+          filtered = allRows.filter((r) => !r.deletedAt);
+        } else if (this.filterState === 'deleted') {
+          filtered = allRows.filter((r) => !!r.deletedAt);
+        }
+
+        const term = (this.q || '').toLowerCase();
+
+        if (term) {
+          filtered = filtered.filter((r) =>
+            (r.name ?? '').toLowerCase().includes(term),
+          );
+        }
+
+        filtered.sort((a, b) => {
+          const va = this.getFieldValue(a, sortField);
+          const vb = this.getFieldValue(b, sortField);
+
+          let cmp = 0;
+
+          if (va == null && vb != null) {
+            cmp = -1;
+          } else if (va != null && vb == null) {
+            cmp = 1;
+          } else if (typeof va === 'number' && typeof vb === 'number') {
+            cmp = va - vb;
+          } else {
+            cmp = String(va ?? '').localeCompare(String(vb ?? ''), 'es', {
+              numeric: true,
+              sensitivity: 'base',
+            });
           }
 
-          // 2) Filtro por nombre
-          const term = (this.q || '').toLowerCase();
-          if (term) {
-            filtered = filtered.filter((r) =>
-              (r.name ?? '').toLowerCase().includes(term),
-            );
-          }
+          return direction === 'asc' ? cmp : -cmp;
+        });
 
-          // 3) Orden
-          filtered.sort((a, b) => {
-            const va = this.getFieldValue(a, sortField);
-            const vb = this.getFieldValue(b, sortField);
-            let cmp = 0;
-            if (va == null && vb != null) cmp = -1;
-            else if (va != null && vb == null) cmp = 1;
-            else if (typeof va === 'number' && typeof vb === 'number')
-              cmp = va - vb;
-            else
-              cmp = String(va ?? '').localeCompare(String(vb ?? ''), 'es', {
-                numeric: true,
-                sensitivity: 'base',
-              });
-            return direction === 'asc' ? cmp : -cmp;
-          });
+        const start = page * size;
+        const slice = filtered.slice(start, start + size);
 
-          // 4) Paginado cliente
-          const start = page * size;
-          const slice = filtered.slice(start, start + size);
-
-          this.dataSource.data = slice;
-          this.total = filtered.length;
-        },
-        error: () => {
-          this.dataSource.data = [];
-          this.total = 0;
-        },
-      });
+        this.dataSource.data = slice;
+        this.total = filtered.length;
+      },
+      error: (err) => {
+        console.error('Error cargando programas:', err);
+        this.dataSource.data = [];
+        this.total = 0;
+      },
+    });
   }
 
   /** Obtener valor para ordenamiento */
@@ -218,6 +223,30 @@ export class ProgramComponent implements AfterViewInit {
   }
 
   openDialog(row?: Program): void {
+    if (!row?.id) {
+      this.openProgramDialog(null);
+      return;
+    }
+
+    this.loading = true;
+
+    this.api
+      .findById(Number(row.id))
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe({
+        next: (fullProgram: Program) => {
+          this.openProgramDialog(fullProgram);
+        },
+        error: (err) => {
+          console.error('[ProgramComponent] Error cargando programa:', err);
+
+          // Fallback: si falla el GET por id, abre con lo que ya tiene la tabla.
+          this.openProgramDialog(row);
+        },
+      });
+  }
+
+  private openProgramDialog(data: Program | null): void {
     setTimeout(() => {
       const ref = this.dialog.open(ProgramDialogComponent, {
         width: '1040px',
@@ -225,7 +254,7 @@ export class ProgramComponent implements AfterViewInit {
         maxHeight: '94vh',
         panelClass: ['maintainer-dialog', 'program-dialog'],
         backdropClass: 'app-backdrop',
-        data: row ?? null,
+        data,
       });
 
       ref.afterClosed().subscribe((result?: Program) => {

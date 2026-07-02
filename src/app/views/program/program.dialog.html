@@ -1,10 +1,10 @@
 <h2 mat-dialog-title>
   <mat-icon>business</mat-icon>
-  {{ form.value.id ? 'Editar programa' : 'Nuevo programa' }}
+  <span>{{ form.value.id ? 'Editar programa' : 'Nuevo programa' }}</span>
 </h2>
 
 <div mat-dialog-content>
-  <form [formGroup]="form" class="form program-form">
+  <form [formGroup]="form" class="dialog-form program-form">
     <mat-form-field appearance="outline" floatLabel="always" class="full">
       <mat-label>Nombre del programa</mat-label>
 
@@ -26,62 +26,63 @@
 
     <div class="form-grid">
       <mat-form-field appearance="outline" floatLabel="always">
-        <mat-label>Tipo población</mat-label>
-        <mat-select formControlName="utt">
-          <mat-option *ngFor="let u of uttOptions" [value]="u">
-            {{ u }}
-          </mat-option>
-        </mat-select>
-
-        <mat-error *ngIf="form.get('utt')?.hasError('required')">
-          El tipo de población es obligatorio.
-        </mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" floatLabel="always">
-        <mat-label>Tipo programa</mat-label>
-        <mat-select formControlName="type">
-          <mat-option *ngFor="let t of typeOptions" [value]="t">
-            {{ t }}
-          </mat-option>
-        </mat-select>
-
-        <mat-error *ngIf="form.get('type')?.hasError('required')">
-          El tipo de programa es obligatorio.
-        </mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" floatLabel="always">
-        <mat-label>Tipo de plan 1</mat-label>
-        <mat-select formControlName="c1">
-          <mat-option *ngFor="let c of c1Options" [value]="c">
-            {{ c }}
+        <mat-label>Tipo de población</mat-label>
+        <mat-select formControlName="populationTypeId">
+          <mat-option [value]="null">Sin especificar</mat-option>
+          <mat-option *ngFor="let item of populationTypes" [value]="item.id">
+            {{ item.name }}
           </mat-option>
         </mat-select>
       </mat-form-field>
 
       <mat-form-field appearance="outline" floatLabel="always">
-        <mat-label>Subtipo 2</mat-label>
-        <mat-select formControlName="c2">
-          <mat-option *ngFor="let c of c2Options" [value]="c">
-            {{ c }}
+        <mat-label>Modalidad</mat-label>
+        <mat-select formControlName="modalityId">
+          <mat-option [value]="null">Sin especificar</mat-option>
+          <mat-option *ngFor="let item of modalities" [value]="item.id">
+            {{ item.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" floatLabel="always">
+        <mat-label>Plan</mat-label>
+        <mat-select formControlName="planId">
+          <mat-option [value]="null">Sin especificar</mat-option>
+          <mat-option *ngFor="let item of plans" [value]="item.id">
+            {{ item.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" floatLabel="always">
+        <mat-label>Región</mat-label>
+        <mat-select formControlName="regionId">
+          <mat-option [value]="null">Sin especificar</mat-option>
+          <mat-option *ngFor="let item of regions" [value]="item.id">
+            {{ item.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" floatLabel="always">
+        <mat-label>Ciudad</mat-label>
+        <mat-select formControlName="cityId">
+          <mat-option [value]="null">Sin especificar</mat-option>
+          <mat-option *ngFor="let item of cities" [value]="item.id">
+            {{ item.name }}
           </mat-option>
         </mat-select>
       </mat-form-field>
 
       <mat-form-field appearance="outline" floatLabel="always">
         <mat-label>Teléfono</mat-label>
-        <input matInput formControlName="cellphone" autocomplete="off" />
+        <input matInput formControlName="phone" autocomplete="off" />
       </mat-form-field>
 
       <mat-form-field appearance="outline" floatLabel="always">
         <mat-label>Email</mat-label>
         <input matInput formControlName="email" autocomplete="off" />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" floatLabel="always">
-        <mat-label>Ciudad</mat-label>
-        <input matInput formControlName="city" autocomplete="off" />
       </mat-form-field>
 
       <mat-form-field appearance="outline" floatLabel="always">
@@ -103,14 +104,15 @@
 </div>
 
 <div mat-dialog-actions align="end">
-  <button mat-button type="button" (click)="cancel()">Cancelar</button>
+  <button mat-stroked-button type="button" (click)="cancel()">Cancelar</button>
 
   <button
     mat-flat-button
     color="primary"
     type="button"
     (click)="save()"
-    [disabled]="form.invalid">
+    [disabled]="form.invalid"
+  >
     Guardar
   </button>
 </div>
