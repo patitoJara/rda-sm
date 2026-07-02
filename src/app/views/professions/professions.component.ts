@@ -119,61 +119,65 @@ export class ProfessionsComponent implements AfterViewInit {
     const direction = (this.sort?.direction as '' | 'asc' | 'desc') || 'asc';
     const sortField = this.mapSortField(active);
 
-    this.api
-      .getAllPaginated({ page, size })
-      .pipe(finalize(() => (this.loading = false)))
-      .subscribe({
-        next: (res: any) => {
-          const allRows: Profession[] = Array.isArray(res)
-            ? res
-            : (res?.content ?? []);
+    const request$ =
+      this.filterState === 'deleted'
+        ? this.api.getDeleted()
+        : this.filterState === 'all'
+          ? this.api.getAll()
+          : this.api.listAll();
 
-          let filtered = allRows;
+    request$.pipe(finalize(() => (this.loading = false))).subscribe({
+      next: (allRows: Profession[]) => {
+        let filtered = allRows;
 
-          if (this.filterState === 'active') {
-            filtered = allRows.filter((r) => !r.deletedAt);
-          } else if (this.filterState === 'deleted') {
-            filtered = allRows.filter((r) => !!r.deletedAt);
+        if (this.filterState === 'active') {
+          filtered = allRows.filter((r) => !r.deletedAt);
+        } else if (this.filterState === 'deleted') {
+          filtered = allRows.filter((r) => !!r.deletedAt);
+        }
+
+        const term = (this.q || '').toLowerCase();
+
+        if (term) {
+          filtered = filtered.filter((r) =>
+            (r.name ?? '').toLowerCase().includes(term),
+          );
+        }
+
+        filtered.sort((a, b) => {
+          const va = this.getFieldValue(a, sortField);
+          const vb = this.getFieldValue(b, sortField);
+
+          let cmp = 0;
+
+          if (va == null && vb != null) {
+            cmp = -1;
+          } else if (va != null && vb == null) {
+            cmp = 1;
+          } else if (typeof va === 'number' && typeof vb === 'number') {
+            cmp = va - vb;
+          } else {
+            cmp = String(va ?? '').localeCompare(String(vb ?? ''), 'es', {
+              numeric: true,
+              sensitivity: 'base',
+            });
           }
 
-          const term = (this.q || '').toLowerCase();
+          return direction === 'asc' ? cmp : -cmp;
+        });
 
-          if (term) {
-            filtered = filtered.filter((r) =>
-              (r.name ?? '').toLowerCase().includes(term),
-            );
-          }
+        const start = page * size;
+        const slice = filtered.slice(start, start + size);
 
-          filtered.sort((a, b) => {
-            const va = this.getFieldValue(a, sortField);
-            const vb = this.getFieldValue(b, sortField);
-
-            let cmp = 0;
-
-            if (va == null && vb != null) {
-              cmp = -1;
-            } else if (va != null && vb == null) {
-              cmp = 1;
-            } else if (typeof va === 'number' && typeof vb === 'number') {
-              cmp = va - vb;
-            } else {
-              cmp = String(va ?? '').localeCompare(String(vb ?? ''), 'es', {
-                numeric: true,
-                sensitivity: 'base',
-              });
-            }
-
-            return direction === 'asc' ? cmp : -cmp;
-          });
-
-          const start = page * size;
-          const slice = filtered.slice(start, start + size);
-
-          this.dataSource.data = slice;
-          this.total = filtered.length;
-        },
-        error: (err) => console.error('Error cargando profesiones:', err),
-      });
+        this.dataSource.data = slice;
+        this.total = filtered.length;
+      },
+      error: (err) => {
+        console.error('Error cargando profesiones:', err);
+        this.dataSource.data = [];
+        this.total = 0;
+      },
+    });
   }
 
   private getFieldValue(row: Profession, field: string): any {
@@ -217,7 +221,7 @@ export class ProfessionsComponent implements AfterViewInit {
         maxWidth: '95vw',
         panelClass: 'maintainer-dialog',
         backdropClass: 'app-backdrop',
-        data: row ?? null, 
+        data: row ?? null,
       });
 
       ref.afterClosed().subscribe((result?: Profession) => {

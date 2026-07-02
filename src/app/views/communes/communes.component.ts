@@ -113,41 +113,76 @@ export class CommunesComponent implements AfterViewInit {
   }
 
   /** Cargar comunas */
+  /** Cargar comunas */
   load(): void {
     this.loading = true;
 
     const page = this.paginator?.pageIndex ?? 0;
     const size = this.paginator?.pageSize ?? 10;
+
     const active = this.sort?.active;
     const direction = (this.sort?.direction as '' | 'asc' | 'desc') || 'asc';
     const sortField = this.mapSortField(active);
-    const sortParam = `${sortField},${direction}`;
 
-    //  this.api.getAllPaginated({ page, size })
-    this.api
-      .listPaginated({ page, size, sort: sortParam, q: this.q })
-      .pipe(finalize(() => (this.loading = false)))
-      .subscribe({
-        next: (res: any) => {
-          const rows: Commune[] = Array.isArray(res)
-            ? res
-            : (res?.content ?? []);
+    const request$ =
+      this.filterState === 'deleted'
+        ? this.api.getDeleted()
+        : this.filterState === 'all'
+          ? this.api.getAll()
+          : this.api.listAll();
 
-          // aplicar filtro de estado
-          let filtered: Commune[];
-          if (this.filterState === 'deleted') {
-            filtered = rows.filter((r) => !!r.deletedAt);
-          } else if (this.filterState === 'active') {
-            filtered = rows.filter((r) => !r.deletedAt);
+    request$.pipe(finalize(() => (this.loading = false))).subscribe({
+      next: (allRows: Commune[]) => {
+        let filtered = allRows;
+
+        if (this.filterState === 'active') {
+          filtered = allRows.filter((r) => !r.deletedAt);
+        } else if (this.filterState === 'deleted') {
+          filtered = allRows.filter((r) => !!r.deletedAt);
+        }
+
+        const term = (this.q || '').toLowerCase();
+
+        if (term) {
+          filtered = filtered.filter((r) =>
+            (r.name ?? '').toLowerCase().includes(term),
+          );
+        }
+
+        filtered.sort((a, b) => {
+          const va = this.getFieldValue(a, sortField);
+          const vb = this.getFieldValue(b, sortField);
+
+          let cmp = 0;
+
+          if (va == null && vb != null) {
+            cmp = -1;
+          } else if (va != null && vb == null) {
+            cmp = 1;
+          } else if (typeof va === 'number' && typeof vb === 'number') {
+            cmp = va - vb;
           } else {
-            filtered = rows;
+            cmp = String(va ?? '').localeCompare(String(vb ?? ''), 'es', {
+              numeric: true,
+              sensitivity: 'base',
+            });
           }
 
-          this.dataSource.data = filtered;
-          this.total = res?.totalElements ?? filtered.length;
-        },
-        error: (err) => console.error('Error cargando comunas:', err),
-      });
+          return direction === 'asc' ? cmp : -cmp;
+        });
+
+        const start = page * size;
+        const slice = filtered.slice(start, start + size);
+
+        this.dataSource.data = slice;
+        this.total = filtered.length;
+      },
+      error: (err) => {
+        console.error('Error cargando comunas:', err);
+        this.dataSource.data = [];
+        this.total = 0;
+      },
+    });
   }
 
   /** Ordenamiento en cliente */

@@ -19,7 +19,6 @@ import {
 import { EpisodeTypesDialogComponent } from './episode-types.dialog';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
 
-
 @Component({
   selector: 'app-episode-types',
   standalone: true,
@@ -40,7 +39,7 @@ export class EpisodeTypesComponent implements OnInit {
   private catalogService = inject(CatalogMaintainerService);
   private dialog = inject(MatDialog);
 
-  readonly resource = 'episode_types';
+  readonly resource = 'episodeTypes';
 
   items: CatalogItem[] = [];
   loading = false;
@@ -65,18 +64,27 @@ export class EpisodeTypesComponent implements OnInit {
     this.loading = true;
 
     try {
-      const rows = await firstValueFrom(
-        this.catalogService.getDemandCatalog('episodeTypes'),
+      const active =
+        this.filterState === 'active'
+          ? true
+          : this.filterState === 'deleted'
+            ? false
+            : undefined;
+
+      const res = await firstValueFrom(
+        this.catalogService.getAllPaginated(this.resource, {
+          page: 0,
+          size: 1000,
+          active,
+          sort: 'id,asc',
+        }),
       );
 
-      if (this.filterState === 'active') {
-        this.items = rows.filter((item) => !this.isDeleted(item));
-      } else if (this.filterState === 'deleted') {
-        this.items = rows.filter((item) => this.isDeleted(item));
-      } else {
-        this.items = rows;
-      }
+      const rows: CatalogItem[] = Array.isArray(res)
+        ? res
+        : (res?.content ?? []);
 
+      this.items = rows;
       this.dataSource.data = this.items;
     } catch (error) {
       console.error('[EpisodeTypes] Error cargando registros:', error);
@@ -164,7 +172,7 @@ export class EpisodeTypesComponent implements OnInit {
   }
 
   isDeleted(item: CatalogItem): boolean {
-    return !!item.deletedAt;
+    return !!item.deletedAt || item.active === false;
   }
 
   private showWarning(message: string): void {

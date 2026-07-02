@@ -1,6 +1,6 @@
 // ============================================================
 // ✅ CATALOG MAINTAINER SERVICE
-// Servicio genérico para mantenedores simples y catálogos RDA-SM
+// Servicio genérico para catálogos RDA-SM de Demanda
 // ============================================================
 
 import { Injectable, inject } from '@angular/core';
@@ -17,6 +17,14 @@ export interface CatalogItem {
   deletedAt?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
+}
+
+export interface Page<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
 }
 
 export type DemandCatalogKey =
@@ -41,6 +49,7 @@ export class CatalogMaintainerService {
   private readonly BASE = environment.BaseUrl.replace(/\/+$/, '');
   private readonly API = `${this.BASE}/api/v1`;
   private readonly DEMAND_CATALOGS_URL = `${this.API}/demand/catalogs`;
+  private readonly MAINTAINERS_URL = `${this.API}/demand/maintainers`;
 
   // ============================================================
   // Catálogos nuevos de Demanda
@@ -53,25 +62,38 @@ export class CatalogMaintainerService {
   }
 
   // ============================================================
-  // CRUD directo para mantenedores con endpoint propio
-  // Ej: roles, programs, communes, users, etc.
+  // Mantenedores de catálogos de Demanda
+  // Base real: /api/v1/demand/maintainers/{catalog}
   // ============================================================
-  getAll(resource: string, includeDeleted = false): Observable<CatalogItem[]> {
+
+  getAll(resource: string, q?: string, active?: boolean): Observable<CatalogItem[]> {
     let params = new HttpParams();
 
-    if (includeDeleted) {
-      params = params.set('includeDeleted', 'true');
+    if (q) {
+      params = params.set('q', q);
     }
 
-    return this.http.get<CatalogItem[]>(`${this.API}/${resource}`, { params });
+    if (active !== undefined) {
+      params = params.set('active', String(active));
+    }
+
+    return this.http.get<CatalogItem[]>(
+      `${this.MAINTAINERS_URL}/${resource}`,
+      { params },
+    );
   }
 
   getById(resource: string, id: number): Observable<CatalogItem> {
-    return this.http.get<CatalogItem>(`${this.API}/${resource}/${id}`);
+    return this.http.get<CatalogItem>(
+      `${this.MAINTAINERS_URL}/${resource}/${id}`,
+    );
   }
 
   create(resource: string, payload: CatalogItem): Observable<CatalogItem> {
-    return this.http.post<CatalogItem>(`${this.API}/${resource}`, payload);
+    return this.http.post<CatalogItem>(
+      `${this.MAINTAINERS_URL}/${resource}`,
+      payload,
+    );
   }
 
   update(
@@ -79,17 +101,56 @@ export class CatalogMaintainerService {
     id: number,
     payload: CatalogItem,
   ): Observable<CatalogItem> {
-    return this.http.put<CatalogItem>(`${this.API}/${resource}/${id}`, payload);
+    return this.http.put<CatalogItem>(
+      `${this.MAINTAINERS_URL}/${resource}/${id}`,
+      payload,
+    );
   }
 
   delete(resource: string, id: number): Observable<void> {
-    return this.http.delete<void>(`${this.API}/${resource}/${id}`);
+    return this.http.delete<void>(
+      `${this.MAINTAINERS_URL}/${resource}/${id}`,
+    );
   }
 
-  restore(resource: string, id: number): Observable<CatalogItem> {
-    return this.http.post<CatalogItem>(
-      `${this.API}/${resource}/${id}/restore`,
+  restore(resource: string, id: number): Observable<void> {
+    return this.http.post<void>(
+      `${this.MAINTAINERS_URL}/${resource}/${id}/restore`,
       {},
+    );
+  }
+
+  getAllPaginated(
+    resource: string,
+    opts: {
+      page?: number;
+      size?: number;
+      q?: string;
+      active?: boolean;
+      sort?: string;
+    } = {},
+  ): Observable<Page<CatalogItem>> {
+    const { page = 0, size = 10, q, active, sort } = opts;
+
+    let params = new HttpParams()
+      .set('page', page)
+      .set('size', size);
+
+    if (q) {
+      params = params.set('q', q);
+    }
+
+    if (active !== undefined) {
+      params = params.set('active', String(active));
+    }
+
+    if (sort) {
+      params = params.set('sort', sort);
+    }
+
+    return this.http.get<Page<CatalogItem>>(
+      `${this.MAINTAINERS_URL}/${resource}/getAllPaginated`,
+      { params },
     );
   }
 }

@@ -11,11 +11,10 @@ export interface Page<T> {
   totalPages: number;
   size: number;
   number: number;
-  // empty?: boolean; // si tu backend lo envía
+  // empty?: boolean; // si tu backend lo envÃa
 }
 
 @Injectable({ providedIn: 'root' })
-
 export class CommuneService {
   private http = inject(HttpClient);
 
@@ -54,12 +53,18 @@ export class CommuneService {
   }
 
   /** GET /communes/getAllPaginated?page=&size=&q=&state=&sort= */
-  getAllPaginated(opts: { page?: number; size?: number; q?: string; state?: string; sort?: string } = {}): Observable<Page<Commune>> {
+  getAllPaginated(
+    opts: {
+      page?: number;
+      size?: number;
+      q?: string;
+      state?: string;
+      sort?: string;
+    } = {},
+  ): Observable<Page<Commune>> {
     const { page = 0, size = 10, q, state, sort } = opts;
 
-    let params = new HttpParams()
-      .set('page', page)
-      .set('size', size);
+    let params = new HttpParams().set('page', page).set('size', size);
 
     if (q) params = params.set('q', q);
     if (state) params = params.set('state', state);
@@ -69,23 +74,40 @@ export class CommuneService {
     return this.http.get<Page<Commune>>(`${this.resourceUrl}/all`);
   }
 
-
-  listPaginated(opts: { page?: number; size?: number; q?: string; state?: string; sort?: string } = {}): Observable<Page<Commune>> {
+  listPaginated(
+    opts: {
+      page?: number;
+      size?: number;
+      q?: string;
+      state?: string;
+      sort?: string;
+    } = {},
+  ): Observable<Page<Commune>> {
     const { page = 0, size = 10, q, state, sort } = opts;
 
-    let params = new HttpParams()
-      .set('page', page)
-      .set('size', size);
+    let params = new HttpParams().set('page', page).set('size', size);
 
     if (q) params = params.set('q', q);
     if (state) params = params.set('state', state);
     if (sort) params = params.set('sort', sort);
 
-    return this.http.get<Page<Commune>>(`${this.resourceUrl}/getAllPaginated`, { params });
+    return this.http.get<Page<Commune>>(`${this.resourceUrl}/getAllPaginated`, {
+      params,
+    });
   }
 
   /** DELETE /communes/all (si tu API lo soporta) */
   deleteAll(): Observable<void> {
     return this.http.delete<void>(`${this.resourceUrl}/all`);
+  }
+
+  /** GET /communes/all */
+  getAll(): Observable<Commune[]> {
+    return this.http.get<Commune[]>(`${this.resourceUrl}/all`);
+  }
+
+  /** GET /communes/deleted */
+  getDeleted(): Observable<Commune[]> {
+    return this.http.get<Commune[]>(`${this.resourceUrl}/deleted`);
   }
 }
