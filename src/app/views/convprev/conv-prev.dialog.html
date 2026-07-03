@@ -1,6 +1,6 @@
 <h2 mat-dialog-title>
   <mat-icon>handshake</mat-icon>
-  {{ form.value.id ? 'Editar previsión' : 'Nueva previsión' }}
+  {{ form.value.id ? 'Editar convenio previsional' : 'Nuevo convenio previsional' }}
 </h2>
 
 <div mat-dialog-content>
@@ -20,18 +20,18 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" floatLabel="always" class="full">
-      <mat-label>Nombre de la previsión</mat-label>
+      <mat-label>Nombre del convenio</mat-label>
 
       <input
         matInput
         formControlName="name"
         autocomplete="off"
-        placeholder="Ej: Fonasa A"
+        placeholder="Ej: FONASA A"
         (keydown.enter)="save()"
       />
 
       <mat-error *ngIf="form.get('name')?.hasError('required')">
-        El nombre de la previsión es obligatorio.
+        El nombre del convenio es obligatorio.
       </mat-error>
 
       <mat-error *ngIf="form.get('name')?.hasError('maxlength')">
@@ -49,7 +49,8 @@
     color="primary"
     type="button"
     (click)="save()"
-    [disabled]="form.invalid">
+    [disabled]="form.invalid"
+  >
     Guardar
   </button>
 </div>
