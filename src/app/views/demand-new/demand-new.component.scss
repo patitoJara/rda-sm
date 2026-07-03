@@ -1126,3 +1126,36 @@
   font-size: 0.88rem;
   font-weight: 600;
 }
+
+.episode-detail-box {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(236, 249, 250, 0.9);
+  border: 1px solid rgba(20, 128, 138, 0.18);
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(15, 73, 84, 0.08);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    span {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #607d86;
+    }
+
+    strong {
+      text-align: right;
+      color: #083f49;
+      font-weight: 800;
+    }
+  }
+}

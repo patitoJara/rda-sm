@@ -197,6 +197,7 @@ export class DemandNewComponent implements OnInit {
   isSavingEpisode = false;
   episodeSaveError: string | null = null;
   createdEpisode: any | null = null;
+  episodeSummary: any | null = null;
 
   readonly flowSteps = [
     'Persona',
@@ -609,7 +610,10 @@ export class DemandNewComponent implements OnInit {
             }) ?? null;
 
           if (!matchedEpisode) {
+            this.createdEpisode = null;
+            this.episodeSummary = null;
             this.episodeLoaded = false;
+
             console.log(
               '[DemandNew] No se encontró episodio para RUN en listado priorizado:',
               rut,
@@ -623,6 +627,7 @@ export class DemandNewComponent implements OnInit {
           );
 
           this.createdEpisode = matchedEpisode;
+          this.episodeSummary = matchedEpisode;
           this.episodeLoaded = true;
           this.showCreateEpisodeForm = false;
 
@@ -704,6 +709,7 @@ export class DemandNewComponent implements OnInit {
           console.log('[DemandNew] Episodio creado:', episode);
 
           this.createdEpisode = episode;
+          this.episodeSummary = episode;
           this.episodeLoaded = true;
           this.stageLoaded = !!episode?.currentStageId;
           this.showCreateEpisodeForm = false;
