@@ -776,12 +776,76 @@
         *ngFor="let action of operativeActions"
         type="button"
         class="action-tile"
-        [disabled]="!action.enabled"
+        [disabled]="
+          !action.enabled ||
+          (!episodeLoaded && !createdEpisode && action.title === 'Observación')
+        "
+        (click)="action.title === 'Observación' ? showObservationForm() : null"
       >
         <mat-icon>{{ action.icon }}</mat-icon>
         <strong>{{ action.title }}</strong>
         <span>{{ action.description }}</span>
       </button>
+    </div>
+
+    <div class="observation-panel" *ngIf="showObservationFormPanel">
+      <div class="section-heading compact-heading">
+        <mat-icon>notes</mat-icon>
+        <div>
+          <h3>Registrar observación</h3>
+          <p>Agregue una observación general al episodio activo.</p>
+        </div>
+      </div>
+
+      <form [formGroup]="observationForm" class="observation-form">
+        <mat-form-field appearance="fill">
+          <mat-label>Comentario breve</mat-label>
+          <input matInput formControlName="comment" />
+          <mat-error
+            *ngIf="observationForm.controls.comment.hasError('required')"
+          >
+            El comentario es obligatorio.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Observación</mat-label>
+          <textarea matInput rows="4" formControlName="observation"></textarea>
+        </mat-form-field>
+      </form>
+
+      <div class="empty-banner success" *ngIf="observationSuccess">
+        <mat-icon>check_circle</mat-icon>
+        <span>{{ observationSuccess }}</span>
+      </div>
+
+      <div class="empty-banner error" *ngIf="observationError">
+        <mat-icon>error</mat-icon>
+        <span>{{ observationError }}</span>
+      </div>
+
+      <div class="create-episode-actions">
+        <button
+          mat-stroked-button
+          class="secondary-btn"
+          type="button"
+          (click)="showObservationFormPanel = false"
+        >
+          <mat-icon>close</mat-icon>
+          Cancelar
+        </button>
+
+        <button
+          mat-flat-button
+          class="primary-btn"
+          type="button"
+          [disabled]="observationForm.invalid || isSavingObservation"
+          (click)="saveObservation()"
+        >
+          <mat-icon>save</mat-icon>
+          {{ isSavingObservation ? "Guardando..." : "Guardar observación" }}
+        </button>
+      </div>
     </div>
   </mat-card>
 

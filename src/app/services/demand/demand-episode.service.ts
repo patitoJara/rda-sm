@@ -85,4 +85,26 @@ export class DemandEpisodeService {
   }): Observable<any> {
     return this.http.post<any>(`${this.resourceUrl}/episodes`, payload);
   }
+
+  createEvent(
+    episodeId: number,
+    payload: {
+      eventTypeCode: string;
+      eventDate?: string | null;
+      eventTime?: string | null;
+      programId?: number | null;
+      comment?: string | null;
+      citationComment?: string | null;
+      observation?: string | null;
+      nextAction?: string | null;
+      nextActionDate?: string | null;
+      resultCode?: string | null;
+      stateCode?: string | null;
+    },
+  ): Observable<any> {
+    return this.http.post<any>(
+      `${this.resourceUrl}/episodes/${episodeId}/events`,
+      payload,
+    );
+  }
 }

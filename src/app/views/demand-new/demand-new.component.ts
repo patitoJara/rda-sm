@@ -99,6 +99,16 @@ export class DemandNewComponent implements OnInit {
   activeProgramId: number | null = null;
   stageVisualState = 'Pendiente de creación';
 
+  showObservationFormPanel = false;
+  isSavingObservation = false;
+  observationError: string | null = null;
+  observationSuccess: string | null = null;
+
+  observationForm = this.fb.group({
+    comment: ['', Validators.required],
+    observation: [''],
+  });
+
   personForm = this.fb.group({
     rut: new FormControl<string>(
       { value: '', disabled: true },
@@ -171,7 +181,7 @@ export class DemandNewComponent implements OnInit {
     previousTreatmentNumber: [{ value: '', disabled: true }],
     currentState: [{ value: '', disabled: true }],
     currentResult: [{ value: '', disabled: true }],
-    initialObservation: [{ value: '', disabled: true }],
+    initialObservation: [''],
 
     primarySubstanceId: new FormControl<number | null>(null),
     secondarySubstances: new FormControl<
@@ -198,6 +208,8 @@ export class DemandNewComponent implements OnInit {
   episodeSaveError: string | null = null;
   createdEpisode: any | null = null;
   episodeSummary: any | null = null;
+
+
 
   readonly flowSteps = [
     'Persona',
@@ -382,7 +394,7 @@ export class DemandNewComponent implements OnInit {
       icon: 'notes',
       title: 'Observación',
       description: 'Agregar observación general del episodio o etapa.',
-      enabled: false,
+      enabled: true,
     },
     {
       icon: 'sync_alt',
@@ -946,5 +958,92 @@ export class DemandNewComponent implements OnInit {
         convPrev: person.convPrev.id ?? null,
       });
     }
+  }
+
+  private getCurrentEpisodeId(): number | null {
+    const id =
+      this.createdEpisode?.id ??
+      this.createdEpisode?.episodeId ??
+      this.episodeSummary?.id ??
+      this.episodeSummary?.episodeId ??
+      null;
+
+    const parsed = Number(id);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+  }
+
+  saveObservation(): void {
+    this.observationForm.markAllAsTouched();
+
+    if (this.observationForm.invalid || this.isSavingObservation) return;
+
+    const episodeId = this.getCurrentEpisodeId();
+
+    if (!episodeId) {
+      this.observationError =
+        'No fue posible identificar el episodio para registrar la observación.';
+      return;
+    }
+
+    const programId = this.tokenService.getActiveProgramId();
+
+    if (!programId) {
+      this.observationError =
+        'No fue posible identificar el programa activo para registrar la observación.';
+      return;
+    }
+
+    const raw = this.observationForm.getRawValue();
+
+    const payload = {
+      eventTypeCode: 'OBSERVACION',
+      eventDate: new Date().toISOString().slice(0, 10),
+      programId: Number(programId),
+      comment: this.toStringOrNull(raw.comment),
+      observation: this.toStringOrNull(raw.observation),
+    };
+
+    this.isSavingObservation = true;
+    this.observationError = null;
+    this.observationSuccess = null;
+
+    this.demandEpisodeService
+      .createEvent(episodeId, payload)
+      .pipe(finalize(() => (this.isSavingObservation = false)))
+      .subscribe({
+        next: (event) => {
+          console.log('[DemandNew] Observación registrada:', event);
+
+          this.observationSuccess = 'Observación registrada correctamente.';
+          this.observationForm.reset({
+            comment: '',
+            observation: '',
+          });
+        },
+        error: (error) => {
+          console.error('[DemandNew] Error registrando observación:', error);
+
+          if (error?.status === 403) {
+            this.observationError =
+              'No tiene permisos para registrar observaciones en el episodio.';
+            return;
+          }
+
+          this.observationError =
+            'No fue posible registrar la observación. Revise los datos e intente nuevamente.';
+        },
+      });
+  }
+
+  showObservationForm(): void {
+    if (!this.createdEpisode && !this.episodeSummary) {
+      this.observationError =
+        'Debe existir un episodio para registrar una observación.';
+      return;
+    }
+
+    this.observationError = null;
+    this.observationSuccess = null;
+    this.showObservationFormPanel = true;
   }
 }
