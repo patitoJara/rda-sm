@@ -1,5 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { forkJoin, Observable } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+
 
 // Servicios de catálogos
 import { CommuneService } from '../comunes.service';
@@ -40,28 +42,39 @@ export class PreloadCatalogsService {
    */
   loadAll(): Observable<any> {
     return forkJoin({
-      communes: this.communeService.listAll(),
-      sexes: this.sexService.listAll(),
-      contactTypes: this.contactTypeService.listAll(),
-      senders: this.senderService.listAll(),
-      diverters: this.diverterService.listAll(),
-      programs: this.programService.listAll(),
-      notRelevants: this.notRelevantService.listAll(),
-      substances: this.substanceService.listAll(),
+      communes: this.communeService.listAll().pipe(catchError(() => of([]))),
+      sexes: this.sexService.listAll().pipe(catchError(() => of([]))),
+      contactTypes: this.contactTypeService
+        .listAll()
+        .pipe(catchError(() => of([]))),
+      senders: this.senderService.listAll().pipe(catchError(() => of([]))),
+      diverters: this.diverterService.listAll().pipe(catchError(() => of([]))),
+      programs: this.programService.listAll().pipe(catchError(() => of([]))),
+      notRelevants: this.notRelevantService
+        .listAll()
+        .pipe(catchError(() => of([]))),
+      substances: this.substanceService
+        .listAll()
+        .pipe(catchError(() => of([]))),
 
-      // Prev
-      convPrev: this.convPrevService.getAll(),
-      intPrev: this.intPrevService.getAll(),
+      convPrev: this.convPrevService.getAll().pipe(catchError(() => of([]))),
+      intPrev: this.intPrevService.getAll().pipe(catchError(() => of([]))),
 
-      // Profesiones (4 combos)
-      profession1: this.professionService.listAll(),
-      profession2: this.professionService.listAll(),
-      profession3: this.professionService.listAll(),
-      profession4: this.professionService.listAll(),
+      profession1: this.professionService
+        .listAll()
+        .pipe(catchError(() => of([]))),
+      profession2: this.professionService
+        .listAll()
+        .pipe(catchError(() => of([]))),
+      profession3: this.professionService
+        .listAll()
+        .pipe(catchError(() => of([]))),
+      profession4: this.professionService
+        .listAll()
+        .pipe(catchError(() => of([]))),
 
-      // Resultados + Estados
-      results: this.resultService.listAll(),
-      state: this.stateService.listAll(),
+      results: this.resultService.listAll().pipe(catchError(() => of([]))),
+      state: this.stateService.listAll().pipe(catchError(() => of([]))),
     });
   }
 }
