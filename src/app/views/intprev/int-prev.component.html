@@ -1,0 +1,195 @@
+<section class="maintainer-page">
+  <div class="maintainer-hero">
+    <div>
+      <span class="eyebrow">
+        <mat-icon>health_and_safety</mat-icon>
+        Catálogo previsional
+      </span>
+
+      <h1>Tipos de previsión</h1>
+
+      <p>
+        Administre los tipos generales de previsión de salud utilizados para
+        clasificar los convenios previsionales.
+      </p>
+    </div>
+
+    <button
+      mat-flat-button
+      class="primary-action"
+      type="button"
+      (click)="openDialog()"
+    >
+      <mat-icon>add</mat-icon>
+      Nuevo tipo
+    </button>
+  </div>
+
+  <mat-card class="toolbar-card">
+    <div class="filters">
+      <mat-form-field
+        appearance="outline"
+        floatLabel="always"
+        class="search-field"
+      >
+        <mat-label>Buscar tipo de previsión</mat-label>
+
+        <mat-icon matPrefix>search</mat-icon>
+
+        <input
+          #search
+          matInput
+          type="text"
+          placeholder="Ej: FONASA, ISAPRE, DIPRECA..."
+          [value]="q"
+          (keyup.enter)="applyFilter(search.value)"
+        />
+      </mat-form-field>
+
+      <div class="state-buttons">
+        <button
+          type="button"
+          [class.active]="filterState === 'active'"
+          (click)="setState('active')"
+        >
+          Activos
+        </button>
+
+        <button
+          type="button"
+          [class.active]="filterState === 'deleted'"
+          (click)="setState('deleted')"
+        >
+          Eliminados
+        </button>
+
+        <button
+          type="button"
+          [class.active]="filterState === 'all'"
+          (click)="setState('all')"
+        >
+          Todos
+        </button>
+      </div>
+    </div>
+  </mat-card>
+
+  <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+
+  <mat-card class="table-card">
+    <div class="table-header">
+      <div>
+        <h2>Listado de tipos de previsión</h2>
+        <p>Total registros encontrados: {{ total }}</p>
+      </div>
+
+      <button
+        type="button"
+        mat-icon-button
+        matTooltip="Actualizar"
+        (click)="refresh()"
+      >
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+
+    <div class="table-wrapper">
+      <table mat-table [dataSource]="dataSource" matSort>
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+          <td mat-cell *matCellDef="let row">{{ row.id }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            Tipo de previsión
+          </th>
+          <td mat-cell *matCellDef="let row">
+            <strong>{{ row.name || "—" }}</strong>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Creado</th>
+          <td mat-cell *matCellDef="let row">{{ row.createdAt || "—" }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="updatedAt">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Actualizado</th>
+          <td mat-cell *matCellDef="let row">{{ row.updatedAt || "—" }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="deletedAt">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Eliminado</th>
+          <td mat-cell *matCellDef="let row">{{ row.deletedAt || "—" }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="status-badge" [class.deleted]="row.deletedAt">
+              {{ row.deletedAt ? "Eliminado" : "Activo" }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let row">
+            <div class="action-buttons">
+              <button
+                mat-icon-button
+                class="edit-btn"
+                matTooltip="Editar tipo de previsión"
+                type="button"
+                [disabled]="row.deletedAt"
+                (click)="openDialog(row)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+
+              <button
+                *ngIf="!row.deletedAt"
+                mat-icon-button
+                class="delete-btn"
+                matTooltip="Eliminar tipo de previsión"
+                type="button"
+                (click)="softDelete(row)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+
+              <button
+                *ngIf="row.deletedAt"
+                mat-icon-button
+                class="restore-btn"
+                matTooltip="Restaurar tipo de previsión"
+                type="button"
+                (click)="restore(row)"
+              >
+                <mat-icon>settings_backup_restore</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+        <tr class="mat-row no-data-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+            Sin resultados para "{{ q }}"
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="total"
+      pageSize="10"
+      [pageSizeOptions]="[5, 10, 20]"
+      showFirstLastButtons
+    >
+    </mat-paginator>
+  </mat-card>
+</section>

@@ -425,6 +425,29 @@ export const routes: Routes = [
       },
 
       {
+        path: 'int-prev',
+        loadComponent: () =>
+          import('./views/intprev/int-prev.component').then(
+            (m) => m.IntPrevComponent,
+          ),
+        canActivate: [roleGuard],
+        data: {
+          module: 'administracion',
+          group: 'Mantenedores',
+          maintainerGroup: 'Vía de ingreso',
+          section: 'maintainer',
+          title: 'Tipos de previsión',
+          description:
+            'Tipos generales de previsión de salud usados por los convenios.',
+          icon: 'health_and_safety',
+          roles: ['ADMIN'],
+          iconColor: '#455a64',
+          tag: 'Previsión',
+          order: 225,
+        },
+      },
+      
+      {
         path: 'conv-prev',
         loadComponent: () =>
           import('./views/convprev/conv-prev.component').then(
@@ -436,8 +459,9 @@ export const routes: Routes = [
           group: 'Mantenedores',
           maintainerGroup: 'Vía de ingreso',
           section: 'maintainer',
-          title: 'Cobertura de salud',
-          description: 'Antecedentes de convenio o coordinación previa.',
+          title: 'Convenios previsionales',
+          description:
+            'Convenios o planes asociados a un tipo de previsión de salud.',
           icon: 'medical_services',
           roles: ['ADMIN'],
           iconColor: '#455a64',
