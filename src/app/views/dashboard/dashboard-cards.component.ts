@@ -13,7 +13,7 @@ import { DashboardStats } from './models/dashboard-stats.model';
   imports: [CommonModule, MatIconModule],
 })
 export class DashboardCardsComponent {
-  @Input() stats: DashboardStats = {
+  readonly defaultStats: DashboardStats = {
     totalDemandas: 0,
     demandasAtendidas: 0,
     demandasEnEspera: 0,
@@ -25,6 +25,20 @@ export class DashboardCardsComponent {
     citacionesAsistio: 0,
     citacionesNoAsistio: 0,
   };
+
+  private _stats: DashboardStats = this.defaultStats;
+
+  @Input()
+  set stats(value: DashboardStats | null | undefined) {
+    this._stats = {
+      ...this.defaultStats,
+      ...(value ?? {}),
+    };
+  }
+
+  get stats(): DashboardStats {
+    return this._stats;
+  }
 
   getColor(dias: number): string {
     if (dias > 30) return '#d32f2f'; // rojo

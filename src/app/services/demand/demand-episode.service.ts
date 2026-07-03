@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -12,18 +12,20 @@ export class DemandEpisodeService {
   private readonly resourceUrl = `${environment.apiBaseUrl}/demand`;
 
   getPersonByRut(rut: string): Observable<any> {
-    return this.http.get<any>(`${this.resourceUrl}/persons/rut/${rut}`);
+    return this.http.get<any>(
+      `${this.resourceUrl}/persons/rut/${encodeURIComponent(rut)}`,
+    );
   }
 
   getActiveEpisodeByRut(rut: string): Observable<any> {
     return this.http.get<any>(
-      `${this.resourceUrl}/episodes/active/by-rut/${rut}`,
+      `${this.resourceUrl}/episodes/active/by-rut/${encodeURIComponent(rut)}`,
     );
   }
 
   getLongitudinalByRut(rut: string): Observable<any> {
     return this.http.get<any>(
-      `${this.resourceUrl}/episodes/by-rut/${rut}/longitudinal`,
+      `${this.resourceUrl}/episodes/by-rut/${encodeURIComponent(rut)}/longitudinal`,
     );
   }
 
@@ -35,5 +37,52 @@ export class DemandEpisodeService {
 
   getDemandCatalogs(): Observable<any> {
     return this.http.get<any>(`${this.resourceUrl}/catalogs`);
+  }
+
+  getPrioritizedEpisodes(
+    opts: {
+      page?: number;
+      size?: number;
+      programId?: number | null;
+      stateCode?: string | null;
+      resultCode?: string | null;
+      sort?: string | null;
+    } = {},
+  ): Observable<any> {
+    const {
+      page = 0,
+      size = 10,
+      programId,
+      stateCode,
+      resultCode,
+      sort,
+    } = opts;
+
+    let params = new HttpParams().set('page', page).set('size', size);
+
+    if (programId) params = params.set('programId', programId);
+    if (stateCode) params = params.set('stateCode', stateCode);
+    if (resultCode) params = params.set('resultCode', resultCode);
+    if (sort) params = params.set('sort', sort);
+
+    return this.http.get<any>(`${this.resourceUrl}/episodes/prioritized`, {
+      params,
+    });
+  }
+
+  createEpisode(payload: {
+    postulantId: number;
+    initialProgramId: number;
+    episodeTypeId?: number | null;
+    episodeTypeCode?: string | null;
+    originalRequestDate?: string | null;
+    responsibleUserId?: number | null;
+    contactTypeId?: number | null;
+    senderId?: number | null;
+    diverterId?: number | null;
+    contactId?: number | null;
+    initialObservation?: string | null;
+  }): Observable<any> {
+    return this.http.post<any>(`${this.resourceUrl}/episodes`, payload);
   }
 }

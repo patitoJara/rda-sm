@@ -19,6 +19,7 @@ export class PostulantService {
   private http = inject(HttpClient);
 
   private readonly resourceUrl = `${environment.apiBaseUrl}/postulants`;
+  private readonly demandPersonsUrl = `${environment.apiBaseUrl}/demand/persons`;
 
   getAll(): Observable<Postulant[]> {
     return this.http.get<Postulant[]>(`${this.resourceUrl}`);
@@ -36,45 +37,27 @@ export class PostulantService {
     opts: {
       page?: number;
       size?: number;
-      q?: string;
-      state?: string;
+      name?: string;
       sort?: string;
-    } = {}
+    } = {},
   ): Observable<Page<Postulant>> {
-    const { page = 0, size = 10, q, state, sort } = opts;
+    const { page = 0, size = 10, name, sort } = opts;
 
     let params = new HttpParams().set('page', page).set('size', size);
-    if (q) params = params.set('q', q);
-    if (state) params = params.set('state', state);
+
+    if (name) params = params.set('name', name);
     if (sort) params = params.set('sort', sort);
 
     return this.http.get<Page<Postulant>>(
       `${this.resourceUrl}/getAllPaginated`,
-      {
-        params,
-      }
+      { params },
     );
   }
 
-  /** 🔍 Buscar por RUT (paginar resultados) */
-  getAllRutPaginated(opts: {
-    page?: number;
-    size?: number;
-    rut: string;
-    sort?: string;
-  }): Observable<Page<Postulant>> {
-    const { page = 0, size = 10, rut, sort } = opts;
-
-    let params = new HttpParams()
-      .set('rut', rut)
-      .set('page', page)
-      .set('size', size);
-
-    if (sort) params = params.set('sort', sort);
-
-    return this.http.get<Page<Postulant>>(`${this.resourceUrl}/searchByRut`, {
-      params,
-    });
+  getPersonByRut(rut: string): Observable<Postulant> {
+    return this.http.get<Postulant>(
+      `${this.demandPersonsUrl}/rut/${encodeURIComponent(rut)}`,
+    );
   }
 
   getById(id: number): Observable<Postulant> {

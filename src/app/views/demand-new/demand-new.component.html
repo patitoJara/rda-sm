@@ -56,12 +56,10 @@
     *ngIf="demandCatalogs && !demandCatalogsError"
   >
     Catálogos de demanda cargados:
-    {{ episodeTypes.length }} tipos de episodio,
-    {{ eventTypes.length }} tipos de evento,
-    {{ attendanceStatuses.length }} estados de asistencia,
+    {{ episodeTypes.length }} tipos de episodio, {{ eventTypes.length }} tipos
+    de evento, {{ attendanceStatuses.length }} estados de asistencia,
     {{ closureReasons.length }} motivos de cierre.
   </div>
-
 
   <!-- BUSCADOR -->
   <mat-card class="search-card">
@@ -241,15 +239,25 @@
       <div class="empty-banner">
         <mat-icon>info</mat-icon>
         <span>
-          Esta sección solo prepara la estructura visual. El guardado real se
-          conectará después.
+          Al guardar, la persona se registrará en el backend real de Demanda.
         </span>
       </div>
 
-      <button mat-flat-button class="primary-btn" type="button" disabled>
+      <button
+        mat-flat-button
+        class="primary-btn"
+        type="button"
+        [disabled]="personForm.invalid || isSavingPerson"
+        (click)="savePerson()"
+      >
         <mat-icon>save</mat-icon>
-        Guardar persona
+        {{ isSavingPerson ? "Guardando..." : "Guardar persona" }}
       </button>
+
+      <div class="empty-banner error" *ngIf="personSaveError">
+        <mat-icon>error</mat-icon>
+        <span>{{ personSaveError }}</span>
+      </div>
     </div>
   </mat-card>
 
@@ -418,8 +426,8 @@
       <div class="empty-banner warning">
         <mat-icon>lock</mat-icon>
         <span>
-          Esta selección es solo visual por ahora. El guardado real se conectará
-          cuando exista un episodio creado.
+          La selección de sustancias quedará preparada para asociarse al
+          episodio creado.
         </span>
       </div>
     </div>
@@ -433,10 +441,21 @@
         </span>
       </div>
 
-      <button mat-flat-button class="primary-btn" type="button" disabled>
+      <button
+        mat-flat-button
+        class="primary-btn"
+        type="button"
+        [disabled]="isSavingEpisode || !selectedPerson"
+        (click)="createEpisode()"
+      >
         <mat-icon>save</mat-icon>
-        Crear episodio
+        {{ isSavingEpisode ? "Creando episodio..." : "Crear episodio" }}
       </button>
+
+      <div class="empty-banner error" *ngIf="episodeSaveError">
+        <mat-icon>error</mat-icon>
+        <span>{{ episodeSaveError }}</span>
+      </div>
     </div>
   </mat-card>
 
@@ -527,12 +546,22 @@
       <div class="episode-status-summary">
         <div class="episode-status-item">
           <span>Estado consulta</span>
-          <strong>Pendiente backend nuevo</strong>
+          <strong>
+            {{
+              episodeLoaded || createdEpisode
+                ? "Encontrado por listado priorizado"
+                : selectedPerson
+                  ? "Consulta oficial pendiente"
+                  : "Sin persona seleccionada"
+            }}
+          </strong>
         </div>
 
         <div class="episode-status-item">
-          <span>Episodio activo</span>
-          <strong>No consultado</strong>
+          <span>Episodio asociado</span>
+          <strong>
+            {{ episodeLoaded || createdEpisode ? "Sí" : "No detectado" }}
+          </strong>
         </div>
 
         <div class="episode-status-item">
@@ -546,21 +575,40 @@
           <span>Acción disponible</span>
           <strong>
             {{
-              selectedPerson ? "Preparar episodio" : "Buscar persona primero"
+              !selectedPerson
+                ? "Buscar persona primero"
+                : episodeLoaded || createdEpisode
+                  ? "No crear nuevo episodio"
+                  : "Preparar episodio"
             }}
           </strong>
         </div>
       </div>
 
-      <div class="empty-state compact warning-stage">
-        <mat-icon>lock</mat-icon>
-        <strong>Consulta de episodio activo pendiente</strong>
+      <div
+        class="empty-state compact success-stage"
+        *ngIf="episodeLoaded || createdEpisode; else activeEpisodeUnavailable"
+      >
+        <mat-icon>check_circle</mat-icon>
+        <strong>Episodio encontrado</strong>
         <span>
-          Esta pantalla esperará la consulta oficial del nuevo modelo para
-          confirmar si existe un episodio activo. La creación real se conectará
-          cuando exista el backend del nuevo modelo.
+          Se encontró un episodio asociado a esta persona mediante el listado
+          priorizado. No se permitirá crear un nuevo episodio activo para el
+          mismo RUN.
         </span>
       </div>
+
+      <ng-template #activeEpisodeUnavailable>
+        <div class="empty-state compact warning-stage">
+          <mat-icon>info</mat-icon>
+          <strong>Consulta de episodio activo no disponible</strong>
+          <span>
+            No fue posible consultar el episodio activo por RUN debido a
+            permisos backend. Puede preparar el episodio, pero la validación
+            final quedará pendiente hasta habilitar el endpoint oficial.
+          </span>
+        </div>
+      </ng-template>
 
       <div class="empty-banner warning" *ngIf="!selectedPerson">
         <mat-icon>info</mat-icon>
@@ -570,16 +618,27 @@
         </span>
       </div>
 
+      <div class="empty-banner error" *ngIf="episodeSaveError">
+        <mat-icon>error</mat-icon>
+        <span>{{ episodeSaveError }}</span>
+      </div>
+
       <div class="card-actions-preview">
         <button
           mat-stroked-button
           class="secondary-btn"
           type="button"
-          [disabled]="!selectedPerson"
+          [disabled]="!selectedPerson || episodeLoaded || !!createdEpisode"
           (click)="showCreateEpisode()"
         >
           <mat-icon>add_circle</mat-icon>
-          {{ selectedPerson ? "Preparar episodio" : "Buscar persona primero" }}
+          {{
+            !selectedPerson
+              ? "Buscar persona primero"
+              : episodeLoaded || createdEpisode
+                ? "Episodio ya existente"
+                : "Preparar episodio"
+          }}
         </button>
       </div>
     </mat-card>
@@ -624,14 +683,28 @@
         </div>
       </div>
 
-      <div class="empty-state compact warning-stage">
-        <mat-icon>lock</mat-icon>
-        <strong>Etapa pendiente de creación</strong>
+      <div
+        class="empty-state compact success-stage"
+        *ngIf="episodeLoaded || createdEpisode; else stagePending"
+      >
+        <mat-icon>check_circle</mat-icon>
+        <strong>Etapa asociada al episodio</strong>
         <span>
-          La etapa inicial se creará junto con el episodio real cuando exista el
-          backend del nuevo modelo.
+          El episodio encontrado ya posee una etapa inicial asociada o se
+          encuentra vinculado al flujo de atención del programa.
         </span>
       </div>
+
+      <ng-template #stagePending>
+        <div class="empty-state compact warning-stage">
+          <mat-icon>lock</mat-icon>
+          <strong>Etapa pendiente de creación</strong>
+          <span>
+            La etapa inicial se crea automáticamente al registrar el episodio
+            real.
+          </span>
+        </div>
+      </ng-template>
     </mat-card>
   </section>
 
