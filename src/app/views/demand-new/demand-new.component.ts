@@ -87,6 +87,7 @@ export class DemandNewComponent implements OnInit {
   substances: any[] = [];
   secondarySubstanceMap: { [id: number]: number } = {};
 
+  professions: any[] = [];
   contactTypes: any[] = [];
   senders: any[] = [];
   diverters: any[] = [];
@@ -103,6 +104,36 @@ export class DemandNewComponent implements OnInit {
   isSavingObservation = false;
   observationError: string | null = null;
   observationSuccess: string | null = null;
+
+  showCitationFormPanel = false;
+  isSavingCitation = false;
+  citationError: string | null = null;
+  citationSuccess: string | null = null;
+
+  citationForm = this.fb.group({
+    eventDate: ['', Validators.required],
+    eventHour: [
+      '',
+      [
+        Validators.required,
+        Validators.pattern(/^(0?[1-9]|1[0-2]):[0-5][0-9]$/),
+      ],
+    ],
+    eventPeriod: ['AM', Validators.required],
+    professionalUserId: new FormControl<number | null>(null, {
+      validators: [Validators.required],
+    }),
+    professionName: ['', Validators.required],
+    comment: ['', Validators.required],
+    citationComment: [''],
+  });
+
+  longitudinal: any | null = null;
+  episodeEvents: any[] = [];
+  isLoadingLongitudinal = false;
+  longitudinalError: string | null = null;
+
+  professionals: any[] = [];
 
   observationForm = this.fb.group({
     comment: ['', Validators.required],
@@ -208,8 +239,6 @@ export class DemandNewComponent implements OnInit {
   episodeSaveError: string | null = null;
   createdEpisode: any | null = null;
   episodeSummary: any | null = null;
-
-
 
   readonly flowSteps = [
     'Persona',
@@ -375,7 +404,7 @@ export class DemandNewComponent implements OnInit {
       title: 'Nueva citación',
       description:
         'Registrar fecha, hora, profesional y comentario de citación.',
-      enabled: false,
+      enabled: true,
     },
     {
       icon: 'how_to_reg',
@@ -469,6 +498,7 @@ export class DemandNewComponent implements OnInit {
         this.contactTypes = data.contactTypes ?? [];
         this.senders = data.senders ?? [];
         this.diverters = data.diverters ?? [];
+        this.professions = data.professions?.content ?? data.professions ?? [];
       },
       error: () => {
         this.sexes = [];
@@ -480,6 +510,7 @@ export class DemandNewComponent implements OnInit {
         this.contactTypes = [];
         this.senders = [];
         this.diverters = [];
+        this.professions = [];
       },
     });
   }
@@ -525,6 +556,10 @@ export class DemandNewComponent implements OnInit {
     if (this.searchForm.invalid || this.isSearching) return;
 
     const rawRut = this.searchForm.getRawValue().rut?.trim();
+
+    // IMPORTANTE:
+    // Para el endpoint longitudinal, el RUN debe mantenerse con puntos y guion.
+    // Ejemplo: 11.799.136-9
     const rut = this.formatRut(rawRut);
 
     if (!rut) return;
@@ -535,13 +570,20 @@ export class DemandNewComponent implements OnInit {
     this.selectedPerson = null;
     this.searchError = null;
     this.personSaveError = null;
+    this.longitudinalError = null;
     this.showCreatePersonForm = false;
     this.showCreateEpisodeForm = false;
 
     this.personLoaded = false;
     this.episodeLoaded = false;
     this.stageLoaded = false;
+    this.stageVisualState = 'Pendiente de creación';
+
     this.filteredConvPrev = [];
+    this.longitudinal = null;
+    this.episodeEvents = [];
+    this.createdEpisode = null;
+    this.episodeSummary = null;
 
     this.episodeForm.reset({
       episodeType: '',
@@ -561,112 +603,45 @@ export class DemandNewComponent implements OnInit {
 
     this.secondarySubstanceMap = {};
 
-    console.log('[DemandNew] RUN búsqueda:', rut);
+    console.log('[DemandNew] RUN búsqueda longitudinal:', rut);
 
-    this.postulantService
-      .getPersonByRut(rut)
+    this.demandEpisodeService
+      .getLongitudinalByRut(rut)
       .pipe(finalize(() => (this.isSearching = false)))
       .subscribe({
-        next: (person) => {
-          if (!person) {
-            this.personNotFound = true;
-            return;
-          }
+        next: (data) => {
+          console.log('[DemandNew] Longitudinal recibido:', data);
 
-          this.selectedPerson = person;
-          this.personLoaded = true;
-
-          this.loadPrioritizedEpisodesFallback(rut);
+          this.applyLongitudinalData(data);
         },
         error: (error) => {
           console.error(
-            '[DemandNew] Error consultando persona por RUN:',
+            '[DemandNew] Error consultando ficha longitudinal por RUN:',
             error,
           );
 
+          if (error?.status === 404) {
+            this.personNotFound = true;
+            this.showCreatePersonForm = false;
+            this.showCreateEpisodeForm = false;
+            this.stageVisualState = 'Sin historia longitudinal registrada';
+
+            this.searchError =
+              'No se encontró una persona registrada con ese RUN. Puede continuar creando una nueva persona.';
+
+            return;
+          }
+
           if (error?.status === 403) {
             this.searchError =
-              'No tiene permisos para consultar personas por RUN. Solicite habilitar el endpoint /postulants/searchByRut.';
+              'No tiene permisos para consultar la ficha longitudinal de demanda por RUN.';
             return;
           }
 
           this.searchError =
-            'No fue posible consultar la persona. Intente nuevamente o contacte a soporte.';
+            'No fue posible consultar la ficha longitudinal. Intente nuevamente o contacte a soporte.';
         },
       });
-  }
-
-  private loadPrioritizedEpisodesFallback(rut: string): void {
-    this.demandEpisodeService
-      .getPrioritizedEpisodes({
-        page: 0,
-        size: 20,
-      })
-      .subscribe({
-        next: (response) => {
-          console.log('[DemandNew] Episodios priorizados:', response);
-
-          const episodes = response?.content ?? [];
-
-          const matchedEpisode =
-            episodes.find((episode: any) => {
-              const episodeRut =
-                episode?.rut ??
-                episode?.postulantRut ??
-                episode?.personRut ??
-                episode?.postulant?.rut ??
-                episode?.person?.rut ??
-                null;
-
-              return this.cleanRut(episodeRut) === this.cleanRut(rut);
-            }) ?? null;
-
-          if (!matchedEpisode) {
-            this.createdEpisode = null;
-            this.episodeSummary = null;
-            this.episodeLoaded = false;
-
-            console.log(
-              '[DemandNew] No se encontró episodio para RUN en listado priorizado:',
-              rut,
-            );
-            return;
-          }
-
-          console.log(
-            '[DemandNew] Episodio encontrado por listado priorizado:',
-            matchedEpisode,
-          );
-
-          this.createdEpisode = matchedEpisode;
-          this.episodeSummary = matchedEpisode;
-          this.episodeLoaded = true;
-          this.showCreateEpisodeForm = false;
-
-          this.stageVisualState =
-            matchedEpisode?.currentStageId || matchedEpisode?.stageId
-              ? `Etapa inicial creada: ${
-                  matchedEpisode?.currentStageId ?? matchedEpisode?.stageId
-                }`
-              : 'Episodio activo encontrado';
-        },
-        error: (error) => {
-          console.error(
-            '[DemandNew] Error consultando episodios priorizados:',
-            error,
-          );
-
-          this.episodeLoaded = false;
-        },
-      });
-  }
-
-  private cleanRut(value: string | null | undefined): string {
-    return String(value ?? '')
-      .replace(/\./g, '')
-      .replace(/-/g, '')
-      .trim()
-      .toUpperCase();
   }
 
   createEpisode(): void {
@@ -741,6 +716,11 @@ export class DemandNewComponent implements OnInit {
             initialObservation:
               episode?.initialObservation ?? raw.initialObservation ?? '',
           });
+          const episodeId = Number(episode?.id ?? episode?.episodeId);
+
+          if (Number.isFinite(episodeId) && episodeId > 0) {
+            this.loadEpisodeLongitudinal(episodeId);
+          }
         },
         error: (error) => {
           console.error('[DemandNew] Error creando episodio:', error);
@@ -1015,10 +995,15 @@ export class DemandNewComponent implements OnInit {
           console.log('[DemandNew] Observación registrada:', event);
 
           this.observationSuccess = 'Observación registrada correctamente.';
+
           this.observationForm.reset({
             comment: '',
             observation: '',
           });
+
+          this.showObservationFormPanel = false;
+
+          this.loadEpisodeLongitudinal(episodeId);
         },
         error: (error) => {
           console.error('[DemandNew] Error registrando observación:', error);
@@ -1035,6 +1020,68 @@ export class DemandNewComponent implements OnInit {
       });
   }
 
+  private applyLongitudinalData(data: any): void {
+    this.longitudinal = data;
+
+    const postulant = data?.postulant ?? null;
+    const activeEpisode = data?.activeEpisode ?? null;
+    const stages = data?.stages ?? [];
+    const events = data?.events ?? [];
+
+    this.episodeEvents = events;
+
+    if (postulant) {
+      this.selectedPerson = postulant;
+      this.personLoaded = true;
+      this.personNotFound = false;
+      this.showCreatePersonForm = false;
+
+      this.personForm.patchValue({
+        rut: postulant.rut ?? '',
+        firstName: postulant.firstName ?? '',
+        secondName: postulant.secondName ?? '',
+        firstLastName: postulant.firstLastName ?? '',
+        secondLastName: postulant.secondLastName ?? '',
+        birthDate: postulant.birthdate ?? '',
+        phone: postulant.phone ?? '',
+        email: postulant.email ?? '',
+        address: postulant.address ?? '',
+      });
+    }
+
+    if (activeEpisode) {
+      this.createdEpisode = activeEpisode;
+      this.episodeSummary = activeEpisode;
+      this.episodeLoaded = true;
+      this.showCreateEpisodeForm = false;
+
+      this.episodeForm.patchValue({
+        episodeType: activeEpisode.episodeType?.name ?? '',
+        originalRequestDate: activeEpisode.originalRequestDate ?? '',
+        initialProgram: activeEpisode.initialProgram?.name ?? '',
+        currentProgram: activeEpisode.currentProgram?.name ?? '',
+        currentState: activeEpisode.stateCode ?? '',
+        currentResult: activeEpisode.resultCode ?? '',
+      });
+    } else {
+      this.createdEpisode = null;
+      this.episodeSummary = null;
+      this.episodeLoaded = false;
+      this.showCreateEpisodeForm = true;
+    }
+
+    const currentStage =
+      stages.find((stage: any) => stage.current === true) ?? stages[0] ?? null;
+
+    if (currentStage) {
+      this.stageLoaded = true;
+      this.stageVisualState = `Etapa activa: ${currentStage.program?.name ?? 'Sin programa'} · ${currentStage.daysInStage ?? 0} días`;
+    } else {
+      this.stageLoaded = false;
+      this.stageVisualState = 'Sin etapa activa cargada';
+    }
+  }
+
   showObservationForm(): void {
     if (!this.createdEpisode && !this.episodeSummary) {
       this.observationError =
@@ -1046,4 +1093,257 @@ export class DemandNewComponent implements OnInit {
     this.observationSuccess = null;
     this.showObservationFormPanel = true;
   }
+
+  loadEpisodeLongitudinal(episodeId: number): void {
+    if (!episodeId) return;
+
+    this.isLoadingLongitudinal = true;
+    this.longitudinalError = null;
+
+    this.demandEpisodeService
+      .getLongitudinalByEpisodeId(episodeId)
+      .pipe(finalize(() => (this.isLoadingLongitudinal = false)))
+      .subscribe({
+        next: (response) => {
+          console.log('[DemandNew] Longitudinal episodio:', response);
+
+          this.longitudinal = response;
+          this.episodeEvents = response?.events ?? [];
+        },
+        error: (error) => {
+          console.error('[DemandNew] Error cargando longitudinal:', error);
+
+          this.longitudinalError =
+            error?.status === 403
+              ? 'No tiene permisos para consultar el historial del episodio.'
+              : 'No fue posible cargar el historial del episodio.';
+        },
+      });
+  }
+
+  showCitationForm(): void {
+    if (!this.getCurrentEpisodeId()) {
+      this.citationError =
+        'Debe existir un episodio activo para registrar una citación.';
+      return;
+    }
+
+    this.citationError = null;
+    this.citationSuccess = null;
+    this.showCitationFormPanel = true;
+    this.showObservationFormPanel = false;
+
+    const today = new Date().toISOString().slice(0, 10);
+
+    this.citationForm.reset({
+      eventDate: today,
+      eventHour: '',
+      eventPeriod: 'AM',
+      professionalUserId: null,
+      professionName: '',
+      comment: '',
+      citationComment: '',
+    });
+  }
+
+  closeCitationForm(): void {
+    this.showCitationFormPanel = false;
+    this.citationError = null;
+    this.citationSuccess = null;
+
+    this.citationForm.reset({
+      eventDate: '',
+      eventHour: '',
+      eventPeriod: 'AM',
+      professionalUserId: null,
+      professionName: '',
+      comment: '',
+      citationComment: '',
+    });
+  }
+
+  saveCitation(): void {
+    this.citationForm.markAllAsTouched();
+
+    if (this.citationForm.invalid || this.isSavingCitation) return;
+
+    const episodeId = this.getCurrentEpisodeId();
+
+    if (!episodeId) {
+      this.citationError =
+        'No fue posible identificar el episodio para registrar la citación.';
+      return;
+    }
+
+    const programId = this.tokenService.getActiveProgramId();
+
+    if (!programId) {
+      this.citationError =
+        'No fue posible identificar el programa activo para registrar la citación.';
+      return;
+    }
+
+    const raw = this.citationForm.getRawValue();
+
+    const eventTime = this.buildEventTime(raw.eventHour, raw.eventPeriod);
+
+    if (!eventTime) {
+      this.citationError =
+        'Debe ingresar una hora válida y seleccionar AM o PM.';
+      return;
+    }
+
+    const payload = {
+      eventTypeCode: 'CITACION',
+      eventDate: this.toStringOrNull(raw.eventDate),
+      eventTime,
+      programId: Number(programId),
+      professionalUserId: raw.professionalUserId
+        ? Number(raw.professionalUserId)
+        : null,
+      professionName: this.toStringOrNull(raw.professionName),
+      comment: this.toStringOrNull(raw.comment),
+      citationComment: this.toStringOrNull(raw.citationComment),
+    };
+
+    this.isSavingCitation = true;
+    this.citationError = null;
+    this.citationSuccess = null;
+
+    this.demandEpisodeService
+      .createEvent(episodeId, payload)
+      .pipe(finalize(() => (this.isSavingCitation = false)))
+      .subscribe({
+        next: (event) => {
+          console.log('[DemandNew] Citación registrada:', event);
+
+          this.citationSuccess = 'Citación registrada correctamente.';
+
+          this.citationForm.reset({
+            eventDate: '',
+            eventHour: '',
+            eventPeriod: 'AM',
+            professionalUserId: null,
+            professionName: '',
+            comment: '',
+            citationComment: '',
+          });
+
+          this.showCitationFormPanel = false;
+
+          this.loadEpisodeLongitudinal(episodeId);
+        },
+        error: (error) => {
+          console.error('[DemandNew] Error registrando citación:', error);
+
+          if (error?.status === 403) {
+            this.citationError =
+              'No tiene permisos para registrar citaciones en el episodio.';
+            return;
+          }
+
+          this.citationError =
+            'No fue posible registrar la citación. Revise los datos e intente nuevamente.';
+        },
+      });
+  }
+
+  canUseOperativeAction(action: any): boolean {
+    if (!this.getCurrentEpisodeId()) return false;
+
+    return action.title === 'Nueva citación' || action.title === 'Observación';
+  }
+
+  handleOperativeAction(action: any): void {
+    if (action.title === 'Nueva citación') {
+      this.showCitationForm();
+      return;
+    }
+
+    if (action.title === 'Observación') {
+      this.showObservationForm();
+      return;
+    }
+  }
+
+  private buildEventTime(
+    hourValue: string | null | undefined,
+    period: string | null | undefined,
+  ): string | null {
+    const value = String(hourValue ?? '').trim();
+    const selectedPeriod = String(period ?? '')
+      .trim()
+      .toUpperCase();
+
+    if (!value || !selectedPeriod) return null;
+
+    const parts = value.split(':');
+    if (parts.length !== 2) return null;
+
+    let hour = Number(parts[0]);
+    const minutes = Number(parts[1]);
+
+    if (!Number.isFinite(hour) || !Number.isFinite(minutes)) return null;
+    if (hour < 1 || hour > 12 || minutes < 0 || minutes > 59) return null;
+
+    if (selectedPeriod === 'PM' && hour < 12) {
+      hour += 12;
+    }
+
+    if (selectedPeriod === 'AM' && hour === 12) {
+      hour = 0;
+    }
+
+    return `${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
+  }
+
+  formatCitationHourInput(): void {
+    const raw = String(this.citationForm.get('eventHour')?.value ?? '')
+      .replace(/\D/g, '')
+      .slice(0, 4);
+
+    if (!raw) {
+      this.citationForm.patchValue({ eventHour: '' }, { emitEvent: false });
+      return;
+    }
+
+    let formatted = raw;
+
+    if (raw.length >= 3) {
+      formatted = `${raw.slice(0, raw.length - 2)}:${raw.slice(-2)}`;
+    }
+
+    if (formatted.length === 4 && formatted.startsWith('0') === false) {
+      formatted = `0${formatted}`;
+    }
+
+    this.citationForm.patchValue(
+      { eventHour: formatted },
+      { emitEvent: false },
+    );
+  }
+
+  get lastEpisodeEvent(): any | null {
+    const events = this.episodeEvents ?? [];
+
+    if (!events.length) return null;
+
+    return [...events].sort((a: any, b: any) => {
+      const dateA = `${a.eventDate ?? ''}T${a.eventTime ?? '00:00:00'}`;
+      const dateB = `${b.eventDate ?? ''}T${b.eventTime ?? '00:00:00'}`;
+
+      return dateB.localeCompare(dateA);
+    })[0];
+  }
+
+  get citationEvents(): any[] {
+    return (this.episodeEvents ?? []).filter(
+      (event: any) => event?.eventType?.code === 'CITACION',
+    );
+  }
+
+  get hasActiveEpisode(): boolean {
+    return !!this.getCurrentEpisodeId();
+  }
+
 }

@@ -4,14 +4,14 @@
     <div class="hero-main">
       <span class="eyebrow">
         <mat-icon>account_tree</mat-icon>
-        Nuevo modelo funcional
+        Gestión de demanda asistencial
       </span>
 
-      <h1>Gestión de demanda actual</h1>
+      <h1>Ficha longitudinal de atención en la red</h1>
 
       <p>
-        Pantalla base para trabajar la demanda desde la lógica Persona →
-        Episodio → Etapa por programa → Eventos → Referencias.
+        Consulta, creación y seguimiento de demanda desde la lógica Persona →
+        Episodio → Etapa por programa → Eventos → Referencias → Egreso o cierre.
       </p>
 
       <div class="flow-strip">
@@ -31,13 +31,9 @@
         <li>La fecha original de solicitud no se reinicia.</li>
         <li>La referencia crea una nueva etapa, no un nuevo episodio.</li>
         <li>
-          El KPI de espera corresponde al indicador de días de espera y se
-          detiene solo con el ingreso efectivo a tratamiento.
+          El KPI de espera se detiene con el ingreso efectivo a tratamiento.
         </li>
-        <li>
-          El cierre formal debe usar el término <strong>egreso</strong> cuando
-          corresponda.
-        </li>
+        <li>El cierre formal debe usar el término <strong>egreso</strong>.</li>
       </ul>
     </aside>
   </section>
@@ -62,14 +58,14 @@
   </div>
 
   <!-- BUSCADOR -->
-  <mat-card class="search-card">
+  <mat-card class="search-card" [class.search-card--compact]="selectedPerson">
     <div class="section-heading">
       <mat-icon>person_search</mat-icon>
       <div>
         <h2>Búsqueda de persona</h2>
         <p>
-          Busque por RUN para iniciar una nueva demanda o recuperar historia
-          longitudinal.
+          Busque por RUN para consultar, crear o continuar una demanda
+          asistencial.
         </p>
       </div>
     </div>
@@ -107,8 +103,8 @@
     <div class="empty-banner" *ngIf="!searched && !isSearching">
       <mat-icon>info</mat-icon>
       <span>
-        Busque una persona por RUN para iniciar o recuperar su historia
-        longitudinal.
+        Ingrese el RUN para cargar la ficha longitudinal o iniciar una nueva
+        demanda si corresponde.
       </span>
     </div>
 
@@ -120,8 +116,8 @@
     <div class="empty-banner success" *ngIf="selectedPerson">
       <mat-icon>check_circle</mat-icon>
       <span>
-        Persona encontrada. Revise los datos base antes de continuar con el
-        episodio.
+        Persona encontrada. Se cargará la ficha longitudinal y el episodio
+        vigente si existe.
       </span>
     </div>
 
@@ -146,8 +142,8 @@
       <div>
         <h2>Crear persona</h2>
         <p>
-          Complete los datos base de identificación y contacto según el modelo
-          de persona del informe.
+          Complete los datos base de identificación y contacto antes de crear un
+          episodio de demanda.
         </p>
       </div>
     </div>
@@ -261,15 +257,15 @@
     </div>
   </mat-card>
 
-  <!-- CREAR EPISODIO / NUEVA DEMANDA -->
+  <!-- CREAR EPISODIO -->
   <mat-card class="create-episode-card" *ngIf="showCreateEpisodeForm">
     <div class="section-heading">
       <mat-icon>folder_shared</mat-icon>
       <div>
-        <h2>Crear episodio / nueva demanda</h2>
+        <h2>Crear episodio de demanda</h2>
         <p>
-          Complete los datos iniciales del episodio según el modelo funcional
-          del informe.
+          Complete los datos iniciales del episodio. Al crear, se generará
+          automáticamente la etapa inicial del programa.
         </p>
       </div>
     </div>
@@ -374,7 +370,7 @@
 
       <div class="empty-banner" *ngIf="!substances.length">
         <mat-icon>info</mat-icon>
-        <span> Catálogo de sustancias no disponible desde backend. </span>
+        <span>Catálogo de sustancias no disponible desde backend.</span>
       </div>
 
       <div class="substances-table" *ngIf="substances.length">
@@ -459,221 +455,163 @@
     </div>
   </mat-card>
 
-  <!-- GRID PRINCIPAL -->
-  <section class="demand-grid">
-    <!-- PERSONA -->
-    <mat-card class="model-card">
-      <div class="card-topline"></div>
-
-      <div class="card-header">
+  <!-- FICHA LONGITUDINAL -->
+  <mat-card class="longitudinal-summary-card" *ngIf="selectedPerson">
+    <div class="summary-person-header">
+      <div class="avatar-placeholder">
         <mat-icon>person</mat-icon>
-        <div>
-          <h3>Persona</h3>
-          <p>Datos base de identificación y contacto.</p>
-        </div>
       </div>
 
-      <div class="person-summary" *ngIf="selectedPerson; else personStructure">
-        <div class="summary-row">
-          <span>RUN</span>
-          <strong>{{ selectedPerson.rut || "Sin información" }}</strong>
-        </div>
-
-        <div class="summary-row">
-          <span>Nombre</span>
-          <strong>
-            {{ selectedPerson.firstName }}
-            {{ selectedPerson.lastName }}
-            {{ selectedPerson.firstLastName }}
-            {{ selectedPerson.secondLastName }}
-          </strong>
-        </div>
-
-        <div class="summary-row">
-          <span>Teléfono</span>
-          <strong>{{ selectedPerson.phone || "Sin información" }}</strong>
-        </div>
-
-        <div class="summary-row">
-          <span>Correo</span>
-          <strong>{{ selectedPerson.email || "Sin información" }}</strong>
-        </div>
-
-        <div class="summary-note">
-          <mat-icon>history</mat-icon>
-          La siguiente etapa será consultar si posee episodio activo o historia
-          previa.
-        </div>
-      </div>
-
-      <ng-template #personStructure>
-        <div class="field-preview">
-          <div class="field-chip" *ngFor="let field of personFields">
-            {{ field }}
-          </div>
-        </div>
-
-        <div class="empty-state compact" *ngIf="!searched && !personNotFound">
-          <mat-icon>person_off</mat-icon>
-          <strong>Sin búsqueda realizada</strong>
-          <span> Busque una persona por RUN para cargar sus datos base. </span>
-        </div>
-
-        <div class="empty-state compact warning-person" *ngIf="personNotFound">
-          <mat-icon>person_add</mat-icon>
-          <strong>Persona no registrada</strong>
-          <span>
-            No existe una persona registrada con el RUN buscado. Puede continuar
-            creando una nueva persona.
-          </span>
-        </div>
-      </ng-template>
-    </mat-card>
-
-    <!-- EPISODIO -->
-    <!-- EPISODIO -->
-    <mat-card class="model-card">
-      <div class="card-topline"></div>
-
-      <div class="card-header">
-        <mat-icon>folder_shared</mat-icon>
-        <div>
-          <h3>Episodio / Nueva demanda</h3>
-          <p>Demanda vigente o nuevo episodio de la persona.</p>
-        </div>
-      </div>
-
-      <div class="episode-status-summary">
-        <div class="episode-status-item">
-          <span>Estado consulta</span>
-          <strong>
-            {{
-              episodeLoaded || createdEpisode
-                ? "Encontrado por listado priorizado"
-                : selectedPerson
-                  ? "Consulta oficial pendiente"
-                  : "Sin persona seleccionada"
-            }}
-          </strong>
-        </div>
-
-        <div class="episode-status-item">
-          <span>Episodio asociado</span>
-          <strong>
-            {{ episodeLoaded || createdEpisode ? "Sí" : "No detectado" }}
-          </strong>
-        </div>
-
-        <div class="episode-status-item">
-          <span>Persona seleccionada</span>
-          <strong>
-            {{ selectedPerson ? "Sí" : "No" }}
-          </strong>
-        </div>
-
-        <div class="episode-status-item">
-          <span>Acción disponible</span>
-          <strong>
-            {{
-              !selectedPerson
-                ? "Buscar persona primero"
-                : episodeLoaded || createdEpisode
-                  ? "No crear nuevo episodio"
-                  : "Preparar episodio"
-            }}
-          </strong>
-        </div>
-      </div>
-
-      <div
-        class="empty-state compact success-stage"
-        *ngIf="episodeLoaded || createdEpisode; else activeEpisodeUnavailable"
-      >
-        <mat-icon>check_circle</mat-icon>
-        <strong>Episodio encontrado</strong>
-        <span>
-          Se encontró un episodio asociado a esta persona mediante el listado
-          priorizado. No se permitirá crear un nuevo episodio activo para el
-          mismo RUN.
+      <div class="person-main-data">
+        <span class="eyebrow-light">
+          <mat-icon>badge</mat-icon>
+          Ficha longitudinal de atención en la red
         </span>
+
+        <h2>
+          {{ selectedPerson.firstName }}
+          {{ selectedPerson.lastName }}
+          {{ selectedPerson.firstLastName }}
+          {{ selectedPerson.secondLastName }}
+        </h2>
+
+        <p>
+          RUN {{ selectedPerson.rut || "Sin información" }}
+          <span>·</span>
+          Teléfono {{ selectedPerson.phone || "Sin información" }}
+          <span>·</span>
+          {{ selectedPerson.email || "Sin correo" }}
+        </p>
+      </div>
+    </div>
+
+    <div class="summary-indicators">
+      <div class="indicator-box">
+        <span>Fecha solicitud original</span>
+        <strong>
+          {{
+            episodeSummary?.originalRequestDate ||
+              createdEpisode?.originalRequestDate ||
+              "Pendiente"
+          }}
+        </strong>
       </div>
 
-      <div class="episode-detail-box" *ngIf="episodeSummary">
-        <div class="summary-row">
-          <span>Código episodio</span>
-          <strong>
-            {{
-              episodeSummary.episodeCode || episodeSummary.code || "Sin código"
-            }}
-          </strong>
-        </div>
+      <div class="indicator-box danger">
+        <span>Días acumulados</span>
+        <strong>
+          {{
+            episodeSummary?.accumulatedDays ??
+              createdEpisode?.accumulatedDays ??
+              0
+          }}
+        </strong>
+      </div>
 
-        <div class="summary-row">
-          <span>Estado</span>
-          <strong>
-            {{
-              episodeSummary.stateCode ||
-                episodeSummary.stateName ||
-                "Sin estado"
-            }}
-          </strong>
-        </div>
+      <div class="indicator-box">
+        <span>Programa actual</span>
+        <strong>
+          {{
+            episodeSummary?.currentProgram?.name ||
+              createdEpisode?.currentProgram?.name ||
+              activeProgramName ||
+              "Sin programa"
+          }}
+        </strong>
+      </div>
 
-        <div class="summary-row">
-          <span>Resultado</span>
-          <strong>
-            {{
-              episodeSummary.resultCode ||
-                episodeSummary.resultName ||
-                "Sin resultado"
-            }}
-          </strong>
-        </div>
+      <div class="indicator-box">
+        <span>Estado</span>
+        <strong>
+          {{
+            episodeSummary?.stateCode ||
+              createdEpisode?.stateCode ||
+              "Sin estado"
+          }}
+        </strong>
+      </div>
 
-        <div class="summary-row">
-          <span>Programa actual</span>
-          <strong>
-            {{
-              episodeSummary.currentProgram?.name ||
-                episodeSummary.currentProgramName ||
-                "Sin programa"
-            }}
-          </strong>
-        </div>
+      <div class="indicator-box">
+        <span>Resultado</span>
+        <strong>
+          {{
+            episodeSummary?.resultCode ||
+              createdEpisode?.resultCode ||
+              "Sin resultado"
+          }}
+        </strong>
+      </div>
+    </div>
+  </mat-card>
 
-        <div class="summary-row">
-          <span>Días acumulados</span>
-          <strong>
-            {{
-              episodeSummary.accumulatedDays ?? episodeSummary.waitingDays ?? 0
-            }}
-          </strong>
+  <!-- PESTAÑAS VISUALES -->
+  <div class="longitudinal-tabs" *ngIf="selectedPerson">
+    <button type="button" class="active">Demanda actual</button>
+    <button type="button">Historia en la red</button>
+    <button type="button">Citaciones</button>
+    <button type="button">Observaciones</button>
+    <button type="button">Documentos</button>
+    <button type="button">Alertas</button>
+  </div>
+
+  <!-- DEMANDA ACTUAL -->
+  <section class="current-demand-grid" *ngIf="selectedPerson">
+    <mat-card class="current-demand-card">
+      <div class="card-header compact-card-header">
+        <mat-icon>description</mat-icon>
+        <div>
+          <h3>Datos de la demanda actual</h3>
+          <p>Resumen del episodio vigente o preparado.</p>
         </div>
       </div>
 
-      <ng-template #activeEpisodeUnavailable>
-        <div class="empty-state compact warning-stage">
-          <mat-icon>info</mat-icon>
-          <strong>Consulta de episodio activo no disponible</strong>
-          <span>
-            No fue posible consultar el episodio activo por RUN debido a
-            permisos backend. Puede preparar el episodio, pero la validación
-            final quedará pendiente hasta habilitar el endpoint oficial.
-          </span>
-        </div>
-      </ng-template>
-
-      <div class="empty-banner warning" *ngIf="!selectedPerson">
-        <mat-icon>info</mat-icon>
-        <span>
-          Primero debe buscar y seleccionar una persona para preparar el
-          episodio.
-        </span>
+      <div class="summary-row">
+        <span>Programa actual</span>
+        <strong>
+          {{
+            episodeSummary?.currentProgram?.name ||
+              createdEpisode?.currentProgram?.name ||
+              activeProgramName ||
+              "Sin programa"
+          }}
+        </strong>
       </div>
 
-      <div class="empty-banner error" *ngIf="episodeSaveError">
-        <mat-icon>error</mat-icon>
-        <span>{{ episodeSaveError }}</span>
+      <div class="summary-row">
+        <span>Estado</span>
+        <strong>
+          {{
+            episodeSummary?.stateCode ||
+              createdEpisode?.stateCode ||
+              "Sin estado"
+          }}
+        </strong>
+      </div>
+
+      <div class="summary-row">
+        <span>Resultado</span>
+        <strong>
+          {{
+            episodeSummary?.resultCode ||
+              createdEpisode?.resultCode ||
+              "Sin resultado"
+          }}
+        </strong>
+      </div>
+
+      <div class="summary-row">
+        <span>Última gestión</span>
+        <strong>
+          {{
+            lastEpisodeEvent
+              ? (lastEpisodeEvent.eventType?.name ||
+                  lastEpisodeEvent.eventType?.code ||
+                  "Gestión registrada") +
+                " · " +
+                lastEpisodeEvent.eventDate
+              : "Sin gestión registrada"
+          }}
+        </strong>
       </div>
 
       <div class="card-actions-preview">
@@ -690,104 +628,177 @@
               ? "Buscar persona primero"
               : episodeLoaded || createdEpisode
                 ? "Episodio ya existente"
-                : "Preparar episodio"
+                : "Crear episodio de demanda"
           }}
         </button>
       </div>
     </mat-card>
 
-    <!-- ETAPA -->
-    <mat-card class="model-card">
-      <div class="card-topline"></div>
-
-      <div class="card-header">
-        <mat-icon>hub</mat-icon>
+    <mat-card class="current-demand-card">
+      <div class="card-header compact-card-header">
+        <mat-icon>timeline</mat-icon>
         <div>
-          <h3>Etapa por programa</h3>
-          <p>Programa responsable, recepción, salida y resultado del tramo.</p>
+          <h3>Trayectoria resumida del episodio</h3>
+          <p>Etapa actual y recorrido por programa.</p>
         </div>
       </div>
 
-      <div class="stage-summary">
-        <div class="stage-item">
-          <span>Programa activo</span>
+      <div class="trajectory-line">
+        <div class="trajectory-dot"></div>
+        <div>
           <strong>
-            {{ activeProgramName || "Sin programa seleccionado" }}
+            {{
+              episodeSummary?.currentProgram?.name ||
+                createdEpisode?.currentProgram?.name ||
+                activeProgramName ||
+                "Programa actual"
+            }}
           </strong>
-        </div>
-
-        <div class="stage-item">
-          <span>ID programa</span>
-          <strong>
-            {{ activeProgramId || "Pendiente" }}
-          </strong>
-        </div>
-
-        <div class="stage-item">
-          <span>Estado etapa</span>
-          <strong>
-            {{ stageVisualState }}
-          </strong>
-        </div>
-
-        <div class="stage-item">
-          <span>Fecha ingreso etapa</span>
-          <strong>Pendiente</strong>
-        </div>
-      </div>
-
-      <div
-        class="empty-state compact success-stage"
-        *ngIf="episodeLoaded || createdEpisode; else stagePending"
-      >
-        <mat-icon>check_circle</mat-icon>
-        <strong>Etapa asociada al episodio</strong>
-        <span>
-          El episodio encontrado ya posee una etapa inicial asociada o se
-          encuentra vinculado al flujo de atención del programa.
-        </span>
-      </div>
-
-      <ng-template #stagePending>
-        <div class="empty-state compact warning-stage">
-          <mat-icon>lock</mat-icon>
-          <strong>Etapa pendiente de creación</strong>
           <span>
-            La etapa inicial se crea automáticamente al registrar el episodio
-            real.
+            {{ stageVisualState || "Etapa pendiente" }}
           </span>
         </div>
-      </ng-template>
+      </div>
+
+      <div class="empty-line" *ngIf="!episodeLoaded && !createdEpisode">
+        No existe episodio activo cargado. Busque una persona y prepare el
+        episodio si corresponde.
+      </div>
+    </mat-card>
+
+    <mat-card class="current-demand-card">
+      <div class="card-header compact-card-header">
+        <mat-icon>monitoring</mat-icon>
+        <div>
+          <h3>Resumen de indicadores</h3>
+          <p>Datos operativos para priorización.</p>
+        </div>
+      </div>
+
+      <div class="indicator-list">
+        <div>
+          <span>Días de espera actual</span>
+          <strong>
+            {{
+              episodeSummary?.accumulatedDays ??
+                createdEpisode?.accumulatedDays ??
+                0
+            }}
+          </strong>
+        </div>
+
+        <div>
+          <span>Semáforo</span>
+          <strong>
+            {{
+              episodeSummary?.semaphoreColor ||
+                createdEpisode?.semaphoreColor ||
+                "Sin color"
+            }}
+          </strong>
+        </div>
+
+        <div>
+          <span>Eventos registrados</span>
+          <strong>{{ episodeEvents.length || 0 }}</strong>
+        </div>
+
+        <div>
+          <span>Programa activo</span>
+          <strong>{{ activeProgramName || "Sin programa" }}</strong>
+        </div>
+      </div>
     </mat-card>
   </section>
 
-  <!-- ACCIONES -->
-  <mat-card class="actions-card">
-    <div class="section-heading">
-      <mat-icon>play_circle</mat-icon>
-      <div>
-        <h2>Acciones operativas</h2>
-        <p>Se habilitarán cuando exista una persona y un episodio activo.</p>
+  <!-- BLOQUES SECUNDARIOS DE LA FICHA -->
+  <section class="longitudinal-detail-grid" *ngIf="selectedPerson">
+    <mat-card class="longitudinal-detail-card wide-card">
+      <div class="card-header compact-card-header">
+        <mat-icon>event</mat-icon>
+        <div>
+          <h3>Citaciones del episodio actual</h3>
+          <p>Registro de citaciones y asistencia.</p>
+        </div>
       </div>
+
+      <div class="empty-line">
+        Las citaciones se mostrarán aquí cuando se habilite la acción Nueva
+        citación y Registro de asistencia.
+      </div>
+    </mat-card>
+
+    <mat-card class="longitudinal-detail-card">
+      <div class="card-header compact-card-header">
+        <mat-icon>notes</mat-icon>
+        <div>
+          <h3>Observaciones recientes</h3>
+          <p>Últimas observaciones registradas.</p>
+        </div>
+      </div>
+
+      <ng-container *ngIf="episodeEvents.length; else noRecentObservations">
+        <article class="recent-observation" *ngFor="let event of episodeEvents">
+          <ng-container *ngIf="event.eventType?.code === 'OBSERVACION'">
+            <strong>{{ event.eventDate || "Sin fecha" }}</strong>
+            <p>{{ event.observation || event.comment }}</p>
+            <span>
+              {{ event.registeredByUser?.name || "No informado" }}
+            </span>
+          </ng-container>
+        </article>
+      </ng-container>
+
+      <ng-template #noRecentObservations>
+        <div class="empty-line">
+          No existen observaciones registradas para este episodio.
+        </div>
+      </ng-template>
+    </mat-card>
+
+    <mat-card class="longitudinal-detail-card alert-card">
+      <div class="card-header compact-card-header">
+        <mat-icon>notification_important</mat-icon>
+        <div>
+          <h3>Alertas y seguimientos</h3>
+          <p>Seguimiento prioritario del episodio.</p>
+        </div>
+      </div>
+
+      <div class="empty-line">No existen alertas activas.</div>
+    </mat-card>
+  </section>
+
+  <!-- HUINCHA FLOTANTE DE ACCIONES -->
+  <aside class="operative-rail" *ngIf="selectedPerson">
+    <div class="operative-rail-title">
+      <mat-icon>play_circle</mat-icon>
+      <span>Acciones</span>
     </div>
 
-    <div class="actions-grid">
-      <button
-        *ngFor="let action of operativeActions"
-        type="button"
-        class="action-tile"
-        [disabled]="
-          !action.enabled ||
-          (!episodeLoaded && !createdEpisode && action.title === 'Observación')
-        "
-        (click)="action.title === 'Observación' ? showObservationForm() : null"
-      >
-        <mat-icon>{{ action.icon }}</mat-icon>
+    <button
+      *ngFor="let action of operativeActions"
+      type="button"
+      class="operative-rail-button"
+      [disabled]="!canUseOperativeAction(action)"
+      (click)="handleOperativeAction(action)"
+    >
+      <mat-icon>{{ action.icon }}</mat-icon>
+
+      <div>
         <strong>{{ action.title }}</strong>
         <span>{{ action.description }}</span>
-      </button>
-    </div>
+      </div>
+    </button>
+  </aside>
 
+  <!-- ACCIONES OPERATIVAS -->
+  <mat-card
+    class="actions-card action-forms-card"
+    *ngIf="
+      selectedPerson && (showObservationFormPanel || showCitationFormPanel)
+    "
+  >
     <div class="observation-panel" *ngIf="showObservationFormPanel">
       <div class="section-heading compact-heading">
         <mat-icon>notes</mat-icon>
@@ -839,7 +850,11 @@
           mat-flat-button
           class="primary-btn"
           type="button"
-          [disabled]="observationForm.invalid || isSavingObservation"
+          [disabled]="
+            observationForm.invalid ||
+            isSavingObservation ||
+            isLoadingLongitudinal
+          "
           (click)="saveObservation()"
         >
           <mat-icon>save</mat-icon>
@@ -847,50 +862,222 @@
         </button>
       </div>
     </div>
+
+    <div class="observation-panel" *ngIf="showCitationFormPanel">
+      <div class="section-heading compact-heading">
+        <mat-icon>event_available</mat-icon>
+        <div>
+          <h3>Registrar citación</h3>
+          <p>Agregue una nueva citación al episodio activo.</p>
+        </div>
+      </div>
+
+      <form [formGroup]="citationForm" class="observation-form">
+        <mat-form-field appearance="fill">
+          <mat-label>Fecha citación</mat-label>
+          <input matInput type="date" formControlName="eventDate" />
+          <mat-error
+            *ngIf="citationForm.controls.eventDate.hasError('required')"
+          >
+            La fecha es obligatoria.
+          </mat-error>
+        </mat-form-field>
+
+        <div class="time-period-grid">
+          <mat-form-field appearance="fill">
+            <mat-label>Hora citación</mat-label>
+            <input
+              matInput
+              type="text"
+              formControlName="eventHour"
+              placeholder="Ej: 01:30"
+              maxlength="5"
+              (blur)="formatCitationHourInput()"
+            />
+            <mat-hint>Ingrese hora en formato 12 horas. Ej: 01:30</mat-hint>
+
+            <mat-error
+              *ngIf="citationForm.controls.eventHour.hasError('required')"
+            >
+              La hora es obligatoria.
+            </mat-error>
+
+            <mat-error
+              *ngIf="citationForm.controls.eventHour.hasError('pattern')"
+            >
+              Use formato válido. Ejemplo: 01:30, 09:15 o 12:00.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>AM / PM</mat-label>
+            <mat-select formControlName="eventPeriod">
+              <mat-option value="AM">AM</mat-option>
+              <mat-option value="PM">PM</mat-option>
+            </mat-select>
+
+            <mat-error
+              *ngIf="citationForm.controls.eventPeriod.hasError('required')"
+            >
+              Debe seleccionar AM o PM.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Profesión</mat-label>
+          <mat-select formControlName="professionName">
+            <mat-option *ngFor="let item of professions" [value]="item.name">
+              {{ item.name }}
+            </mat-option>
+          </mat-select>
+
+          <mat-error
+            *ngIf="citationForm.controls.professionName.hasError('required')"
+          >
+            La profesión es obligatoria.
+          </mat-error>
+
+          <mat-hint *ngIf="!professions.length">
+            Catálogo de profesiones no disponible desde backend.
+          </mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Comentario breve</mat-label>
+          <input
+            matInput
+            formControlName="comment"
+            placeholder="Ej: Primera citación registrada"
+          />
+          <mat-error *ngIf="citationForm.controls.comment.hasError('required')">
+            El comentario es obligatorio.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Comentario de citación</mat-label>
+          <textarea
+            matInput
+            rows="4"
+            formControlName="citationComment"
+          ></textarea>
+        </mat-form-field>
+      </form>
+
+      <div class="empty-banner success" *ngIf="citationSuccess">
+        <mat-icon>check_circle</mat-icon>
+        <span>{{ citationSuccess }}</span>
+      </div>
+
+      <div class="empty-banner error" *ngIf="citationError">
+        <mat-icon>error</mat-icon>
+        <span>{{ citationError }}</span>
+      </div>
+
+      <div class="create-episode-actions">
+        <button
+          mat-stroked-button
+          class="secondary-btn"
+          type="button"
+          (click)="closeCitationForm()"
+        >
+          <mat-icon>close</mat-icon>
+          Cancelar
+        </button>
+
+        <button
+          mat-flat-button
+          class="primary-btn"
+          type="button"
+          [disabled]="
+            citationForm.invalid || isSavingCitation || isLoadingLongitudinal
+          "
+          (click)="saveCitation()"
+        >
+          <mat-icon>save</mat-icon>
+          {{ isSavingCitation ? "Guardando..." : "Guardar citación" }}
+        </button>
+      </div>
+    </div>
   </mat-card>
 
-  <!-- SECCIONES INFERIORES -->
-  <!-- MÓDULOS DEL EPISODIO -->
-  <section class="episode-modules">
-    <div class="modules-heading">
+  <!-- HISTORIAL DEL EPISODIO -->
+  <mat-card
+    class="episode-history-card"
+    *ngIf="episodeEvents.length || isLoadingLongitudinal || longitudinalError"
+  >
+    <div class="section-heading">
+      <mat-icon>history</mat-icon>
       <div>
-        <span class="eyebrow-light">
-          <mat-icon>dataset</mat-icon>
-          Módulos del episodio
-        </span>
-
-        <h2>Información complementaria del modelo</h2>
-
-        <p>
-          Estos módulos se activarán progresivamente cuando exista una persona,
-          un episodio y una etapa vigente.
-        </p>
+        <h2>Últimas gestiones del episodio</h2>
+        <p>Eventos y gestiones registradas para el episodio activo.</p>
       </div>
     </div>
 
-    <div class="modules-grid">
-      <mat-card class="module-card" *ngFor="let section of structuralSections">
-        <div class="module-card-header">
-          <div class="module-icon">
-            <mat-icon>{{ section.icon }}</mat-icon>
-          </div>
-
-          <div>
-            <h3>{{ section.title }}</h3>
-            <p>{{ section.subtitle }}</p>
-          </div>
-        </div>
-
-        <div class="mini-field-preview">
-          <div class="mini-field-chip" *ngFor="let field of section.fields">
-            {{ field }}
-          </div>
-        </div>
-
-        <div class="empty-line">
-          {{ section.empty }}
-        </div>
-      </mat-card>
+    <div class="empty-banner" *ngIf="isLoadingLongitudinal">
+      <mat-icon>hourglass_top</mat-icon>
+      <span>Cargando historial del episodio...</span>
     </div>
-  </section>
+
+    <div class="empty-banner error" *ngIf="longitudinalError">
+      <mat-icon>error</mat-icon>
+      <span>{{ longitudinalError }}</span>
+    </div>
+
+    <div
+      class="event-timeline"
+      *ngIf="
+        !isLoadingLongitudinal && !longitudinalError && episodeEvents.length
+      "
+    >
+      <article class="event-card" *ngFor="let event of episodeEvents">
+        <div class="event-card__header">
+          <div>
+            <strong>{{ event.eventType?.name || "Evento registrado" }}</strong>
+            <span>{{ event.eventType?.code || "SIN_CODIGO" }}</span>
+          </div>
+
+          <small>
+            {{ event.eventDate || "Sin fecha" }}
+            <ng-container *ngIf="event.eventTime">
+              · {{ event.eventTime }}
+            </ng-container>
+          </small>
+        </div>
+
+        <div class="event-card__body">
+          <p *ngIf="event.comment">
+            <strong>Comentario:</strong> {{ event.comment }}
+          </p>
+
+          <p *ngIf="event.observation">
+            <strong>Observación:</strong> {{ event.observation }}
+          </p>
+
+          <p *ngIf="event.nextAction">
+            <strong>Próxima acción:</strong> {{ event.nextAction }}
+          </p>
+
+          <p *ngIf="event.nextActionDate">
+            <strong>Fecha próxima acción:</strong> {{ event.nextActionDate }}
+          </p>
+        </div>
+
+        <div class="event-card__footer">
+          <span>
+            Registrado por:
+            <strong>
+              {{ event.registeredByUser?.name || "No informado" }}
+            </strong>
+          </span>
+
+          <span>
+            Programa:
+            <strong>{{ event.program?.name || "No informado" }}</strong>
+          </span>
+        </div>
+      </article>
+    </div>
+  </mat-card>
 </div>

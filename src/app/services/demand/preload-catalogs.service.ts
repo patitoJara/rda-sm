@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { forkJoin, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-
 // Servicios de catálogos
 import { CommuneService } from '../comunes.service';
 import { SexService } from '../sex.service';
@@ -44,15 +43,20 @@ export class PreloadCatalogsService {
     return forkJoin({
       communes: this.communeService.listAll().pipe(catchError(() => of([]))),
       sexes: this.sexService.listAll().pipe(catchError(() => of([]))),
+
       contactTypes: this.contactTypeService
         .listAll()
         .pipe(catchError(() => of([]))),
+
       senders: this.senderService.listAll().pipe(catchError(() => of([]))),
       diverters: this.diverterService.listAll().pipe(catchError(() => of([]))),
+
       programs: this.programService.listAll().pipe(catchError(() => of([]))),
+
       notRelevants: this.notRelevantService
         .listAll()
         .pipe(catchError(() => of([]))),
+
       substances: this.substanceService
         .listAll()
         .pipe(catchError(() => of([]))),
@@ -60,16 +64,7 @@ export class PreloadCatalogsService {
       convPrev: this.convPrevService.getAll().pipe(catchError(() => of([]))),
       intPrev: this.intPrevService.getAll().pipe(catchError(() => of([]))),
 
-      profession1: this.professionService
-        .listAll()
-        .pipe(catchError(() => of([]))),
-      profession2: this.professionService
-        .listAll()
-        .pipe(catchError(() => of([]))),
-      profession3: this.professionService
-        .listAll()
-        .pipe(catchError(() => of([]))),
-      profession4: this.professionService
+      professions: this.professionService
         .listAll()
         .pipe(catchError(() => of([]))),
 
