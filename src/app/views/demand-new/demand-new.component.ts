@@ -5,15 +5,28 @@ import {
   FormBuilder,
   Validators,
   FormControl,
+  FormGroup,
 } from '@angular/forms';
+
+import {
+  AfterViewInit,
+  ElementRef,
+  OnDestroy,
+  QueryList,
+  ViewChildren,
+} from '@angular/core';
+
 import { RouterModule } from '@angular/router';
 import { MatSelectModule } from '@angular/material/select';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { finalize } from 'rxjs/operators';
 import { PostulantService } from '@app/services/postulant.service';
 import { Postulant } from '@app/models/postulant';
 import { PreloadCatalogsService } from '@app/services/demand/preload-catalogs.service';
 import { TokenService } from '@app/services/token.service';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
 // Angular Material
 import { MatCardModule } from '@angular/material/card';
@@ -27,12 +40,38 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { DemandEpisodeService } from '@app/services/demand/demand-episode.service';
+import { ProgramProfessionalService } from '@app/services/program-professional.service';
 
 import {
   DemandCatalogItem,
   DemandCatalogsDTO,
   DemandService,
 } from '../../core/services/demand.service';
+
+type ActiveActionPanel =
+  | 'citation'
+  | 'attendance'
+  | 'interview'
+  | 'observation'
+  | 'reference'
+  | 'treatmentEntry'
+  | 'egressClosure'
+  | null;
+
+type SummarySectionId =
+  | 'demanda-actual'
+  | 'demandante'
+  | 'trayectoria'
+  | 'citaciones'
+  | 'observaciones'
+  | 'documentos'
+  | 'alertas';
+
+interface SummaryNavigationItem {
+  id: SummarySectionId;
+  label: string;
+  icon: string;
+}
 
 @Component({
   selector: 'app-demand-new',
@@ -53,15 +92,20 @@ import {
     MatSelectModule,
     MatRadioModule,
     MatProgressBarModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
 })
-export class DemandNewComponent implements OnInit {
+export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   private fb = inject(FormBuilder);
   private postulantService = inject(PostulantService);
   private preloadCatalogs = inject(PreloadCatalogsService);
   private readonly tokenService = inject(TokenService);
   private readonly demandService = inject(DemandService);
   private readonly demandEpisodeService = inject(DemandEpisodeService);
+  private readonly programProfessionalService = inject(
+    ProgramProfessionalService,
+  );
 
   demandCatalogs: DemandCatalogsDTO | null = null;
 
@@ -77,6 +121,8 @@ export class DemandNewComponent implements OnInit {
 
   isLoadingDemandCatalogs = false;
   demandCatalogsError = '';
+
+  showDemandantDetails = false;
 
   sexes: any[] = [];
   communes: any[] = [];
@@ -100,32 +146,66 @@ export class DemandNewComponent implements OnInit {
   activeProgramId: number | null = null;
   stageVisualState = 'Pendiente de creación';
 
-  showObservationFormPanel = false;
+  activeActionPanel: ActiveActionPanel = null;
+
   isSavingObservation = false;
   observationError: string | null = null;
   observationSuccess: string | null = null;
 
-  showCitationFormPanel = false;
   isSavingCitation = false;
   citationError: string | null = null;
   citationSuccess: string | null = null;
 
+  isSavingAttendance = false;
+  attendanceError: string | null = null;
+  attendanceSuccess: string | null = null;
+
+  isSavingInterview = false;
+  interviewError: string | null = null;
+  interviewSuccess: string | null = null;
+
+  showBackToNavigation = false;
+  highlightedSummarySection: SummarySectionId | null = null;
+
+  historyDisplayLimit = 8;
+  showAllHistory = false;
+  historyTypeFilter = 'TODOS';
+
+  private summaryHighlightTimeout: ReturnType<typeof setTimeout> | null = null;
+
   citationForm = this.fb.group({
-    eventDate: ['', Validators.required],
-    eventHour: [
-      '',
-      [
-        Validators.required,
-        Validators.pattern(/^(0?[1-9]|1[0-2]):[0-5][0-9]$/),
-      ],
-    ],
+    eventDate: new FormControl<Date | null>(new Date(), Validators.required),
+    eventHour: ['', Validators.required],
     eventPeriod: ['AM', Validators.required],
-    professionalUserId: new FormControl<number | null>(null, {
-      validators: [Validators.required],
-    }),
+    programProfessionalId: new FormControl<number | null>(
+      null,
+      Validators.required,
+    ),
     professionName: ['', Validators.required],
     comment: ['', Validators.required],
     citationComment: [''],
+  });
+
+  attendanceForm = this.fb.group({
+    citationEventId: new FormControl<number | null>(null, {
+      validators: [Validators.required],
+    }),
+
+    attendanceStatusId: new FormControl<number | null>(null, {
+      validators: [Validators.required],
+    }),
+
+    comment: ['', Validators.required],
+  });
+
+  interviewForm = this.fb.group({
+    eventDate: [new Date(), Validators.required],
+    eventHour: ['', [Validators.pattern(/^(0?[1-9]|1[0-2]):[0-5][0-9]$/)]],
+    eventPeriod: ['AM'],
+    comment: ['', Validators.required],
+    observation: ['', Validators.required],
+    nextAction: [''],
+    nextActionDate: [null as Date | null],
   });
 
   longitudinal: any | null = null;
@@ -134,6 +214,8 @@ export class DemandNewComponent implements OnInit {
   longitudinalError: string | null = null;
 
   professionals: any[] = [];
+  isLoadingProfessionals = false;
+  professionalsError: string | null = null;
 
   observationForm = this.fb.group({
     comment: ['', Validators.required],
@@ -405,25 +487,30 @@ export class DemandNewComponent implements OnInit {
       description:
         'Registrar fecha, hora, profesional y comentario de citación.',
       enabled: true,
+      panel: 'citation' as const,
     },
     {
       icon: 'how_to_reg',
       title: 'Registrar asistencia',
       description:
         'Marcar si se presentó, no se presentó, reprogramó o quedó pendiente.',
-      enabled: false,
+      enabled: true,
+      panel: 'attendance' as const,
     },
     {
-      icon: 'assignment',
+      icon: 'psychology',
       title: 'Entrevista / evaluación',
-      description: 'Registrar evento clínico o social independiente.',
-      enabled: false,
+      description:
+        'Registrar entrevista, evaluación clínica/social o antecedentes relevantes.',
+      enabled: true,
+      panel: 'interview' as const,
     },
     {
       icon: 'notes',
       title: 'Observación',
       description: 'Agregar observación general del episodio o etapa.',
       enabled: true,
+      panel: 'observation' as const,
     },
     {
       icon: 'sync_alt',
@@ -431,29 +518,452 @@ export class DemandNewComponent implements OnInit {
       description:
         'Cerrar etapa origen y crear etapa receptora sin reiniciar días.',
       enabled: false,
+      panel: 'reference' as const,
     },
     {
       icon: 'fact_check',
       title: 'Ingreso a tratamiento',
       description: 'Registrar ingreso efectivo y detener KPI de espera.',
       enabled: false,
+      panel: 'treatmentEntry' as const,
     },
     {
       icon: 'logout',
       title: 'Egreso / cierre',
       description: 'Cerrar episodio con motivo, observación y auditoría.',
       enabled: false,
+      panel: 'egressClosure' as const,
     },
   ];
+
+  readonly summaryNavigationItems: SummaryNavigationItem[] = [
+    {
+      id: 'demanda-actual',
+      label: 'Demanda actual',
+      icon: 'assignment',
+    },
+    {
+      id: 'demandante',
+      label: 'Demandante',
+      icon: 'person',
+    },
+    {
+      id: 'trayectoria',
+      label: 'Trayectoria',
+      icon: 'timeline',
+    },
+    {
+      id: 'citaciones',
+      label: 'Citaciones',
+      icon: 'event',
+    },
+    {
+      id: 'observaciones',
+      label: 'Observaciones',
+      icon: 'notes',
+    },
+    {
+      id: 'documentos',
+      label: 'Documentos',
+      icon: 'description',
+    },
+    {
+      id: 'alertas',
+      label: 'Alertas',
+      icon: 'notifications',
+    },
+  ];
+
+  activeSummarySection: SummarySectionId = 'demanda-actual';
+
+  @ViewChildren('summarySection')
+  private summarySections!: QueryList<ElementRef<HTMLElement>>;
+
+  private summarySectionObserver: IntersectionObserver | null = null;
 
   ngOnInit(): void {
     this.loadCatalogs();
     this.loadActiveProgramContext();
     this.loadDemandCatalogs();
+    this.loadActiveProfessionals();
 
     this.personForm.get('intPrev')?.valueChanges.subscribe((id) => {
       this.filterConvPrevByIntPrev(Number(id));
     });
+
+    this.citationForm
+      .get('programProfessionalId')
+      ?.valueChanges.subscribe((programProfessionalId) => {
+        this.applySelectedProfessionalToCitation(Number(programProfessionalId));
+      });
+  }
+
+  ngAfterViewInit(): void {
+    this.summarySections.changes.subscribe(() => {
+      queueMicrotask(() => {
+        this.initializeSummarySectionObserver();
+      });
+    });
+
+    queueMicrotask(() => {
+      this.initializeSummarySectionObserver();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.summarySectionObserver?.disconnect();
+    this.summarySectionObserver = null;
+
+    if (this.summaryHighlightTimeout) {
+      clearTimeout(this.summaryHighlightTimeout);
+      this.summaryHighlightTimeout = null;
+    }
+  }
+
+  onDemandPageScroll(event: Event): void {
+    const container = event.target as HTMLElement | null;
+
+    if (!container) {
+      this.showBackToNavigation = false;
+      return;
+    }
+
+    this.showBackToNavigation =
+      !!this.selectedPerson && container.scrollTop > 550;
+  }
+
+  scrollToSummarySection(sectionId: SummarySectionId): void {
+    const target = document.getElementById(sectionId);
+    const navigation = document.getElementById('longitudinal-navigation');
+
+    const scrollContainer = document.querySelector(
+      '.demand-new-page',
+    ) as HTMLElement | null;
+
+    if (!target) {
+      console.warn(`[DemandNew] No se encontró la sección: ${sectionId}`);
+      return;
+    }
+
+    this.activeSummarySection = sectionId;
+    this.highlightSummarySection(sectionId);
+
+    const navigationHeight =
+      sectionId === 'demandante' ? 16 : (navigation?.offsetHeight ?? 0) + 46;
+
+    /*
+     * Caso 1: el scroll está dentro de .demand-new-page.
+     */
+    if (
+      scrollContainer &&
+      scrollContainer.scrollHeight > scrollContainer.clientHeight
+    ) {
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+
+      const targetTop =
+        scrollContainer.scrollTop +
+        targetRect.top -
+        containerRect.top -
+        navigationHeight;
+
+      scrollContainer.scrollTo({
+        top: Math.max(0, targetTop),
+        behavior: 'smooth',
+      });
+
+      return;
+    }
+
+    /*
+     * Caso 2: el scroll pertenece a la ventana.
+     */
+    const targetTop =
+      window.scrollY + target.getBoundingClientRect().top - navigationHeight;
+
+    window.scrollTo({
+      top: Math.max(0, targetTop),
+      behavior: 'smooth',
+    });
+  }
+
+  scrollToLongitudinalNavigation(): void {
+    const anchor = document.getElementById('longitudinal-navigation-anchor');
+
+    const scrollContainer = document.querySelector(
+      '.demand-new-page',
+    ) as HTMLElement | null;
+
+    if (!anchor) {
+      console.warn(
+        '[DemandNew] No se encontró el ancla de navegación longitudinal.',
+      );
+      return;
+    }
+
+    /*
+     * Si la ficha tiene scroll interno, desplazamos ese contenedor.
+     */
+    if (
+      scrollContainer &&
+      scrollContainer.scrollHeight > scrollContainer.clientHeight
+    ) {
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const anchorRect = anchor.getBoundingClientRect();
+
+      const targetTop =
+        scrollContainer.scrollTop + anchorRect.top - containerRect.top - 8;
+
+      scrollContainer.scrollTo({
+        top: Math.max(0, targetTop),
+        behavior: 'smooth',
+      });
+    } else {
+      /*
+       * Respaldo para layouts donde el scroll pertenece a la ventana.
+       */
+      anchor.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+
+    this.showBackToNavigation = false;
+  }
+
+  private highlightSummarySection(sectionId: SummarySectionId): void {
+    if (this.summaryHighlightTimeout) {
+      clearTimeout(this.summaryHighlightTimeout);
+    }
+
+    this.highlightedSummarySection = sectionId;
+
+    this.summaryHighlightTimeout = setTimeout(() => {
+      this.highlightedSummarySection = null;
+      this.summaryHighlightTimeout = null;
+    }, 1600);
+  }
+
+  private initializeSummarySectionObserver(): void {
+    this.summarySectionObserver?.disconnect();
+
+    if (!this.summarySections?.length) {
+      return;
+    }
+
+    const scrollContainer = document.querySelector(
+      '.demand-new-page',
+    ) as HTMLElement | null;
+
+    this.summarySectionObserver = new IntersectionObserver(
+      (entries) => {
+        const visibleEntries = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((first, second) => {
+            const firstDistance = Math.abs(first.boundingClientRect.top - 140);
+
+            const secondDistance = Math.abs(
+              second.boundingClientRect.top - 140,
+            );
+
+            return firstDistance - secondDistance;
+          });
+
+        const activeEntry = visibleEntries[0];
+
+        if (!activeEntry) {
+          return;
+        }
+
+        const sectionId = activeEntry.target.id as SummarySectionId;
+
+        const sectionExists = this.summaryNavigationItems.some(
+          (item) => item.id === sectionId,
+        );
+
+        if (sectionExists) {
+          this.activeSummarySection = sectionId;
+        }
+      },
+      {
+        root: scrollContainer,
+        rootMargin: '-110px 0px -60% 0px',
+        threshold: [0, 0.1, 0.25, 0.5],
+      },
+    );
+
+    this.summarySections.forEach((section) => {
+      this.summarySectionObserver?.observe(section.nativeElement);
+    });
+  }
+
+  trackSummaryNavigationItem(
+    index: number,
+    item: SummaryNavigationItem,
+  ): SummarySectionId {
+    return item.id;
+  }
+
+  private loadActiveProfessionals(): void {
+    this.professionals = [];
+    this.professionalsError = null;
+    this.isLoadingProfessionals = true;
+
+    this.programProfessionalService
+      .getActive()
+      .pipe(finalize(() => (this.isLoadingProfessionals = false)))
+      .subscribe({
+        next: (response: any) => {
+          const items = this.extractArray(response);
+
+          this.professionals = items
+            .map((item: any) => this.normalizeProfessionalForCitation(item))
+            .filter(
+              (item: any) =>
+                !!item.id && !item.deletedAt && item.active !== false,
+            )
+            .sort((a: any, b: any) =>
+              String(a.name).localeCompare(String(b.name), 'es', {
+                sensitivity: 'base',
+              }),
+            );
+
+          if (!this.professionals.length) {
+            this.professionalsError =
+              'No hay facultativos activos disponibles.';
+          }
+        },
+        error: (error) => {
+          console.error(
+            '[DemandNew] Error cargando facultativos activos:',
+            error,
+          );
+
+          this.professionals = [];
+          this.professionalsError =
+            'No fue posible cargar los facultativos activos.';
+        },
+      });
+  }
+
+  private normalizeProfessionalForCitation(raw: any): any {
+    const programs = Array.isArray(raw?.programs)
+      ? raw.programs
+          .filter((program: any) => program && !program.deletedAt)
+          .map((program: any) => ({
+            id: Number(program.id),
+            name: String(
+              program.name ?? program.nombre ?? `Programa ${program.id}`,
+            ),
+          }))
+      : [];
+
+    const programIds = Array.isArray(raw?.programIds)
+      ? raw.programIds
+          .map((id: any) => Number(id))
+          .filter((id: number) => Number.isFinite(id))
+      : programs.map((program: any) => program.id);
+
+    return {
+      ...raw,
+      id: Number(raw?.id ?? raw?.professionalUserId ?? raw?.userId),
+      name:
+        raw?.name ?? raw?.nombre ?? raw?.fullName ?? 'Facultativo sin nombre',
+      professionId:
+        raw?.professionId ?? raw?.profession_id ?? raw?.profession?.id ?? null,
+      professionName:
+        raw?.professionName ??
+        raw?.profession_name ??
+        raw?.profession?.name ??
+        raw?.profession?.nombre ??
+        '',
+      email: raw?.email ?? null,
+      phone: raw?.phone ?? raw?.telefono ?? null,
+      active: raw?.active,
+      deletedAt: raw?.deletedAt ?? raw?.deleted_at ?? null,
+      programIds,
+      programs,
+      programNames: programs.map((program: any) => program.name).join(', '),
+    };
+  }
+
+  private formatDateForBackend(
+    value: Date | string | null | undefined,
+  ): string | null {
+    if (!value) {
+      return null;
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim();
+
+      if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
+        return normalized;
+      }
+    }
+
+    const date = value instanceof Date ? value : new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return null;
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  }
+
+  private applySelectedProfessionalToCitation(professionalId: number): void {
+    if (!professionalId) {
+      this.citationForm.patchValue(
+        {
+          professionName: '',
+        },
+        { emitEvent: false },
+      );
+      return;
+    }
+
+    const selected = this.professionals.find(
+      (item) => Number(item.id) === Number(professionalId),
+    );
+
+    if (!selected) {
+      return;
+    }
+
+    this.citationForm.patchValue(
+      {
+        professionName: selected.professionName || '',
+      },
+      { emitEvent: false },
+    );
+  }
+
+  private extractArray(raw: any): any[] {
+    if (Array.isArray(raw)) {
+      return raw;
+    }
+
+    if (Array.isArray(raw?.data)) {
+      return raw.data;
+    }
+
+    if (Array.isArray(raw?.content)) {
+      return raw.content;
+    }
+
+    if (Array.isArray(raw?.items)) {
+      return raw.items;
+    }
+
+    if (Array.isArray(raw?.results)) {
+      return raw.results;
+    }
+
+    return [];
   }
 
   private loadDemandCatalogs(): void {
@@ -551,6 +1061,7 @@ export class DemandNewComponent implements OnInit {
   }
 
   searchPerson(): void {
+    this.showDemandantDetails = false;
     this.searchForm.markAllAsTouched();
 
     if (this.searchForm.invalid || this.isSearching) return;
@@ -890,6 +1401,106 @@ export class DemandNewComponent implements OnInit {
       });
   }
 
+  saveInterview(): void {
+    this.interviewForm.markAllAsTouched();
+
+    if (this.interviewForm.invalid || this.isSavingInterview) {
+      return;
+    }
+
+    const episodeId = this.getCurrentEpisodeId();
+
+    if (!episodeId) {
+      this.interviewError =
+        'No fue posible identificar el episodio para registrar entrevista.';
+      return;
+    }
+
+    const programId = this.tokenService.getActiveProgramId();
+
+    if (!programId) {
+      this.interviewError =
+        'No fue posible identificar el programa activo para registrar entrevista.';
+      return;
+    }
+
+    const raw = this.interviewForm.getRawValue();
+
+    const eventTime = this.buildTime24From12Hour(
+      this.toStringOrNull(raw.eventHour),
+      this.toStringOrNull(raw.eventPeriod) ?? 'AM',
+    );
+
+    const payload = {
+      eventTypeCode: 'ENTREVISTA',
+      eventDate:
+        this.toStringOrNull(raw.eventDate) ??
+        new Date().toISOString().slice(0, 10),
+      eventTime,
+      programId: Number(programId),
+      comment: this.toStringOrNull(raw.comment),
+      observation: this.toStringOrNull(raw.observation),
+      nextAction: this.toStringOrNull(raw.nextAction),
+      nextActionDate: this.toBackendDate(raw.nextActionDate),
+    };
+
+    console.log('[DemandNew] Payload entrevista:', payload);
+    console.log('[DemandNew] Episodio:', episodeId);
+
+    this.isSavingInterview = true;
+    this.interviewError = null;
+    this.interviewSuccess = null;
+
+    this.demandEpisodeService
+      .createEvent(episodeId, payload)
+      .pipe(finalize(() => (this.isSavingInterview = false)))
+      .subscribe({
+        next: (event) => {
+          console.log('[DemandNew] Entrevista registrada:', event);
+
+          if (event?.id) {
+            this.episodeEvents = [
+              ...(this.episodeEvents ?? []).filter(
+                (item: any) => Number(item.id) !== Number(event.id),
+              ),
+              event,
+            ];
+          }
+
+          this.interviewSuccess = 'Entrevista registrada correctamente.';
+
+          this.interviewForm.reset({
+            eventDate: new Date(),
+            eventHour: '',
+            eventPeriod: 'AM',
+            comment: '',
+            observation: '',
+            nextAction: '',
+            nextActionDate: null,
+          });
+          this.loadEpisodeLongitudinal(episodeId);
+        },
+        error: (error) => {
+          console.error('[DemandNew] Error registrando entrevista:', error);
+
+          if (error?.status === 403) {
+            this.interviewError =
+              'No tiene permisos para registrar entrevista en el episodio.';
+            return;
+          }
+
+          if (error?.status === 400) {
+            this.interviewError =
+              'No fue posible registrar la entrevista. Revise si el backend acepta eventTypeCode ENTREVISTA.';
+            return;
+          }
+
+          this.interviewError =
+            'No fue posible registrar la entrevista. Intente nuevamente.';
+        },
+      });
+  }
+
   private toStringOrNull(value: unknown): string | null {
     const text = String(value ?? '').trim();
     return text.length ? text : null;
@@ -1001,8 +1612,6 @@ export class DemandNewComponent implements OnInit {
             observation: '',
           });
 
-          this.showObservationFormPanel = false;
-
           this.loadEpisodeLongitudinal(episodeId);
         },
         error: (error) => {
@@ -1082,18 +1691,6 @@ export class DemandNewComponent implements OnInit {
     }
   }
 
-  showObservationForm(): void {
-    if (!this.createdEpisode && !this.episodeSummary) {
-      this.observationError =
-        'Debe existir un episodio para registrar una observación.';
-      return;
-    }
-
-    this.observationError = null;
-    this.observationSuccess = null;
-    this.showObservationFormPanel = true;
-  }
-
   loadEpisodeLongitudinal(episodeId: number): void {
     if (!episodeId) return;
 
@@ -1107,8 +1704,57 @@ export class DemandNewComponent implements OnInit {
         next: (response) => {
           console.log('[DemandNew] Longitudinal episodio:', response);
 
+          const events = response?.events ?? [];
+
+          console.table(
+            events.map((event: any) => ({
+              id: event?.id,
+              eventTypeCode:
+                event?.eventType?.code ??
+                event?.eventTypeCode ??
+                event?.typeCode ??
+                event?.code ??
+                '',
+              eventTypeName:
+                event?.eventType?.name ?? event?.eventTypeName ?? '',
+              eventDate: event?.eventDate,
+              eventTime: event?.eventTime,
+              relatedEventId:
+                event?.relatedEventId ??
+                event?.relatedEvent?.id ??
+                event?.citationEventId ??
+                event?.citation?.id ??
+                event?.parentEventId ??
+                '',
+              attendanceStatusId:
+                event?.attendanceStatus?.id ?? event?.attendanceStatusId ?? '',
+              attendanceStatusName:
+                event?.attendanceStatus?.name ??
+                event?.attendanceStatusName ??
+                '',
+              comment: event?.comment,
+            })),
+          );
+
+          const attendanceEvents = events.filter((event: any) => {
+            const code = String(
+              event?.eventType?.code ??
+                event?.eventTypeCode ??
+                event?.typeCode ??
+                event?.code ??
+                '',
+            )
+              .toUpperCase()
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '');
+
+            return code === 'ASISTENCIA';
+          });
+
+          console.log('[DemandNew] Eventos ASISTENCIA:', attendanceEvents);
+
           this.longitudinal = response;
-          this.episodeEvents = response?.events ?? [];
+          this.episodeEvents = events;
         },
         error: (error) => {
           console.error('[DemandNew] Error cargando longitudinal:', error);
@@ -1121,51 +1767,248 @@ export class DemandNewComponent implements OnInit {
       });
   }
 
-  showCitationForm(): void {
-    if (!this.getCurrentEpisodeId()) {
-      this.citationError =
-        'Debe existir un episodio activo para registrar una citación.';
-      return;
+  openActionPanel(panel: ActiveActionPanel): void {
+    this.activeActionPanel = panel;
+
+    this.citationError = null;
+    this.citationSuccess = null;
+
+    this.observationError = null;
+    this.observationSuccess = null;
+
+    this.attendanceError = null;
+    this.attendanceSuccess = null;
+
+    this.interviewError = null;
+    this.interviewSuccess = null;
+
+    if (panel === 'citation') {
+      this.citationForm.reset({
+        eventDate: new Date(),
+        eventHour: '',
+        eventPeriod: 'AM',
+        programProfessionalId: null,
+        professionName: '',
+        comment: '',
+        citationComment: '',
+      });
     }
 
-    this.citationError = null;
-    this.citationSuccess = null;
-    this.showCitationFormPanel = true;
-    this.showObservationFormPanel = false;
+    if (panel === 'attendance') {
+      this.attendanceForm.reset({
+        citationEventId: this.pendingCitationEvents[0]?.id ?? null,
+        attendanceStatusId: null,
+        comment: '',
+      });
+    }
 
-    const today = new Date().toISOString().slice(0, 10);
+    if (panel === 'interview') {
+      this.interviewForm.reset({
+        eventDate: new Date(),
+        eventHour: '',
+        eventPeriod: 'AM',
+        comment: '',
+        observation: '',
+        nextAction: '',
+        nextActionDate: null,
+      });
+    }
 
-    this.citationForm.reset({
-      eventDate: today,
-      eventHour: '',
-      eventPeriod: 'AM',
-      professionalUserId: null,
-      professionName: '',
-      comment: '',
-      citationComment: '',
-    });
+    if (panel === 'observation') {
+      this.observationForm.reset({
+        comment: '',
+        observation: '',
+      });
+    }
   }
 
-  closeCitationForm(): void {
-    this.showCitationFormPanel = false;
-    this.citationError = null;
-    this.citationSuccess = null;
+  private todayDateOnly(): string {
+    return new Date().toISOString().slice(0, 10);
+  }
 
-    this.citationForm.reset({
-      eventDate: '',
-      eventHour: '',
-      eventPeriod: 'AM',
-      professionalUserId: null,
-      professionName: '',
-      comment: '',
-      citationComment: '',
+  isExpiredCitation(item: any): boolean {
+    const eventDate = String(item?.eventDate ?? '');
+
+    if (!eventDate) {
+      return false;
+    }
+
+    return eventDate < this.todayDateOnly();
+  }
+
+  isTodayCitation(item: any): boolean {
+    const eventDate = String(item?.eventDate ?? '');
+
+    if (!eventDate) {
+      return false;
+    }
+
+    return eventDate === this.todayDateOnly();
+  }
+
+  isFutureCitation(item: any): boolean {
+    const eventDate = String(item?.eventDate ?? '');
+
+    if (!eventDate) {
+      return false;
+    }
+
+    return eventDate > this.todayDateOnly();
+  }
+
+  get expiredPendingCitationEvents(): any[] {
+    return this.pendingCitationEvents.filter((item: any) =>
+      this.isExpiredCitation(item),
+    );
+  }
+
+  getCitationNumber(item: any): number {
+    const ordered = [...(this.citationEvents ?? [])].sort((a: any, b: any) => {
+      const dateA = `${a.eventDate ?? ''}T${a.eventTime ?? '00:00:00'}`;
+      const dateB = `${b.eventDate ?? ''}T${b.eventTime ?? '00:00:00'}`;
+
+      return dateA.localeCompare(dateB);
     });
+
+    const index = ordered.findIndex(
+      (event: any) => Number(event.id) === Number(item.id),
+    );
+
+    return index >= 0 ? index + 1 : 0;
+  }
+
+  getAttendanceForCitation(citation: any): any | null {
+    const citationId = Number(citation?.id);
+
+    if (!citationId) {
+      return null;
+    }
+
+    const citationDate = String(citation?.eventDate ?? '').trim();
+    const citationTime = this.normalizeEventTime(citation?.eventTime);
+    const citationProfession = this.normalizeText(
+      citation?.professionName ?? citation?.profession?.name,
+    );
+
+    const attendanceEvents = (this.episodeEvents ?? [])
+      .filter((event: any) => {
+        const code = this.normalizeText(
+          event?.eventType?.code ??
+            event?.eventTypeCode ??
+            event?.typeCode ??
+            event?.code,
+        );
+
+        return code === 'ASISTENCIA';
+      })
+      .sort((a: any, b: any) => {
+        const dateA = String(a?.createdAt ?? '');
+        const dateB = String(b?.createdAt ?? '');
+        return dateB.localeCompare(dateA);
+      });
+
+    return (
+      attendanceEvents.find((event: any) => {
+        const relatedEventId = Number(
+          event?.relatedEventId ??
+            event?.relatedEvent?.id ??
+            event?.citationEventId ??
+            event?.citation?.id ??
+            event?.parentEventId,
+        );
+
+        return relatedEventId === citationId;
+      }) ??
+      attendanceEvents.find((event: any) => {
+        const eventDate = String(event?.eventDate ?? '').trim();
+        const eventTime = this.normalizeEventTime(event?.eventTime);
+        const eventProfession = this.normalizeText(
+          event?.professionName ?? event?.profession?.name,
+        );
+
+        return (
+          eventDate === citationDate &&
+          eventTime === citationTime &&
+          (!citationProfession || eventProfession === citationProfession)
+        );
+      }) ??
+      null
+    );
+  }
+
+  private normalizeEventTime(value: any): string {
+    return String(value ?? '')
+      .trim()
+      .slice(0, 5);
+  }
+
+  private normalizeText(value: any): string {
+    return String(value ?? '')
+      .toUpperCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
+  }
+
+  getCitationAttendanceLabel(citation: any): string {
+    const attendance = this.getAttendanceForCitation(citation);
+
+    const statusFromAttendance =
+      attendance?.attendanceStatus?.name ??
+      attendance?.attendanceStatusName ??
+      attendance?.attendanceStatus?.code ??
+      attendance?.attendanceStatusCode ??
+      null;
+
+    const statusFromCitation =
+      citation?.attendanceStatus?.name ??
+      citation?.attendanceStatusName ??
+      citation?.attendanceStatus?.code ??
+      citation?.attendanceStatusCode ??
+      null;
+
+    return statusFromAttendance || statusFromCitation || 'Pendiente';
+  }
+
+  get selectedAttendanceCitationIsExpired(): boolean {
+    return (
+      !!this.selectedAttendanceCitation &&
+      this.isExpiredCitation(this.selectedAttendanceCitation)
+    );
+  }
+
+  get currentPendingCitationEvents(): any[] {
+    return this.pendingCitationEvents.filter(
+      (item: any) => !this.isExpiredCitation(item),
+    );
+  }
+
+  getCitationTemporalLabel(item: any): string {
+    if (this.isExpiredCitation(item)) {
+      return 'Vencida pendiente';
+    }
+
+    if (this.isTodayCitation(item)) {
+      return 'Citación de hoy';
+    }
+
+    if (this.isFutureCitation(item)) {
+      return 'Próxima citación';
+    }
+
+    return 'Sin fecha';
+  }
+
+  closeActionPanel(): void {
+    this.activeActionPanel = null;
   }
 
   saveCitation(): void {
     this.citationForm.markAllAsTouched();
 
-    if (this.citationForm.invalid || this.isSavingCitation) return;
+    if (this.citationForm.invalid || this.isSavingCitation) {
+      return;
+    }
 
     const episodeId = this.getCurrentEpisodeId();
 
@@ -1185,7 +2028,14 @@ export class DemandNewComponent implements OnInit {
 
     const raw = this.citationForm.getRawValue();
 
+    const eventDate = this.formatDateForBackend(raw.eventDate);
     const eventTime = this.buildEventTime(raw.eventHour, raw.eventPeriod);
+
+    if (!eventDate) {
+      this.citationError =
+        'Debe seleccionar una fecha válida para la citación.';
+      return;
+    }
 
     if (!eventTime) {
       this.citationError =
@@ -1193,13 +2043,25 @@ export class DemandNewComponent implements OnInit {
       return;
     }
 
+    const stageId =
+      this.longitudinal?.activeEpisode?.currentStageId ??
+      this.longitudinal?.stages?.find((stage: any) => stage?.current)?.id ??
+      null;
+
+    if (!stageId) {
+      this.citationError =
+        'No fue posible identificar la etapa activa del episodio.';
+      return;
+    }
+
     const payload = {
       eventTypeCode: 'CITACION',
-      eventDate: this.toStringOrNull(raw.eventDate),
+      eventDate,
       eventTime,
+      stageId,
       programId: Number(programId),
-      professionalUserId: raw.professionalUserId
-        ? Number(raw.professionalUserId)
+      programProfessionalId: raw.programProfessionalId
+        ? Number(raw.programProfessionalId)
         : null,
       professionName: this.toStringOrNull(raw.professionName),
       comment: this.toStringOrNull(raw.comment),
@@ -1212,33 +2074,43 @@ export class DemandNewComponent implements OnInit {
 
     this.demandEpisodeService
       .createEvent(episodeId, payload)
-      .pipe(finalize(() => (this.isSavingCitation = false)))
+      .pipe(
+        finalize(() => {
+          this.isSavingCitation = false;
+        }),
+      )
       .subscribe({
-        next: (event) => {
+        next: (event: any) => {
           console.log('[DemandNew] Citación registrada:', event);
 
           this.citationSuccess = 'Citación registrada correctamente.';
 
           this.citationForm.reset({
-            eventDate: '',
+            eventDate: new Date(),
             eventHour: '',
             eventPeriod: 'AM',
-            professionalUserId: null,
+            programProfessionalId: null,
             professionName: '',
             comment: '',
             citationComment: '',
           });
 
-          this.showCitationFormPanel = false;
-
           this.loadEpisodeLongitudinal(episodeId);
         },
-        error: (error) => {
+
+        error: (error: HttpErrorResponse) => {
           console.error('[DemandNew] Error registrando citación:', error);
 
-          if (error?.status === 403) {
+          if (error.status === 403) {
             this.citationError =
               'No tiene permisos para registrar citaciones en el episodio.';
+            return;
+          }
+
+          if (error.status === 400) {
+            this.citationError =
+              error.error?.message ||
+              'Los datos de la citación no son válidos.';
             return;
           }
 
@@ -1248,22 +2120,180 @@ export class DemandNewComponent implements OnInit {
       });
   }
 
-  canUseOperativeAction(action: any): boolean {
-    if (!this.getCurrentEpisodeId()) return false;
+  saveAttendance(): void {
+    this.attendanceForm.markAllAsTouched();
 
-    return action.title === 'Nueva citación' || action.title === 'Observación';
-  }
-
-  handleOperativeAction(action: any): void {
-    if (action.title === 'Nueva citación') {
-      this.showCitationForm();
+    if (this.attendanceForm.invalid || this.isSavingAttendance) {
       return;
     }
 
-    if (action.title === 'Observación') {
-      this.showObservationForm();
+    const episodeId = this.getCurrentEpisodeId();
+
+    if (!episodeId) {
+      this.attendanceError =
+        'No fue posible identificar el episodio para registrar asistencia.';
       return;
     }
+
+    const programId = this.tokenService.getActiveProgramId();
+
+    if (!programId) {
+      this.attendanceError =
+        'No fue posible identificar el programa activo para registrar asistencia.';
+      return;
+    }
+
+    const raw = this.attendanceForm.getRawValue();
+
+    const selectedCitation = this.pendingCitationEvents.find(
+      (item: any) => Number(item.id) === Number(raw.citationEventId),
+    );
+
+    if (!selectedCitation) {
+      this.attendanceError =
+        'Debe seleccionar una citación válida para registrar asistencia.';
+      return;
+    }
+
+    const payload = {
+      eventTypeCode: 'ASISTENCIA',
+
+      eventDate:
+        this.toStringOrNull(selectedCitation?.eventDate) ??
+        new Date().toISOString().slice(0, 10),
+
+      eventTime: selectedCitation?.eventTime ?? null,
+
+      stageId:
+        this.longitudinal?.activeEpisode?.currentStageId ??
+        this.longitudinal?.stages?.find((stage: any) => stage?.current)?.id ??
+        null,
+
+      programId: Number(programId),
+
+      relatedEventId: raw.citationEventId ? Number(raw.citationEventId) : null,
+
+      attendanceStatusId: raw.attendanceStatusId
+        ? Number(raw.attendanceStatusId)
+        : null,
+
+      programProfessionalId:
+        selectedCitation?.programProfessionalId ??
+        selectedCitation?.programProfessional?.id ??
+        null,
+
+      professionName: this.toStringOrNull(selectedCitation?.professionName),
+
+      comment: this.toStringOrNull(raw.comment),
+    };
+
+    console.log('[DemandNew] Payload asistencia:', payload);
+    console.log('[DemandNew] Citación seleccionada:', selectedCitation);
+    console.log('[DemandNew] Episodio:', episodeId);
+
+    this.isSavingAttendance = true;
+    this.attendanceError = null;
+    this.attendanceSuccess = null;
+
+    this.demandEpisodeService
+      .createEvent(episodeId, payload)
+      .pipe(
+        finalize(() => {
+          this.isSavingAttendance = false;
+        }),
+      )
+      .subscribe({
+        next: (event: any) => {
+          console.log('[DemandNew] Respuesta asistencia registrada:', event);
+
+          console.table([
+            {
+              id: event?.id,
+
+              eventTypeCode:
+                event?.eventType?.code ??
+                event?.eventTypeCode ??
+                event?.typeCode ??
+                event?.code ??
+                '',
+
+              relatedEventId:
+                event?.relatedEventId ??
+                event?.relatedEvent?.id ??
+                event?.citationEventId ??
+                event?.citation?.id ??
+                '',
+
+              attendanceStatusId:
+                event?.attendanceStatus?.id ?? event?.attendanceStatusId ?? '',
+
+              attendanceStatusName:
+                event?.attendanceStatus?.name ??
+                event?.attendanceStatusName ??
+                '',
+
+              comment: event?.comment,
+            },
+          ]);
+
+          if (event?.id) {
+            this.episodeEvents = [
+              ...(this.episodeEvents ?? []).filter(
+                (item: any) => Number(item.id) !== Number(event.id),
+              ),
+              event,
+            ];
+          }
+
+          this.attendanceSuccess = 'Asistencia registrada correctamente.';
+
+          this.attendanceForm.reset({
+            citationEventId: null,
+            attendanceStatusId: null,
+            comment: '',
+          });
+
+          this.attendanceForm.markAsPristine();
+          this.attendanceForm.markAsUntouched();
+
+          /*
+           * Cerramos directamente el card.
+           * No usamos closeActionPanel() porque todavía
+           * isSavingAttendance puede continuar en true
+           * hasta que se ejecute finalize().
+           */
+          this.activeActionPanel = null;
+
+          /*
+           * Recarga completa para actualizar:
+           * - estado de asistencia de la citación;
+           * - eventos registrados;
+           * - citaciones pendientes;
+           * - indicadores del episodio.
+           */
+          this.loadEpisodeLongitudinal(episodeId);
+        },
+
+        error: (error: any) => {
+          console.error('[DemandNew] Error registrando asistencia:', error);
+
+          if (error?.status === 403) {
+            this.attendanceError =
+              'No tiene permisos para registrar asistencia en el episodio.';
+            return;
+          }
+
+          if (error?.status === 400) {
+            this.attendanceError =
+              error?.error?.message ||
+              'No fue posible registrar la asistencia. Revise los datos ingresados.';
+            return;
+          }
+
+          this.attendanceError =
+            'No fue posible registrar la asistencia. Intente nuevamente.';
+        },
+      });
   }
 
   private buildEventTime(
@@ -1297,6 +2327,53 @@ export class DemandNewComponent implements OnInit {
     return `${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
   }
 
+  private buildTime24From12Hour(
+    hourValue: string | null,
+    periodValue: string | null,
+  ): string | null {
+    const hourText = String(hourValue ?? '').trim();
+    const period = String(periodValue ?? 'AM')
+      .toUpperCase()
+      .trim();
+
+    if (!hourText) {
+      return null;
+    }
+
+    const parts = hourText.split(':');
+
+    if (parts.length !== 2) {
+      return null;
+    }
+
+    let hour = Number(parts[0]);
+    const minutes = Number(parts[1]);
+
+    if (
+      Number.isNaN(hour) ||
+      Number.isNaN(minutes) ||
+      hour < 1 ||
+      hour > 12 ||
+      minutes < 0 ||
+      minutes > 59
+    ) {
+      return null;
+    }
+
+    if (period === 'PM' && hour < 12) {
+      hour += 12;
+    }
+
+    if (period === 'AM' && hour === 12) {
+      hour = 0;
+    }
+
+    return `${String(hour).padStart(2, '0')}:${String(minutes).padStart(
+      2,
+      '0',
+    )}:00`;
+  }
+
   formatCitationHourInput(): void {
     const raw = String(this.citationForm.get('eventHour')?.value ?? '')
       .replace(/\D/g, '')
@@ -1323,6 +2400,39 @@ export class DemandNewComponent implements OnInit {
     );
   }
 
+  formatInterviewHourInput(): void {
+    const control = this.interviewForm.get('eventHour');
+    const value = String(control?.value ?? '').trim();
+
+    if (!value) {
+      return;
+    }
+
+    const parts = value.split(':');
+
+    if (parts.length !== 2) {
+      return;
+    }
+
+    const hour = Number(parts[0]);
+    const minutes = Number(parts[1]);
+
+    if (
+      Number.isNaN(hour) ||
+      Number.isNaN(minutes) ||
+      hour < 1 ||
+      hour > 12 ||
+      minutes < 0 ||
+      minutes > 59
+    ) {
+      return;
+    }
+
+    control?.setValue(
+      `${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`,
+    );
+  }
+
   get lastEpisodeEvent(): any | null {
     const events = this.episodeEvents ?? [];
 
@@ -1336,14 +2446,412 @@ export class DemandNewComponent implements OnInit {
     })[0];
   }
 
-  get citationEvents(): any[] {
-    return (this.episodeEvents ?? []).filter(
-      (event: any) => event?.eventType?.code === 'CITACION',
+  get orderedEpisodeEvents(): any[] {
+    const events = [...(this.episodeEvents ?? [])];
+
+    return events.sort((a: any, b: any) => {
+      const dateA = this.getEventSortDate(a);
+      const dateB = this.getEventSortDate(b);
+
+      return dateB - dateA;
+    });
+  }
+
+  get filteredEpisodeEvents(): any[] {
+    const events = this.orderedEpisodeEvents;
+
+    if (this.historyTypeFilter === 'TODOS') {
+      return events;
+    }
+
+    return events.filter((event: any) => {
+      return this.getEventTypeCode(event) === this.historyTypeFilter;
+    });
+  }
+
+  get visibleEpisodeEvents(): any[] {
+    if (this.showAllHistory) {
+      return this.filteredEpisodeEvents;
+    }
+
+    return this.filteredEpisodeEvents.slice(0, this.historyDisplayLimit);
+  }
+
+  get hiddenHistoryCount(): number {
+    return Math.max(
+      0,
+      this.filteredEpisodeEvents.length - this.visibleEpisodeEvents.length,
     );
+  }
+
+  setHistoryTypeFilter(type: string): void {
+    this.historyTypeFilter = type;
+    this.showAllHistory = false;
+  }
+
+  toggleAllHistory(): void {
+    this.showAllHistory = !this.showAllHistory;
+  }
+
+  private getEventSortDate(event: any): number {
+    const eventDate = String(event?.eventDate ?? '').trim();
+    const eventTime = String(event?.eventTime ?? '00:00:00')
+      .trim()
+      .slice(0, 8);
+
+    if (eventDate) {
+      const parsed = new Date(`${eventDate}T${eventTime}`).getTime();
+
+      if (!Number.isNaN(parsed)) {
+        return parsed;
+      }
+    }
+
+    const createdAt = new Date(event?.createdAt ?? '').getTime();
+
+    return Number.isNaN(createdAt) ? 0 : createdAt;
+  }
+
+  getEventTypeCode(event: any): string {
+    return String(
+      event?.eventType?.code ??
+        event?.eventTypeCode ??
+        event?.typeCode ??
+        event?.code ??
+        '',
+    )
+      .toUpperCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
+  }
+
+  getEventIcon(event: any): string {
+    const code = this.getEventTypeCode(event);
+
+    switch (code) {
+      case 'CITACION':
+      case 'NUEVA_CITACION':
+        return 'event_available';
+
+      case 'ASISTENCIA':
+        return 'how_to_reg';
+
+      case 'ENTREVISTA':
+        return 'psychology';
+
+      case 'OBSERVACION':
+        return 'notes';
+
+      case 'REFERENCIA':
+        return 'sync_alt';
+
+      case 'INGRESO':
+        return 'fact_check';
+
+      case 'EGRESO':
+      case 'CIERRE':
+        return 'logout';
+
+      default:
+        return 'assignment_turned_in';
+    }
+  }
+
+  getEventCardClass(event: any): string {
+    const code = this.getEventTypeCode(event);
+
+    switch (code) {
+      case 'CITACION':
+      case 'NUEVA_CITACION':
+        return 'event-card--citation';
+
+      case 'ASISTENCIA':
+        return 'event-card--attendance';
+
+      case 'ENTREVISTA':
+        return 'event-card--interview';
+
+      case 'OBSERVACION':
+        return 'event-card--observation';
+
+      case 'REFERENCIA':
+        return 'event-card--reference';
+
+      case 'INGRESO':
+        return 'event-card--entry';
+
+      case 'EGRESO':
+      case 'CIERRE':
+        return 'event-card--closure';
+
+      default:
+        return 'event-card--default';
+    }
+  }
+
+  getEventProfessionalName(event: any): string | null {
+    return (
+      event?.programProfessionalName ??
+      event?.professionalName ??
+      event?.programProfessional?.name ??
+      event?.professional?.name ??
+      event?.professionalUser?.name ??
+      null
+    );
+  }
+
+  getEventProfessionName(event: any): string | null {
+    return event?.professionName ?? event?.profession?.name ?? null;
+  }
+
+  getRelatedCitation(event: any): any | null {
+    const relatedEventId = Number(
+      event?.relatedEventId ??
+        event?.relatedEvent?.id ??
+        event?.citationEventId ??
+        null,
+    );
+
+    if (!relatedEventId) {
+      return null;
+    }
+
+    return (
+      this.citationEvents.find(
+        (citation: any) => Number(citation.id) === relatedEventId,
+      ) ?? null
+    );
+  }
+
+  get citationEvents(): any[] {
+    return (this.episodeEvents ?? [])
+      .filter((event: any) => {
+        const code = String(
+          event?.eventType?.code ?? event?.eventTypeCode ?? '',
+        )
+          .toUpperCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
+
+        return code === 'CITACION' || code === 'NUEVA_CITACION';
+      })
+      .sort((a: any, b: any) => {
+        const dateA = `${a.eventDate ?? ''}T${a.eventTime ?? '00:00:00'}`;
+        const dateB = `${b.eventDate ?? ''}T${b.eventTime ?? '00:00:00'}`;
+        return dateB.localeCompare(dateA);
+      });
+  }
+
+  get pendingCitationEvents(): any[] {
+    return this.citationEvents.filter((event: any) => {
+      const hasAttendance = !!this.getAttendanceForCitation(event);
+
+      if (hasAttendance) {
+        return false;
+      }
+
+      const status = this.normalizeText(
+        event?.attendanceStatus?.code ??
+          event?.attendanceStatusCode ??
+          event?.attendanceStatusName,
+      );
+
+      return (
+        !status ||
+        status === 'PENDIENTE' ||
+        status === 'AGENDADO' ||
+        status === 'SIN_ESTADO'
+      );
+    });
+  }
+
+  get selectedAttendanceCitation(): any | null {
+    const selectedId = this.attendanceForm.getRawValue().citationEventId;
+
+    if (!selectedId) {
+      return null;
+    }
+
+    return (
+      this.pendingCitationEvents.find(
+        (item: any) => Number(item.id) === Number(selectedId),
+      ) ?? null
+    );
+  }
+
+  formatCitationOptionDate(item: any): string {
+    const value = String(item?.eventDate ?? '');
+
+    if (!value) {
+      return 'Sin fecha';
+    }
+
+    const parts = value.split('-');
+
+    if (parts.length === 3) {
+      return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+
+    return value;
+  }
+
+  formatCitationOptionTime(item: any): string {
+    const value = String(item?.eventTime ?? '');
+
+    if (!value) {
+      return 'Sin hora';
+    }
+
+    return value.slice(0, 5);
+  }
+
+  getNextCitationNumberForActiveProgram(): number {
+    const activeProgramId = Number(this.tokenService.getActiveProgramId());
+
+    if (!activeProgramId) {
+      return 1;
+    }
+
+    const currentProgramCitations = this.citationEvents.filter((event: any) => {
+      const eventProgramId =
+        event?.program?.id ?? event?.programId ?? event?.program_id ?? null;
+
+      return Number(eventProgramId) === activeProgramId;
+    });
+
+    return currentProgramCitations.length + 1;
+  }
+
+  getSemaphoreClass(value: string | null | undefined): string {
+    const color = this.normalizeSemaphoreColor(value);
+
+    if (color === 'ROJO') {
+      return 'semaphore-red';
+    }
+
+    if (color === 'AMARILLO') {
+      return 'semaphore-yellow';
+    }
+
+    if (color === 'VERDE') {
+      return 'semaphore-green';
+    }
+
+    return 'semaphore-empty';
+  }
+
+  getSemaphoreDescription(value: string | null | undefined): string {
+    const color = this.normalizeSemaphoreColor(value);
+
+    if (color === 'ROJO') {
+      return 'Atención prioritaria';
+    }
+
+    if (color === 'AMARILLO') {
+      return 'Seguimiento preventivo';
+    }
+
+    if (color === 'VERDE') {
+      return 'Dentro de plazo';
+    }
+
+    return 'Sin clasificación';
+  }
+
+  private normalizeSemaphoreColor(value: string | null | undefined): string {
+    return String(value ?? '')
+      .toUpperCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
   }
 
   get hasActiveEpisode(): boolean {
     return !!this.getCurrentEpisodeId();
   }
 
+  private toBackendDate(value: any): string | null {
+    if (!value) {
+      return null;
+    }
+
+    if (value instanceof Date) {
+      const year = value.getFullYear();
+      const month = String(value.getMonth() + 1).padStart(2, '0');
+      const day = String(value.getDate()).padStart(2, '0');
+
+      return `${year}-${month}-${day}`;
+    }
+
+    const text = String(value).trim();
+
+    if (!text) {
+      return null;
+    }
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+      return text;
+    }
+
+    const parts = text.split('/');
+
+    if (parts.length === 3) {
+      const day = parts[0].padStart(2, '0');
+      const month = parts[1].padStart(2, '0');
+      const year = parts[2];
+
+      return `${year}-${month}-${day}`;
+    }
+
+    return text;
+  }
+
+  formatDisplayDate(value: any): string {
+    if (!value) {
+      return 'Sin fecha';
+    }
+
+    if (value instanceof Date) {
+      const day = String(value.getDate()).padStart(2, '0');
+      const month = String(value.getMonth() + 1).padStart(2, '0');
+      const year = value.getFullYear();
+
+      return `${day}/${month}/${year}`;
+    }
+
+    const text = String(value).trim();
+
+    if (!text) {
+      return 'Sin fecha';
+    }
+
+    // Formato backend: yyyy-MM-dd
+    const onlyDate = text.slice(0, 10);
+    const parts = onlyDate.split('-');
+
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+
+    return text;
+  }
+
+  formatDisplayTime(value: any): string {
+    if (!value) {
+      return 'Sin hora';
+    }
+
+    return String(value).trim().slice(0, 5);
+  }
+
+  toggleDemandantDetails(): void {
+    this.showDemandantDetails = !this.showDemandantDetails;
+  }
+
+  get observationEvents(): any[] {
+    return this.episodeEvents.filter(
+      (event: any) => event?.eventType?.code === 'OBSERVACION',
+    );
+  }
 }

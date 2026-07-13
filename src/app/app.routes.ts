@@ -314,6 +314,29 @@ export const routes: Routes = [
       },
 
       {
+        path: 'program-professionals',
+        loadComponent: () =>
+          import('./views/program-professionals/program-professionals.component').then(
+            (m) => m.ProgramProfessionalsComponent,
+          ),
+        canActivate: [roleGuard],
+        data: {
+          module: 'administracion',
+          group: 'Mantenedores',
+          maintainerGroup: 'Red y programas',
+          section: 'maintainer',
+          title: 'Facultativos',
+          description:
+            'Profesionales y facultativos asociados a programas para citaciones y atenciones.',
+          icon: 'medical_services',
+          roles: ['ADMIN'],
+          iconColor: '#455a64',
+          tag: 'Nuevo',
+          order: 40,
+        },
+      },
+
+      {
         path: 'substances',
         loadComponent: () =>
           import('./views/substances/substances.component').then(
@@ -446,7 +469,7 @@ export const routes: Routes = [
           order: 225,
         },
       },
-      
+
       {
         path: 'conv-prev',
         loadComponent: () =>

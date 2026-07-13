@@ -92,12 +92,26 @@ export class DemandEpisodeService {
       eventTypeCode: string;
       eventDate?: string | null;
       eventTime?: string | null;
+
+      stageId?: number | null;
       programId?: number | null;
+
+      programProfessionalId?: number | null;
+      professionalUserId?: number | null;
+      professionName?: string | null;
+
+      relatedEventId?: number | null;
+
+      attendanceStatusId?: number | null;
+      attendanceStatusCode?: string | null;
+
       comment?: string | null;
       citationComment?: string | null;
       observation?: string | null;
+
       nextAction?: string | null;
       nextActionDate?: string | null;
+
       resultCode?: string | null;
       stateCode?: string | null;
     },

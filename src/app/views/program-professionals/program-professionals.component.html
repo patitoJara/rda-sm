@@ -1,0 +1,353 @@
+<section class="program-professionals-page">
+  <!-- HERO -->
+  <header class="page-hero">
+    <div>
+      <p class="eyebrow">Mantenedores · Red y programas</p>
+      <h1>Facultativos</h1>
+      <p class="hero-description">
+        Administración de profesionales y facultativos asociados a uno o más
+        programas para citaciones, atenciones y registros operativos.
+      </p>
+    </div>
+
+    <button
+      mat-flat-button
+      class="primary-btn"
+      type="button"
+      (click)="openCreateForm()"
+    >
+      <mat-icon>add</mat-icon>
+      Nuevo profesional
+    </button>
+  </header>
+
+  <!-- FORMULARIO EMBEBIDO -->
+  <mat-card class="form-card" *ngIf="showForm">
+    <div class="section-header">
+      <div>
+        <p class="section-kicker">
+          {{ selectedProfessional ? "Edición" : "Nuevo registro" }}
+        </p>
+        <h2>
+          {{
+            selectedProfessional
+              ? "Editar facultativo"
+              : "Registrar facultativo"
+          }}
+        </h2>
+      </div>
+
+      <button
+        mat-icon-button
+        type="button"
+        aria-label="Cerrar formulario"
+        (click)="cancelForm()"
+        [disabled]="isSaving"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <form
+      class="professional-form"
+      [formGroup]="professionalForm"
+      (ngSubmit)="save()"
+    >
+      <mat-form-field appearance="outline" class="span-2">
+        <mat-label>Nombre del facultativo</mat-label>
+        <input
+          matInput
+          formControlName="name"
+          placeholder="Ej: Dr. Juan Pérez / Psicóloga María Soto"
+        />
+        <mat-error *ngIf="professionalForm.get('name')?.hasError('required')">
+          El nombre del facultativo es obligatorio.
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Profesión</mat-label>
+        <mat-select formControlName="professionId">
+          <mat-option
+            *ngFor="let profession of professions"
+            [value]="profession.id"
+          >
+            {{ profession.name || profession.nombre }}
+          </mat-option>
+        </mat-select>
+
+        <mat-error
+          *ngIf="professionalForm.get('professionId')?.hasError('required')"
+        >
+          Debe seleccionar una profesión.
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Correo electrónico</mat-label>
+        <input
+          matInput
+          type="email"
+          formControlName="email"
+          placeholder="correo@dominio.cl"
+        />
+        <mat-error *ngIf="professionalForm.get('email')?.hasError('email')">
+          Debe ingresar un correo válido.
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Teléfono</mat-label>
+
+        <span matTextPrefix class="phone-prefix">+56 9&nbsp;</span>
+
+        <input
+          matInput
+          formControlName="phone"
+          placeholder="12345678"
+          maxlength="8"
+          inputmode="numeric"
+        />
+
+        <mat-hint>Ingrese solo los 8 dígitos del número móvil.</mat-hint>
+      </mat-form-field>
+
+      <!-- PROGRAMAS MÚLTIPLES -->
+      <mat-form-field appearance="outline" class="span-3">
+        <mat-label>Programas asociados</mat-label>
+
+        <mat-select formControlName="programIds" multiple>
+          <mat-option *ngFor="let program of programs" [value]="program.id">
+            {{ program.name || program.nombre }}
+          </mat-option>
+        </mat-select>
+
+        <mat-hint>
+          Puede asociar el facultativo a más de un programa.
+        </mat-hint>
+
+        <mat-error
+          *ngIf="professionalForm.get('programIds')?.hasError('required')"
+        >
+          Debe seleccionar al menos un programa.
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="span-3">
+        <mat-label>Observación</mat-label>
+        <textarea
+          matInput
+          rows="2"
+          formControlName="observation"
+          placeholder="Antecedentes administrativos u observaciones internas"
+        ></textarea>
+      </mat-form-field>
+
+      <!-- BOTONES VISIBLES -->
+      <div class="form-actions span-full">
+        <button
+          mat-stroked-button
+          class="secondary-btn"
+          type="button"
+          (click)="cancelForm()"
+          [disabled]="isSaving"
+        >
+          <mat-icon>close</mat-icon>
+          Cancelar
+        </button>
+
+        <button
+          mat-flat-button
+          class="primary-btn"
+          type="button"
+          (click)="save()"
+          [disabled]="isSaving"
+        >
+          <mat-icon>{{ isSaving ? "hourglass_top" : "save" }}</mat-icon>
+          {{ isSaving ? "Guardando..." : "Guardar" }}
+        </button>
+      </div>
+    </form>
+  </mat-card>
+
+  <!-- FILTROS -->
+  <mat-card class="filters-card">
+    <form class="filters-grid" [formGroup]="filtersForm">
+      <mat-form-field appearance="outline">
+        <mat-label>Buscar</mat-label>
+        <input
+          matInput
+          type="text"
+          formControlName="search"
+          placeholder="Nombre, profesión, correo o programa"
+        />
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Programa</mat-label>
+        <mat-select formControlName="programId">
+          <mat-option [value]="null">Todos los programas</mat-option>
+
+          <mat-option *ngFor="let program of programs" [value]="program.id">
+            {{ program.name || program.nombre }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Estado</mat-label>
+        <mat-select formControlName="status">
+          <mat-option value="ACTIVE">Activos</mat-option>
+          <mat-option value="DELETED">Eliminados</mat-option>
+          <mat-option value="ALL">Todos</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </form>
+  </mat-card>
+
+  <!-- LISTADO -->
+  <mat-card class="list-card">
+    <div class="section-header">
+      <div>
+        <p class="section-kicker">Registros</p>
+        <h2>Facultativos registrados</h2>
+      </div>
+
+      <span class="counter-chip">
+        {{ filteredProfessionals.length }} registros
+      </span>
+    </div>
+
+    <div
+      class="empty-state"
+      *ngIf="!isLoading && !filteredProfessionals.length"
+    >
+      <mat-icon>medical_services</mat-icon>
+      <h3>No hay facultativos para mostrar</h3>
+      <p>Puede registrar un nuevo facultativo desde el botón superior.</p>
+    </div>
+
+    <div class="loading-state" *ngIf="isLoading">
+      <mat-icon>hourglass_top</mat-icon>
+      <p>Cargando facultativos...</p>
+    </div>
+
+    <div
+      class="table-wrapper"
+      *ngIf="!isLoading && filteredProfessionals.length"
+    >
+      <table class="professionals-table">
+        <thead>
+          <tr>
+            <th>Facultativo</th>
+            <th>Profesión</th>
+            <th>Programas asociados</th>
+            <th>Contacto</th>
+            <th>Estado</th>
+            <th class="actions-column">Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let professional of filteredProfessionals">
+            <td>
+              <div class="person-cell">
+                <strong>{{ professional.name }}</strong>
+                <span>ID {{ professional.id }}</span>
+              </div>
+            </td>
+
+            <td>
+              {{
+                professional.professionName ||
+                  getProfessionName(professional.professionId)
+              }}
+            </td>
+
+            <td>
+              <div class="programs-cell">
+                <ng-container
+                  *ngIf="professional.programIds.length; else noPrograms"
+                >
+                  <span
+                    class="program-chip"
+                    *ngFor="let programId of professional.programIds"
+                  >
+                    {{ getProgramName(programId) }}
+                  </span>
+                </ng-container>
+
+                <ng-template #noPrograms>
+                  <span class="muted-text"> Sin programas asociados </span>
+                </ng-template>
+              </div>
+            </td>
+
+            <td>
+              <div class="contact-cell">
+                <span *ngIf="professional.email">
+                  <mat-icon>mail</mat-icon>
+                  {{ professional.email }}
+                </span>
+
+                <span *ngIf="professional.phone">
+                  <mat-icon>call</mat-icon>
+                  {{ professional.phone }}
+                </span>
+
+                <span
+                  class="muted-text"
+                  *ngIf="!professional.email && !professional.phone"
+                >
+                  Sin contacto
+                </span>
+              </div>
+            </td>
+
+            <td>
+              <span
+                class="status-badge"
+                [class.deleted]="professional.deletedAt"
+              >
+                {{ professional.deletedAt ? "Eliminado" : "Activo" }}
+              </span>
+            </td>
+
+            <td class="actions-column">
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Editar"
+                (click)="openEditForm(professional)"
+                *ngIf="!professional.deletedAt"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Eliminar"
+                (click)="delete(professional)"
+                *ngIf="!professional.deletedAt"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Restaurar"
+                (click)="restore(professional)"
+                *ngIf="professional.deletedAt"
+              >
+                <mat-icon>restore</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </mat-card>
+</section>
