@@ -1,0 +1,315 @@
+<section class="maintainer-page">
+  <div class="maintainer-hero">
+    <div>
+      <span class="eyebrow">
+        <mat-icon>location_city</mat-icon>
+        Red y programas
+      </span>
+
+      <h1>Comunas por región</h1>
+
+      <p>
+        Administre las comunas territoriales y su asociación con una región.
+      </p>
+    </div>
+
+    <button
+      mat-flat-button
+      class="primary-action"
+      type="button"
+      (click)="openCreate()"
+    >
+      <mat-icon>add</mat-icon>
+      Nueva comuna
+    </button>
+  </div>
+
+  <mat-card class="toolbar-card">
+    <div class="filters">
+      <mat-form-field
+        appearance="outline"
+        floatLabel="always"
+        class="search-field"
+      >
+        <mat-label>Buscar comuna</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+
+        <input
+          matInput
+          type="text"
+          [formControl]="searchControl"
+          placeholder="Código, nombre, región o descripción"
+        />
+
+        <button
+          *ngIf="searchControl.value"
+          mat-icon-button
+          matSuffix
+          type="button"
+          matTooltip="Limpiar búsqueda"
+          (click)="clearSearch()"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <mat-form-field
+        appearance="outline"
+        floatLabel="always"
+        class="region-filter-field"
+      >
+        <mat-label>Filtrar por región</mat-label>
+
+        <mat-select
+          [formControl]="regionFilterControl"
+          [disabled]="loadingRegions"
+        >
+          <mat-option [value]="null"> Todas las regiones </mat-option>
+
+          <mat-option *ngFor="let region of regions" [value]="region.id">
+            {{ region.name }}
+          </mat-option>
+        </mat-select>
+
+        <button
+          *ngIf="regionFilterControl.value !== null"
+          mat-icon-button
+          matSuffix
+          type="button"
+          class="clear-region-button"
+          matTooltip="Quitar filtro de región"
+          (mousedown)="$event.preventDefault(); $event.stopPropagation()"
+          (click)="
+            $event.preventDefault();
+            $event.stopPropagation();
+            clearRegionFilter()
+          "
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+
+        <mat-hint *ngIf="regionsError">
+          {{ regionsError }}
+        </mat-hint>
+      </mat-form-field>
+
+      <div class="state-buttons">
+        <button
+          type="button"
+          [class.active]="!showDeleted"
+          (click)="showDeleted && toggleDeleted()"
+        >
+          Activas
+        </button>
+
+        <button
+          type="button"
+          [class.active]="showDeleted"
+          (click)="!showDeleted && toggleDeleted()"
+        >
+          Eliminadas
+        </button>
+      </div>
+
+      <button
+        mat-icon-button
+        type="button"
+        class="refresh-button"
+        matTooltip="Actualizar"
+        (click)="loadCities()"
+      >
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </mat-card>
+
+  <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+
+  <mat-card *ngIf="loadError" class="error-card">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ loadError }}</span>
+
+    <button mat-stroked-button type="button" (click)="loadCities()">
+      Reintentar
+    </button>
+  </mat-card>
+
+  <div class="cities-table-wrapper">
+    <mat-card class="table-card">
+      <div class="table-header">
+        <div>
+          <h2>
+            {{ showDeleted ? "Comunas eliminadas" : "Comunas activas" }}
+          </h2>
+
+          <p>Registros encontrados: {{ total }}</p>
+        </div>
+
+        <button
+          type="button"
+          mat-icon-button
+          matTooltip="Actualizar"
+          (click)="loadCities()"
+        >
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+
+      <div class="table-wrapper">
+        <table mat-table matSort class="cities-table" [dataSource]="dataSource">
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+
+            <td mat-cell *matCellDef="let row">
+              {{ row.id }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="code">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Código</th>
+
+            <td mat-cell *matCellDef="let row">
+              <span class="code-badge">
+                {{ row.code || "—" }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Comuna</th>
+
+            <td mat-cell *matCellDef="let row">
+              <strong>{{ row.name || "—" }}</strong>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="region">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Región</th>
+
+            <td mat-cell *matCellDef="let row">
+              <div class="region-cell">
+                <span
+                  [matTooltip]="row.regionName || ''"
+                  matTooltipPosition="above"
+                >
+                  {{ row.regionName || "Sin región" }}
+                </span>
+
+                <small *ngIf="row.regionCode">
+                  {{ row.regionCode }}
+                </small>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="description">
+            <th mat-header-cell *matHeaderCellDef>Descripción</th>
+
+            <td mat-cell *matCellDef="let row">
+              <span
+                class="description-cell"
+                [matTooltip]="row.description || ''"
+                matTooltipPosition="above"
+              >
+                {{ row.description || "—" }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="active">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>
+              Habilitada
+            </th>
+
+            <td mat-cell *matCellDef="let row">
+              <span
+                class="status-badge"
+                [class.active]="row.active === true"
+                [class.inactive]="row.active === false"
+              >
+                {{ row.active ? "Sí" : "No" }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="recordStatus">
+            <th mat-header-cell *matHeaderCellDef>Estado registro</th>
+
+            <td mat-cell *matCellDef="let row">
+              <span
+                class="status-badge"
+                [class.active]="!row.deletedAt"
+                [class.deleted]="row.deletedAt"
+              >
+                {{ row.deletedAt ? "Eliminado" : "Activo" }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions" stickyEnd>
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+
+            <td mat-cell *matCellDef="let row">
+              <div class="action-buttons">
+                <button
+                  *ngIf="!row.deletedAt"
+                  mat-icon-button
+                  type="button"
+                  class="edit-btn"
+                  matTooltip="Editar comuna"
+                  (click)="openEdit(row)"
+                >
+                  <mat-icon>edit</mat-icon>
+                </button>
+
+                <button
+                  *ngIf="!row.deletedAt"
+                  mat-icon-button
+                  type="button"
+                  class="delete-btn"
+                  matTooltip="Eliminar comuna"
+                  (click)="confirmDelete(row)"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+
+                <button
+                  *ngIf="row.deletedAt"
+                  mat-icon-button
+                  type="button"
+                  class="restore-btn"
+                  matTooltip="Restaurar comuna"
+                  (click)="confirmRestore(row)"
+                >
+                  <mat-icon>settings_backup_restore</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+          <tr class="mat-row no-data-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+              {{
+                searchControl.value || regionFilterControl.value !== null
+                  ? "No existen comunas que coincidan con los filtros seleccionados."
+                  : showDeleted
+                    ? "No existen comunas eliminadas."
+                    : "No existen comunas registradas."
+              }}
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <mat-paginator
+        [pageSize]="10"
+        [pageSizeOptions]="[5, 10, 20, 50]"
+        showFirstLastButtons
+      ></mat-paginator>
+    </mat-card>
+  </div>
+</section>

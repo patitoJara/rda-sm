@@ -295,7 +295,7 @@
 
 .search-card {
   display: grid;
-  grid-template-columns: minmax(240px, 340px) minmax(0, 1fr);
+  grid-template-columns: minmax(360px, 390px) minmax(0, 1fr);
   align-items: center;
   gap: 16px;
 
@@ -1948,9 +1948,8 @@
 
 .back-to-navigation-button {
   position: fixed;
-  top: 50%;
-  right: 18px;
-  bottom: auto;
+  right: 20px;
+  bottom: 22px;
   z-index: 80;
 
   min-height: 44px;
@@ -1970,7 +1969,7 @@
     0 12px 30px rgba(8, 119, 138, 0.32),
     0 4px 10px rgba(8, 119, 138, 0.18);
 
-  transform: translateY(-50%);
+  transform: none;
 
   animation: back-navigation-enter 220ms ease;
 }
@@ -1997,12 +1996,12 @@
 @keyframes back-navigation-enter {
   from {
     opacity: 0;
-    transform: translateY(-50%) translateX(12px);
+    transform: translateY(10px);
   }
 
   to {
     opacity: 1;
-    transform: translateY(-50%) translateX(0);
+    transform: translateY(0);
   }
 }
 
@@ -2055,6 +2054,78 @@
       opacity: 1;
       transform: translateY(0);
     }
+  }
+}
+
+/* =========================================================
+   JERARQUÍA VISUAL DE MODOS
+========================================================= */
+
+/* Edición: ámbar, para distinguirla de la consulta longitudinal. */
+.create-person-card {
+  border: 1px solid #efd49a !important;
+  border-left: 6px solid #d99a19 !important;
+  background: linear-gradient(135deg, #fffdf8 0%, #ffffff 100%) !important;
+  box-shadow:
+    0 16px 36px rgba(153, 103, 8, 0.14),
+    0 3px 9px rgba(153, 103, 8, 0.07) !important;
+  animation: person-editor-enter 240ms ease-out;
+}
+
+.create-person-card .create-person-heading .section-heading__icon,
+.create-person-card .person-form-section__icon {
+  background: #fff2d5;
+  color: #9b6500;
+}
+
+@keyframes person-editor-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Consulta ampliada: azul, para distinguirla de edición y guardado. */
+.demandant-full-details__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid #bfd7ef;
+  border-left: 5px solid #246fa8;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #edf6ff 0%, #ffffff 100%);
+  box-shadow: 0 10px 24px rgba(36, 111, 168, 0.1);
+
+  p {
+    margin: 3px 0 0;
+    color: #557189;
+    font-size: 0.84rem;
+  }
+}
+
+.detail-mode-label {
+  color: #174f7a;
+  font-size: 0.9rem;
+  font-weight: 950;
+}
+
+.edit-person-btn {
+  flex: 0 0 auto;
+  min-height: 42px;
+  border-radius: 999px !important;
+  background: #d99a19 !important;
+  color: #ffffff !important;
+  font-weight: 900 !important;
+
+  mat-icon {
+    margin-right: 6px;
   }
 }
 
@@ -3252,5 +3323,370 @@
   .history-load-actions button {
     min-width: 0;
     width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .demandant-full-details__toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .edit-person-btn {
+    width: 100%;
+  }
+}
+
+//-----------------------------------------------------------------------------------------
+
+/* Agregar al final de demand-new.component.scss */
+
+/* ============================================================
+   PANELES OPERATIVOS — VERSIÓN COMPACTA CON ICONOS
+   Reemplaza desde el comentario anterior hasta el final.
+   ============================================================ */
+
+.action-forms-card {
+  overflow: hidden;
+  margin-top: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.operation-panel-shell {
+  --panel-color: #08798a;
+  --panel-soft: #eaf7f8;
+  --panel-border: #b9dde2;
+
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+
+  border: 1px solid var(--panel-border);
+  border-left: 6px solid var(--panel-color);
+  border-radius: 22px;
+
+  background: #ffffff;
+  box-shadow: 0 14px 32px rgba(21, 63, 73, 0.12);
+
+  animation: operation-panel-enter 220ms ease-out;
+}
+
+.operation-panel-shell--citation {
+  --panel-color: #1976d2;
+  --panel-soft: #edf5ff;
+  --panel-border: #bfd7f2;
+}
+
+.operation-panel-shell--attendance {
+  --panel-color: #7656b8;
+  --panel-soft: #f3effc;
+  --panel-border: #d5c8ed;
+}
+
+.operation-panel-shell--interview {
+  --panel-color: #c87900;
+  --panel-soft: #fff6e5;
+  --panel-border: #f1d29c;
+}
+
+.operation-panel-shell--observation {
+  --panel-color: #0288a8;
+  --panel-soft: #e9f8fb;
+  --panel-border: #b9e1ea;
+}
+
+.operation-panel-shell--reference {
+  --panel-color: #4f63bd;
+  --panel-soft: #eef0fb;
+  --panel-border: #c8ceec;
+}
+
+.operation-panel-shell--treatmentEntry {
+  --panel-color: #27865a;
+  --panel-soft: #ebf7f0;
+  --panel-border: #bfdfcc;
+}
+
+.operation-panel-shell--egressClosure {
+  --panel-color: #b24b4b;
+  --panel-soft: #fff0f0;
+  --panel-border: #ecc6c6;
+}
+
+.operation-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 10px 13px;
+
+  border: 1px solid var(--panel-border);
+  border-radius: 17px;
+
+  background: linear-gradient(135deg, var(--panel-soft), #ffffff);
+}
+
+.operation-panel-header > div:last-child {
+  min-width: 0;
+}
+
+.operation-panel-header span {
+  display: block;
+  margin-bottom: 1px;
+
+  color: var(--panel-color);
+
+  font-size: 0.71rem;
+  font-weight: 950;
+  letter-spacing: 0.065em;
+  text-transform: uppercase;
+}
+
+.operation-panel-header h3 {
+  margin: 0 0 2px;
+
+  color: #153f49;
+
+  font-size: 1.06rem;
+  font-weight: 950;
+}
+
+.operation-panel-header p {
+  margin: 0;
+
+  color: #60777e;
+
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.operation-icon {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 15px;
+
+  background: var(--panel-color);
+  color: #ffffff;
+}
+
+.operation-icon mat-icon {
+  width: 23px;
+  height: 23px;
+  font-size: 23px;
+}
+
+/* Formulario compacto: dos columnas y poco espacio vertical */
+.operation-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  column-gap: 12px;
+  row-gap: 0;
+
+  padding: 2px 0 0;
+}
+
+.operation-form .span-2 {
+  grid-column: 1 / -1;
+}
+
+.operation-form mat-form-field {
+  width: 100%;
+  margin: 0;
+}
+
+/* Evita que los mensajes reservados de Material ocupen demasiado alto */
+.operation-form .mat-mdc-form-field-subscript-wrapper {
+  min-height: 16px;
+  margin-top: 0;
+}
+
+.operation-form .mat-mdc-form-field-bottom-align::before {
+  height: 16px;
+}
+
+.operation-form .mat-mdc-form-field-hint-wrapper,
+.operation-form .mat-mdc-form-field-error-wrapper {
+  padding: 0 12px;
+}
+
+.operation-form .mat-mdc-form-field-hint,
+.operation-form .mat-mdc-form-field-error {
+  font-size: 0.72rem;
+  line-height: 1.15;
+}
+
+/* Iconos internos de cada campo */
+.operation-form mat-icon[matprefix],
+.operation-form mat-icon[matPrefix] {
+  margin-right: 7px;
+  color: var(--panel-color);
+  opacity: 0.88;
+}
+
+/* Campos de hora agrupados y compactos */
+.time-period-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 108px;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Textareas sin espacio exagerado */
+.operation-form textarea {
+  resize: vertical;
+}
+
+.operation-form textarea[rows="3"] {
+  min-height: 70px;
+}
+
+.operation-form textarea[rows="4"],
+.operation-form textarea[rows="5"] {
+  min-height: 88px;
+}
+
+/* Mensajes de éxito, advertencia y error dentro del grid */
+.operation-form > .empty-banner {
+  margin: 0 0 4px;
+}
+
+/* Estados aún no implementados */
+.operation-pending-state {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  min-height: 84px;
+  padding: 13px 15px;
+
+  border: 1px dashed var(--panel-border);
+  border-radius: 16px;
+
+  background: var(--panel-soft);
+}
+
+.operation-pending-state > mat-icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 14px;
+
+  background: #ffffff;
+  color: var(--panel-color);
+
+  font-size: 23px;
+}
+
+.operation-pending-state strong,
+.operation-pending-state span {
+  display: block;
+}
+
+.operation-pending-state strong {
+  margin-bottom: 2px;
+
+  color: #234b54;
+
+  font-size: 0.93rem;
+  font-weight: 950;
+}
+
+.operation-pending-state span {
+  color: #617980;
+
+  font-size: 0.82rem;
+  line-height: 1.38;
+}
+
+/* Acciones inferiores */
+.operation-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 9px;
+
+  margin-top: 0;
+  padding-top: 10px;
+
+  border-top: 1px solid #e1ecee;
+}
+
+.operation-actions .primary-btn {
+  background: var(--panel-color) !important;
+}
+
+/* Select de facultativos y citaciones */
+.professional-option__content,
+.citation-option__detail {
+  min-width: 0;
+}
+
+@keyframes operation-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 760px) {
+  .operation-panel-shell {
+    padding: 12px;
+    border-left-width: 5px;
+  }
+
+  .operation-panel-header {
+    align-items: flex-start;
+    padding: 10px 11px;
+  }
+
+  .operation-form {
+    grid-template-columns: 1fr;
+    row-gap: 0;
+  }
+
+  .operation-form .span-2 {
+    grid-column: auto;
+  }
+
+  .time-period-grid {
+    grid-template-columns: minmax(0, 1fr) 100px;
+  }
+
+  .operation-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .operation-actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .time-period-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .operation-pending-state {
+    align-items: flex-start;
   }
 }

@@ -134,20 +134,36 @@ export class LoginComponent implements AfterViewInit {
         });
       },
       error: (err) => {
-        console.error('[login] ❌ Error de autenticación:', err);
-        this.loading = false;
+        const status = Number(err?.status ?? -1);
 
-        if (err.status === 401) {
+        /*
+         * Sin red o backend temporalmente caído.
+         * BackendStatusService ya muestra el modal institucional,
+         * por lo que no abrimos un segundo mensaje desde el login.
+         */
+        if ([0, 502, 503, 504].includes(status)) {
+          this.loading = false;
+          return;
+        }
+
+        if (status === 401) {
+          this.loading = false;
           this.mostrarErrorLogin('Usuario o contraseña incorrectos.');
-        } else if (err.status === 403) {
+          return;
+        }
+
+        if (status === 403) {
+          this.loading = false;
           this.mostrarErrorLogin(
             'Tu usuario no tiene permisos para acceder al sistema.',
           );
-        } else {
-          this.mostrarErrorLogin(
-            'No fue posible iniciar sesión. Intenta nuevamente.',
-          );
+          return;
         }
+
+        this.loading = false;
+        this.mostrarErrorLogin(
+          'No fue posible iniciar sesión. Intenta nuevamente.',
+        );
       },
     });
   }

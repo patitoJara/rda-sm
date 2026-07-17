@@ -3,21 +3,22 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription, Subject, timer } from 'rxjs';
 import { TokenService } from '../../services/token.service';
+import { TimeService } from './time.service';
 
 @Injectable({ providedIn: 'root' })
 export class SessionService implements OnDestroy {
   private sessionSub?: Subscription;
-  
+
   // ⏱ 60 minutos
   private readonly SESSION_TIME = 60 * 60 * 1000;
 
   // 🔔 Notificador de expiración (NO hace logout inmediato)
   sessionExpired$ = new Subject<void>();
-  
 
   constructor(
     private router: Router,
     private tokenService: TokenService,
+    private timeService: TimeService,
   ) {}
 
   startSession(source: 'login' | 'refresh' | 'reload' = 'login'): void {
@@ -38,7 +39,7 @@ export class SessionService implements OnDestroy {
     const expiration = this.tokenService.getTokenExpiration();
     if (!expiration) return;
 
-    const remaining = expiration - Date.now();
+    const remaining = expiration - this.timeService.nowMs();
 
     if (remaining <= 0) {
       this.sessionExpired$.next();

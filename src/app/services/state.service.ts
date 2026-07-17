@@ -1,89 +1,96 @@
-// src/app/services/state.service.ts
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
 import { Observable } from 'rxjs';
+
 import { environment } from '../../environments/environment';
 import { State } from '../models/state';
 
-export interface Page<T> {
-  content: T[];
-  totalElements: number;
-  totalPages: number;
-  size: number;
-  number: number;
-  // empty?: boolean; // si tu backend lo envía
-}
-
-@Injectable({ providedIn: 'root' })
-
+@Injectable({
+  providedIn: 'root',
+})
 export class StateService {
-  private http = inject(HttpClient);
+  private readonly baseUrl = `${environment.apiBaseUrl}/states`;
 
-  // Deriva las URLs desde tu BaseUrl (sin barra final)
-  private readonly resourceUrl = `${environment.apiBaseUrl}/states`;
+  constructor(
+    private http: HttpClient,
+  ) {}
 
-  /** GET /states/{id} */
-  findById(id: number): Observable<State> {
-    return this.http.get<State>(`${this.resourceUrl}/${id}`);
-  }
-
-  /** PUT /states/{id} */
-
-  update(id: number, state: State): Observable<State> {
-    return this.http.put<State>(`${this.resourceUrl}/${id}`, state);
-  }
-
-  /** DELETE /states/{id} */
-  delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.resourceUrl}/${id}`);
-  }
-
-  /** GET /states */
+  /**
+   * Lista los estados activos.
+   */
   listAll(): Observable<State[]> {
-    return this.http.get<State[]>(this.resourceUrl);
+    return this.http.get<State[]>(
+      this.baseUrl,
+    );
   }
 
-  /** POST /states */
-  save(state: State): Observable<State> {
-    return this.http.post<State>(this.resourceUrl, state);
+  /**
+   * Lista todos los estados, incluidos los eliminados.
+   */
+  getAll(): Observable<State[]> {
+    return this.http.get<State[]>(
+      `${this.baseUrl}/all`,
+    );
   }
 
-  /** POST /states/{id}/restore */
-  restore(id: number): Observable<State> {
-    return this.http.post<State>(`${this.resourceUrl}/${id}/restore`, {});
+  /**
+   * Lista solamente los estados eliminados.
+   */
+  getDeleted(): Observable<State[]> {
+    return this.http.get<State[]>(
+      `${this.baseUrl}/deleted`,
+    );
   }
 
-  /** GET /states/getAllPaginated?page=&size=&q=&state=&sort= */
-  getAllPaginated(opts: { page?: number; size?: number; q?: string; state?: string; sort?: string } = {}): Observable<Page<State>> {
-    const { page = 0, size = 10, q, state, sort } = opts;
-
-    let params = new HttpParams()
-      .set('page', page)
-      .set('size', size);
-
-    if (q)     params = params.set('q', q);
-    if (state) params = params.set('state', state);
-    if (sort)  params = params.set('sort', sort);
-
-    //return this.http.get<Page<states>>(`${this.resourceUrl}/getAllPaginated`, { params });
-    return this.http.get<Page<State>>(`${this.resourceUrl}/all`);
+  /**
+   * Obtiene un estado por ID.
+   */
+  getById(id: number): Observable<State> {
+    return this.http.get<State>(
+      `${this.baseUrl}/${id}`,
+    );
   }
 
-  /** DELETE /sexs/all (si tu API lo soporta) */
-  deleteAll(): Observable<void> {
-    return this.http.delete<void>(`${this.resourceUrl}/all`);
+  /**
+   * Crea un nuevo estado.
+   */
+  save(payload: State): Observable<State> {
+    return this.http.post<State>(
+      this.baseUrl,
+      payload,
+    );
   }
-          /*
-        GET /api/v1/states/{id}
-        PUT /api/v1/states/{id}
-        DELETE /api/v1/states/{id}
-        GET /api/v1/states
-        POST /api/v1/states
-        POST /api/v1/states/{id}/restore
-        GET /api/v1/states/getAllPaginated
-        GET /api/v1/states/deleted
-        GET /api/v1/states/all
-        */  
+
+  /**
+   * Actualiza un estado existente.
+   */
+  update(
+    id: number,
+    payload: State,
+  ): Observable<State> {
+    return this.http.put<State>(
+      `${this.baseUrl}/${id}`,
+      payload,
+    );
+  }
+
+  /**
+   * Elimina lógicamente un estado.
+   */
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.baseUrl}/${id}`,
+    );
+  }
+
+  /**
+   * Restaura un estado eliminado.
+   */
+  restore(id: number): Observable<void> {
+    return this.http.put<void>(
+      `${this.baseUrl}/restore/${id}`,
+      {},
+    );
+  }
 }
-
-

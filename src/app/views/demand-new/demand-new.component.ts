@@ -20,7 +20,9 @@ import { RouterModule } from '@angular/router';
 import { MatSelectModule } from '@angular/material/select';
 import { HttpErrorResponse } from '@angular/common/http';
 
-import { finalize } from 'rxjs/operators';
+import { throwError } from 'rxjs';
+import { finalize, switchMap } from 'rxjs/operators';
+
 import { PostulantService } from '@app/services/postulant.service';
 import { Postulant } from '@app/models/postulant';
 import { PreloadCatalogsService } from '@app/services/demand/preload-catalogs.service';
@@ -281,6 +283,11 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       value: null,
       disabled: true,
     }),
+
+    contactName: [''],
+    contactDescription: [''],
+    contactCellphone: [''],
+    contactEmail: ['', Validators.email],
   });
 
   episodeForm = this.fb.group({
@@ -816,12 +823,25 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
         next: (response: any) => {
           const items = this.extractArray(response);
 
+          const activeProgramId = Number(
+            this.tokenService.getActiveProgramId(),
+          );
+
           this.professionals = items
             .map((item: any) => this.normalizeProfessionalForCitation(item))
-            .filter(
-              (item: any) =>
-                !!item.id && !item.deletedAt && item.active !== false,
-            )
+            .filter((item: any) => {
+              const isActive =
+                !!item.id && !item.deletedAt && item.active !== false;
+
+              const belongsToActiveProgram =
+                activeProgramId > 0 &&
+                Array.isArray(item.programIds) &&
+                item.programIds.some(
+                  (programId: number) => Number(programId) === activeProgramId,
+                );
+
+              return isActive && belongsToActiveProgram;
+            })
             .sort((a: any, b: any) =>
               String(a.name).localeCompare(String(b.name), 'es', {
                 sensitivity: 'base',
@@ -830,7 +850,9 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
           if (!this.professionals.length) {
             this.professionalsError =
-              'No hay facultativos activos disponibles.';
+              activeProgramId > 0
+                ? 'No hay facultativos activos asociados al programa actual.'
+                : 'No fue posible identificar el programa activo.';
           }
         },
         error: (error) => {
@@ -1060,20 +1082,100 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  openCreatePersonForm(): void {
+    const rutControl = this.searchForm.get('rut');
+
+    rutControl?.markAsTouched();
+    rutControl?.updateValueAndValidity();
+
+    if (!rutControl?.value) {
+      this.searchError = 'Debe ingresar un RUN antes de crear una persona.';
+      this.showCreatePersonForm = false;
+      return;
+    }
+
+    if (rutControl.invalid) {
+      this.searchError =
+        'El RUN ingresado no es válido. Revise el número y el dígito verificador.';
+      this.showCreatePersonForm = false;
+      return;
+    }
+
+    const rut = this.formatRut(String(rutControl.value));
+
+    if (!rut) {
+      this.searchError = 'No fue posible validar el RUN ingresado.';
+      this.showCreatePersonForm = false;
+      return;
+    }
+
+    this.searchError = null;
+    this.personNotFound = true;
+    this.selectedPerson = null;
+    this.showCreatePersonForm = true;
+
+    this.personForm.reset();
+    this.personForm.patchValue({ rut });
+
+    this.personForm.get('rut')?.disable({ emitEvent: false });
+  }
+
+  openEditPersonForm(): void {
+    if (!this.selectedPerson?.id) {
+      return;
+    }
+
+    this.personSaveError = null;
+    this.patchPersonForm(this.selectedPerson);
+    this.showDemandantDetails = false;
+    this.showCreateEpisodeForm = false;
+    this.showCreatePersonForm = true;
+    this.showBackToNavigation = false;
+
+    this.personForm.markAsPristine();
+    this.personForm.markAsUntouched();
+
+    queueMicrotask(() => {
+      document
+        .querySelector('.create-person-card')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  closePersonForm(): void {
+    if (this.isSavingPerson) {
+      return;
+    }
+
+    this.personSaveError = null;
+    this.showCreatePersonForm = false;
+
+    if (this.selectedPerson) {
+      this.patchPersonForm(this.selectedPerson);
+      this.personForm.markAsPristine();
+      this.personForm.markAsUntouched();
+    }
+  }
+
   searchPerson(): void {
     this.showDemandantDetails = false;
     this.searchForm.markAllAsTouched();
 
-    if (this.searchForm.invalid || this.isSearching) return;
+    if (this.isSearching) {
+      return;
+    }
+
+    if (this.searchForm.invalid) {
+      this.searchError = 'Debe ingresar un RUN antes de realizar la búsqueda.';
+      return;
+    }
 
     const rawRut = this.searchForm.getRawValue().rut?.trim();
-
-    // IMPORTANTE:
-    // Para el endpoint longitudinal, el RUN debe mantenerse con puntos y guion.
-    // Ejemplo: 11.799.136-9
     const rut = this.formatRut(rawRut);
 
-    if (!rut) return;
+    if (!rut) {
+      return;
+    }
 
     this.isSearching = true;
     this.searched = true;
@@ -1116,41 +1218,123 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     console.log('[DemandNew] RUN búsqueda longitudinal:', rut);
 
-    this.demandEpisodeService
-      .getLongitudinalByRut(rut)
-      .pipe(finalize(() => (this.isSearching = false)))
-      .subscribe({
-        next: (data) => {
-          console.log('[DemandNew] Longitudinal recibido:', data);
+    this.demandEpisodeService.getLongitudinalByRut(rut).subscribe({
+      next: (data) => {
+        console.log('[DemandNew] Longitudinal recibido:', data);
 
-          this.applyLongitudinalData(data);
-        },
-        error: (error) => {
-          console.error(
-            '[DemandNew] Error consultando ficha longitudinal por RUN:',
-            error,
+        this.applyLongitudinalData(data);
+        this.isSearching = false;
+      },
+
+      error: (error) => {
+        console.error(
+          '[DemandNew] Error consultando ficha longitudinal por RUN:',
+          error,
+        );
+
+        /*
+         * Si el longitudinal está bloqueado o no existe,
+         * buscamos directamente la persona por RUN.
+         */
+        if (error?.status === 403 || error?.status === 404) {
+          this.loadPersonFallbackByRut(rut, Number(error.status));
+          return;
+        }
+
+        this.isSearching = false;
+        this.searchError =
+          'No fue posible consultar la ficha longitudinal. Intente nuevamente o contacte a soporte.';
+      },
+    });
+  }
+
+  private loadPersonFallbackByRut(
+    rut: string,
+    longitudinalStatus: number,
+  ): void {
+    console.log(
+      '[DemandNew] Intentando recuperar persona directamente por RUN:',
+      rut,
+    );
+
+    this.postulantService
+      .getPersonByRut(rut)
+      .pipe(
+        switchMap((person) => {
+          const personId = Number(person?.id);
+
+          if (!personId) {
+            return throwError(
+              () => new Error('La persona recuperada no posee un ID válido.'),
+            );
+          }
+
+          console.log(
+            '[DemandNew] ID recuperado por RUN. Cargando ficha completa:',
+            personId,
           );
 
-          if (error?.status === 404) {
+          return this.postulantService.getById(personId);
+        }),
+        finalize(() => (this.isSearching = false)),
+      )
+      .subscribe({
+        next: (person: Postulant) => {
+          console.log('[DemandNew] Persona completa recuperada:', person);
+
+          this.selectedPerson = person;
+          this.personLoaded = true;
+          this.personNotFound = false;
+
+          this.showCreatePersonForm = false;
+          this.showCreateEpisodeForm = false;
+          this.showDemandantDetails = false;
+
+          this.patchPersonForm(person);
+
+          this.stageVisualState = 'Ficha longitudinal no disponible';
+
+          this.searchError =
+            longitudinalStatus === 403
+              ? 'Se recuperaron los datos de la persona, pero actualmente no tiene autorización para consultar su ficha longitudinal.'
+              : 'La persona está registrada, pero no posee una ficha longitudinal disponible.';
+        },
+
+        error: (personError) => {
+          console.error(
+            '[DemandNew] Error recuperando persona completa por RUN:',
+            personError,
+          );
+
+          if (personError?.status === 404) {
+            this.selectedPerson = null;
+            this.personLoaded = false;
             this.personNotFound = true;
-            this.showCreatePersonForm = false;
+
+            // Solo cuando no existe se abre automáticamente.
+            this.showCreatePersonForm = true;
             this.showCreateEpisodeForm = false;
-            this.stageVisualState = 'Sin historia longitudinal registrada';
+            this.showDemandantDetails = false;
+
+            this.personForm.reset();
+            this.personForm.patchValue({ rut });
+
+            this.stageVisualState = 'Persona no registrada';
 
             this.searchError =
-              'No se encontró una persona registrada con ese RUN. Puede continuar creando una nueva persona.';
+              'No se encontró una persona registrada con ese RUN. Complete los datos para crearla.';
 
             return;
           }
 
-          if (error?.status === 403) {
+          if (personError?.status === 403) {
             this.searchError =
-              'No tiene permisos para consultar la ficha longitudinal de demanda por RUN.';
+              'No tiene permisos para consultar los datos completos de la persona.';
             return;
           }
 
           this.searchError =
-            'No fue posible consultar la ficha longitudinal. Intente nuevamente o contacte a soporte.';
+            'No fue posible recuperar los datos completos de la persona.';
         },
       });
   }
@@ -1330,12 +1514,11 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const raw = this.personForm.getRawValue();
-
     const userId = this.tokenService.getUserId();
 
     if (!userId) {
       this.personSaveError =
-        'No fue posible identificar el usuario autenticado para crear la persona.';
+        'No fue posible identificar el usuario autenticado para guardar la persona.';
       return;
     }
 
@@ -1379,26 +1562,42 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       };
     }
 
+    const personId = Number(this.selectedPerson?.id);
+
+    const request$ = personId
+      ? this.postulantService.update(personId, payload)
+      : this.postulantService.create(payload);
+
     this.isSavingPerson = true;
     this.personSaveError = null;
 
-    this.postulantService
-      .create(payload)
-      .pipe(finalize(() => (this.isSavingPerson = false)))
-      .subscribe({
-        next: (created) => {
-          this.selectedPerson = created;
-          this.personLoaded = true;
-          this.personNotFound = false;
-          this.showCreatePersonForm = false;
-          this.patchPersonForm(created);
-        },
-        error: (error) => {
-          console.error('[DemandNew] Error guardando persona:', error);
+    request$.pipe(finalize(() => (this.isSavingPerson = false))).subscribe({
+      next: (savedPerson) => {
+        this.selectedPerson = savedPerson;
+        this.personLoaded = true;
+        this.personNotFound = false;
+        this.showCreatePersonForm = false;
+        this.patchPersonForm(savedPerson);
+      },
+      error: (error) => {
+        console.error('[DemandNew] Error guardando persona:', error);
+
+        if (error?.status === 403) {
           this.personSaveError =
-            'No fue posible guardar la persona. Revise los datos e intente nuevamente.';
-        },
-      });
+            'No tiene permisos para guardar los datos de la persona.';
+          return;
+        }
+
+        if (error?.status === 409) {
+          this.personSaveError =
+            'Ya existe una persona registrada con este RUN.';
+          return;
+        }
+
+        this.personSaveError =
+          'No fue posible guardar la persona. Revise los datos e intente nuevamente.';
+      },
+    });
   }
 
   saveInterview(): void {
@@ -2847,6 +3046,15 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleDemandantDetails(): void {
     this.showDemandantDetails = !this.showDemandantDetails;
+    this.showBackToNavigation = false;
+
+    if (this.showDemandantDetails) {
+      queueMicrotask(() => {
+        document
+          .getElementById('demandant-full-details')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    }
   }
 
   get observationEvents(): any[] {

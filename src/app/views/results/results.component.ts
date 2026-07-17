@@ -55,6 +55,10 @@ export class ResultsComponent implements AfterViewInit {
   displayedColumns = [
     'id',
     'name',
+    'code',
+    'scope',
+    'description',
+    'active',
     'createdAt',
     'updatedAt',
     'deletedAt',
@@ -99,14 +103,28 @@ export class ResultsComponent implements AfterViewInit {
     switch (active) {
       case 'id':
         return 'id';
+
       case 'name':
         return 'name';
+
+      case 'code':
+        return 'code';
+
+      case 'scope':
+        return 'scope';
+
+      case 'active':
+        return 'active';
+
       case 'createdAt':
         return 'createdAt';
+
       case 'updatedAt':
         return 'updatedAt';
+
       case 'deletedAt':
         return 'deletedAt';
+
       default:
         return 'id';
     }
@@ -144,11 +162,17 @@ export class ResultsComponent implements AfterViewInit {
           filtered = allRows.filter((r) => !!r.deletedAt);
         }
 
-        const term = (this.q || '').toLowerCase();
+        const term = (this.q || '').trim().toLowerCase();
+
         if (term) {
-          filtered = filtered.filter((r) =>
-            (r.name ?? '').toLowerCase().includes(term),
-          );
+          filtered = filtered.filter((r) => {
+            const searchableText = [r.name, r.code, r.scope, r.description]
+              .filter(Boolean)
+              .join(' ')
+              .toLowerCase();
+
+            return searchableText.includes(term);
+          });
         }
 
         filtered.sort((a, b) => {
@@ -191,14 +215,28 @@ export class ResultsComponent implements AfterViewInit {
     switch (field) {
       case 'id':
         return row.id;
+
       case 'name':
         return row.name;
+
+      case 'code':
+        return row.code;
+
+      case 'scope':
+        return row.scope;
+
+      case 'active':
+        return row.active;
+
       case 'createdAt':
         return row.createdAt;
+
       case 'updatedAt':
         return row.updatedAt;
+
       case 'deletedAt':
         return row.deletedAt;
+
       default:
         return row.id;
     }
@@ -268,7 +306,51 @@ export class ResultsComponent implements AfterViewInit {
   }
 
   /** Restaurar resultado eliminado */
+  /** Restaurar resultado eliminado */
   restore(row: Result): void {
-    this.api.restore(Number(row.id)).subscribe(() => this.load());
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '460px',
+      maxWidth: '95vw',
+      disableClose: true,
+      panelClass: 'rda-confirm-dialog',
+      backdropClass: 'app-backdrop',
+      data: {
+        title: 'Restaurar resultado',
+        message: `¿Seguro que deseas restaurar “${row.name}” (ID: ${row.id})?`,
+        confirmText: 'Restaurar',
+        cancelText: 'Cancelar',
+        color: 'primary',
+        icon: 'restore',
+      },
+    });
+
+    ref.afterClosed().subscribe((ok: boolean) => {
+      if (!ok) {
+        return;
+      }
+
+      this.loading = true;
+
+      this.api
+        .restore(Number(row.id))
+        .pipe(
+          finalize(() => {
+            this.loading = false;
+          }),
+        )
+        .subscribe({
+          next: () => {
+            this.paginator.firstPage();
+            this.load();
+          },
+
+          error: (error) => {
+            console.error(
+              '[ResultsComponent] Error restaurando resultado:',
+              error,
+            );
+          },
+        });
+    });
   }
 }

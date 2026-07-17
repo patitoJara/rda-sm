@@ -1,0 +1,135 @@
+<h2 mat-dialog-title>
+  <mat-icon>map</mat-icon>
+
+  <span>
+    {{
+      form.get("id")?.value
+        ? "Editar región"
+        : "Nueva región"
+    }}
+  </span>
+</h2>
+
+<div mat-dialog-content>
+  <form
+    [formGroup]="form"
+    class="dialog-form"
+    (ngSubmit)="save()"
+  >
+    <mat-form-field
+      appearance="outline"
+      floatLabel="always"
+      class="full"
+    >
+      <mat-label>Nombre de la región</mat-label>
+
+      <input
+        matInput
+        formControlName="name"
+        autocomplete="off"
+        placeholder="Ej: Región de Magallanes"
+      />
+
+      <mat-error *ngIf="form.get('name')?.hasError('required')">
+        El nombre de la región es obligatorio.
+      </mat-error>
+
+      <mat-error *ngIf="form.get('name')?.hasError('maxlength')">
+        El nombre no puede superar los 120 caracteres.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field
+      appearance="outline"
+      floatLabel="always"
+      class="full"
+    >
+      <mat-label>Código</mat-label>
+
+      <input
+        matInput
+        formControlName="code"
+        autocomplete="off"
+        placeholder="Ej: MAGALLANES"
+      />
+
+      <mat-hint>
+        Use letras, números, guion o guion bajo.
+      </mat-hint>
+
+      <mat-error *ngIf="form.get('code')?.hasError('required')">
+        El código es obligatorio.
+      </mat-error>
+
+      <mat-error *ngIf="form.get('code')?.hasError('pattern')">
+        El código contiene caracteres no permitidos.
+      </mat-error>
+
+      <mat-error *ngIf="form.get('code')?.hasError('maxlength')">
+        El código no puede superar los 80 caracteres.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field
+      appearance="outline"
+      floatLabel="always"
+      class="full"
+    >
+      <mat-label>Descripción</mat-label>
+
+      <textarea
+        matInput
+        formControlName="description"
+        rows="4"
+        maxlength="500"
+        placeholder="Describa la información complementaria de la región"
+      ></textarea>
+
+      <mat-hint align="end">
+        {{ form.get("description")?.value?.length || 0 }}/500
+      </mat-hint>
+
+      <mat-error
+        *ngIf="form.get('description')?.hasError('maxlength')"
+      >
+        La descripción no puede superar los 500 caracteres.
+      </mat-error>
+    </mat-form-field>
+
+    <div class="active-control">
+      <mat-checkbox formControlName="active">
+        Región habilitada para su utilización
+      </mat-checkbox>
+
+      <small>
+        Al deshabilitarla, el registro se conserva, pero no debería
+        utilizarse para asociar nuevas comunas.
+      </small>
+    </div>
+  </form>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button
+    mat-stroked-button
+    type="button"
+    (click)="cancel()"
+    [disabled]="saving"
+  >
+    Cancelar
+  </button>
+
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="save()"
+    [disabled]="form.invalid || saving"
+  >
+    <mat-icon>
+      {{ saving ? "hourglass_top" : "save" }}
+    </mat-icon>
+
+    {{ saving ? "Guardando..." : "Guardar" }}
+  </button>
+</div>

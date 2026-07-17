@@ -1,4 +1,5 @@
 // src/app/views/program/program.dialog.ts
+
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -25,6 +26,12 @@ import {
   CatalogMaintainerService,
 } from '../../services/catalog-maintainer.service';
 
+interface CityCatalogItem extends CatalogItem {
+  regionId?: number | null;
+  regionCode?: string | null;
+  regionName?: string | null;
+}
+
 @Component({
   standalone: true,
   selector: 'app-program-dialog',
@@ -48,7 +55,9 @@ export class ProgramDialogComponent implements OnInit {
   modalities: CatalogItem[] = [];
   plans: CatalogItem[] = [];
   regions: CatalogItem[] = [];
-  cities: CatalogItem[] = [];
+
+  cities: CityCatalogItem[] = [];
+  filteredCities: CityCatalogItem[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -79,6 +88,10 @@ export class ProgramDialogComponent implements OnInit {
       description: [this.data?.description ?? ''],
     });
 
+    this.form.get('regionId')?.valueChanges.subscribe(() => {
+      this.applyCityFilter(true);
+    });
+
     this.loadCatalogs();
   }
 
@@ -107,11 +120,73 @@ export class ProgramDialogComponent implements OnInit {
         console.error('[ProgramDialog] Error cargando regiones:', err),
     });
 
-    this.catalogs.getDemandCatalog('cities').subscribe({
-      next: (rows) => (this.cities = rows),
-      error: (err) =>
-        console.error('[ProgramDialog] Error cargando ciudades:', err),
-    });
+    this.catalogs
+      .getAll('cities', {
+        active: true,
+        includeDeleted: false,
+      })
+      .subscribe({
+        next: (rows) => {
+          this.cities = rows as CityCatalogItem[];
+          this.applyCityFilter(false);
+        },
+        error: (err) =>
+          console.error('[ProgramDialog] Error cargando comunas:', err),
+      });
+  }
+
+  /**
+   * Filtra las comunas de acuerdo con la región seleccionada.
+   *
+   * clearInvalidSelection:
+   * - true: cuando el usuario cambia la región, limpia una comuna incompatible.
+   * - false: al cargar el diálogo, conserva la comuna almacenada.
+   */
+  private applyCityFilter(clearInvalidSelection: boolean): void {
+    const regionId = this.toNullableNumber(this.form.get('regionId')?.value);
+
+    if (regionId === null) {
+      this.filteredCities = [...this.cities];
+
+      if (clearInvalidSelection) {
+        this.form.get('cityId')?.setValue(null, { emitEvent: false });
+      }
+
+      return;
+    }
+
+    this.filteredCities = this.cities.filter(
+      (city) => this.toNullableNumber(city.regionId) === regionId,
+    );
+
+    if (!clearInvalidSelection) {
+      return;
+    }
+
+    const selectedCityId = this.toNullableNumber(
+      this.form.get('cityId')?.value,
+    );
+
+    if (selectedCityId === null) {
+      return;
+    }
+
+    const cityBelongsToRegion = this.filteredCities.some(
+      (city) => Number(city.id) === selectedCityId,
+    );
+
+    if (!cityBelongsToRegion) {
+      this.form.get('cityId')?.setValue(null, { emitEvent: false });
+    }
+  }
+
+  private toNullableNumber(value: unknown): number | null {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    const numberValue = Number(value);
+    return Number.isFinite(numberValue) ? numberValue : null;
   }
 
   save(): void {
@@ -123,30 +198,28 @@ export class ProgramDialogComponent implements OnInit {
     this.form.disable();
 
     const raw = this.form.getRawValue();
-    const id = raw.id ? Number(raw.id) : null;
+    const id = this.toNullableNumber(raw.id);
 
     const payload: Partial<Program> = {
       name: String(raw.name || '').trim(),
 
-      populationTypeId: raw.populationTypeId
-        ? Number(raw.populationTypeId)
-        : null,
-      modalityId: raw.modalityId ? Number(raw.modalityId) : null,
-      planId: raw.planId ? Number(raw.planId) : null,
-      regionId: raw.regionId ? Number(raw.regionId) : null,
-      cityId: raw.cityId ? Number(raw.cityId) : null,
+      populationTypeId: this.toNullableNumber(raw.populationTypeId),
+      modalityId: this.toNullableNumber(raw.modalityId),
+      planId: this.toNullableNumber(raw.planId),
+      regionId: this.toNullableNumber(raw.regionId),
+      cityId: this.toNullableNumber(raw.cityId),
 
-      address: raw.address || null,
-      phone: raw.phone || null,
-      email: raw.email || null,
-      description: raw.description || null,
+      address: String(raw.address || '').trim() || null,
+      phone: String(raw.phone || '').trim() || null,
+      email: String(raw.email || '').trim() || null,
+      description: String(raw.description || '').trim() || null,
     };
 
-    const req = id
+    const request$ = id
       ? this.api.update(id, payload as Program)
       : this.api.save(payload as Program);
 
-    req.subscribe({
+    request$.subscribe({
       next: (row: Program) => this.ref.close(row),
       error: (err: unknown) => {
         console.error('[ProgramDialog] Error guardando:', err);

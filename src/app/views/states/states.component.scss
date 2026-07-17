@@ -1,1 +1,17 @@
 @use '../../shared/styles/maintainer-page.scss' as *;
+
+.description-cell {
+  display: block;
+  max-width: 320px;
+  white-space: normal;
+  line-height: 1.35;
+}
+
+code {
+  font-family:
+    'Roboto Mono',
+    Consolas,
+    monospace;
+  font-size: 0.82rem;
+  font-weight: 600;
+}

@@ -269,29 +269,6 @@ export const routes: Routes = [
       },
 
       {
-        path: 'commune',
-        loadComponent: () =>
-          import('./views/communes/communes.component').then(
-            (m) => m.CommunesComponent,
-          ),
-        canActivate: [roleGuard],
-        data: {
-          module: 'administracion',
-          group: 'Mantenedores',
-          maintainerGroup: 'Red y programas',
-          section: 'maintainer',
-          title: 'Comunas',
-          description:
-            'Catálogo territorial utilizado en personas y programas.',
-          icon: 'location_city',
-          roles: ['ADMIN'],
-          iconColor: '#455a64',
-          tag: 'Actual',
-          order: 20,
-        },
-      },
-
-      {
         path: 'professions',
         loadComponent: () =>
           import('./views/professions/professions.component').then(
@@ -354,7 +331,7 @@ export const routes: Routes = [
           roles: ['ADMIN'],
           iconColor: '#455a64',
           tag: 'Actual',
-          order: 120,
+          order: 124,
         },
       },
 
@@ -399,6 +376,219 @@ export const routes: Routes = [
           iconColor: '#455a64',
           tag: 'Actual',
           order: 110,
+        },
+      },
+
+      {
+        path: 'attendance-statuses',
+        loadComponent: () =>
+          import('./views/attendance-statuses/attendance-statuses.component').then(
+            (m) => m.AttendanceStatusesComponent,
+          ),
+        canActivate: [roleGuard],
+        data: {
+          module: 'administracion',
+          group: 'Mantenedores',
+          maintainerGroup: 'Gestión de demanda',
+          section: 'maintainer',
+          title: 'Estados de asistencia',
+          description:
+            'Estados y resultados asociados a citaciones y asistencias.',
+          icon: 'event_available',
+          roles: ['ADMIN'],
+          iconColor: '#455a64',
+          tag: 'Nuevo',
+          order: 115,
+        },
+      },
+
+      {
+        path: 'closure-reasons',
+        loadComponent: () =>
+          import('./views/closure-reasons/closure-reasons.component').then(
+            (m) => m.ClosureReasonsComponent,
+          ),
+        canActivate: [roleGuard],
+        data: {
+          module: 'administracion',
+          group: 'Mantenedores',
+          maintainerGroup: 'Gestión de demanda',
+          section: 'maintainer',
+          title: 'Causales de cierre',
+          description:
+            'Causales utilizadas para cerrar formalmente un episodio de demanda.',
+          icon: 'lock',
+          roles: ['ADMIN'],
+          iconColor: '#455a64',
+          tag: 'Nuevo',
+          order: 116,
+        },
+      },
+
+      {
+        path: 'event-types',
+        loadComponent: () =>
+          import('./views/event-types/event-types.component').then(
+            (m) => m.EventTypesComponent,
+          ),
+        canActivate: [roleGuard],
+        data: {
+          module: 'administracion',
+          group: 'Mantenedores',
+          maintainerGroup: 'Gestión de demanda',
+          section: 'maintainer',
+          title: 'Tipos de eventos',
+          description:
+            'Tipos de actividades y actuaciones registradas en el historial del episodio.',
+          icon: 'event_note',
+          roles: ['ADMIN'],
+          iconColor: '#455a64',
+          tag: 'Nuevo',
+          order: 117,
+        },
+      },
+
+      {
+        path: 'document-types',
+        loadComponent: () =>
+          import('./views/document-types/document-types.component').then(
+            (m) => m.DocumentTypesComponent,
+          ),
+        canActivate: [roleGuard],
+        data: {
+          module: 'administracion',
+          group: 'Mantenedores',
+          maintainerGroup: 'Gestión de demanda',
+          section: 'maintainer',
+          title: 'Tipos de documento',
+          description:
+            'Tipos de documentos asociados a la gestión y respaldo de los episodios.',
+          icon: 'description',
+          roles: ['ADMIN'],
+          iconColor: '#455a64',
+          tag: 'Nuevo',
+          order: 118,
+        },
+      },
+
+      {
+        path: 'program-populations',
+        loadComponent: () =>
+          import('./views/program-populations/program-populations.component').then(
+            (m) => m.ProgramPopulationsComponent,
+          ),
+        canActivate: [roleGuard],
+        data: {
+          module: 'administracion',
+          group: 'Mantenedores',
+          maintainerGroup: 'Gestión de demanda',
+          section: 'maintainer',
+          title: 'Poblaciones de programa',
+          description:
+            'Poblaciones objetivo utilizadas para clasificar y configurar los programas de atención.',
+          icon: 'groups',
+          roles: ['ADMIN'],
+          iconColor: '#455a64',
+          tag: 'Nuevo',
+          order: 119,
+        },
+      },
+
+      {
+        path: 'program-modalities',
+        loadComponent: () =>
+          import('./views/program-modalities/program-modalities.component').then(
+            (m) => m.ProgramModalitiesComponent,
+          ),
+        canActivate: [roleGuard],
+        data: {
+          module: 'administracion',
+          group: 'Mantenedores',
+          maintainerGroup: 'Gestión de demanda',
+          section: 'maintainer',
+          title: 'Modalidades de programa',
+          description:
+            'Modalidades de atención utilizadas para configurar los programas.',
+          icon: 'domain',
+          roles: ['ADMIN'],
+          iconColor: '#455a64',
+          tag: 'Nuevo',
+          order: 120,
+        },
+      },
+
+      {
+        path: 'program-plans',
+        loadComponent: () =>
+          import('./views/program-plans/program-plans.component').then(
+            (m) => m.ProgramPlansComponent,
+          ),
+        canActivate: [roleGuard],
+        data: {
+          module: 'administracion',
+          group: 'Mantenedores',
+          maintainerGroup: 'Gestión de demanda',
+          section: 'maintainer',
+          title: 'Planes de programa',
+          description:
+            'Planes de atención utilizados para configurar y clasificar los programas.',
+          icon: 'assignment',
+          roles: ['ADMIN'],
+          iconColor: '#455a64',
+          tag: 'Nuevo',
+          order: 121,
+        },
+      },
+
+      {
+        path: 'regions',
+        loadComponent: () =>
+          import('./views/regions/regions.component').then(
+            (m) => m.RegionsComponent,
+          ),
+        canActivate: [roleGuard],
+        data: {
+          module: 'administracion',
+          group: 'Mantenedores',
+          maintainerGroup: 'Red y programas',
+          section: 'maintainer',
+          title: 'Regiones',
+          description:
+            'Regiones utilizadas para identificar la ubicación territorial de los programas.',
+          icon: 'map',
+          roles: ['ADMIN'],
+          iconColor: '#455a64',
+          tag: 'Nuevo',
+          order: 50,
+        },
+      },
+
+      {
+        path: 'commune',
+        redirectTo: 'cities',
+        pathMatch: 'full',
+      },
+
+      {
+        path: 'cities',
+        loadComponent: () =>
+          import('./views/cities/cities.component').then(
+            (m) => m.CitiesComponent,
+          ),
+        canActivate: [roleGuard],
+        data: {
+          module: 'administracion',
+          group: 'Mantenedores',
+          maintainerGroup: 'Red y programas',
+          section: 'maintainer',
+          title: 'Comunas por región',
+          description:
+            'Catálogo nacional de comunas asociadas a su región, utilizado en los datos de personas y en la configuración territorial del sistema.',
+          icon: 'location_city',
+          roles: ['ADMIN'],
+          iconColor: '#455a64',
+          tag: 'Actual',
+          order: 60,
         },
       },
 

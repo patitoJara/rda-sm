@@ -45,7 +45,7 @@ import { forkJoin, merge, finalize } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 // 🔹 Servicios
-import { CommuneService } from '../../services/comunes.service';
+import { CatalogMaintainerService } from '../../services/catalog-maintainer.service';
 import { SexService } from '../../services/sex.service';
 import { ContactTypeService } from '../../services/contact.type.service';
 import { ProgramService } from '../../services/program.service';
@@ -127,7 +127,7 @@ export class DemandListComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private communeService: CommuneService,
+    private catalogMaintainerService: CatalogMaintainerService,
     private sexService: SexService,
     private contactTypeService: ContactTypeService,
     private programService: ProgramService,
@@ -292,7 +292,10 @@ export class DemandListComponent implements OnInit {
     const data = await firstValueFrom(
       forkJoin({
         programs: this.programService.listAll(),
-        communes: this.communeService.listAll(),
+        communes: this.catalogMaintainerService.getAll('cities', {
+          active: true,
+          includeDeleted: false,
+        }),
         contactTypes: this.contactTypeService.listAll(),
         substances: this.substanceService.listAll(),
         states: this.stateService.listAll(),

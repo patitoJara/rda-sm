@@ -1,41 +1,221 @@
 <h2 mat-dialog-title>
   <mat-icon>flag</mat-icon>
-  {{ form.value.id ? 'Editar estado' : 'Nuevo estado' }}
+
+  {{
+    form.get('id')?.value
+      ? "Editar estado"
+      : "Nuevo estado"
+  }}
 </h2>
 
 <div mat-dialog-content>
-  <form [formGroup]="form" class="form">
-    <mat-form-field appearance="outline" floatLabel="always" class="full">
-      <mat-label>Nombre del estado</mat-label>
+  <form
+    [formGroup]="form"
+    class="form"
+  >
+    <mat-form-field
+      appearance="outline"
+      floatLabel="always"
+      class="full"
+    >
+      <mat-label>
+        Nombre del estado
+      </mat-label>
 
       <input
         matInput
         formControlName="name"
         autocomplete="off"
-        placeholder="Ej: En evaluación"
-        (keydown.enter)="save()"
+        placeholder="Ej: En trámite"
       />
 
-      <mat-error *ngIf="form.get('name')?.hasError('required')">
+      <mat-error
+        *ngIf="
+          form
+            .get('name')
+            ?.hasError('required')
+        "
+      >
         El nombre del estado es obligatorio.
       </mat-error>
 
-      <mat-error *ngIf="form.get('name')?.hasError('maxlength')">
-        El nombre no puede superar los 120 caracteres.
+      <mat-error
+        *ngIf="
+          form
+            .get('name')
+            ?.hasError('maxlength')
+        "
+      >
+        El nombre no puede superar los
+        120 caracteres.
       </mat-error>
     </mat-form-field>
+
+    <mat-form-field
+      appearance="outline"
+      floatLabel="always"
+      class="full"
+    >
+      <mat-label>Código</mat-label>
+
+      <input
+        matInput
+        formControlName="code"
+        autocomplete="off"
+        placeholder="Ej: EN_TRAMITE"
+      />
+
+      <mat-hint>
+        Utilice letras, números, guion o
+        guion bajo.
+      </mat-hint>
+
+      <mat-error
+        *ngIf="
+          form
+            .get('code')
+            ?.hasError('required')
+        "
+      >
+        El código es obligatorio.
+      </mat-error>
+
+      <mat-error
+        *ngIf="
+          form
+            .get('code')
+            ?.hasError('pattern')
+        "
+      >
+        El código contiene caracteres no
+        permitidos.
+      </mat-error>
+
+      <mat-error
+        *ngIf="
+          form
+            .get('code')
+            ?.hasError('maxlength')
+        "
+      >
+        El código no puede superar los
+        80 caracteres.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field
+      appearance="outline"
+      floatLabel="always"
+      class="full"
+    >
+      <mat-label>Ámbito</mat-label>
+
+      <mat-select
+        formControlName="scope"
+      >
+        <mat-option
+          *ngFor="
+            let scope of availableScopes
+          "
+          [value]="scope.value"
+        >
+          {{ scope.value }} —
+          {{ scope.label }}
+        </mat-option>
+      </mat-select>
+
+      <mat-hint>
+        EPISODE aplica al episodio completo;
+        STAGE aplica a una etapa.
+      </mat-hint>
+
+      <mat-error
+        *ngIf="
+          form
+            .get('scope')
+            ?.hasError('required')
+        "
+      >
+        El ámbito es obligatorio.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field
+      appearance="outline"
+      floatLabel="always"
+      class="full"
+    >
+      <mat-label>Descripción</mat-label>
+
+      <textarea
+        matInput
+        formControlName="description"
+        rows="4"
+        placeholder="Describa cuándo se utiliza este estado"
+      >
+      </textarea>
+
+      <mat-hint align="end">
+        {{
+          form.get('description')?.value
+            ?.length || 0
+        }}/500
+      </mat-hint>
+
+      <mat-error
+        *ngIf="
+          form
+            .get('description')
+            ?.hasError('maxlength')
+        "
+      >
+        La descripción no puede superar
+        los 500 caracteres.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-checkbox
+      formControlName="active"
+    >
+      Estado habilitado
+    </mat-checkbox>
   </form>
 </div>
 
-<div mat-dialog-actions align="end">
-  <button mat-button type="button" (click)="cancel()">Cancelar</button>
+<div
+  mat-dialog-actions
+  align="end"
+>
+  <button
+    mat-button
+    type="button"
+    [disabled]="saving"
+    (click)="cancel()"
+  >
+    Cancelar
+  </button>
 
   <button
     mat-flat-button
     color="primary"
     type="button"
+    [disabled]="
+      form.invalid || saving
+    "
     (click)="save()"
-    [disabled]="form.invalid">
-    Guardar
+  >
+    <mat-icon>
+      {{
+        saving
+          ? "hourglass_top"
+          : "save"
+      }}
+    </mat-icon>
+
+    {{
+      saving
+        ? "Guardando..."
+        : "Guardar"
+    }}
   </button>
 </div>

@@ -11,9 +11,10 @@ import { MatIconModule } from '@angular/material/icon';
 export interface ErrorConfirmData {
   title?: string;
   message: string;
-  confirmText?: string;   // default: 'Aceptar'
-  icon?: string;          // ej: 'error', 'warning'
+  confirmText?: string;
+  icon?: string;
   dense?: boolean;
+  color?: 'primary' | 'accent' | 'warn';
 }
 
 @Component({

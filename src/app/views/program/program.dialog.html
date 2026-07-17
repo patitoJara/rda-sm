@@ -27,9 +27,14 @@
     <div class="form-grid">
       <mat-form-field appearance="outline" floatLabel="always">
         <mat-label>Tipo de población</mat-label>
+
         <mat-select formControlName="populationTypeId">
           <mat-option [value]="null">Sin especificar</mat-option>
-          <mat-option *ngFor="let item of populationTypes" [value]="item.id">
+
+          <mat-option
+            *ngFor="let item of populationTypes"
+            [value]="item.id"
+          >
             {{ item.name }}
           </mat-option>
         </mat-select>
@@ -37,8 +42,10 @@
 
       <mat-form-field appearance="outline" floatLabel="always">
         <mat-label>Modalidad</mat-label>
+
         <mat-select formControlName="modalityId">
           <mat-option [value]="null">Sin especificar</mat-option>
+
           <mat-option *ngFor="let item of modalities" [value]="item.id">
             {{ item.name }}
           </mat-option>
@@ -47,8 +54,10 @@
 
       <mat-form-field appearance="outline" floatLabel="always">
         <mat-label>Plan</mat-label>
+
         <mat-select formControlName="planId">
           <mat-option [value]="null">Sin especificar</mat-option>
+
           <mat-option *ngFor="let item of plans" [value]="item.id">
             {{ item.name }}
           </mat-option>
@@ -57,8 +66,10 @@
 
       <mat-form-field appearance="outline" floatLabel="always">
         <mat-label>Región</mat-label>
+
         <mat-select formControlName="regionId">
           <mat-option [value]="null">Sin especificar</mat-option>
+
           <mat-option *ngFor="let item of regions" [value]="item.id">
             {{ item.name }}
           </mat-option>
@@ -66,33 +77,70 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline" floatLabel="always">
-        <mat-label>Ciudad</mat-label>
-        <mat-select formControlName="cityId">
+        <mat-label>Comuna</mat-label>
+
+        <mat-select
+          formControlName="cityId"
+          [disabled]="!form.get('regionId')?.value"
+        >
           <mat-option [value]="null">Sin especificar</mat-option>
-          <mat-option *ngFor="let item of cities" [value]="item.id">
+
+          <mat-option
+            *ngFor="let item of filteredCities"
+            [value]="item.id"
+          >
             {{ item.name }}
           </mat-option>
         </mat-select>
+
+        <mat-hint *ngIf="!form.get('regionId')?.value">
+          Seleccione primero una región.
+        </mat-hint>
+
+        <mat-hint
+          *ngIf="
+            form.get('regionId')?.value &&
+            filteredCities.length === 0
+          "
+        >
+          No existen comunas asociadas a la región seleccionada.
+        </mat-hint>
       </mat-form-field>
 
       <mat-form-field appearance="outline" floatLabel="always">
         <mat-label>Teléfono</mat-label>
-        <input matInput formControlName="phone" autocomplete="off" />
+
+        <input
+          matInput
+          formControlName="phone"
+          autocomplete="off"
+        />
       </mat-form-field>
 
       <mat-form-field appearance="outline" floatLabel="always">
         <mat-label>Email</mat-label>
-        <input matInput formControlName="email" autocomplete="off" />
+
+        <input
+          matInput
+          formControlName="email"
+          autocomplete="off"
+        />
       </mat-form-field>
 
       <mat-form-field appearance="outline" floatLabel="always">
         <mat-label>Dirección</mat-label>
-        <input matInput formControlName="address" autocomplete="off" />
+
+        <input
+          matInput
+          formControlName="address"
+          autocomplete="off"
+        />
       </mat-form-field>
     </div>
 
     <mat-form-field appearance="outline" floatLabel="always" class="full">
       <mat-label>Descripción</mat-label>
+
       <textarea
         matInput
         formControlName="description"
@@ -104,14 +152,20 @@
 </div>
 
 <div mat-dialog-actions align="end">
-  <button mat-stroked-button type="button" (click)="cancel()">Cancelar</button>
+  <button
+    mat-stroked-button
+    type="button"
+    (click)="cancel()"
+  >
+    Cancelar
+  </button>
 
   <button
     mat-flat-button
     color="primary"
     type="button"
     (click)="save()"
-    [disabled]="form.invalid"
+    [disabled]="form.invalid || form.disabled"
   >
     Guardar
   </button>

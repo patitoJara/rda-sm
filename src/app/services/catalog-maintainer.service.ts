@@ -66,8 +66,18 @@ export class CatalogMaintainerService {
   // Base real: /api/v1/demand/maintainers/{catalog}
   // ============================================================
 
-  getAll(resource: string, q?: string, active?: boolean): Observable<CatalogItem[]> {
+  getAll(
+    resource: string,
+    options: {
+      q?: string;
+      active?: boolean;
+      includeDeleted?: boolean;
+      deleted?: boolean;
+    } = {},
+  ): Observable<CatalogItem[]> {
     let params = new HttpParams();
+
+    const { q, active, includeDeleted, deleted } = options;
 
     if (q) {
       params = params.set('q', q);
@@ -77,10 +87,17 @@ export class CatalogMaintainerService {
       params = params.set('active', String(active));
     }
 
-    return this.http.get<CatalogItem[]>(
-      `${this.MAINTAINERS_URL}/${resource}`,
-      { params },
-    );
+    if (includeDeleted !== undefined) {
+      params = params.set('includeDeleted', String(includeDeleted));
+    }
+
+    if (deleted !== undefined) {
+      params = params.set('deleted', String(deleted));
+    }
+
+    return this.http.get<CatalogItem[]>(`${this.MAINTAINERS_URL}/${resource}`, {
+      params,
+    });
   }
 
   getById(resource: string, id: number): Observable<CatalogItem> {
@@ -108,9 +125,7 @@ export class CatalogMaintainerService {
   }
 
   delete(resource: string, id: number): Observable<void> {
-    return this.http.delete<void>(
-      `${this.MAINTAINERS_URL}/${resource}/${id}`,
-    );
+    return this.http.delete<void>(`${this.MAINTAINERS_URL}/${resource}/${id}`);
   }
 
   restore(resource: string, id: number): Observable<void> {
@@ -132,9 +147,7 @@ export class CatalogMaintainerService {
   ): Observable<Page<CatalogItem>> {
     const { page = 0, size = 10, q, active, sort } = opts;
 
-    let params = new HttpParams()
-      .set('page', page)
-      .set('size', size);
+    let params = new HttpParams().set('page', page).set('size', size);
 
     if (q) {
       params = params.set('q', q);

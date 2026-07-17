@@ -29,6 +29,7 @@ import { firstValueFrom } from 'rxjs';
 import { NavigationStateService } from '@app/core/services/navigation-state.service';
 import { SessionService } from '@app/core/services/session.service';
 import { DashboardComponent } from '../../views/dashboard/dashboard.component';
+import { TimeService } from '@app/core/services/time.service';
 
 let globalReloadListenerAdded = false;
 
@@ -83,6 +84,7 @@ export class TemplateComponent implements OnInit {
   private expirationRetryCount = 0;
   private readonly MAX_EXP_RETRIES = 5;
   private sessionService = inject(SessionService);
+  private timeService = inject(TimeService);
 
   userRoles: string[] = [];
   userPrograms: string[] = [];
@@ -528,17 +530,18 @@ export class TemplateComponent implements OnInit {
     const exp = this.tokenService.getTokenExpiration();
 
     if (!exp) {
-      console.warn('[TemplateComponent] ⏰ No hay expiración registrada');
+      console.warn('[TemplateComponent] No hay expiración registrada');
       return;
     }
 
-    let remainingMs = exp - Date.now();
+    let remainingMs = exp - this.timeService.nowMs();
 
     this.remainingMinutes = Math.max(0, Math.floor(remainingMs / 60000));
+
     this.showExtendButton = this.remainingMinutes <= 5;
 
     console.log(
-      `[TemplateComponent] ⏲ Sesión expira en ${this.remainingMinutes} minutos`,
+      `[TemplateComponent] Sesión expira en ${this.remainingMinutes} minutos`,
     );
 
     if (this.timerSub) {
@@ -547,7 +550,8 @@ export class TemplateComponent implements OnInit {
     }
 
     this.timerSub = interval(60000).subscribe(() => {
-      remainingMs = exp - Date.now();
+      remainingMs = exp - this.timeService.nowMs();
+
       this.remainingMinutes = Math.max(0, Math.floor(remainingMs / 60000));
 
       this.showExtendButton = this.remainingMinutes <= 5;

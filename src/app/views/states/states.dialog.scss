@@ -1,1 +1,16 @@
 @use '../../shared/styles/maintainer-dialog.scss' as *;
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.full {
+  width: 100%;
+}
+
+mat-checkbox {
+  margin-top: 2px;
+  margin-bottom: 10px;
+}

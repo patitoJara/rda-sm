@@ -1,1 +1,169 @@
 @use '../../shared/styles/maintainer-page.scss' as *;
+
+.code-badge {
+  display: inline-flex;
+  align-items: center;
+
+  max-width: 220px;
+  padding: 4px 8px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  border: 1px solid #c9dfe4;
+  border-radius: 8px;
+
+  background: #f2f8fa;
+  color: #27616c;
+
+  font-family: monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.description-cell {
+  display: block;
+
+  max-width: 280px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   TABLA COMPACTA DE RESULTADOS
+========================================================= */
+
+.results-table-wrapper,
+.table-card,
+.table-wrapper {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.table-card {
+  overflow: hidden;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.results-table {
+  width: 100% !important;
+  min-width: 0 !important;
+  table-layout: fixed !important;
+}
+
+.results-table th,
+.results-table td {
+  box-sizing: border-box;
+  padding: 8px 7px !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.results-table th {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.results-table td {
+  font-size: 12px;
+}
+
+/* Distribución exacta del ancho total */
+
+.mat-column-id {
+  width: 5% !important;
+}
+
+.mat-column-name {
+  width: 12% !important;
+}
+
+.mat-column-code {
+  width: 11% !important;
+}
+
+.mat-column-scope {
+  width: 7% !important;
+}
+
+.mat-column-description {
+  width: 17% !important;
+}
+
+.mat-column-active {
+  width: 7% !important;
+  text-align: center;
+}
+
+.mat-column-createdAt {
+  width: 9% !important;
+}
+
+.mat-column-updatedAt {
+  width: 9% !important;
+}
+
+.mat-column-deletedAt {
+  width: 9% !important;
+}
+
+.mat-column-estado {
+  width: 7% !important;
+  text-align: center;
+}
+
+.mat-column-acciones {
+  width: 7% !important;
+  min-width: 88px !important;
+  text-align: center;
+
+  position: sticky !important;
+  right: 0;
+  z-index: 3;
+
+  background: #ffffff;
+  border-left: 1px solid #dce7ec;
+}
+
+th.mat-column-acciones {
+  z-index: 4;
+  background: #e8f4f6;
+}
+
+.description-cell,
+.code-badge,
+.status-badge {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.action-buttons button {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+}
+
+.action-buttons mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}

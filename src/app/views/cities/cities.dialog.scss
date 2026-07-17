@@ -1,0 +1,178 @@
+﻿:host {
+  display: block;
+}
+
+.dialog-container {
+  width: 100%;
+  background: #ffffff;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 22px 24px 14px;
+  border-bottom: 1px solid #e2eaec;
+  background:
+    linear-gradient(
+      135deg,
+      #f7fbfc 0%,
+      #eef7f8 100%
+    );
+}
+
+.header-icon {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #dff1f3;
+  color: #0f6b75;
+
+  mat-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 28px;
+  }
+}
+
+.header-text {
+  min-width: 0;
+}
+
+.header-text h2 {
+  margin: 0;
+  padding: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #263238;
+}
+
+.header-text p {
+  margin: 5px 0 0;
+  color: #607d8b;
+  line-height: 1.45;
+}
+
+mat-dialog-content {
+  max-height: 68vh;
+  padding: 22px 24px;
+}
+
+.city-form {
+  width: 100%;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr);
+  gap: 16px;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.error-banner,
+.region-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 10px;
+}
+
+.error-banner {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border: 1px solid #efb7bb;
+  background: #fff3f4;
+  color: #a5131c;
+
+  mat-icon {
+    flex: 0 0 auto;
+  }
+}
+
+.region-error {
+  grid-column: 1 / -1;
+  padding: 11px 12px;
+  margin-top: -8px;
+  border: 1px solid #f2c879;
+  background: #fff9eb;
+  color: #8a5700;
+
+  span {
+    flex: 1;
+  }
+}
+
+.active-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 14px 16px;
+  border: 1px solid #dce5e8;
+  border-radius: 10px;
+  background: #f8fbfc;
+
+  span {
+    padding-left: 30px;
+    color: #607d8b;
+    font-size: 0.83rem;
+    line-height: 1.4;
+  }
+}
+
+mat-dialog-actions {
+  gap: 10px;
+  padding: 16px 24px 22px;
+  border-top: 1px solid #e2eaec;
+
+  button {
+    min-width: 130px;
+  }
+
+  mat-spinner {
+    display: inline-block;
+    margin-right: 8px;
+  }
+}
+
+@media (max-width: 620px) {
+  .dialog-header {
+    padding: 18px 18px 12px;
+  }
+
+  mat-dialog-content {
+    padding: 18px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .full-width,
+  .region-error {
+    grid-column: 1;
+  }
+
+  mat-dialog-actions {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: stretch;
+    padding: 14px 18px 18px;
+
+    button {
+      width: 100%;
+    }
+  }
+}

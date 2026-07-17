@@ -1,0 +1,255 @@
+﻿<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-icon">
+      <mat-icon>
+        {{ isEditMode ? 'edit_location_alt' : 'add_location_alt' }}
+      </mat-icon>
+    </div>
+
+    <div class="header-text">
+      <h2 mat-dialog-title>
+        {{ dialogTitle }}
+      </h2>
+
+      <p>
+        {{ dialogDescription }}
+      </p>
+    </div>
+  </div>
+
+  <mat-dialog-content>
+    <form
+      class="city-form"
+      [formGroup]="form"
+      (ngSubmit)="save()"
+    >
+      <div
+        class="error-banner"
+        *ngIf="saveError"
+      >
+        <mat-icon>error_outline</mat-icon>
+
+        <span>
+          {{ saveError }}
+        </span>
+      </div>
+
+      <div class="form-grid">
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+        >
+          <mat-label>Región</mat-label>
+
+          <mat-select
+            formControlName="regionId"
+            [disabled]="isLoadingRegions"
+          >
+            <mat-option
+              *ngIf="isLoadingRegions"
+              disabled
+            >
+              Cargando regiones...
+            </mat-option>
+
+            <mat-option
+              *ngFor="let region of regions"
+              [value]="region.id"
+            >
+              {{ region.name }}
+            </mat-option>
+          </mat-select>
+
+          <mat-icon matPrefix>
+            map
+          </mat-icon>
+
+          <mat-hint>
+            Región a la que pertenece la comuna.
+          </mat-hint>
+
+          <mat-error
+            *ngIf="hasError('regionId', 'required')"
+          >
+            Debes seleccionar una región.
+          </mat-error>
+        </mat-form-field>
+
+        <div
+          class="region-error"
+          *ngIf="loadRegionsError"
+        >
+          <mat-icon>warning_amber</mat-icon>
+
+          <span>
+            {{ loadRegionsError }}
+          </span>
+
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="loadRegions()"
+          >
+            Reintentar
+          </button>
+        </div>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Nombre de la comuna</mat-label>
+
+          <input
+            matInput
+            formControlName="name"
+            maxlength="150"
+            placeholder="Ejemplo: Punta Arenas"
+            (blur)="generateCodeFromName()"
+          />
+
+          <mat-icon matPrefix>
+            location_city
+          </mat-icon>
+
+          <mat-hint align="end">
+            {{
+              form.controls['name'].value?.length || 0
+            }}/150
+          </mat-hint>
+
+          <mat-error
+            *ngIf="hasError('name', 'required')"
+          >
+            El nombre es obligatorio.
+          </mat-error>
+
+          <mat-error
+            *ngIf="hasError('name', 'maxlength')"
+          >
+            El nombre no puede superar los 150 caracteres.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Código</mat-label>
+
+          <input
+            matInput
+            formControlName="code"
+            maxlength="100"
+            placeholder="Ejemplo: PUNTA_ARENAS"
+            (blur)="normalizeCode()"
+          />
+
+          <mat-icon matPrefix>
+            tag
+          </mat-icon>
+
+          <mat-hint>
+            Usa letras mayúsculas, números y guion bajo.
+          </mat-hint>
+
+          <mat-error
+            *ngIf="hasError('code', 'required')"
+          >
+            El código es obligatorio.
+          </mat-error>
+
+          <mat-error
+            *ngIf="hasError('code', 'pattern')"
+          >
+            Solo se permiten letras mayúsculas, números y guion bajo.
+          </mat-error>
+
+          <mat-error
+            *ngIf="hasError('code', 'maxlength')"
+          >
+            El código no puede superar los 100 caracteres.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+        >
+          <mat-label>Descripción</mat-label>
+
+          <textarea
+            matInput
+            formControlName="description"
+            rows="4"
+            maxlength="500"
+            placeholder="Describe brevemente la comuna y su uso territorial."
+          ></textarea>
+
+          <mat-icon matPrefix>
+            notes
+          </mat-icon>
+
+          <mat-hint align="end">
+            {{
+              form.controls['description'].value?.length || 0
+            }}/500
+          </mat-hint>
+
+          <mat-error
+            *ngIf="hasError('description', 'maxlength')"
+          >
+            La descripción no puede superar los 500 caracteres.
+          </mat-error>
+        </mat-form-field>
+
+        <div class="active-field full-width">
+          <mat-checkbox formControlName="active">
+            Comuna activa
+          </mat-checkbox>
+
+          <span>
+            Las comunas inactivas no estarán disponibles para nuevas
+            configuraciones.
+          </span>
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button
+      mat-stroked-button
+      type="button"
+      [disabled]="isSaving"
+      (click)="cancel()"
+    >
+      Cancelar
+    </button>
+
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      [disabled]="
+        isSaving ||
+        isLoadingRegions ||
+        !!loadRegionsError
+      "
+      (click)="save()"
+    >
+      <mat-spinner
+        *ngIf="isSaving"
+        diameter="20"
+      ></mat-spinner>
+
+      <mat-icon *ngIf="!isSaving">
+        save
+      </mat-icon>
+
+      <span>
+        {{
+          isSaving
+            ? 'Guardando...'
+            : isEditMode
+              ? 'Guardar cambios'
+              : 'Crear comuna'
+        }}
+      </span>
+    </button>
+  </mat-dialog-actions>
+</div>

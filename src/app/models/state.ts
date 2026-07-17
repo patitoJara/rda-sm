@@ -1,8 +1,13 @@
+export interface State {
+  id?: number;
 
-export class State {
-    id?: number;
-    name?: string;
-    createdAt?: string;
-    updatedAt?: string;
-    deletedAt?: string | null;  
+  name: string;
+  code: string;
+  scope: string;
+  description: string | null;
+  active: boolean;
+
+  createdAt?: string;
+  updatedAt?: string | null;
+  deletedAt?: string | null;
 }

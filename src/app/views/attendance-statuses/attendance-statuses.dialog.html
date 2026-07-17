@@ -1,0 +1,115 @@
+<h2 mat-dialog-title>
+  <mat-icon>event_available</mat-icon>
+
+  <span>
+    {{
+      form.get("id")?.value
+        ? "Editar estado de asistencia"
+        : "Nuevo estado de asistencia"
+    }}
+  </span>
+</h2>
+
+<div mat-dialog-content>
+  <form [formGroup]="form" class="dialog-form" (ngSubmit)="save()">
+    <mat-form-field appearance="outline" floatLabel="always" class="full">
+      <mat-label>Nombre</mat-label>
+
+      <input
+        matInput
+        formControlName="name"
+        autocomplete="off"
+        placeholder="Ej: Se presentó"
+      />
+
+      <mat-error *ngIf="form.get('name')?.hasError('required')">
+        El nombre es obligatorio.
+      </mat-error>
+
+      <mat-error *ngIf="form.get('name')?.hasError('maxlength')">
+        El nombre no puede superar los 120 caracteres.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" floatLabel="always" class="full">
+      <mat-label>Código</mat-label>
+
+      <input
+        matInput
+        formControlName="code"
+        autocomplete="off"
+        placeholder="Ej: SE_PRESENTO"
+      />
+
+      <mat-hint>
+        Use letras, números, guion o guion bajo.
+      </mat-hint>
+
+      <mat-error *ngIf="form.get('code')?.hasError('required')">
+        El código es obligatorio.
+      </mat-error>
+
+      <mat-error *ngIf="form.get('code')?.hasError('pattern')">
+        El código contiene caracteres no permitidos.
+      </mat-error>
+
+      <mat-error *ngIf="form.get('code')?.hasError('maxlength')">
+        El código no puede superar los 80 caracteres.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" floatLabel="always" class="full">
+      <mat-label>Descripción</mat-label>
+
+      <textarea
+        matInput
+        formControlName="description"
+        rows="4"
+        maxlength="500"
+        placeholder="Describa cuándo se utiliza este estado"
+      ></textarea>
+
+      <mat-hint align="end">
+        {{ form.get("description")?.value?.length || 0 }}/500
+      </mat-hint>
+
+      <mat-error *ngIf="form.get('description')?.hasError('maxlength')">
+        La descripción no puede superar los 500 caracteres.
+      </mat-error>
+    </mat-form-field>
+
+    <div class="active-control">
+      <mat-checkbox formControlName="active">
+        Estado habilitado para su utilización
+      </mat-checkbox>
+
+      <small>
+        Al deshabilitarlo, el registro se conserva, pero no debería aparecer
+        como opción disponible en los formularios operativos.
+      </small>
+    </div>
+  </form>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button
+    mat-stroked-button
+    type="button"
+    (click)="cancel()"
+    [disabled]="saving"
+  >
+    Cancelar
+  </button>
+
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="save()"
+    [disabled]="form.invalid || saving"
+  >
+    <mat-icon>{{ saving ? "hourglass_top" : "save" }}</mat-icon>
+
+    {{ saving ? "Guardando..." : "Guardar" }}
+  </button>
+</div>

@@ -1,0 +1,40 @@
+@use '../../shared/styles/maintainer-dialog.scss' as *;
+
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 8px;
+}
+
+.full {
+  width: 100%;
+}
+
+.active-control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  margin-top: 4px;
+  padding: 14px 16px;
+
+  border: 1px solid #d5e3e7;
+  border-radius: 12px;
+
+  background: #f8fbfc;
+
+  small {
+    padding-left: 32px;
+
+    color: #60757b;
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: 640px) {
+  .active-control small {
+    padding-left: 0;
+  }
+}

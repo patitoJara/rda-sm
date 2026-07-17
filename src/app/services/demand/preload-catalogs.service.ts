@@ -3,7 +3,7 @@ import { forkJoin, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 // Servicios de catálogos
-import { CommuneService } from '../comunes.service';
+import { CatalogMaintainerService } from '../catalog-maintainer.service';
 import { SexService } from '../sex.service';
 import { ContactTypeService } from '../contact.type.service';
 import { SenderService } from '../sender.service';
@@ -21,7 +21,7 @@ import { IntPrevService } from '../int-prev.service';
   providedIn: 'root',
 })
 export class PreloadCatalogsService {
-  private communeService = inject(CommuneService);
+  private catalogMaintainerService = inject(CatalogMaintainerService);
   private sexService = inject(SexService);
   private contactTypeService = inject(ContactTypeService);
   private senderService = inject(SenderService);
@@ -41,7 +41,12 @@ export class PreloadCatalogsService {
    */
   loadAll(): Observable<any> {
     return forkJoin({
-      communes: this.communeService.listAll().pipe(catchError(() => of([]))),
+      communes: this.catalogMaintainerService
+        .getAll('cities', {
+          active: true,
+          includeDeleted: false,
+        })
+        .pipe(catchError(() => of([]))),
       sexes: this.sexService.listAll().pipe(catchError(() => of([]))),
 
       contactTypes: this.contactTypeService

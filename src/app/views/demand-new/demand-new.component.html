@@ -45,7 +45,7 @@
   <!-- ESTADO CATÁLOGOS DEMANDA -->
   <div
     class="system-status-strip"
-    *ngIf="isLoadingDemandCatalogs || demandCatalogsError || demandCatalogs"
+    *ngIf="isLoadingDemandCatalogs || demandCatalogsError"
   >
     <div class="catalog-status" *ngIf="isLoadingDemandCatalogs">
       <mat-icon>hourglass_top</mat-icon>
@@ -55,19 +55,6 @@
     <div class="catalog-error" *ngIf="demandCatalogsError">
       <mat-icon>error</mat-icon>
       <span>{{ demandCatalogsError }}</span>
-    </div>
-
-    <div
-      class="catalog-status success"
-      *ngIf="demandCatalogs && !demandCatalogsError"
-    >
-      <mat-icon>check_circle</mat-icon>
-      <span>
-        Catálogos cargados: {{ episodeTypes.length }} tipos de episodio,
-        {{ eventTypes.length }} eventos,
-        {{ attendanceStatuses.length }} asistencias,
-        {{ closureReasons.length }} cierres.
-      </span>
     </div>
   </div>
 
@@ -99,7 +86,13 @@
 
         <mat-icon matIconPrefix>search</mat-icon>
 
-        <input matInput formControlName="rut" placeholder="12.345.678-9" />
+        <input
+          matInput
+          formControlName="rut"
+          placeholder="Ej: 123456789 o 12.345.678-9"
+        />
+
+        <mat-hint> Puede ingresar el RUN con o sin puntos y guion. </mat-hint>
 
         <mat-error *ngIf="searchForm.controls.rut.hasError('required')">
           El RUN es obligatorio para iniciar la búsqueda.
@@ -109,16 +102,6 @@
       <button mat-flat-button class="primary-btn" type="submit">
         <mat-icon>search</mat-icon>
         Buscar
-      </button>
-
-      <button
-        mat-stroked-button
-        class="secondary-btn"
-        type="button"
-        (click)="showCreatePerson()"
-      >
-        <mat-icon>person_add</mat-icon>
-        Crear persona
       </button>
     </form>
 
@@ -155,122 +138,372 @@
 
   <!-- CREAR PERSONA -->
   <mat-card class="create-person-card" *ngIf="showCreatePersonForm">
-    <div class="section-heading">
-      <mat-icon>person_add</mat-icon>
+    <!-- ENCABEZADO -->
+    <div class="section-heading create-person-heading">
+      <div class="section-heading__icon">
+        <mat-icon>
+          {{ selectedPerson?.id ? "manage_accounts" : "person_add" }}
+        </mat-icon>
+      </div>
+
       <div>
-        <h2>Crear persona</h2>
+        <h2>
+          {{ selectedPerson?.id ? "Actualizar persona" : "Crear persona" }}
+        </h2>
+
         <p>
-          Complete los datos base de identificación y contacto antes de crear un
-          episodio de demanda.
+          {{
+            selectedPerson?.id
+              ? "Revise y actualice los datos personales, territoriales y previsionales."
+              : "Complete los datos de identificación, contacto y previsión antes de crear el episodio."
+          }}
         </p>
       </div>
     </div>
 
-    <form [formGroup]="personForm" class="person-form-grid">
-      <mat-form-field appearance="fill">
-        <mat-label>RUN</mat-label>
-        <input matInput formControlName="rut" />
-      </mat-form-field>
+    <form [formGroup]="personForm" class="person-form">
+      <!-- =====================================================
+         IDENTIFICACIÓN
+    ====================================================== -->
+      <section class="person-form-section">
+        <div class="person-form-section__header">
+          <div class="person-form-section__icon">
+            <mat-icon>badge</mat-icon>
+          </div>
 
-      <mat-form-field appearance="fill">
-        <mat-label>Primer nombre</mat-label>
-        <input matInput formControlName="firstName" />
-      </mat-form-field>
+          <div>
+            <h3>Identificación personal</h3>
+            <p>Datos de individualización de la persona.</p>
+          </div>
+        </div>
 
-      <mat-form-field appearance="fill">
-        <mat-label>Segundo nombre</mat-label>
-        <input matInput formControlName="secondName" />
-      </mat-form-field>
+        <div class="person-form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>RUN</mat-label>
 
-      <mat-form-field appearance="fill">
-        <mat-label>Primer apellido</mat-label>
-        <input matInput formControlName="firstLastName" />
-      </mat-form-field>
+            <mat-icon matPrefix>fingerprint</mat-icon>
 
-      <mat-form-field appearance="fill">
-        <mat-label>Segundo apellido</mat-label>
-        <input matInput formControlName="secondLastName" />
-      </mat-form-field>
+            <input
+              matInput
+              formControlName="rut"
+              placeholder="Ej.: 11.799.136-9"
+            />
+          </mat-form-field>
 
-      <mat-form-field appearance="fill">
-        <mat-label>Fecha nacimiento</mat-label>
-        <input matInput type="date" formControlName="birthDate" />
-      </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha de nacimiento</mat-label>
 
-      <mat-form-field appearance="fill">
-        <mat-label>Sexo</mat-label>
-        <mat-select formControlName="sex">
-          <mat-option *ngFor="let item of sexes" [value]="item.id">
-            {{ item.name }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+            <mat-icon matPrefix>cake</mat-icon>
 
-      <mat-form-field appearance="fill">
-        <mat-label>Teléfono</mat-label>
-        <input matInput formControlName="phone" />
-      </mat-form-field>
+            <input matInput type="date" formControlName="birthDate" />
 
-      <mat-form-field appearance="fill">
-        <mat-label>Correo</mat-label>
-        <input matInput formControlName="email" />
-      </mat-form-field>
+            <mat-hint>Seleccione o escriba la fecha</mat-hint>
+          </mat-form-field>
 
-      <mat-form-field appearance="fill" class="span-2">
-        <mat-label>Dirección</mat-label>
-        <input matInput formControlName="address" />
-      </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Genero</mat-label>
 
-      <mat-form-field appearance="fill">
-        <mat-label>Comuna</mat-label>
-        <mat-select formControlName="commune">
-          <mat-option *ngFor="let item of communes" [value]="item.id">
-            {{ item.name }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+            <mat-icon matPrefix>wc</mat-icon>
 
-      <mat-form-field appearance="fill">
-        <mat-label>Tipo previsión</mat-label>
-        <mat-select formControlName="intPrev">
-          <mat-option *ngFor="let item of intPrev" [value]="item.id">
-            {{ item.name }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+            <mat-select formControlName="sex">
+              <mat-option *ngFor="let item of sexes" [value]="item.id">
+                {{ item.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
 
-      <mat-form-field appearance="fill">
-        <mat-label>Previsión</mat-label>
-        <mat-select formControlName="convPrev">
-          <mat-option *ngFor="let item of filteredConvPrev" [value]="item.id">
-            {{ item.name }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Primer nombre</mat-label>
+
+            <mat-icon matPrefix>person</mat-icon>
+
+            <input
+              matInput
+              formControlName="firstName"
+              placeholder="Primer nombre"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Segundo nombre</mat-label>
+
+            <mat-icon matPrefix>person_outline</mat-icon>
+
+            <input
+              matInput
+              formControlName="secondName"
+              placeholder="Segundo nombre"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Primer apellido</mat-label>
+
+            <mat-icon matPrefix>account_box</mat-icon>
+
+            <input
+              matInput
+              formControlName="firstLastName"
+              placeholder="Primer apellido"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Segundo apellido</mat-label>
+
+            <mat-icon matPrefix>account_box</mat-icon>
+
+            <input
+              matInput
+              formControlName="secondLastName"
+              placeholder="Segundo apellido"
+            />
+          </mat-form-field>
+        </div>
+      </section>
+
+      <!-- =====================================================
+         CONTACTO Y TERRITORIO
+    ====================================================== -->
+      <section class="person-form-section">
+        <div class="person-form-section__header">
+          <div class="person-form-section__icon">
+            <mat-icon>contact_phone</mat-icon>
+          </div>
+
+          <div>
+            <h3>Contacto y territorio</h3>
+            <p>
+              Información para ubicar y contactar directamente a la persona.
+            </p>
+          </div>
+        </div>
+
+        <div class="person-form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Teléfono</mat-label>
+
+            <mat-icon matPrefix>phone</mat-icon>
+
+            <input
+              matInput
+              formControlName="phone"
+              placeholder="Ej.: 9 1234 5678"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Correo electrónico</mat-label>
+
+            <mat-icon matPrefix>mail</mat-icon>
+
+            <input
+              matInput
+              type="email"
+              formControlName="email"
+              placeholder="correo@ejemplo.cl"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Comuna</mat-label>
+
+            <mat-icon matPrefix>location_on</mat-icon>
+
+            <mat-select formControlName="commune">
+              <mat-option *ngFor="let item of communes" [value]="item.id">
+                {{ item.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="span-2">
+            <mat-label>Dirección</mat-label>
+
+            <mat-icon matPrefix>home</mat-icon>
+
+            <input
+              matInput
+              formControlName="address"
+              placeholder="Calle, número y referencia"
+            />
+          </mat-form-field>
+        </div>
+      </section>
+
+      <!-- =====================================================
+         PREVISIÓN DE SALUD
+    ====================================================== -->
+      <section class="person-form-section">
+        <div class="person-form-section__header">
+          <div class="person-form-section__icon">
+            <mat-icon>health_and_safety</mat-icon>
+          </div>
+
+          <div>
+            <h3>Previsión de salud</h3>
+            <p>
+              Seleccione el sistema previsional y la previsión correspondiente.
+            </p>
+          </div>
+        </div>
+
+        <div class="person-form-grid person-form-grid--prevision">
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de previsión</mat-label>
+
+            <mat-icon matPrefix>medical_information</mat-icon>
+
+            <mat-select formControlName="intPrev">
+              <mat-option *ngFor="let item of intPrev" [value]="item.id">
+                {{ item.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Previsión</mat-label>
+
+            <mat-icon matPrefix>local_hospital</mat-icon>
+
+            <mat-select formControlName="convPrev">
+              <mat-option
+                *ngFor="let item of filteredConvPrev"
+                [value]="item.id"
+              >
+                {{ item.name }}
+              </mat-option>
+            </mat-select>
+
+            <mat-hint *ngIf="!personForm.get('intPrev')?.value">
+              Primero seleccione el tipo de previsión
+            </mat-hint>
+          </mat-form-field>
+        </div>
+      </section>
+
+      <!-- =====================================================
+     REFERENTE DE CONTACTO
+====================================================== -->
+      <section class="person-form-section">
+        <div class="person-form-section__header">
+          <div class="person-form-section__icon">
+            <mat-icon>contact_emergency</mat-icon>
+          </div>
+
+          <div>
+            <h3>Referente de contacto</h3>
+            <p>
+              Persona a quien el equipo puede llamar cuando no logra ubicar al
+              usuario.
+            </p>
+          </div>
+        </div>
+
+        <div class="person-form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre del contacto</mat-label>
+
+            <mat-icon matPrefix>person</mat-icon>
+
+            <input
+              matInput
+              formControlName="contactName"
+              placeholder="Nombre completo"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Parentesco o relación</mat-label>
+
+            <mat-icon matPrefix>family_restroom</mat-icon>
+
+            <input
+              matInput
+              formControlName="contactDescription"
+              placeholder="Ej.: madre, hermano, pareja"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Teléfono del contacto</mat-label>
+
+            <mat-icon matPrefix>phone_in_talk</mat-icon>
+
+            <input
+              matInput
+              formControlName="contactCellphone"
+              placeholder="Ej.: 9 1234 5678"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Correo del contacto</mat-label>
+
+            <mat-icon matPrefix>alternate_email</mat-icon>
+
+            <input
+              matInput
+              type="email"
+              formControlName="contactEmail"
+              placeholder="correo@ejemplo.cl"
+            />
+          </mat-form-field>
+        </div>
+      </section>
     </form>
 
+    <!-- MENSAJE DE ERROR -->
+    <div class="empty-banner error" *ngIf="personSaveError">
+      <mat-icon>error</mat-icon>
+      <span>{{ personSaveError }}</span>
+    </div>
+
+    <!-- ACCIONES -->
     <div class="create-person-actions">
       <div class="empty-banner">
         <mat-icon>info</mat-icon>
+
         <span>
-          Al guardar, la persona se registrará en el backend real de Demanda.
+          {{
+            selectedPerson?.id
+              ? "Los cambios actualizarán los datos existentes de la persona."
+              : "Al guardar, la persona será registrada en el backend real de Demanda."
+          }}
         </span>
       </div>
 
-      <button
-        mat-flat-button
-        class="primary-btn"
-        type="button"
-        [disabled]="personForm.invalid || isSavingPerson"
-        (click)="savePerson()"
-      >
-        <mat-icon>save</mat-icon>
-        {{ isSavingPerson ? "Guardando..." : "Guardar persona" }}
-      </button>
+      <div class="create-person-actions__buttons">
+        <button
+          mat-stroked-button
+          type="button"
+          class="secondary-btn"
+          [disabled]="isSavingPerson"
+          (click)="closePersonForm()"
+        >
+          <mat-icon>close</mat-icon>
+          Cerrar sin guardar
+        </button>
 
-      <div class="empty-banner error" *ngIf="personSaveError">
-        <mat-icon>error</mat-icon>
-        <span>{{ personSaveError }}</span>
+        <button
+          mat-flat-button
+          class="primary-btn"
+          type="button"
+          [disabled]="personForm.invalid || isSavingPerson"
+          (click)="savePerson()"
+        >
+          <mat-icon>
+            {{ selectedPerson?.id ? "published_with_changes" : "save" }}
+          </mat-icon>
+
+          {{
+            isSavingPerson
+              ? "Guardando..."
+              : selectedPerson?.id
+                ? "Actualizar persona"
+                : "Guardar persona"
+          }}
+        </button>
       </div>
     </div>
   </mat-card>
@@ -617,6 +850,23 @@
       class="demandant-full-details"
       *ngIf="showDemandantDetails"
     >
+      <div class="demandant-full-details__toolbar">
+        <div>
+          <span class="detail-mode-label">Vista completa del postulante</span>
+          <p>Revise la información antes de decidir si necesita modificarla.</p>
+        </div>
+
+        <button
+          mat-flat-button
+          type="button"
+          class="edit-person-btn"
+          (click)="openEditPersonForm()"
+        >
+          <mat-icon>edit</mat-icon>
+          Editar datos
+        </button>
+      </div>
+
       <!-- IDENTIFICACIÓN -->
       <section class="demandant-detail-group">
         <div class="demandant-detail-group__header">
@@ -920,11 +1170,15 @@
   </mat-card>
 
   <!-- PANEL OPERATIVO CENTRALIZADO -->
+  <!-- PANEL OPERATIVO CENTRALIZADO -->
   <mat-card
     class="actions-card action-forms-card"
     *ngIf="selectedPerson && activeActionPanel"
   >
-    <div class="operation-panel-shell">
+    <div
+      class="operation-panel-shell"
+      [ngClass]="'operation-panel-shell--' + activeActionPanel"
+    >
       <div class="operation-panel-header">
         <div class="operation-icon">
           <mat-icon>
@@ -937,7 +1191,13 @@
                     ? "psychology"
                     : activeActionPanel === "observation"
                       ? "notes"
-                      : "construction"
+                      : activeActionPanel === "reference"
+                        ? "sync_alt"
+                        : activeActionPanel === "treatmentEntry"
+                          ? "fact_check"
+                          : activeActionPanel === "egressClosure"
+                            ? "logout"
+                            : "construction"
             }}
           </mat-icon>
         </div>
@@ -954,7 +1214,13 @@
                     ? "Entrevista / evaluación"
                     : activeActionPanel === "observation"
                       ? "Registrar observación"
-                      : "Acción en preparación"
+                      : activeActionPanel === "reference"
+                        ? "Referir programa"
+                        : activeActionPanel === "treatmentEntry"
+                          ? "Ingreso a tratamiento"
+                          : activeActionPanel === "egressClosure"
+                            ? "Egreso / cierre"
+                            : "Acción en preparación"
             }}
           </h3>
           <p>
@@ -967,7 +1233,13 @@
                     ? "Registre entrevista, evaluación clínica/social o antecedentes relevantes."
                     : activeActionPanel === "observation"
                       ? "Registre una observación general del episodio."
-                      : "Complete la información correspondiente a la acción seleccionada."
+                      : activeActionPanel === "reference"
+                        ? "Cierre la etapa de origen y prepare la continuidad en el programa receptor."
+                        : activeActionPanel === "treatmentEntry"
+                          ? "Registre el ingreso efectivo a tratamiento y detenga el KPI de espera."
+                          : activeActionPanel === "egressClosure"
+                            ? "Registre el egreso formal, el motivo de cierre y la trazabilidad de la decisión."
+                            : "Complete la información correspondiente a la acción seleccionada."
             }}
           </p>
         </div>
@@ -981,6 +1253,7 @@
       >
         <mat-form-field appearance="outline">
           <mat-label>Facultativo</mat-label>
+          <mat-icon matPrefix>person</mat-icon>
 
           <mat-select formControlName="programProfessionalId">
             <mat-option
@@ -1031,6 +1304,7 @@
 
         <mat-form-field appearance="outline">
           <mat-label>Fecha citación</mat-label>
+          <mat-icon matPrefix>event</mat-icon>
 
           <input
             matInput
@@ -1057,6 +1331,7 @@
         <div class="time-period-grid">
           <mat-form-field appearance="outline">
             <mat-label>Hora citación</mat-label>
+            <mat-icon matPrefix>schedule</mat-icon>
             <input
               matInput
               type="text"
@@ -1083,6 +1358,7 @@
 
           <mat-form-field appearance="outline">
             <mat-label>AM / PM</mat-label>
+            <mat-icon matPrefix>more_time</mat-icon>
 
             <mat-select formControlName="eventPeriod">
               <mat-option value="AM">AM</mat-option>
@@ -1099,6 +1375,7 @@
 
         <mat-form-field appearance="outline">
           <mat-label>Profesión</mat-label>
+          <mat-icon matPrefix>medical_services</mat-icon>
 
           <input
             matInput
@@ -1116,6 +1393,7 @@
 
         <mat-form-field appearance="outline">
           <mat-label>Comentario breve</mat-label>
+          <mat-icon matPrefix>short_text</mat-icon>
 
           <input
             matInput
@@ -1130,6 +1408,7 @@
 
         <mat-form-field appearance="outline" class="span-2">
           <mat-label>Comentario de citación</mat-label>
+          <mat-icon matPrefix>notes</mat-icon>
 
           <textarea
             matInput
@@ -1157,6 +1436,7 @@
       >
         <mat-form-field appearance="outline" class="span-2">
           <mat-label>Citación a actualizar</mat-label>
+          <mat-icon matPrefix>event_available</mat-icon>
 
           <mat-select formControlName="citationEventId">
             <mat-select-trigger>
@@ -1257,6 +1537,7 @@
 
         <mat-form-field appearance="outline">
           <mat-label>Estado de asistencia</mat-label>
+          <mat-icon matPrefix>how_to_reg</mat-icon>
 
           <mat-select formControlName="attendanceStatusId">
             <mat-option
@@ -1282,6 +1563,7 @@
 
         <mat-form-field appearance="outline">
           <mat-label>Comentario</mat-label>
+          <mat-icon matPrefix>comment</mat-icon>
 
           <input
             matInput
@@ -1315,6 +1597,7 @@
       >
         <mat-form-field appearance="outline">
           <mat-label>Fecha entrevista</mat-label>
+          <mat-icon matPrefix>event</mat-icon>
 
           <input
             matInput
@@ -1340,6 +1623,7 @@
         <div class="time-period-grid">
           <mat-form-field appearance="outline">
             <mat-label>Hora entrevista</mat-label>
+            <mat-icon matPrefix>schedule</mat-icon>
 
             <input
               matInput
@@ -1361,6 +1645,7 @@
 
           <mat-form-field appearance="outline">
             <mat-label>AM / PM</mat-label>
+            <mat-icon matPrefix>more_time</mat-icon>
 
             <mat-select formControlName="eventPeriod">
               <mat-option value="AM">AM</mat-option>
@@ -1371,6 +1656,7 @@
 
         <mat-form-field appearance="outline" class="span-2">
           <mat-label>Comentario breve</mat-label>
+          <mat-icon matPrefix>short_text</mat-icon>
           <input
             matInput
             formControlName="comment"
@@ -1386,6 +1672,7 @@
 
         <mat-form-field appearance="outline" class="span-2">
           <mat-label>Detalle de entrevista / evaluación</mat-label>
+          <mat-icon matPrefix>psychology</mat-icon>
           <textarea
             matInput
             rows="4"
@@ -1402,6 +1689,7 @@
 
         <mat-form-field appearance="outline">
           <mat-label>Próxima acción</mat-label>
+          <mat-icon matPrefix>next_plan</mat-icon>
           <input
             matInput
             formControlName="nextAction"
@@ -1411,6 +1699,7 @@
 
         <mat-form-field appearance="outline">
           <mat-label>Fecha próxima acción</mat-label>
+          <mat-icon matPrefix>event_repeat</mat-icon>
 
           <input
             matInput
@@ -1436,6 +1725,92 @@
           <span>{{ interviewError }}</span>
         </div>
       </form>
+
+      <!-- FORMULARIO OBSERVACIÓN -->
+      <form
+        *ngIf="activeActionPanel === 'observation'"
+        [formGroup]="observationForm"
+        class="operation-form operation-form--observation"
+      >
+        <mat-form-field appearance="outline" class="span-2">
+          <mat-label>Comentario breve</mat-label>
+          <mat-icon matPrefix>short_text</mat-icon>
+          <mat-icon matPrefix>subject</mat-icon>
+          <input
+            matInput
+            formControlName="comment"
+            placeholder="Ej.: Se realiza contacto telefónico con la persona"
+          />
+          <mat-error
+            *ngIf="observationForm.controls.comment.hasError('required')"
+          >
+            El comentario es obligatorio.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="span-2">
+          <mat-label>Detalle de la observación</mat-label>
+          <mat-icon matPrefix>notes</mat-icon>
+          <textarea
+            matInput
+            rows="5"
+            formControlName="observation"
+            placeholder="Registre antecedentes, acuerdos, seguimiento o información relevante."
+          ></textarea>
+        </mat-form-field>
+
+        <div class="empty-banner success span-2" *ngIf="observationSuccess">
+          <mat-icon>check_circle</mat-icon>
+          <span>{{ observationSuccess }}</span>
+        </div>
+
+        <div class="empty-banner error span-2" *ngIf="observationError">
+          <mat-icon>error</mat-icon>
+          <span>{{ observationError }}</span>
+        </div>
+      </form>
+
+      <div
+        class="operation-pending-state"
+        *ngIf="activeActionPanel === 'reference'"
+      >
+        <mat-icon>sync_alt</mat-icon>
+        <div>
+          <strong>Formulario en preparación</strong>
+          <span>
+            Esta acción conservará la fecha original de solicitud, cerrará la
+            etapa de origen y creará una nueva etapa en el programa receptor.
+          </span>
+        </div>
+      </div>
+
+      <div
+        class="operation-pending-state"
+        *ngIf="activeActionPanel === 'treatmentEntry'"
+      >
+        <mat-icon>fact_check</mat-icon>
+        <div>
+          <strong>Formulario en preparación</strong>
+          <span>
+            Esta acción registrará el ingreso efectivo a tratamiento y detendrá
+            el KPI de espera del episodio.
+          </span>
+        </div>
+      </div>
+
+      <div
+        class="operation-pending-state"
+        *ngIf="activeActionPanel === 'egressClosure'"
+      >
+        <mat-icon>logout</mat-icon>
+        <div>
+          <strong>Formulario en preparación</strong>
+          <span>
+            Esta acción registrará el egreso formal, el motivo de cierre, las
+            observaciones y la trazabilidad correspondiente.
+          </span>
+        </div>
+      </div>
 
       <div class="operation-actions">
         <button
@@ -1490,6 +1865,22 @@
         >
           <mat-icon>save</mat-icon>
           {{ isSavingInterview ? "Guardando..." : "Guardar entrevista" }}
+        </button>
+
+        <button
+          *ngIf="activeActionPanel === 'observation'"
+          mat-flat-button
+          class="primary-btn"
+          type="button"
+          [disabled]="
+            observationForm.invalid ||
+            isSavingObservation ||
+            isLoadingLongitudinal
+          "
+          (click)="saveObservation()"
+        >
+          <mat-icon>save</mat-icon>
+          {{ isSavingObservation ? "Guardando..." : "Guardar observación" }}
         </button>
       </div>
     </div>
@@ -2341,14 +2732,21 @@
   </mat-card>
 
   <button
-    *ngIf="selectedPerson && showBackToNavigation"
+    *ngIf="
+      selectedPerson &&
+      showBackToNavigation &&
+      !showCreatePersonForm &&
+      !showCreateEpisodeForm &&
+      !showDemandantDetails &&
+      activeSummarySection !== 'demanda-actual'
+    "
     mat-flat-button
     type="button"
     class="back-to-navigation-button"
     (click)="scrollToLongitudinalNavigation()"
-    aria-label="Volver a la navegación de la ficha"
+    aria-label="Volver al índice de secciones"
   >
     <mat-icon>keyboard_arrow_up</mat-icon>
-    <span>Volver a secciones</span>
+    <span>Volver al índice</span>
   </button>
 </div>

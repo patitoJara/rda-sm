@@ -1,0 +1,170 @@
+@use '../../shared/styles/maintainer-page.scss' as *;
+
+.code-badge {
+  display: inline-flex;
+  align-items: center;
+
+  max-width: 220px;
+  padding: 4px 8px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  border: 1px solid #c9dfe4;
+  border-radius: 8px;
+
+  background: #f2f8fa;
+  color: #27616c;
+
+  font-family: monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.description-cell {
+  display: block;
+
+  max-width: 280px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attendance-table-wrapper,
+.table-card,
+.table-wrapper {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.table-card {
+  overflow: hidden;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.attendance-table {
+  width: 100% !important;
+  min-width: 1120px;
+  table-layout: fixed !important;
+}
+
+.attendance-table th,
+.attendance-table td {
+  box-sizing: border-box;
+  padding: 8px 7px !important;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  vertical-align: middle;
+}
+
+.attendance-table th {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.attendance-table td {
+  font-size: 12px;
+}
+
+.mat-column-id {
+  width: 5% !important;
+}
+
+.mat-column-name {
+  width: 14% !important;
+}
+
+.mat-column-code {
+  width: 13% !important;
+}
+
+.mat-column-description {
+  width: 20% !important;
+}
+
+.mat-column-active {
+  width: 8% !important;
+  text-align: center;
+}
+
+.mat-column-createdAt {
+  width: 10% !important;
+}
+
+.mat-column-updatedAt {
+  width: 10% !important;
+}
+
+.mat-column-deletedAt {
+  width: 10% !important;
+}
+
+.mat-column-recordStatus {
+  width: 8% !important;
+  text-align: center;
+}
+
+.mat-column-actions {
+  width: 8% !important;
+  min-width: 88px !important;
+
+  position: sticky !important;
+  right: 0;
+  z-index: 3;
+
+  text-align: center;
+
+  background: #ffffff;
+  border-left: 1px solid #dce7ec;
+}
+
+th.mat-column-actions {
+  z-index: 4;
+  background: #e8f4f6;
+}
+
+.description-cell,
+.code-badge,
+.status-badge {
+  max-width: 100%;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.action-buttons button {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+}
+
+.action-buttons mat-icon {
+  width: 20px;
+  height: 20px;
+
+  font-size: 20px;
+}
+
+@media (max-width: 900px) {
+  .attendance-table {
+    min-width: 1050px;
+  }
+}
