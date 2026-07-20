@@ -35,7 +35,7 @@ function normalizePage<T>(res: PageLike<T>): { data: T[]; total: number } {
 @Component({
   standalone: true,
   selector: 'app-commune-list',
-  templateUrl: './Commune-list.component.html',
+  templateUrl: './commune-list.component.html',
   imports: [
     CommonModule,
     MatDividerModule,
