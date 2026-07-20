@@ -13,6 +13,7 @@ import {
   ElementRef,
   OnDestroy,
   QueryList,
+  ViewChild,
   ViewChildren,
 } from '@angular/core';
 
@@ -251,8 +252,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       nonNullable: true,
     }),
 
-    birthDate: new FormControl<string>('', {
-      nonNullable: true,
+    birthDate: new FormControl<Date | null>(null, {
       validators: [Validators.required],
     }),
 
@@ -587,6 +587,9 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   private summarySections!: QueryList<ElementRef<HTMLElement>>;
 
   private summarySectionObserver: IntersectionObserver | null = null;
+
+  @ViewChild('personEditSection')
+  private personEditSection?: ElementRef<HTMLElement>;
 
   ngOnInit(): void {
     this.loadCatalogs();
@@ -1127,6 +1130,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.personSaveError = null;
     this.patchPersonForm(this.selectedPerson);
+
     this.showDemandantDetails = false;
     this.showCreateEpisodeForm = false;
     this.showCreatePersonForm = true;
@@ -1135,11 +1139,22 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     this.personForm.markAsPristine();
     this.personForm.markAsUntouched();
 
-    queueMicrotask(() => {
-      document
-        .querySelector('.create-person-card')
-        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+    setTimeout(() => {
+      const editSection = this.personEditSection?.nativeElement;
+
+      if (!editSection) {
+        return;
+      }
+
+      editSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+
+      editSection.focus({
+        preventScroll: true,
+      });
+    }, 150);
   }
 
   closePersonForm(): void {
@@ -1548,7 +1563,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       secondLastName: this.toStringOrNull(raw.secondLastName) ?? undefined,
 
       rut: this.formatRut(raw.rut),
-      birthdate: this.toStringOrNull(raw.birthDate),
+      birthdate: this.formatDateForBackend(raw.birthDate) ?? undefined,
 
       email: this.toStringOrNull(raw.email) ?? undefined,
       phone: this.toStringOrNull(raw.phone) ?? undefined,
@@ -1725,13 +1740,18 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private patchPersonForm(person: Postulant): void {
+    const birthDate = this.parseBackendDate(person.birthdate);
+
     this.personForm.patchValue({
       rut: person.rut ?? '',
       firstName: person.firstName ?? '',
+
+      // En el modelo actual, el segundo nombre viene como lastName.
       secondName: person.lastName ?? '',
+
       firstLastName: person.firstLastName ?? '',
       secondLastName: person.secondLastName ?? '',
-      birthDate: person.birthdate ?? '',
+      birthDate,
       sex: person.sex?.id ?? null,
       phone: person.phone ?? '',
       email: person.email ?? '',
@@ -1739,15 +1759,37 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       commune: person.commune?.id ?? null,
       intPrev: person.convPrev?.intPrev?.id ?? null,
       convPrev: person.convPrev?.id ?? null,
+
+      // Todavía no están disponibles directamente en Postulant.
+      contactName: '',
+      contactDescription: '',
+      contactCellphone: '',
+      contactEmail: '',
     });
 
-    if (person.convPrev?.intPrev?.id) {
-      this.filterConvPrevByIntPrev(Number(person.convPrev.intPrev.id));
+    const intPrevId = person.convPrev?.intPrev?.id;
+
+    if (intPrevId) {
+      this.filterConvPrevByIntPrev(Number(intPrevId));
 
       this.personForm.patchValue({
-        convPrev: person.convPrev.id ?? null,
+        convPrev: person.convPrev?.id ?? null,
       });
     }
+  }
+  private parseBackendDate(value: string | null | undefined): Date | null {
+    if (!value) {
+      return null;
+    }
+
+    const dateOnly = value.substring(0, 10);
+    const [year, month, day] = dateOnly.split('-').map(Number);
+
+    if (!year || !month || !day) {
+      return null;
+    }
+
+    return new Date(year, month - 1, day);
   }
 
   private getCurrentEpisodeId(): number | null {
@@ -1850,7 +1892,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
         secondName: postulant.secondName ?? '',
         firstLastName: postulant.firstLastName ?? '',
         secondLastName: postulant.secondLastName ?? '',
-        birthDate: postulant.birthdate ?? '',
+        birthDate: this.parseBackendDate(postulant.birthdate),
         phone: postulant.phone ?? '',
         email: postulant.email ?? '',
         address: postulant.address ?? '',

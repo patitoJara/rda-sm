@@ -1,0 +1,116 @@
+/* ============================================================
+   FORMULARIOS PERSONA / EPISODIO
+   ============================================================ */
+
+.episode-form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px 14px;
+  margin-top: 12px;
+}
+
+.span-2 {
+  grid-column: span 2;
+}
+
+.create-episode-actions,
+.operation-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #e1ecee;
+
+  .empty-banner {
+    margin-right: auto;
+  }
+}
+
+.episode-substances-panel {
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: 18px;
+  background: #f8fbfc;
+  border: 1px solid #dcebed;
+}
+
+.substances-title {
+  margin-bottom: 12px;
+}
+
+.substances-table {
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid #dcebed;
+  background: #ffffff;
+}
+
+.substances-header,
+.substance-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px 120px;
+  align-items: center;
+  gap: 10px;
+}
+
+.substances-header {
+  padding: 10px 12px;
+  background: #e9f5f6;
+  color: #13424b;
+  font-size: 0.78rem;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.substances-help {
+  padding: 9px 12px;
+  color: #5d747b;
+  font-size: 0.84rem;
+  border-bottom: 1px solid #edf4f5;
+}
+
+.substance-row {
+  min-height: 46px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-top: 1px solid #edf4f5;
+
+  &:hover {
+    background: #f4fbfc;
+  }
+
+  &.primary-selected {
+    background: #e8f7f8;
+  }
+}
+
+.substance-name {
+  font-weight: 800;
+  color: #153f49;
+}
+
+.secondary-order {
+  display: flex;
+  justify-content: center;
+}
+
+.order-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #eef4f5;
+  color: #4d6870;
+  font-weight: 850;
+  font-size: 0.8rem;
+
+  &.primary-badge {
+    background: #08798a;
+    color: #ffffff;
+  }
+}

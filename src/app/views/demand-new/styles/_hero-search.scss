@@ -1,0 +1,348 @@
+/* ============================================================
+   HERO INICIAL
+   ============================================================ */
+
+.demand-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 18px;
+  max-width: 1480px;
+  margin: 0 auto 16px;
+}
+
+.hero-main,
+.hero-rules,
+.search-card,
+.create-episode-card,
+.longitudinal-summary-card,
+.current-demand-card,
+.longitudinal-detail-card,
+.actions-card,
+.episode-history-card {
+  border: 1px solid rgba(14, 91, 103, 0.13);
+  box-shadow: 0 16px 32px rgba(15, 47, 61, 0.08) !important;
+}
+
+.hero-main {
+  position: relative;
+  overflow: hidden;
+  padding: 24px 28px;
+  border-radius: 26px;
+  background: linear-gradient(135deg, #0f4d56 0%, #08798a 100%);
+  color: #ffffff;
+
+  &::after {
+    content: "";
+    position: absolute;
+    right: -70px;
+    top: -80px;
+    width: 230px;
+    height: 230px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.11);
+  }
+
+  h1 {
+    position: relative;
+    z-index: 1;
+    margin: 12px 0 8px;
+    font-size: clamp(2rem, 3vw, 2.8rem);
+    line-height: 1.05;
+    letter-spacing: -0.045em;
+    font-weight: 950;
+  }
+
+  p {
+    position: relative;
+    z-index: 1;
+    max-width: 820px;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.86);
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+}
+
+.eyebrow,
+.eyebrow-light {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  border-radius: 999px;
+  font-weight: 850;
+}
+
+.eyebrow {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  font-size: 0.82rem;
+
+  mat-icon {
+    color: #d8f3f1;
+  }
+}
+
+.eyebrow-light {
+  padding: 6px 11px;
+  background: #e6f6f7;
+  color: #08798a;
+  font-size: 0.78rem;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.flow-strip {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+
+  span {
+    padding: 7px 11px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 0.8rem;
+    font-weight: 850;
+  }
+
+  mat-icon {
+    opacity: 0.75;
+  }
+}
+
+.hero-rules {
+  padding: 20px;
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.96);
+
+  > mat-icon {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 17px;
+    background: #e2f3f4;
+    color: #0f6b75;
+    font-size: 25px;
+    margin-bottom: 14px;
+  }
+
+  h2 {
+    margin: 0 0 10px;
+    color: #123b44;
+    font-size: 1.15rem;
+    font-weight: 950;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 18px;
+    color: #4d6870;
+    line-height: 1.45;
+    font-size: 0.88rem;
+  }
+}
+
+/* ============================================================
+   ESTADOS / BUSCADOR
+   ============================================================ */
+
+.system-status-strip,
+.search-card,
+.create-episode-card,
+.longitudinal-summary-card,
+.current-demand-grid,
+.longitudinal-detail-grid,
+.actions-card,
+.episode-history-card,
+.longitudinal-tabs {
+  position: relative;
+  width: 100%;
+  margin-bottom: 14px;
+  padding: 7px;
+
+  border: 1px solid #cfe0e5;
+  border-radius: 18px;
+
+  background: rgba(255, 255, 255, 0.96);
+
+  box-shadow:
+    0 10px 30px rgba(22, 75, 87, 0.1),
+    0 2px 7px rgba(22, 75, 87, 0.05);
+
+  backdrop-filter: blur(12px);
+}
+
+.longitudinal-tabs {
+  position: sticky;
+  top: 8px;
+  z-index: 40;
+  isolation: isolate;
+}
+
+.system-status-strip {
+  margin-bottom: 12px;
+}
+
+.catalog-status,
+.catalog-error,
+.empty-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: #f2f8f9;
+  border: 1px solid #dbe9eb;
+  color: #345c65;
+  font-size: 0.86rem;
+  font-weight: 650;
+
+  mat-icon {
+    font-size: 19px;
+    width: 19px;
+    height: 19px;
+    color: #08798a;
+  }
+
+  &.success {
+    background: #e7f7f3;
+    border-color: #bde4d8;
+    color: #0b6b56;
+  }
+
+  &.warning {
+    background: #fff7df;
+    border-color: #ffe0a3;
+    color: #8a5e00;
+  }
+
+  &.error,
+  &.searching {
+    background: #fff1f1;
+    border-color: #efcaca;
+    color: #963737;
+  }
+}
+
+.catalog-error {
+  background: #fff1f1;
+  border-color: #efcaca;
+  color: #963737;
+}
+
+.search-card,
+.create-episode-card,
+.actions-card,
+.episode-history-card {
+  margin-bottom: 16px;
+  padding: 18px !important;
+  border-radius: 22px !important;
+  background: rgba(255, 255, 255, 0.97) !important;
+}
+
+.search-card {
+  display: grid;
+  grid-template-columns: minmax(360px, 390px) minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+
+  &.search-card--compact {
+    position: static;
+    z-index: auto;
+    padding: 12px 14px !important;
+    border-radius: 20px !important;
+    backdrop-filter: none;
+  }
+}
+
+.search-card__title,
+.section-heading,
+.card-header,
+.substances-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+
+  > mat-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 15px;
+    background: #eef7f7;
+    color: #0f6b75;
+  }
+
+  h2,
+  h3 {
+    margin: 0;
+    color: #123b44;
+    font-weight: 950;
+    letter-spacing: -0.025em;
+  }
+
+  h2 {
+    font-size: 1.1rem;
+  }
+
+  h3 {
+    font-size: 1rem;
+  }
+
+  p {
+    margin: 3px 0 0;
+    color: #5d747b;
+    font-size: 0.86rem;
+    line-height: 1.35;
+  }
+}
+
+.search-form {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.search-feedbacks {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: -4px;
+}
+
+.primary-btn,
+.secondary-btn {
+  min-height: 46px;
+  border-radius: 999px !important;
+  font-weight: 850 !important;
+
+  mat-icon {
+    margin-right: 6px;
+  }
+}
+
+.primary-btn {
+  background: #08798a !important;
+  color: #ffffff !important;
+}
+
+.secondary-btn {
+  color: #0f5964 !important;
+  border-color: rgba(15, 89, 100, 0.26) !important;
+}

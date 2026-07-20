@@ -1,0 +1,22 @@
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1180px) {
+  .demand-hero,
+  .search-card,
+  .operative-dock,
+  .current-demand-grid,
+  .longitudinal-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .operative-dock__actions {
+    justify-content: flex-start;
+  }
+
+  .summary-indicators,
+  .demandant-data-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

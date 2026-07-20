@@ -137,7 +137,13 @@
   </mat-card>
 
   <!-- CREAR PERSONA -->
-  <mat-card class="create-person-card" *ngIf="showCreatePersonForm">
+  <mat-card
+    #personEditSection
+    tabindex="-1"
+    class="create-person-card"
+    [class.create-person-card--editing]="selectedPerson?.id"
+    *ngIf="showCreatePersonForm"
+  >
     <!-- ENCABEZADO -->
     <div class="section-heading create-person-heading">
       <div class="section-heading__icon">
@@ -161,13 +167,13 @@
       </div>
     </div>
 
-    <form [formGroup]="personForm" class="person-form">
+    <form [formGroup]="personForm" class="person-editor-form">
       <!-- =====================================================
-         IDENTIFICACIÓN
-    ====================================================== -->
-      <section class="person-form-section">
-        <div class="person-form-section__header">
-          <div class="person-form-section__icon">
+       IDENTIFICACIÓN
+  ====================================================== -->
+      <section class="person-editor-section">
+        <div class="person-editor-section__header">
+          <div class="person-editor-section__icon">
             <mat-icon>badge</mat-icon>
           </div>
 
@@ -177,10 +183,9 @@
           </div>
         </div>
 
-        <div class="person-form-grid">
+        <div class="person-editor-grid">
           <mat-form-field appearance="outline">
             <mat-label>RUN</mat-label>
-
             <mat-icon matPrefix>fingerprint</mat-icon>
 
             <input
@@ -192,17 +197,25 @@
 
           <mat-form-field appearance="outline">
             <mat-label>Fecha de nacimiento</mat-label>
-
             <mat-icon matPrefix>cake</mat-icon>
 
-            <input matInput type="date" formControlName="birthDate" />
+            <input
+              matInput
+              [matDatepicker]="birthDatePicker"
+              formControlName="birthDate"
+              placeholder="dd/mm/aaaa"
+            />
 
-            <mat-hint>Seleccione o escriba la fecha</mat-hint>
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="birthDatePicker"
+            ></mat-datepicker-toggle>
+
+            <mat-datepicker #birthDatePicker></mat-datepicker>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Genero</mat-label>
-
+            <mat-label>Género</mat-label>
             <mat-icon matPrefix>wc</mat-icon>
 
             <mat-select formControlName="sex">
@@ -214,7 +227,6 @@
 
           <mat-form-field appearance="outline">
             <mat-label>Primer nombre</mat-label>
-
             <mat-icon matPrefix>person</mat-icon>
 
             <input
@@ -226,7 +238,6 @@
 
           <mat-form-field appearance="outline">
             <mat-label>Segundo nombre</mat-label>
-
             <mat-icon matPrefix>person_outline</mat-icon>
 
             <input
@@ -238,7 +249,6 @@
 
           <mat-form-field appearance="outline">
             <mat-label>Primer apellido</mat-label>
-
             <mat-icon matPrefix>account_box</mat-icon>
 
             <input
@@ -250,7 +260,6 @@
 
           <mat-form-field appearance="outline">
             <mat-label>Segundo apellido</mat-label>
-
             <mat-icon matPrefix>account_box</mat-icon>
 
             <input
@@ -263,11 +272,11 @@
       </section>
 
       <!-- =====================================================
-         CONTACTO Y TERRITORIO
-    ====================================================== -->
-      <section class="person-form-section">
-        <div class="person-form-section__header">
-          <div class="person-form-section__icon">
+       CONTACTO Y TERRITORIO
+  ====================================================== -->
+      <section class="person-editor-section">
+        <div class="person-editor-section__header">
+          <div class="person-editor-section__icon">
             <mat-icon>contact_phone</mat-icon>
           </div>
 
@@ -279,10 +288,9 @@
           </div>
         </div>
 
-        <div class="person-form-grid">
+        <div class="person-editor-grid">
           <mat-form-field appearance="outline">
             <mat-label>Teléfono</mat-label>
-
             <mat-icon matPrefix>phone</mat-icon>
 
             <input
@@ -294,7 +302,6 @@
 
           <mat-form-field appearance="outline">
             <mat-label>Correo electrónico</mat-label>
-
             <mat-icon matPrefix>mail</mat-icon>
 
             <input
@@ -307,7 +314,6 @@
 
           <mat-form-field appearance="outline">
             <mat-label>Comuna</mat-label>
-
             <mat-icon matPrefix>location_on</mat-icon>
 
             <mat-select formControlName="commune">
@@ -319,7 +325,6 @@
 
           <mat-form-field appearance="outline" class="span-2">
             <mat-label>Dirección</mat-label>
-
             <mat-icon matPrefix>home</mat-icon>
 
             <input
@@ -332,11 +337,11 @@
       </section>
 
       <!-- =====================================================
-         PREVISIÓN DE SALUD
-    ====================================================== -->
-      <section class="person-form-section">
-        <div class="person-form-section__header">
-          <div class="person-form-section__icon">
+       PREVISIÓN DE SALUD
+  ====================================================== -->
+      <section class="person-editor-section">
+        <div class="person-editor-section__header">
+          <div class="person-editor-section__icon">
             <mat-icon>health_and_safety</mat-icon>
           </div>
 
@@ -348,10 +353,9 @@
           </div>
         </div>
 
-        <div class="person-form-grid person-form-grid--prevision">
+        <div class="person-editor-grid person-editor-grid--prevision">
           <mat-form-field appearance="outline">
             <mat-label>Tipo de previsión</mat-label>
-
             <mat-icon matPrefix>medical_information</mat-icon>
 
             <mat-select formControlName="intPrev">
@@ -363,7 +367,6 @@
 
           <mat-form-field appearance="outline">
             <mat-label>Previsión</mat-label>
-
             <mat-icon matPrefix>local_hospital</mat-icon>
 
             <mat-select formControlName="convPrev">
@@ -383,11 +386,11 @@
       </section>
 
       <!-- =====================================================
-     REFERENTE DE CONTACTO
-====================================================== -->
-      <section class="person-form-section">
-        <div class="person-form-section__header">
-          <div class="person-form-section__icon">
+       REFERENTE DE CONTACTO
+  ====================================================== -->
+      <section class="person-editor-section">
+        <div class="person-editor-section__header">
+          <div class="person-editor-section__icon">
             <mat-icon>contact_emergency</mat-icon>
           </div>
 
@@ -400,10 +403,9 @@
           </div>
         </div>
 
-        <div class="person-form-grid">
+        <div class="person-editor-grid">
           <mat-form-field appearance="outline">
             <mat-label>Nombre del contacto</mat-label>
-
             <mat-icon matPrefix>person</mat-icon>
 
             <input
@@ -415,7 +417,6 @@
 
           <mat-form-field appearance="outline">
             <mat-label>Parentesco o relación</mat-label>
-
             <mat-icon matPrefix>family_restroom</mat-icon>
 
             <input
@@ -427,7 +428,6 @@
 
           <mat-form-field appearance="outline">
             <mat-label>Teléfono del contacto</mat-label>
-
             <mat-icon matPrefix>phone_in_talk</mat-icon>
 
             <input
@@ -439,7 +439,6 @@
 
           <mat-form-field appearance="outline">
             <mat-label>Correo del contacto</mat-label>
-
             <mat-icon matPrefix>alternate_email</mat-icon>
 
             <input
@@ -597,7 +596,7 @@
         <input matInput formControlName="currentResult" />
       </mat-form-field>
 
-      <mat-form-field appearance="fill" class="span-2">
+      <mat-form-field appearance="outline" class="span-full">
         <mat-label>Observación inicial</mat-label>
         <textarea
           matInput
@@ -819,13 +818,13 @@
     </div>
 
     <!-- =====================================================
-       BOTÓN EXPANDIR DATOS COMPLETOS
-  ====================================================== -->
+     BOTÓN EXPANDIR DATOS COMPLETOS
+====================================================== -->
     <div class="demandant-detail-actions">
       <button
         mat-stroked-button
         type="button"
-        class="secondary-btn"
+        class="secondary-btn demandant-details-toggle"
         (click)="toggleDemandantDetails()"
         [attr.aria-expanded]="showDemandantDetails"
         aria-controls="demandant-full-details"
@@ -851,8 +850,9 @@
       *ngIf="showDemandantDetails"
     >
       <div class="demandant-full-details__toolbar">
-        <div>
-          <span class="detail-mode-label">Vista completa del postulante</span>
+        <div class="demandant-full-details__toolbar-text">
+          <span class="detail-mode-label"> Vista completa del postulante </span>
+
           <p>Revise la información antes de decidir si necesita modificarla.</p>
         </div>
 
@@ -863,7 +863,7 @@
           (click)="openEditPersonForm()"
         >
           <mat-icon>edit</mat-icon>
-          Editar datos
+          <span>Editar datos</span>
         </button>
       </div>
 
@@ -1170,7 +1170,6 @@
   </mat-card>
 
   <!-- PANEL OPERATIVO CENTRALIZADO -->
-  <!-- PANEL OPERATIVO CENTRALIZADO -->
   <mat-card
     class="actions-card action-forms-card"
     *ngIf="selectedPerson && activeActionPanel"
@@ -1329,9 +1328,10 @@
         </mat-form-field>
 
         <div class="time-period-grid">
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" class="time-hour-field">
             <mat-label>Hora citación</mat-label>
             <mat-icon matPrefix>schedule</mat-icon>
+
             <input
               matInput
               type="text"
@@ -1340,8 +1340,6 @@
               maxlength="5"
               (blur)="formatCitationHourInput()"
             />
-
-            <mat-hint>Formato 12 horas. Ej: 01:30</mat-hint>
 
             <mat-error
               *ngIf="citationForm.controls.eventHour.hasError('required')"
@@ -1391,7 +1389,7 @@
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" class="span-2">
           <mat-label>Comentario breve</mat-label>
           <mat-icon matPrefix>short_text</mat-icon>
 
@@ -1406,7 +1404,7 @@
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="span-2">
+        <mat-form-field appearance="outline" class="span-full">
           <mat-label>Comentario de citación</mat-label>
           <mat-icon matPrefix>notes</mat-icon>
 
@@ -1621,7 +1619,7 @@
         </mat-form-field>
 
         <div class="time-period-grid">
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" class="time-hour-field">
             <mat-label>Hora entrevista</mat-label>
             <mat-icon matPrefix>schedule</mat-icon>
 
@@ -1633,8 +1631,11 @@
               maxlength="5"
               (blur)="formatInterviewHourInput()"
             />
-
-            <mat-hint>Formato 12 horas. Ej: 01:30</mat-hint>
+            <mat-error
+              *ngIf="interviewForm.controls.eventHour.hasError('required')"
+            >
+              La hora es obligatoria.
+            </mat-error>
 
             <mat-error
               *ngIf="interviewForm.controls.eventHour.hasError('pattern')"
@@ -1670,7 +1671,7 @@
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="span-2">
+        <mat-form-field appearance="outline" class="span-full">
           <mat-label>Detalle de entrevista / evaluación</mat-label>
           <mat-icon matPrefix>psychology</mat-icon>
           <textarea
@@ -1734,13 +1735,15 @@
       >
         <mat-form-field appearance="outline" class="span-2">
           <mat-label>Comentario breve</mat-label>
-          <mat-icon matPrefix>short_text</mat-icon>
+
           <mat-icon matPrefix>subject</mat-icon>
+
           <input
             matInput
             formControlName="comment"
             placeholder="Ej.: Se realiza contacto telefónico con la persona"
           />
+
           <mat-error
             *ngIf="observationForm.controls.comment.hasError('required')"
           >
@@ -1748,9 +1751,11 @@
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="span-2">
+        <mat-form-field appearance="outline" class="span-full">
           <mat-label>Detalle de la observación</mat-label>
+
           <mat-icon matPrefix>notes</mat-icon>
+
           <textarea
             matInput
             rows="5"
@@ -1759,12 +1764,12 @@
           ></textarea>
         </mat-form-field>
 
-        <div class="empty-banner success span-2" *ngIf="observationSuccess">
+        <div class="empty-banner success span-full" *ngIf="observationSuccess">
           <mat-icon>check_circle</mat-icon>
           <span>{{ observationSuccess }}</span>
         </div>
 
-        <div class="empty-banner error span-2" *ngIf="observationError">
+        <div class="empty-banner error span-full" *ngIf="observationError">
           <mat-icon>error</mat-icon>
           <span>{{ observationError }}</span>
         </div>

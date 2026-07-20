@@ -1,0 +1,477 @@
+/* =========================================================
+   EDITOR DE PERSONA
+========================================================= */
+
+.person-editor-card {
+  position: relative;
+  z-index: 1;
+
+  width: 100%;
+  margin: 10px 0 16px;
+  padding: 12px 14px !important;
+
+  scroll-margin-top: 96px;
+  outline: none;
+
+  border: 1px solid #efd49a !important;
+  border-left: 6px solid #d99a19 !important;
+  border-radius: 18px !important;
+
+  background: linear-gradient(
+    135deg,
+    #fffdf8 0%,
+    #ffffff 75%
+  ) !important;
+
+  box-shadow:
+    0 14px 30px rgba(153, 103, 8, 0.12),
+    0 3px 8px rgba(153, 103, 8, 0.06) !important;
+
+  animation: person-editor-enter 240ms ease-out;
+}
+
+.person-editor-card--editing {
+  z-index: 5;
+
+  border-color: #e5b85b !important;
+  border-left-color: #c98500 !important;
+
+  box-shadow:
+    0 18px 38px rgba(153, 103, 8, 0.16),
+    0 0 0 5px rgba(217, 154, 25, 0.08) !important;
+}
+
+.person-editor-card--editing::before {
+  content: "Edición de datos del postulante";
+
+  position: absolute;
+  top: -13px;
+  left: 22px;
+  z-index: 3;
+
+  padding: 4px 13px;
+
+  border: 1px solid #c98500;
+  border-radius: 999px;
+
+  background: linear-gradient(135deg, #c98500, #e0a32d);
+  color: #ffffff;
+
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.025em;
+
+  box-shadow: 0 5px 13px rgba(153, 103, 8, 0.22);
+}
+
+@keyframes person-editor-enter {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.person-editor-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  min-height: 0;
+  margin: 0 0 8px;
+  padding: 5px 7px 7px;
+
+  border-bottom: 1px solid #f0dfb9;
+}
+
+.person-editor-heading .section-heading__icon {
+  width: 31px;
+  height: 31px;
+  min-width: 31px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 10px;
+
+  background: #fff2d5;
+  color: #9b6500;
+}
+
+.person-editor-heading .section-heading__icon mat-icon {
+  width: 18px;
+  height: 18px;
+
+  font-size: 18px;
+  line-height: 18px;
+}
+
+.person-editor-heading h2 {
+  margin: 0;
+
+  color: #573a08;
+  font-size: 0.94rem;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.person-editor-heading p {
+  margin: 2px 0 0;
+
+  color: #725f3c;
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+/* =========================================================
+   FORMULARIO
+========================================================= */
+
+.person-editor-form {
+  display: grid;
+  gap: 7px;
+}
+
+.person-editor-section {
+  margin: 0;
+  padding: 0;
+}
+
+.person-editor-section__header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  min-height: 30px;
+  margin: 0 0 5px;
+  padding: 4px 7px;
+
+  border-left: 3px solid #d99a19;
+  border-radius: 7px;
+
+  background: linear-gradient(
+    90deg,
+    #fff2d5 0%,
+    #fff9eb 62%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+}
+
+.person-editor-section__icon {
+  width: 23px;
+  height: 23px;
+  min-width: 23px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 7px;
+
+  color: #9b6500;
+}
+
+.person-editor-section__icon mat-icon {
+  width: 16px;
+  height: 16px;
+
+  font-size: 16px;
+  line-height: 16px;
+}
+
+.person-editor-section__header h3 {
+  margin: 0;
+
+  color: #4e3b18;
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.person-editor-section__header p {
+  margin: 1px 0 0;
+
+  color: #706246;
+  font-size: 0.64rem;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+/* =========================================================
+   GRILLAS
+========================================================= */
+
+.person-editor-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  column-gap: 8px;
+  row-gap: 2px;
+}
+
+.person-editor-grid--prevision {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.person-editor-grid .span-2 {
+  grid-column: span 2;
+}
+
+/* =========================================================
+   ANGULAR MATERIAL DEL EDITOR
+========================================================= */
+
+:host ::ng-deep .person-editor-form .mat-mdc-form-field {
+  width: 100%;
+  margin: 0;
+}
+
+:host ::ng-deep .person-editor-form .mat-mdc-text-field-wrapper {
+  min-height: 48px;
+  height: 48px;
+
+  background: #ffffff;
+}
+
+:host ::ng-deep .person-editor-form .mat-mdc-form-field-flex {
+  min-height: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+}
+
+:host ::ng-deep .person-editor-form .mat-mdc-form-field-icon-prefix {
+  flex: 0 0 40px;
+
+  width: 40px;
+  min-width: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 9px 0 6px !important;
+  margin: 0 !important;
+}
+
+:host ::ng-deep .person-editor-form .mat-mdc-form-field-icon-prefix mat-icon {
+  flex: 0 0 19px;
+
+  width: 19px;
+  height: 19px;
+
+  margin: 0 !important;
+
+  color: #9b6500;
+
+  font-size: 19px;
+  line-height: 19px;
+}
+
+:host ::ng-deep .person-editor-form .mat-mdc-form-field-icon-suffix {
+  flex: 0 0 40px;
+
+  width: 40px;
+  min-width: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 6px !important;
+}
+
+:host ::ng-deep .person-editor-form .mat-mdc-form-field-icon-suffix mat-icon {
+  width: 19px;
+  height: 19px;
+
+  font-size: 19px;
+  line-height: 19px;
+}
+
+:host ::ng-deep .person-editor-form .mat-mdc-form-field-infix {
+  flex: 1 1 auto;
+
+  min-width: 0;
+  min-height: 48px;
+
+  padding: 12px 4px 8px 7px !important;
+}
+
+:host ::ng-deep .person-editor-form .mat-mdc-floating-label {
+  color: #5e513b;
+
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+:host ::ng-deep .person-editor-form input.mat-mdc-input-element,
+:host ::ng-deep .person-editor-form .mat-mdc-select-value,
+:host ::ng-deep .person-editor-form .mat-mdc-select-value-text {
+  color: #26383c;
+
+  font-size: 0.8rem;
+  font-weight: 550;
+  line-height: 1.25;
+}
+
+:host ::ng-deep .person-editor-form .mat-mdc-form-field-subscript-wrapper {
+  min-height: 14px;
+  height: 14px;
+
+  margin: 0;
+}
+
+:host ::ng-deep .person-editor-form .mat-mdc-form-field-bottom-align::before {
+  height: 14px;
+}
+
+:host ::ng-deep .person-editor-form .mat-mdc-form-field-hint-wrapper,
+:host ::ng-deep .person-editor-form .mat-mdc-form-field-error-wrapper {
+  padding: 0 8px;
+}
+
+:host ::ng-deep .person-editor-form .mat-mdc-form-field-hint,
+:host ::ng-deep .person-editor-form .mat-mdc-form-field-error {
+  font-size: 0.6rem;
+  line-height: 1.05;
+}
+
+/* =========================================================
+   MENSAJES Y ACCIONES
+========================================================= */
+
+.person-editor-card > .empty-banner.error {
+  min-height: 34px;
+  margin: 5px 0;
+  padding: 6px 10px;
+
+  font-size: 0.7rem;
+}
+
+.person-editor-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  margin-top: 4px;
+  padding-top: 7px;
+
+  border-top: 1px solid #efdfbd;
+}
+
+.person-editor-actions > .empty-banner {
+  min-height: 31px;
+  margin: 0;
+  padding: 4px 9px;
+
+  border-radius: 999px;
+
+  font-size: 0.63rem;
+  line-height: 1.15;
+}
+
+.person-editor-actions > .empty-banner mat-icon {
+  width: 15px;
+  height: 15px;
+
+  font-size: 15px;
+  line-height: 15px;
+}
+
+.person-editor-actions__buttons {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  flex-shrink: 0;
+}
+
+.person-editor-actions__buttons button {
+  min-height: 34px;
+  height: 34px;
+  padding-inline: 13px;
+
+  border-radius: 999px !important;
+
+  font-size: 0.69rem;
+  font-weight: 850;
+}
+
+.person-editor-actions__buttons button mat-icon {
+  width: 16px;
+  height: 16px;
+
+  font-size: 16px;
+  line-height: 16px;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1250px) {
+  .person-editor-grid,
+  .person-editor-grid--prevision {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .person-editor-grid,
+  .person-editor-grid--prevision {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .person-editor-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .person-editor-actions__buttons {
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 600px) {
+  .person-editor-card {
+    scroll-margin-top: 82px;
+    padding: 12px 10px !important;
+  }
+
+  .person-editor-card--editing::before {
+    left: 12px;
+    max-width: calc(100% - 24px);
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .person-editor-grid,
+  .person-editor-grid--prevision {
+    grid-template-columns: 1fr;
+  }
+
+  .person-editor-grid .span-2 {
+    grid-column: auto;
+  }
+
+  .person-editor-actions__buttons {
+    flex-direction: column-reverse;
+  }
+
+  .person-editor-actions__buttons button {
+    width: 100%;
+  }
+}

@@ -1,0 +1,41 @@
+/* ============================================================
+   MATERIAL
+   ============================================================ */
+
+::ng-deep .demand-new-page {
+  .mat-mdc-form-field {
+    width: 100%;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    background: #ffffff;
+  }
+
+  .mat-mdc-form-field-icon-prefix,
+  .mat-mdc-form-field-icon-suffix {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 42px !important;
+    overflow: visible !important;
+  }
+
+  .mat-mdc-form-field-icon-prefix .mat-icon,
+  .mat-mdc-form-field-icon-suffix .mat-icon {
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 22px !important;
+    line-height: 22px !important;
+    overflow: visible !important;
+  }
+
+  .mat-mdc-form-field-infix {
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper {
+    min-height: 0;
+  }
+}

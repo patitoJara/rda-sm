@@ -1,0 +1,890 @@
+/* ============================================================
+   CITACION CARD
+   ============================================================ */
+
+.citation-list {
+  display: grid;
+  gap: 10px;
+}
+
+.citation-card {
+  display: grid;
+  gap: 10px;
+  padding: 13px;
+  border-radius: 18px;
+  background: #f8fbfc;
+  border: 1px solid #dcebed;
+}
+
+.citation-card__main {
+  display: grid;
+  grid-template-columns: minmax(140px, 180px) minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.citation-date {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  mat-icon {
+    color: #08798a;
+  }
+
+  strong,
+  span {
+    display: block;
+  }
+
+  strong {
+    color: #123b44;
+    font-weight: 950;
+  }
+
+  span {
+    color: #667c83;
+    font-size: 0.82rem;
+  }
+}
+
+.citation-detail {
+  min-width: 0;
+
+  strong,
+  span {
+    display: block;
+  }
+
+  strong {
+    color: #123b44;
+    font-weight: 950;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  span {
+    margin-top: 2px;
+    color: #667c83;
+    font-size: 0.84rem;
+  }
+}
+
+.citation-comment {
+  padding: 10px 11px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #e5eff1;
+
+  p {
+    margin: 0;
+    color: #153f49;
+    font-weight: 750;
+  }
+
+  small {
+    display: block;
+    margin-top: 4px;
+    color: #667c83;
+  }
+}
+
+.citation-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  padding-top: 8px;
+  border-top: 1px solid #e5eff1;
+  color: #667c83;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+/* ============================================================
+   OPCION DE CITACIONES
+   ============================================================ */
+
+::ng-deep .citation-option {
+  height: auto !important;
+  min-height: 76px !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+::ng-deep .citation-option + .citation-option {
+  border-top: 1px solid #e1ecee;
+}
+
+::ng-deep .citation-option.mat-mdc-option-active,
+::ng-deep .citation-option.mdc-list-item--selected {
+  background: #eaf4ff !important;
+}
+
+.citation-option__main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  line-height: 1.25;
+}
+
+.citation-option__main strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #123b44;
+  font-size: 0.9rem;
+  font-weight: 950;
+}
+
+.citation-option__professional {
+  color: #0f5964;
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.citation-option__detail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 5px;
+  color: #667c83;
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+
+.citation-option__detail small {
+  color: #08798a;
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+/* ============================================================
+   ETIQUETAS DE ASISTENCIA
+   ============================================================ */
+
+.citation-temporal-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 900;
+  background: #eef4f5;
+  color: #61777e;
+}
+
+.citation-temporal-badge.expired {
+  background: #fff1f1;
+  color: #a72d2d;
+}
+
+.citation-temporal-badge.today {
+  background: #e8f7f8;
+  color: #08798a;
+}
+
+.citation-temporal-badge.future {
+  background: #eaf8f1;
+  color: #0b6b45;
+}
+
+.citation-sequence-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 24px;
+  margin-bottom: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #e8f7f8;
+  color: #08798a;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+::ng-deep .professional-option {
+  height: auto !important;
+  min-height: 64px !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+.professional-option__content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 1.25;
+}
+
+.professional-option__main {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  strong {
+    font-size: 0.9rem;
+  }
+
+  span {
+    font-size: 0.78rem;
+    color: #52657a;
+  }
+}
+
+.professional-option__programs {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  font-size: 0.72rem;
+  color: #657589;
+  white-space: normal;
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    flex: 0 0 auto;
+  }
+}
+
+/* ============================================================
+   PANELES OPERATIVOS COMPACTOS
+============================================================ */
+
+.action-forms-card {
+  overflow: visible;
+
+  margin: 8px 0 14px;
+  padding: 0 !important;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+
+  background: transparent !important;
+
+  box-shadow: none !important;
+}
+
+/* ============================================================
+   CONTENEDOR GENERAL
+============================================================ */
+
+.operation-panel-shell {
+  --panel-color: #08798a;
+  --panel-soft: #eaf7f8;
+  --panel-border: #b9dde2;
+
+  position: relative;
+
+  display: grid;
+  gap: 8px;
+
+  padding: 11px 13px;
+
+  border: 1px solid var(--panel-border);
+  border-left: 6px solid var(--panel-color);
+  border-radius: 18px;
+
+  background: linear-gradient(135deg, var(--panel-soft) 0%, #ffffff 62%);
+
+  box-shadow:
+    0 10px 24px rgba(21, 63, 73, 0.1),
+    0 2px 6px rgba(21, 63, 73, 0.05);
+
+  animation: operation-panel-enter 220ms ease-out;
+}
+
+/* ============================================================
+   COLORES POR TIPO DE OPERACIÓN
+============================================================ */
+
+.operation-panel-shell--citation {
+  --panel-color: #1976d2;
+  --panel-soft: #edf5ff;
+  --panel-border: #bfd7f2;
+}
+
+.operation-panel-shell--attendance {
+  --panel-color: #7656b8;
+  --panel-soft: #f3effc;
+  --panel-border: #d5c8ed;
+}
+
+.operation-panel-shell--interview {
+  --panel-color: #c87900;
+  --panel-soft: #fff6e5;
+  --panel-border: #f1d29c;
+}
+
+.operation-panel-shell--observation {
+  --panel-color: #c85a45;
+  --panel-soft: #fff2ee;
+  --panel-border: #edc3b9;
+}
+
+.operation-panel-shell--reference {
+  --panel-color: #4f63bd;
+  --panel-soft: #eef0fb;
+  --panel-border: #c8ceec;
+}
+
+.operation-panel-shell--treatmentEntry {
+  --panel-color: #27865a;
+  --panel-soft: #ebf7f0;
+  --panel-border: #bfdfcc;
+}
+
+.operation-panel-shell--egressClosure {
+  --panel-color: #b24b4b;
+  --panel-soft: #fff0f0;
+  --panel-border: #ecc6c6;
+}
+
+/* ============================================================
+   ENCABEZADO
+============================================================ */
+
+.operation-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  min-height: 40px;
+  padding: 5px 7px 7px;
+
+  border: 0;
+  border-bottom: 1px solid var(--panel-border);
+  border-radius: 0;
+
+  background: transparent;
+}
+
+.operation-panel-header > div:last-child {
+  min-width: 0;
+}
+
+.operation-panel-header span {
+  display: block;
+
+  margin: 0 0 1px;
+
+  color: var(--panel-color);
+
+  font-size: 0.65rem;
+  font-weight: 950;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.operation-panel-header h3 {
+  margin: 0;
+
+  color: #153f49;
+
+  font-size: 0.91rem;
+  font-weight: 950;
+  line-height: 1.15;
+}
+
+.operation-panel-header p {
+  margin: 2px 0 0;
+
+  color: #60777e;
+
+  font-size: 0.68rem;
+  line-height: 1.25;
+}
+
+.operation-icon {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 11px;
+
+  background: var(--panel-color);
+  color: #ffffff;
+
+  box-shadow: 0 5px 12px rgba(21, 63, 73, 0.14);
+}
+
+.operation-icon mat-icon {
+  width: 19px;
+  height: 19px;
+
+  font-size: 19px;
+  line-height: 19px;
+}
+
+/* ============================================================
+   FORMULARIO
+============================================================ */
+
+.operation-form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  column-gap: 9px;
+  row-gap: 7px;
+
+  padding: 0;
+}
+
+.operation-form .span-2 {
+  grid-column: span 2;
+}
+
+.operation-form .span-full,
+.operation-form > .empty-banner {
+  grid-column: 1 / -1;
+}
+
+.operation-form mat-form-field {
+  width: 100%;
+  margin: 0;
+}
+
+/* ============================================================
+   CAMPOS ANGULAR MATERIAL
+============================================================ */
+
+:host ::ng-deep .operation-form .mat-mdc-text-field-wrapper {
+  min-height: 47px;
+  height: 47px;
+
+  background: #ffffff;
+}
+
+:host ::ng-deep .operation-form .mat-mdc-form-field-flex {
+  min-height: 47px;
+  height: 47px;
+
+  align-items: center;
+}
+
+:host ::ng-deep .operation-form .mat-mdc-form-field-infix {
+  min-width: 0;
+  min-height: 47px;
+
+  padding-top: 11px;
+  padding-bottom: 7px;
+}
+
+:host ::ng-deep .operation-form .mat-mdc-form-field-subscript-wrapper {
+  min-height: 18px;
+  height: auto;
+
+  margin: 0;
+}
+
+:host ::ng-deep .operation-form .mat-mdc-form-field-bottom-align::before {
+  height: 18px;
+}
+
+:host ::ng-deep .operation-form .mat-mdc-form-field-hint-wrapper,
+:host ::ng-deep .operation-form .mat-mdc-form-field-error-wrapper {
+  padding: 0 8px;
+}
+
+:host ::ng-deep .operation-form .mat-mdc-form-field-hint,
+:host ::ng-deep .operation-form .mat-mdc-form-field-error {
+  font-size: 0.65rem;
+  line-height: 1.2;
+  white-space: normal;
+}
+
+:host ::ng-deep .operation-form .mat-mdc-floating-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+:host ::ng-deep .operation-form input.mat-mdc-input-element,
+:host ::ng-deep .operation-form .mat-mdc-select-value,
+:host ::ng-deep .operation-form .mat-mdc-select-value-text {
+  color: #26383c;
+
+  font-size: 0.79rem;
+  font-weight: 550;
+}
+
+/* ============================================================
+   ICONOS DE LOS CAMPOS
+============================================================ */
+
+:host ::ng-deep .operation-form .mat-mdc-form-field-icon-prefix {
+  flex: 0 0 50px;
+
+  width: 50px;
+  min-width: 50px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 10px 0 11px !important;
+  margin: 0 6px 0 0 !important;
+}
+
+:host ::ng-deep .operation-form .mat-mdc-form-field-icon-prefix mat-icon {
+  display: block;
+
+  width: 19px;
+  height: 19px;
+
+  margin: 0 !important;
+
+  color: var(--panel-color);
+
+  font-size: 19px;
+  line-height: 19px;
+
+  flex: 0 0 19px;
+}
+
+:host ::ng-deep .operation-form .mat-mdc-form-field-infix {
+  flex: 1 1 auto;
+
+  min-width: 0;
+  min-height: 47px;
+
+  padding-top: 11px;
+  padding-right: 4px;
+  padding-bottom: 7px;
+  padding-left: 7px !important;
+}
+
+/* ============================================================
+   FECHAS Y HORAS
+============================================================ */
+
+.time-period-grid {
+  display: grid;
+  grid-template-columns: minmax(150px, 230px) 120px;
+  gap: 8px;
+
+  min-width: 0;
+}
+
+/* Campo AM / PM: prefijo más compacto */
+:host
+  ::ng-deep
+  .time-period-grid
+  mat-form-field:last-child
+  .mat-mdc-form-field-icon-prefix {
+  flex: 0 0 38px;
+
+  width: 38px;
+  min-width: 38px;
+
+  padding: 0 5px 0 7px !important;
+  margin-right: 2px !important;
+}
+
+:host
+  ::ng-deep
+  .time-period-grid
+  mat-form-field:last-child
+  .mat-mdc-form-field-infix {
+  padding-left: 2px !important;
+}
+
+/* ============================================================
+   TEXTAREAS
+============================================================ */
+
+.operation-form textarea {
+  resize: vertical;
+}
+
+/* ============================================================
+   CAMPOS MULTILÍNEA Y SUS ERRORES
+============================================================ */
+
+:host
+  ::ng-deep
+  .operation-form
+  mat-form-field.span-full
+  .mat-mdc-text-field-wrapper {
+  height: auto;
+  min-height: 76px;
+}
+
+:host
+  ::ng-deep
+  .operation-form
+  mat-form-field.span-full
+  .mat-mdc-form-field-flex {
+  height: auto;
+  min-height: 76px;
+  align-items: flex-start;
+}
+
+:host
+  ::ng-deep
+  .operation-form
+  mat-form-field.span-full
+  .mat-mdc-form-field-infix {
+  height: auto;
+  min-height: 76px;
+
+  padding-top: 19px;
+  padding-bottom: 8px;
+}
+
+:host
+  ::ng-deep
+  .operation-form
+  mat-form-field.span-full
+  .mat-mdc-form-field-icon-prefix {
+  align-self: flex-start;
+  padding-top: 18px !important;
+}
+
+:host
+  ::ng-deep
+  .operation-form
+  mat-form-field.span-full
+  textarea.mat-mdc-input-element {
+  display: block;
+
+  min-height: 52px;
+  max-height: 140px;
+
+  margin: 0;
+  padding: 0;
+
+  line-height: 1.35;
+}
+
+:host
+  ::ng-deep
+  .operation-form
+  mat-form-field.span-full
+  .mat-mdc-form-field-subscript-wrapper {
+  height: auto;
+  min-height: 20px;
+}
+
+:host
+  ::ng-deep
+  .operation-form
+  mat-form-field.span-full
+  .mat-mdc-form-field-bottom-align::before {
+  height: 20px;
+}
+
+:host
+  ::ng-deep
+  .operation-form
+  mat-form-field.span-full
+  .mat-mdc-form-field-error {
+  white-space: normal;
+
+  font-size: 0.67rem;
+  line-height: 1.25;
+}
+
+/* ============================================================
+   MENSAJES DE ESTADO
+============================================================ */
+
+.operation-form > .empty-banner {
+  margin: 0 0 4px;
+}
+
+.operation-pending-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  min-height: 58px;
+  padding: 9px 11px;
+
+  border: 1px dashed var(--panel-border);
+  border-radius: 13px;
+
+  background: var(--panel-soft);
+}
+
+.operation-pending-state > mat-icon {
+  width: 31px;
+  height: 31px;
+  min-width: 31px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+  color: var(--panel-color);
+
+  font-size: 19px;
+  line-height: 19px;
+}
+
+.operation-pending-state strong,
+.operation-pending-state span {
+  display: block;
+}
+
+.operation-pending-state strong {
+  margin-bottom: 1px;
+
+  color: #234b54;
+
+  font-size: 0.82rem;
+  font-weight: 950;
+}
+
+.operation-pending-state span {
+  color: #617980;
+
+  font-size: 0.69rem;
+  line-height: 1.25;
+}
+
+/* ============================================================
+   BOTONES
+============================================================ */
+
+.operation-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+
+  margin: 0;
+  padding-top: 7px;
+
+  border-top: 1px solid var(--panel-border);
+}
+
+.operation-actions button {
+  min-width: 0;
+  min-height: 34px;
+  height: 34px;
+
+  padding-inline: 13px;
+
+  border-radius: 999px !important;
+
+  font-size: 0.69rem;
+  font-weight: 850;
+}
+
+.operation-actions .primary-btn {
+  background: var(--panel-color) !important;
+  color: #ffffff !important;
+}
+
+.operation-actions button mat-icon {
+  width: 16px;
+  height: 16px;
+
+  font-size: 16px;
+  line-height: 16px;
+}
+
+/* ============================================================
+   ANIMACIÓN
+============================================================ */
+
+@keyframes operation-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Espacio inferior suficiente para errores de hora */
+:host
+  ::ng-deep
+  .operation-form
+  .time-hour-field
+  .mat-mdc-form-field-subscript-wrapper {
+  min-height: 18px;
+  height: auto;
+}
+
+:host
+  ::ng-deep
+  .operation-form
+  .time-hour-field
+  .mat-mdc-form-field-bottom-align::before {
+  height: 18px;
+}
+
+:host
+  ::ng-deep
+  .operation-form
+  .time-hour-field
+  .mat-mdc-form-field-error {
+  white-space: nowrap;
+  font-size: 0.67rem;
+  line-height: 1.2;
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
+@media (max-width: 1200px) {
+  .operation-form {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .operation-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .operation-panel-shell {
+    padding: 10px;
+    border-left-width: 5px;
+  }
+
+  .operation-panel-header {
+    align-items: flex-start;
+  }
+
+  .operation-form {
+    grid-template-columns: 1fr;
+  }
+
+  .operation-form .span-2,
+  .operation-form .span-full {
+    grid-column: auto;
+  }
+
+  .time-period-grid {
+    grid-column: auto;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .operation-actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .operation-actions button {
+    width: 100%;
+  }
+}
