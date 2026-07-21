@@ -75,6 +75,7 @@ import {
 import { extractArray } from './utils/demand-new-data.utils';
 import { getEventSortDate } from './utils/demand-new-history.utils';
 import { todayDateOnly, toBackendDate } from './utils/demand-new-date.utils';
+import { calculatePreviousTreatmentNumber } from './utils/demand-new-episode.utils';
 
 @Component({
   selector: 'app-demand-new',
@@ -1670,24 +1671,6 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.episodeForm.markAsPristine();
     this.episodeForm.markAsUntouched();
-  }
-
-  private calculatePreviousTreatmentNumber(data: any): number {
-    const previousEpisodes = data?.previousEpisodes ?? data?.episodes ?? [];
-
-    return previousEpisodes.filter((episode: any) => {
-      const hasEntryDate = Boolean(
-        episode.entryToTreatmentAt ?? episode.entry_to_treatment_at,
-      );
-
-      const hasEntryEvent = (episode.events ?? []).some(
-        (event: any) =>
-          event.eventType?.code === 'INGRESO_TRATAMIENTO' ||
-          event.eventTypeCode === 'INGRESO_TRATAMIENTO',
-      );
-
-      return hasEntryDate || hasEntryEvent;
-    }).length;
   }
 
   selectPrimarySubstance(id: number): void {
