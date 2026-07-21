@@ -21,3 +21,19 @@
 
   return [];
 }
+
+export function filterConvPrevByIntPrevId(
+  items: any[],
+  intPrevId: number,
+): any[] {
+  if (!Array.isArray(items) || !intPrevId) {
+    return [];
+  }
+
+  return items.filter((item: any) => {
+    const relatedId =
+      item?.intPrev?.id ?? item?.int_prev_id ?? item?.intPrevId ?? null;
+
+    return Number(relatedId) === Number(intPrevId);
+  });
+}

@@ -72,7 +72,10 @@ import {
   normalizeText,
 } from './utils/demand-new-event.utils';
 
-import { extractArray } from './utils/demand-new-data.utils';
+import {
+  extractArray,
+  filterConvPrevByIntPrevId,
+} from './utils/demand-new-data.utils';
 import { getEventSortDate } from './utils/demand-new-history.utils';
 import { todayDateOnly, toBackendDate } from './utils/demand-new-date.utils';
 import { calculatePreviousTreatmentNumber } from './utils/demand-new-episode.utils';
@@ -1010,12 +1013,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    this.filteredConvPrev = this.convPrev.filter((item: any) => {
-      const relatedId =
-        item?.intPrev?.id ?? item?.int_prev_id ?? item?.intPrevId ?? null;
-
-      return Number(relatedId) === Number(intPrevId);
-    });
+    this.filteredConvPrev = filterConvPrevByIntPrevId(this.convPrev, intPrevId);
 
     convPrevControl?.enable({
       emitEvent: false,
@@ -3839,4 +3837,3 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     return false;
   }
 }
-
