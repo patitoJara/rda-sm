@@ -2148,7 +2148,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const raw = this.interviewForm.getRawValue();
 
-    const eventTime = this.buildTime24From12Hour(
+    const eventTime = buildEventTime(
       toStringOrNull(raw.eventHour),
       toStringOrNull(raw.eventPeriod) ?? 'AM',
     );
@@ -3445,53 +3445,6 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
             'No fue posible registrar la asistencia. Intente nuevamente.';
         },
       });
-  }
-
-  private buildTime24From12Hour(
-    hourValue: string | null,
-    periodValue: string | null,
-  ): string | null {
-    const hourText = String(hourValue ?? '').trim();
-    const period = String(periodValue ?? 'AM')
-      .toUpperCase()
-      .trim();
-
-    if (!hourText) {
-      return null;
-    }
-
-    const parts = hourText.split(':');
-
-    if (parts.length !== 2) {
-      return null;
-    }
-
-    let hour = Number(parts[0]);
-    const minutes = Number(parts[1]);
-
-    if (
-      Number.isNaN(hour) ||
-      Number.isNaN(minutes) ||
-      hour < 1 ||
-      hour > 12 ||
-      minutes < 0 ||
-      minutes > 59
-    ) {
-      return null;
-    }
-
-    if (period === 'PM' && hour < 12) {
-      hour += 12;
-    }
-
-    if (period === 'AM' && hour === 12) {
-      hour = 0;
-    }
-
-    return `${String(hour).padStart(2, '0')}:${String(minutes).padStart(
-      2,
-      '0',
-    )}:00`;
   }
 
   formatCitationHourInput(): void {
