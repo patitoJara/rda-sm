@@ -65,6 +65,13 @@ import {
   toStringOrNull,
 } from './utils/demand-new-format.utils';
 
+import {
+  buildEventTime,
+  normalizeEventTime,
+  normalizeSemaphoreColor,
+  normalizeText,
+} from './utils/demand-new-event.utils';
+
 @Component({
   selector: 'app-demand-new',
   standalone: true,
@@ -3037,14 +3044,14 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const citationDate = String(citation?.eventDate ?? '').trim();
-    const citationTime = this.normalizeEventTime(citation?.eventTime);
-    const citationProfession = this.normalizeText(
+    const citationTime = normalizeEventTime(citation?.eventTime);
+    const citationProfession = normalizeText(
       citation?.professionName ?? citation?.profession?.name,
     );
 
     const attendanceEvents = (this.episodeEvents ?? [])
       .filter((event: any) => {
-        const code = this.normalizeText(
+        const code = normalizeText(
           event?.eventType?.code ??
             event?.eventTypeCode ??
             event?.typeCode ??
@@ -3073,8 +3080,8 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       }) ??
       attendanceEvents.find((event: any) => {
         const eventDate = String(event?.eventDate ?? '').trim();
-        const eventTime = this.normalizeEventTime(event?.eventTime);
-        const eventProfession = this.normalizeText(
+        const eventTime = normalizeEventTime(event?.eventTime);
+        const eventProfession = normalizeText(
           event?.professionName ?? event?.profession?.name,
         );
 
@@ -3086,20 +3093,6 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       }) ??
       null
     );
-  }
-
-  private normalizeEventTime(value: any): string {
-    return String(value ?? '')
-      .trim()
-      .slice(0, 5);
-  }
-
-  private normalizeText(value: any): string {
-    return String(value ?? '')
-      .toUpperCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .trim();
   }
 
   getCitationAttendanceLabel(citation: any): string {
@@ -3184,7 +3177,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     const raw = this.citationForm.getRawValue();
 
     const eventDate = formatDateForBackend(raw.eventDate);
-    const eventTime = this.buildEventTime(raw.eventHour, raw.eventPeriod);
+    const eventTime = buildEventTime(raw.eventHour, raw.eventPeriod);
 
     if (!eventDate) {
       this.citationError =
@@ -3452,37 +3445,6 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
             'No fue posible registrar la asistencia. Intente nuevamente.';
         },
       });
-  }
-
-  private buildEventTime(
-    hourValue: string | null | undefined,
-    period: string | null | undefined,
-  ): string | null {
-    const value = String(hourValue ?? '').trim();
-    const selectedPeriod = String(period ?? '')
-      .trim()
-      .toUpperCase();
-
-    if (!value || !selectedPeriod) return null;
-
-    const parts = value.split(':');
-    if (parts.length !== 2) return null;
-
-    let hour = Number(parts[0]);
-    const minutes = Number(parts[1]);
-
-    if (!Number.isFinite(hour) || !Number.isFinite(minutes)) return null;
-    if (hour < 1 || hour > 12 || minutes < 0 || minutes > 59) return null;
-
-    if (selectedPeriod === 'PM' && hour < 12) {
-      hour += 12;
-    }
-
-    if (selectedPeriod === 'AM' && hour === 12) {
-      hour = 0;
-    }
-
-    return `${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
   }
 
   private buildTime24From12Hour(
@@ -3809,7 +3771,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
         return false;
       }
 
-      const status = this.normalizeText(
+      const status = normalizeText(
         event?.attendanceStatus?.code ??
           event?.attendanceStatusCode ??
           event?.attendanceStatusName,
@@ -3882,7 +3844,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getSemaphoreClass(value: string | null | undefined): string {
-    const color = this.normalizeSemaphoreColor(value);
+    const color = normalizeSemaphoreColor(value);
 
     if (color === 'ROJO') {
       return 'semaphore-red';
@@ -3900,7 +3862,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getSemaphoreDescription(value: string | null | undefined): string {
-    const color = this.normalizeSemaphoreColor(value);
+    const color = normalizeSemaphoreColor(value);
 
     if (color === 'ROJO') {
       return 'Atención prioritaria';
@@ -3915,14 +3877,6 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     return 'Sin clasificación';
-  }
-
-  private normalizeSemaphoreColor(value: string | null | undefined): string {
-    return String(value ?? '')
-      .toUpperCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .trim();
   }
 
   get hasActiveEpisode(): boolean {
