@@ -74,6 +74,7 @@ import {
 
 import { extractArray } from './utils/demand-new-data.utils';
 import { getEventSortDate } from './utils/demand-new-history.utils';
+import { todayDateOnly, toBackendDate } from './utils/demand-new-date.utils';
 
 @Component({
   selector: 'app-demand-new',
@@ -1429,8 +1430,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       episodeTypeId: Number(raw.episodeTypeId),
 
       originalRequestDate:
-        toStringOrNull(raw.originalRequestDate) ??
-        getTodayForDateInput(),
+        toStringOrNull(raw.originalRequestDate) ?? getTodayForDateInput(),
 
       responsibleUserId,
 
@@ -1642,8 +1642,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       this.episodeForm.controls.originalRequestDate.value;
 
     this.episodeForm.patchValue({
-      originalRequestDate:
-        currentOriginalRequestDate || getTodayForDateInput(),
+      originalRequestDate: currentOriginalRequestDate || getTodayForDateInput(),
 
       initialProgramId: activeProgramId,
 
@@ -2135,14 +2134,13 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     const payload = {
       eventTypeCode: 'ENTREVISTA',
       eventDate:
-        toStringOrNull(raw.eventDate) ??
-        new Date().toISOString().slice(0, 10),
+        toStringOrNull(raw.eventDate) ?? new Date().toISOString().slice(0, 10),
       eventTime,
       programId: Number(programId),
       comment: toStringOrNull(raw.comment),
       observation: toStringOrNull(raw.observation),
       nextAction: toStringOrNull(raw.nextAction),
-      nextActionDate: this.toBackendDate(raw.nextActionDate),
+      nextActionDate: toBackendDate(raw.nextActionDate),
     };
 
     console.log('[DemandNew] Payload entrevista:', payload);
@@ -2960,10 +2958,6 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  private todayDateOnly(): string {
-    return new Date().toISOString().slice(0, 10);
-  }
-
   isExpiredCitation(item: any): boolean {
     const eventDate = String(item?.eventDate ?? '');
 
@@ -2971,7 +2965,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       return false;
     }
 
-    return eventDate < this.todayDateOnly();
+    return eventDate < todayDateOnly();
   }
 
   isTodayCitation(item: any): boolean {
@@ -2981,7 +2975,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       return false;
     }
 
-    return eventDate === this.todayDateOnly();
+    return eventDate === todayDateOnly();
   }
 
   isFutureCitation(item: any): boolean {
@@ -2991,7 +2985,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       return false;
     }
 
-    return eventDate > this.todayDateOnly();
+    return eventDate > todayDateOnly();
   }
 
   get expiredPendingCitationEvents(): any[] {
@@ -3796,42 +3790,6 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     return !!this.getCurrentEpisodeId();
   }
 
-  private toBackendDate(value: any): string | null {
-    if (!value) {
-      return null;
-    }
-
-    if (value instanceof Date) {
-      const year = value.getFullYear();
-      const month = String(value.getMonth() + 1).padStart(2, '0');
-      const day = String(value.getDate()).padStart(2, '0');
-
-      return `${year}-${month}-${day}`;
-    }
-
-    const text = String(value).trim();
-
-    if (!text) {
-      return null;
-    }
-
-    if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
-      return text;
-    }
-
-    const parts = text.split('/');
-
-    if (parts.length === 3) {
-      const day = parts[0].padStart(2, '0');
-      const month = parts[1].padStart(2, '0');
-      const year = parts[2];
-
-      return `${year}-${month}-${day}`;
-    }
-
-    return text;
-  }
-
   formatDisplayDate(value: any): string {
     if (!value) {
       return 'Sin fecha';
@@ -3938,6 +3896,3 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     return false;
   }
 }
-
-
-
