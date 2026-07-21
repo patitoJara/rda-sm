@@ -80,6 +80,10 @@ import { getEventSortDate } from './utils/demand-new-history.utils';
 import { todayDateOnly, toBackendDate } from './utils/demand-new-date.utils';
 import { calculatePreviousTreatmentNumber } from './utils/demand-new-episode.utils';
 import { normalizeProfessionalForCitation } from './utils/demand-new-professional.utils';
+import {
+  buildSecondarySubstances,
+  reorderSecondarySubstanceMap,
+} from './utils/demand-new-substance.utils';
 
 @Component({
   selector: 'app-demand-new',
@@ -1665,27 +1669,14 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private reorderSecondarySubstances(): void {
-    const ordered = Object.entries(this.secondarySubstanceMap).sort(
-      (a, b) => a[1] - b[1],
+    this.secondarySubstanceMap = reorderSecondarySubstanceMap(
+      this.secondarySubstanceMap,
     );
-
-    this.secondarySubstanceMap = {};
-
-    ordered.forEach(([key], index) => {
-      this.secondarySubstanceMap[+key] = index + 1;
-    });
   }
 
   private syncSecondarySubstances(): void {
-    const arr = Object.entries(this.secondarySubstanceMap).map(
-      ([id, order]) => ({
-        substanceId: Number(id),
-        order,
-      }),
-    );
-
     this.episodeForm.patchValue({
-      secondarySubstances: arr,
+      secondarySubstances: buildSecondarySubstances(this.secondarySubstanceMap),
     });
   }
 
