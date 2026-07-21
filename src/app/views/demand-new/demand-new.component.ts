@@ -82,6 +82,13 @@ import {
   calculatePreviousTreatmentNumber,
   getCurrentEpisodeId,
 } from './utils/demand-new-episode.utils';
+import {
+  getCitationNumber as calculateCitationNumber,
+  getCitationTemporalLabel as resolveCitationTemporalLabel,
+  isExpiredCitation as checkExpiredCitation,
+  isFutureCitation as checkFutureCitation,
+  isTodayCitation as checkTodayCitation,
+} from './utils/demand-new-citation.utils';
 import { normalizeProfessionalForCitation } from './utils/demand-new-professional.utils';
 import {
   buildSecondarySubstances,
@@ -2882,33 +2889,15 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   isExpiredCitation(item: any): boolean {
-    const eventDate = String(item?.eventDate ?? '');
-
-    if (!eventDate) {
-      return false;
-    }
-
-    return eventDate < todayDateOnly();
+    return checkExpiredCitation(item);
   }
 
   isTodayCitation(item: any): boolean {
-    const eventDate = String(item?.eventDate ?? '');
-
-    if (!eventDate) {
-      return false;
-    }
-
-    return eventDate === todayDateOnly();
+    return checkTodayCitation(item);
   }
 
   isFutureCitation(item: any): boolean {
-    const eventDate = String(item?.eventDate ?? '');
-
-    if (!eventDate) {
-      return false;
-    }
-
-    return eventDate > todayDateOnly();
+    return checkFutureCitation(item);
   }
 
   get expiredPendingCitationEvents(): any[] {
@@ -2918,18 +2907,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getCitationNumber(item: any): number {
-    const ordered = [...(this.citationEvents ?? [])].sort((a: any, b: any) => {
-      const dateA = `${a.eventDate ?? ''}T${a.eventTime ?? '00:00:00'}`;
-      const dateB = `${b.eventDate ?? ''}T${b.eventTime ?? '00:00:00'}`;
-
-      return dateA.localeCompare(dateB);
-    });
-
-    const index = ordered.findIndex(
-      (event: any) => Number(event.id) === Number(item.id),
-    );
-
-    return index >= 0 ? index + 1 : 0;
+    return calculateCitationNumber(item, this.citationEvents);
   }
 
   getAttendanceForCitation(citation: any): any | null {
@@ -3025,19 +3003,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getCitationTemporalLabel(item: any): string {
-    if (this.isExpiredCitation(item)) {
-      return 'Vencida pendiente';
-    }
-
-    if (this.isTodayCitation(item)) {
-      return 'Citación de hoy';
-    }
-
-    if (this.isFutureCitation(item)) {
-      return 'Próxima citación';
-    }
-
-    return 'Sin fecha';
+    return resolveCitationTemporalLabel(item);
   }
 
   closeActionPanel(): void {
