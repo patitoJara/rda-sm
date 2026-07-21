@@ -140,8 +140,8 @@
   <mat-card
     #personEditSection
     tabindex="-1"
-    class="create-person-card"
-    [class.create-person-card--editing]="selectedPerson?.id"
+    class="person-editor-card"
+    [class.person-editor-card--editing]="selectedPerson?.id"
     *ngIf="showCreatePersonForm"
   >
     <!-- ENCABEZADO -->
@@ -459,7 +459,7 @@
     </div>
 
     <!-- ACCIONES -->
-    <div class="create-person-actions">
+    <div class="person-editor-actions">
       <div class="empty-banner">
         <mat-icon>info</mat-icon>
 
@@ -472,235 +472,54 @@
         </span>
       </div>
 
-      <div class="create-person-actions__buttons">
-        <button
-          mat-stroked-button
-          type="button"
-          class="secondary-btn"
-          [disabled]="isSavingPerson"
-          (click)="closePersonForm()"
-        >
-          <mat-icon>close</mat-icon>
-          Cerrar sin guardar
-        </button>
+      <!-- ACCIONES -->
+      <div class="person-editor-actions">
+        <div class="empty-banner">
+          <mat-icon>info</mat-icon>
 
-        <button
-          mat-flat-button
-          class="primary-btn"
-          type="button"
-          [disabled]="personForm.invalid || isSavingPerson"
-          (click)="savePerson()"
-        >
-          <mat-icon>
-            {{ selectedPerson?.id ? "published_with_changes" : "save" }}
-          </mat-icon>
-
-          {{
-            isSavingPerson
-              ? "Guardando..."
-              : selectedPerson?.id
-                ? "Actualizar persona"
-                : "Guardar persona"
-          }}
-        </button>
-      </div>
-    </div>
-  </mat-card>
-
-  <!-- CREAR EPISODIO -->
-  <mat-card class="create-episode-card" *ngIf="showCreateEpisodeForm">
-    <div class="section-heading">
-      <mat-icon>folder_shared</mat-icon>
-      <div>
-        <h2>Crear episodio de demanda</h2>
-        <p>
-          Complete los datos iniciales del episodio. Al crear, se generará
-          automáticamente la etapa inicial del programa.
-        </p>
-      </div>
-    </div>
-
-    <form [formGroup]="episodeForm" class="episode-form-grid">
-      <mat-form-field appearance="fill">
-        <mat-label>Tipo episodio</mat-label>
-        <input matInput formControlName="episodeType" />
-      </mat-form-field>
-
-      <mat-form-field appearance="fill">
-        <mat-label>Fecha solicitud original</mat-label>
-        <input matInput type="date" formControlName="originalRequestDate" />
-      </mat-form-field>
-
-      <mat-form-field appearance="fill">
-        <mat-label>Programa inicial</mat-label>
-        <input matInput formControlName="initialProgram" />
-      </mat-form-field>
-
-      <mat-form-field appearance="fill">
-        <mat-label>Programa actual</mat-label>
-        <input matInput formControlName="currentProgram" />
-      </mat-form-field>
-
-      <mat-form-field appearance="fill">
-        <mat-label>Vía de ingreso</mat-label>
-        <mat-select formControlName="contactType">
-          <mat-option *ngFor="let item of contactTypes" [value]="item.id">
-            {{ item.name }}
-          </mat-option>
-        </mat-select>
-        <mat-hint *ngIf="!contactTypes.length">
-          Catálogo no disponible desde backend.
-        </mat-hint>
-      </mat-form-field>
-
-      <mat-form-field appearance="fill">
-        <mat-label>Remitente</mat-label>
-        <mat-select formControlName="sender">
-          <mat-option *ngFor="let item of senders" [value]="item.id">
-            {{ item.name }}
-          </mat-option>
-        </mat-select>
-        <mat-hint *ngIf="!senders.length">
-          Catálogo no disponible desde backend.
-        </mat-hint>
-      </mat-form-field>
-
-      <mat-form-field appearance="fill">
-        <mat-label>Derivador</mat-label>
-        <mat-select formControlName="diverter">
-          <mat-option *ngFor="let item of diverters" [value]="item.id">
-            {{ item.name }}
-          </mat-option>
-        </mat-select>
-        <mat-hint *ngIf="!diverters.length">
-          Catálogo no disponible desde backend.
-        </mat-hint>
-      </mat-form-field>
-
-      <mat-form-field appearance="fill">
-        <mat-label>Número de tratamiento previo</mat-label>
-        <input
-          matInput
-          type="number"
-          formControlName="previousTreatmentNumber"
-        />
-      </mat-form-field>
-
-      <mat-form-field appearance="fill">
-        <mat-label>Estado actual</mat-label>
-        <input matInput formControlName="currentState" />
-      </mat-form-field>
-
-      <mat-form-field appearance="fill">
-        <mat-label>Resultado actual</mat-label>
-        <input matInput formControlName="currentResult" />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="span-full">
-        <mat-label>Observación inicial</mat-label>
-        <textarea
-          matInput
-          rows="3"
-          formControlName="initialObservation"
-        ></textarea>
-      </mat-form-field>
-    </form>
-
-    <div class="episode-substances-panel">
-      <div class="substances-title">
-        <mat-icon>science</mat-icon>
-        <div>
-          <h3>Sustancias del episodio</h3>
-          <p>
-            Seleccione una sustancia principal y, si corresponde, ordene las
-            sustancias secundarias.
-          </p>
-        </div>
-      </div>
-
-      <div class="empty-banner" *ngIf="!substances.length">
-        <mat-icon>info</mat-icon>
-        <span>Catálogo de sustancias no disponible desde backend.</span>
-      </div>
-
-      <div class="substances-table" *ngIf="substances.length">
-        <div class="substances-header">
-          <div class="col-name"></div>
-          <div class="col-main">Principal</div>
-          <div class="col-secondary">Secundaria</div>
+          <span>
+            {{
+              selectedPerson?.id
+                ? "Los cambios actualizarán los datos existentes de la persona."
+                : "Al guardar, la persona será registrada en el backend real de Demanda."
+            }}
+          </span>
         </div>
 
-        <div class="substances-help">
-          Click en la fila para asignar o quitar orden de consumo secundario.
-        </div>
+        <div class="person-editor-actions__buttons">
+          <button
+            mat-stroked-button
+            type="button"
+            class="secondary-btn person-editor-cancel-btn"
+            [disabled]="isSavingPerson"
+            (click)="closePersonForm()"
+          >
+            <mat-icon>close</mat-icon>
+            <span>Cerrar sin guardar</span>
+          </button>
 
-        <div
-          *ngFor="let item of substances"
-          class="substance-row"
-          (click)="toggleSecondarySubstance(item.id)"
-          [class.primary-selected]="
-            episodeForm.getRawValue().primarySubstanceId === item.id
-          "
-        >
-          <div class="substance-name">
-            {{ item.name }}
-          </div>
+          <button
+            mat-flat-button
+            type="button"
+            class="primary-btn person-editor-save-btn"
+            [disabled]="personForm.invalid || isSavingPerson"
+            (click)="savePerson()"
+          >
+            <mat-icon>
+              {{ selectedPerson?.id ? "published_with_changes" : "save" }}
+            </mat-icon>
 
-          <mat-radio-button
-            (click)="$event.stopPropagation()"
-            [checked]="episodeForm.getRawValue().primarySubstanceId === item.id"
-            (change)="selectPrimarySubstance(item.id)"
-          ></mat-radio-button>
-
-          <div class="secondary-order">
-            <span
-              class="order-badge"
-              [class.primary-badge]="
-                episodeForm.getRawValue().primarySubstanceId === item.id
-              "
-            >
+            <span>
               {{
-                episodeForm.getRawValue().primarySubstanceId === item.id
-                  ? "Principal"
-                  : getSecondarySubstanceOrder(item.id) || "-"
+                isSavingPerson
+                  ? "Guardando..."
+                  : selectedPerson?.id
+                    ? "Actualizar persona"
+                    : "Guardar persona"
               }}
             </span>
-          </div>
+          </button>
         </div>
-      </div>
-
-      <div class="empty-banner warning">
-        <mat-icon>lock</mat-icon>
-        <span>
-          La selección de sustancias quedará preparada para asociarse al
-          episodio creado.
-        </span>
-      </div>
-    </div>
-
-    <div class="create-episode-actions">
-      <div class="empty-banner">
-        <mat-icon>info</mat-icon>
-        <span>
-          Al crear el episodio se generará automáticamente la primera etapa por
-          programa.
-        </span>
-      </div>
-
-      <button
-        mat-flat-button
-        class="primary-btn"
-        type="button"
-        [disabled]="isSavingEpisode || !selectedPerson"
-        (click)="createEpisode()"
-      >
-        <mat-icon>save</mat-icon>
-        {{ isSavingEpisode ? "Creando episodio..." : "Crear episodio" }}
-      </button>
-
-      <div class="empty-banner error" *ngIf="episodeSaveError">
-        <mat-icon>error</mat-icon>
-        <span>{{ episodeSaveError }}</span>
       </div>
     </div>
   </mat-card>
@@ -819,7 +638,7 @@
 
     <!-- =====================================================
      BOTÓN EXPANDIR DATOS COMPLETOS
-====================================================== -->
+    ====================================================== -->
     <div class="demandant-detail-actions">
       <button
         mat-stroked-button
@@ -1989,13 +1808,14 @@
 
       <div class="card-actions-preview">
         <button
-          mat-stroked-button
-          class="secondary-btn"
+          mat-flat-button
+          class="create-episode-trigger"
           type="button"
           [disabled]="!selectedPerson || episodeLoaded || !!createdEpisode"
           (click)="showCreateEpisode()"
         >
           <mat-icon>add_circle</mat-icon>
+
           {{
             !selectedPerson
               ? "Buscar persona primero"
@@ -2104,6 +1924,284 @@
       </div>
     </mat-card>
   </section>
+
+  <!-- CREAR EPISODIO -->
+  <mat-card
+    #createEpisodeSection
+    tabindex="-1"
+    class="create-episode-card create-episode-card--embedded"
+    *ngIf="showCreateEpisodeForm"
+  >
+    <div class="episode-creation-header">
+      <div class="episode-creation-header__main">
+        <div class="episode-creation-header__icon">
+          <mat-icon>folder_shared</mat-icon>
+        </div>
+
+        <div>
+          <span>GESTIÓN DEL EPISODIO</span>
+
+          <h2>Crear episodio de demanda</h2>
+
+          <p>
+            Complete los datos iniciales del episodio. Al crear, se generará
+            automáticamente la etapa inicial del programa.
+          </p>
+        </div>
+      </div>
+
+      <button
+        mat-icon-button
+        type="button"
+        class="episode-creation-close"
+        aria-label="Cerrar creación de episodio"
+        [disabled]="isSavingEpisode"
+        (click)="closeCreateEpisodeForm()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <form [formGroup]="episodeForm" class="episode-form-grid operation-form">
+      <div class="episode-form-section-title span-full">
+        <mat-icon>assignment</mat-icon>
+
+        <div>
+          <strong>Datos de apertura</strong>
+          <span>Información administrativa inicial del episodio.</span>
+        </div>
+      </div>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Tipo episodio</mat-label>
+        <mat-icon matPrefix>category</mat-icon>
+        <mat-select formControlName="episodeTypeId">
+          <mat-option *ngFor="let item of episodeTypes" [value]="item.id">
+            {{ item.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha solicitud original</mat-label>
+        <mat-icon matPrefix>event</mat-icon>
+        <input matInput type="date" formControlName="originalRequestDate" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Programa inicial</mat-label>
+        <mat-icon matPrefix>domain_add</mat-icon>
+        <input matInput formControlName="initialProgramName" readonly />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Programa actual</mat-label>
+        <mat-icon matPrefix>business</mat-icon>
+        <input matInput formControlName="currentProgramName" readonly />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Vía de ingreso</mat-label>
+        <mat-icon matPrefix>login</mat-icon>
+
+        <mat-select formControlName="contactType">
+          <mat-option *ngFor="let item of contactTypes" [value]="item.id">
+            {{ item.name }}
+          </mat-option>
+        </mat-select>
+
+        <mat-hint *ngIf="!contactTypes.length">
+          Catálogo no disponible desde backend.
+        </mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Remitente</mat-label>
+        <mat-icon matPrefix>forward_to_inbox</mat-icon>
+
+        <mat-select formControlName="sender">
+          <mat-option *ngFor="let item of senders" [value]="item.id">
+            {{ item.name }}
+          </mat-option>
+        </mat-select>
+
+        <mat-hint *ngIf="!senders.length">
+          Catálogo no disponible desde backend.
+        </mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Derivador</mat-label>
+        <mat-icon matPrefix>account_tree</mat-icon>
+
+        <mat-select formControlName="diverter">
+          <mat-option *ngFor="let item of diverters" [value]="item.id">
+            {{ item.name }}
+          </mat-option>
+        </mat-select>
+
+        <mat-hint *ngIf="!diverters.length">
+          Catálogo no disponible desde backend.
+        </mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Número de tratamientos previos</mat-label>
+        <mat-icon matPrefix>repeat</mat-icon>
+
+        <input
+          matInput
+          type="number"
+          formControlName="previousTreatmentNumber"
+          readonly
+        />
+      </mat-form-field>
+
+      <div class="episode-form-section-title span-full">
+        <mat-icon>track_changes</mat-icon>
+
+        <div>
+          <strong>Condición inicial</strong>
+          <span>Estado y resultado con que comienza la demanda.</span>
+        </div>
+      </div>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Estado actual</mat-label>
+        <mat-icon matPrefix>flag</mat-icon>
+        <input matInput formControlName="currentState" readonly />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Resultado actual</mat-label>
+        <mat-icon matPrefix>fact_check</mat-icon>
+        <input matInput formControlName="currentResult" readonly />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="span-full">
+        <mat-label>Observación inicial</mat-label>
+        <mat-icon matPrefix>notes</mat-icon>
+
+        <textarea
+          matInput
+          rows="3"
+          formControlName="initialObservation"
+        ></textarea>
+      </mat-form-field>
+    </form>
+
+    <div class="episode-substances-panel">
+      <div class="substances-title">
+        <mat-icon>science</mat-icon>
+        <div>
+          <h3>Sustancias del episodio</h3>
+          <p>
+            Seleccione una sustancia principal y, si corresponde, ordene las
+            sustancias secundarias.
+          </p>
+        </div>
+      </div>
+
+      <div class="empty-banner" *ngIf="!substances.length">
+        <mat-icon>info</mat-icon>
+        <span>Catálogo de sustancias no disponible desde backend.</span>
+      </div>
+
+      <div class="substances-table" *ngIf="substances.length">
+        <div class="substances-header">
+          <div class="col-name"></div>
+          <div class="col-main">Principal</div>
+          <div class="col-secondary">Secundaria</div>
+        </div>
+
+        <div class="substances-help">
+          Click en la fila para asignar o quitar orden de consumo secundario.
+        </div>
+
+        <div
+          *ngFor="let item of substances"
+          class="substance-row"
+          (click)="toggleSecondarySubstance(item.id)"
+          [class.primary-selected]="
+            episodeForm.getRawValue().primarySubstanceId === item.id
+          "
+        >
+          <div class="substance-name">
+            {{ item.name }}
+          </div>
+
+          <mat-radio-button
+            (click)="$event.stopPropagation()"
+            [checked]="episodeForm.getRawValue().primarySubstanceId === item.id"
+            (change)="selectPrimarySubstance(item.id)"
+          ></mat-radio-button>
+
+          <div class="secondary-order">
+            <span
+              class="order-badge"
+              [class.primary-badge]="
+                episodeForm.getRawValue().primarySubstanceId === item.id
+              "
+            >
+              {{
+                episodeForm.getRawValue().primarySubstanceId === item.id
+                  ? "Principal"
+                  : getSecondarySubstanceOrder(item.id) || "-"
+              }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-banner warning">
+        <mat-icon>lock</mat-icon>
+        <span>
+          La selección de sustancias quedará preparada para asociarse al
+          episodio creado.
+        </span>
+      </div>
+    </div>
+
+    <div class="create-episode-actions">
+      <div class="empty-banner">
+        <mat-icon>info</mat-icon>
+        <span>
+          Al crear el episodio se generará automáticamente la primera etapa por
+          programa.
+        </span>
+      </div>
+
+      <div class="create-episode-actions__buttons">
+        <button
+          mat-stroked-button
+          class="secondary-btn"
+          type="button"
+          [disabled]="isSavingEpisode"
+          (click)="closeCreateEpisodeForm()"
+        >
+          <mat-icon>close</mat-icon>
+          Cancelar
+        </button>
+
+        <button
+          mat-flat-button
+          class="primary-btn"
+          type="button"
+          [disabled]="isSavingEpisode || !selectedPerson"
+          (click)="createEpisode()"
+        >
+          <mat-icon>save</mat-icon>
+
+          {{ isSavingEpisode ? "Creando episodio..." : "Crear episodio" }}
+        </button>
+      </div>
+
+      <div class="empty-banner error" *ngIf="episodeSaveError">
+        <mat-icon>error</mat-icon>
+        <span>{{ episodeSaveError }}</span>
+      </div>
+    </div>
+  </mat-card>
 
   <!-- BLOQUES SECUNDARIOS DE LA FICHA -->
   <section class="longitudinal-detail-grid" *ngIf="selectedPerson">
@@ -2256,7 +2354,6 @@
     </mat-card>
   </section>
 
-  <!-- DOCUMENTOS DEL EPISODIO -->
   <!-- DOCUMENTOS DEL EPISODIO -->
   <section class="longitudinal-full-section" *ngIf="selectedPerson">
     <mat-card

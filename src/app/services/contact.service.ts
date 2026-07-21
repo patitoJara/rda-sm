@@ -5,12 +5,10 @@ import { Contact } from '../models/contact';
 import { Observable } from 'rxjs';
 import { ContactCreateDto } from '../models/contact-create.dto';
 
-
 @Injectable({
   providedIn: 'root',
 })
 export class ContactService {
-
   private http = inject(HttpClient);
 
   // Deriva las URLs desde tu BaseUrl (sin barra final)
@@ -55,7 +53,7 @@ export class ContactService {
 
   createDto(data: ContactCreateDto): Observable<Contact> {
     return this.http.post<Contact>(`${this.resourceUrl}`, data);
-  }  
+  }
 
   /** ============================
    *   🔹 PUT: Actualizar Contact
@@ -77,4 +75,25 @@ export class ContactService {
   restore(id: number) {
     return this.http.post(`${this.resourceUrl}/${id}/restore`, {});
   }
+
+  /**
+   * Obtiene los contactos activos asociados a un postulante.
+   */
+  getByPostulant(postulantId: number): Observable<Contact[]> {
+    return this.http.get<Contact[]>(
+      `${this.resourceUrl}/by-postulant/${postulantId}`,
+    );
+  }
+
+  /**
+   * Obtiene todos los contactos asociados al postulante,
+   * incluyendo los que el backend considere en la ruta /all.
+   */
+  getAllByPostulant(postulantId: number): Observable<Contact[]> {
+    return this.http.get<Contact[]>(
+      `${this.resourceUrl}/by-postulant/${postulantId}/all`,
+    );
+  }
+
+  
 }

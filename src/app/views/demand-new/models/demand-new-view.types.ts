@@ -1,0 +1,24 @@
+export type ActiveActionPanel =
+  | 'citation'
+  | 'attendance'
+  | 'interview'
+  | 'observation'
+  | 'reference'
+  | 'treatmentEntry'
+  | 'egressClosure'
+  | null;
+
+export type SummarySectionId =
+  | 'demanda-actual'
+  | 'demandante'
+  | 'trayectoria'
+  | 'citaciones'
+  | 'observaciones'
+  | 'documentos'
+  | 'alertas';
+
+export interface SummaryNavigationItem {
+  id: SummarySectionId;
+  label: string;
+  icon: string;
+}

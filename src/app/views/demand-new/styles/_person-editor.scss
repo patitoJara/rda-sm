@@ -1,67 +1,87 @@
 /* =========================================================
    EDITOR DE PERSONA
+   Crear persona: turquesa
+   Editar persona: ámbar
 ========================================================= */
 
 .person-editor-card {
   position: relative;
   z-index: 1;
 
-  width: 100%;
-  margin: 10px 0 16px;
-  padding: 12px 14px !important;
+  width: calc(100% - 32px);
+  max-width: 1380px;
 
-  scroll-margin-top: 96px;
+  margin: 22px auto 34px;
+  padding: 24px 26px 24px !important;
+
+  scroll-margin-top: 100px;
   outline: none;
+  overflow: visible !important;
 
-  border: 1px solid #efd49a !important;
-  border-left: 6px solid #d99a19 !important;
-  border-radius: 18px !important;
+  border: 1px solid #bfdce1 !important;
+  border-left: 6px solid #08798a !important;
+  border-radius: 22px !important;
 
   background: linear-gradient(
     135deg,
-    #fffdf8 0%,
-    #ffffff 75%
+    #f7fcfd 0%,
+    #ffffff 74%
   ) !important;
 
   box-shadow:
-    0 14px 30px rgba(153, 103, 8, 0.12),
-    0 3px 8px rgba(153, 103, 8, 0.06) !important;
+    0 16px 38px rgba(20, 73, 85, 0.11),
+    0 3px 9px rgba(20, 73, 85, 0.05) !important;
 
   animation: person-editor-enter 240ms ease-out;
 }
 
+/* =========================================================
+   VARIANTE EDICIÓN
+========================================================= */
+
 .person-editor-card--editing {
   z-index: 5;
 
-  border-color: #e5b85b !important;
+  border-color: #e5bc68 !important;
   border-left-color: #c98500 !important;
 
+  background: linear-gradient(
+    135deg,
+    #fffaf0 0%,
+    #ffffff 76%
+  ) !important;
+
   box-shadow:
-    0 18px 38px rgba(153, 103, 8, 0.16),
-    0 0 0 5px rgba(217, 154, 25, 0.08) !important;
+    0 18px 42px rgba(153, 103, 8, 0.15),
+    0 0 0 5px rgba(217, 154, 25, 0.07) !important;
 }
 
 .person-editor-card--editing::before {
-  content: "Edición de datos del postulante";
+  content: "Edición de datos de la persona";
 
   position: absolute;
-  top: -13px;
-  left: 22px;
+  top: -14px;
+  left: 26px;
   z-index: 3;
 
-  padding: 4px 13px;
+  padding: 6px 15px;
 
   border: 1px solid #c98500;
   border-radius: 999px;
 
-  background: linear-gradient(135deg, #c98500, #e0a32d);
+  background: linear-gradient(
+    135deg,
+    #c98500 0%,
+    #e0a32d 100%
+  );
+
   color: #ffffff;
 
-  font-size: 0.7rem;
+  font-size: 0.74rem;
   font-weight: 850;
   letter-spacing: 0.025em;
 
-  box-shadow: 0 5px 13px rgba(153, 103, 8, 0.22);
+  box-shadow: 0 6px 15px rgba(153, 103, 8, 0.22);
 }
 
 @keyframes person-editor-enter {
@@ -77,59 +97,81 @@
 }
 
 /* =========================================================
-   ENCABEZADO
+   ENCABEZADO PRINCIPAL
 ========================================================= */
 
 .person-editor-heading {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 12px;
 
-  min-height: 0;
-  margin: 0 0 8px;
-  padding: 5px 7px 7px;
+  min-height: 58px;
+  margin: 0 0 20px;
+  padding: 4px 4px 17px;
 
-  border-bottom: 1px solid #f0dfb9;
+  border-bottom: 1px solid #d7e7ea;
 }
 
 .person-editor-heading .section-heading__icon {
-  width: 31px;
-  height: 31px;
-  min-width: 31px;
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
 
   display: grid;
   place-items: center;
 
-  border-radius: 10px;
+  border-radius: 13px;
 
-  background: #fff2d5;
-  color: #9b6500;
+  background: #e5f5f7;
+  color: #08798a;
 }
 
 .person-editor-heading .section-heading__icon mat-icon {
-  width: 18px;
-  height: 18px;
+  width: 23px;
+  height: 23px;
 
-  font-size: 18px;
-  line-height: 18px;
+  font-size: 23px;
+  line-height: 23px;
 }
 
 .person-editor-heading h2 {
   margin: 0;
 
-  color: #573a08;
-  font-size: 0.94rem;
-  font-weight: 900;
-  line-height: 1.15;
+  color: #153f49;
+
+  font-size: 1.15rem;
+  font-weight: 950;
+  line-height: 1.2;
 }
 
 .person-editor-heading p {
-  margin: 2px 0 0;
+  margin: 4px 0 0;
 
+  color: #627980;
+
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+/* Encabezado en modo edición */
+
+.person-editor-card--editing .person-editor-heading {
+  border-bottom-color: #ead8af;
+}
+
+.person-editor-card--editing
+  .person-editor-heading
+  .section-heading__icon {
+  background: #fff0ce;
+  color: #9b6500;
+}
+
+.person-editor-card--editing .person-editor-heading h2 {
+  color: #573a08;
+}
+
+.person-editor-card--editing .person-editor-heading p {
   color: #725f3c;
-  font-size: 0.7rem;
-  font-weight: 500;
-  line-height: 1.25;
 }
 
 /* =========================================================
@@ -138,87 +180,126 @@
 
 .person-editor-form {
   display: grid;
-  gap: 7px;
+  gap: 18px;
 }
+
+/* =========================================================
+   SECCIONES DEL FORMULARIO
+========================================================= */
 
 .person-editor-section {
   margin: 0;
-  padding: 0;
+  padding: 16px 16px 8px;
+
+  border: 1px solid #dce9ec;
+  border-radius: 17px;
+
+  background: #fbfdfd;
 }
 
 .person-editor-section__header {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 9px;
 
-  min-height: 30px;
-  margin: 0 0 5px;
-  padding: 4px 7px;
+  min-height: 48px;
+  margin: -4px -4px 16px;
+  padding: 9px 12px;
 
-  border-left: 3px solid #d99a19;
-  border-radius: 7px;
+  border-left: 4px solid #08798a;
+  border-radius: 11px;
 
   background: linear-gradient(
     90deg,
-    #fff2d5 0%,
-    #fff9eb 62%,
-    rgba(255, 255, 255, 0.9) 100%
+    #e6f5f7 0%,
+    #f4fafb 65%,
+    #ffffff 100%
   );
 }
 
 .person-editor-section__icon {
-  width: 23px;
-  height: 23px;
-  min-width: 23px;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
 
   display: grid;
   place-items: center;
 
-  border-radius: 7px;
-
-  color: #9b6500;
+  color: #08798a;
 }
 
 .person-editor-section__icon mat-icon {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
 
-  font-size: 16px;
-  line-height: 16px;
+  font-size: 20px;
+  line-height: 20px;
 }
 
 .person-editor-section__header h3 {
   margin: 0;
 
-  color: #4e3b18;
-  font-size: 0.78rem;
+  color: #173f49;
+
+  font-size: 0.88rem;
   font-weight: 900;
-  line-height: 1.1;
+  line-height: 1.15;
 }
 
 .person-editor-section__header p {
-  margin: 1px 0 0;
+  margin: 3px 0 0;
 
-  color: #706246;
-  font-size: 0.64rem;
-  font-weight: 500;
-  line-height: 1.15;
+  color: #687f86;
+
+  font-size: 0.72rem;
+  line-height: 1.3;
+}
+
+/* Secciones en modo edición */
+
+.person-editor-card--editing .person-editor-section {
+  border-color: #ead7aa;
+  background: #fffdf8;
+}
+
+.person-editor-card--editing .person-editor-section__header {
+  border-left-color: #d99a19;
+
+  background: linear-gradient(
+    90deg,
+    #fff0c9 0%,
+    #fff8e8 62%,
+    #ffffff 100%
+  );
+}
+
+.person-editor-card--editing .person-editor-section__icon {
+  color: #9b6500;
+}
+
+.person-editor-card--editing
+  .person-editor-section__header
+  h3 {
+  color: #573a08;
+}
+
+.person-editor-card--editing
+  .person-editor-section__header
+  p {
+  color: #725f3c;
 }
 
 /* =========================================================
    GRILLAS
 ========================================================= */
 
-.person-editor-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-
-  column-gap: 8px;
-  row-gap: 2px;
-}
-
+.person-editor-grid,
 .person-editor-grid--prevision {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  column-gap: 18px;
+  row-gap: 8px;
 }
 
 .person-editor-grid .span-2 {
@@ -226,7 +307,7 @@
 }
 
 /* =========================================================
-   ANGULAR MATERIAL DEL EDITOR
+   ANGULAR MATERIAL
 ========================================================= */
 
 :host ::ng-deep .person-editor-form .mat-mdc-form-field {
@@ -235,227 +316,374 @@
 }
 
 :host ::ng-deep .person-editor-form .mat-mdc-text-field-wrapper {
-  min-height: 48px;
-  height: 48px;
+  min-height: 56px;
+  height: 56px;
+
+  border-radius: 10px;
 
   background: #ffffff;
 }
 
 :host ::ng-deep .person-editor-form .mat-mdc-form-field-flex {
-  min-height: 48px;
-  height: 48px;
+  min-height: 56px;
+  height: 56px;
 
   display: flex;
   align-items: center;
-}
-
-:host ::ng-deep .person-editor-form .mat-mdc-form-field-icon-prefix {
-  flex: 0 0 40px;
-
-  width: 40px;
-  min-width: 40px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 0 9px 0 6px !important;
-  margin: 0 !important;
-}
-
-:host ::ng-deep .person-editor-form .mat-mdc-form-field-icon-prefix mat-icon {
-  flex: 0 0 19px;
-
-  width: 19px;
-  height: 19px;
-
-  margin: 0 !important;
-
-  color: #9b6500;
-
-  font-size: 19px;
-  line-height: 19px;
-}
-
-:host ::ng-deep .person-editor-form .mat-mdc-form-field-icon-suffix {
-  flex: 0 0 40px;
-
-  width: 40px;
-  min-width: 40px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 0 6px !important;
-}
-
-:host ::ng-deep .person-editor-form .mat-mdc-form-field-icon-suffix mat-icon {
-  width: 19px;
-  height: 19px;
-
-  font-size: 19px;
-  line-height: 19px;
 }
 
 :host ::ng-deep .person-editor-form .mat-mdc-form-field-infix {
   flex: 1 1 auto;
 
   min-width: 0;
-  min-height: 48px;
+  min-height: 56px;
 
-  padding: 12px 4px 8px 7px !important;
+  padding: 16px 6px 10px 8px !important;
+}
+
+:host ::ng-deep .person-editor-form .mat-mdc-form-field-icon-prefix {
+  flex: 0 0 46px;
+
+  width: 46px;
+  min-width: 46px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0 !important;
+  padding: 0 10px 0 8px !important;
+}
+
+:host
+  ::ng-deep
+  .person-editor-form
+  .mat-mdc-form-field-icon-prefix
+  mat-icon {
+  width: 21px;
+  height: 21px;
+  margin: 0 !important;
+
+  color: #08798a;
+
+  font-size: 21px;
+  line-height: 21px;
+}
+
+:host ::ng-deep .person-editor-form .mat-mdc-form-field-icon-suffix {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 8px !important;
 }
 
 :host ::ng-deep .person-editor-form .mat-mdc-floating-label {
-  color: #5e513b;
+  color: #4e656b;
 
-  font-size: 0.72rem;
-  font-weight: 700;
+  font-size: 0.78rem;
+  font-weight: 750;
 }
 
 :host ::ng-deep .person-editor-form input.mat-mdc-input-element,
 :host ::ng-deep .person-editor-form .mat-mdc-select-value,
 :host ::ng-deep .person-editor-form .mat-mdc-select-value-text {
-  color: #26383c;
+  color: #263c42;
 
-  font-size: 0.8rem;
-  font-weight: 550;
-  line-height: 1.25;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
-:host ::ng-deep .person-editor-form .mat-mdc-form-field-subscript-wrapper {
-  min-height: 14px;
-  height: 14px;
-
-  margin: 0;
+:host
+  ::ng-deep
+  .person-editor-form
+  .mat-mdc-form-field-subscript-wrapper {
+  min-height: 18px;
+  height: auto;
 }
 
-:host ::ng-deep .person-editor-form .mat-mdc-form-field-bottom-align::before {
-  height: 14px;
-}
-
-:host ::ng-deep .person-editor-form .mat-mdc-form-field-hint-wrapper,
-:host ::ng-deep .person-editor-form .mat-mdc-form-field-error-wrapper {
+:host
+  ::ng-deep
+  .person-editor-form
+  .mat-mdc-form-field-hint-wrapper,
+:host
+  ::ng-deep
+  .person-editor-form
+  .mat-mdc-form-field-error-wrapper {
   padding: 0 8px;
 }
 
 :host ::ng-deep .person-editor-form .mat-mdc-form-field-hint,
 :host ::ng-deep .person-editor-form .mat-mdc-form-field-error {
-  font-size: 0.6rem;
-  line-height: 1.05;
+  font-size: 0.68rem;
+  line-height: 1.15;
+}
+
+/* Iconos Material en modo edición */
+
+:host
+  ::ng-deep
+  .person-editor-card--editing
+  .person-editor-form
+  .mat-mdc-form-field-icon-prefix
+  mat-icon {
+  color: #a36b00;
 }
 
 /* =========================================================
-   MENSAJES Y ACCIONES
+   MENSAJE DE ERROR
 ========================================================= */
 
 .person-editor-card > .empty-banner.error {
-  min-height: 34px;
-  margin: 5px 0;
-  padding: 6px 10px;
+  width: 100%;
+  min-height: 42px;
 
-  font-size: 0.7rem;
+  margin: 14px 0 0;
+  padding: 9px 12px;
+
+  border-radius: 12px;
+
+  font-size: 0.75rem;
+  line-height: 1.25;
 }
+
+/* =========================================================
+   PIE DEL FORMULARIO
+========================================================= */
 
 .person-editor-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 14px;
 
-  margin-top: 4px;
-  padding-top: 7px;
+  width: 100%;
 
-  border-top: 1px solid #efdfbd;
+  margin-top: 12px;
+  padding: 16px 4px 2px;
+
+  border-top: 1px solid #d7e7ea;
 }
+
+.person-editor-card--editing .person-editor-actions {
+  border-top-color: #e2d6b8;
+}
+
+/* Mensaje informativo */
 
 .person-editor-actions > .empty-banner {
-  min-height: 31px;
+  flex: 1 1 420px;
+
+  width: auto;
+  max-width: 620px;
+  min-height: 42px;
+
   margin: 0;
-  padding: 4px 9px;
+  padding: 9px 13px;
 
-  border-radius: 999px;
+  border: 1px solid #c9e1e5;
+  border-radius: 12px;
 
-  font-size: 0.63rem;
-  line-height: 1.15;
+  background: #edf8f9;
+  color: #205c66;
+
+  font-size: 0.76rem;
+  font-weight: 750;
+  line-height: 1.25;
 }
 
-.person-editor-actions > .empty-banner mat-icon {
-  width: 15px;
-  height: 15px;
+.person-editor-card--editing
+  .person-editor-actions
+  > .empty-banner {
+  border-color: #ead7aa;
 
-  font-size: 15px;
-  line-height: 15px;
+  background: #fff8e8;
+  color: #76530f;
 }
+
+/* Contenedor de botones */
 
 .person-editor-actions__buttons {
   display: flex;
   align-items: center;
-  gap: 7px;
+  justify-content: flex-end;
+  gap: 10px;
 
-  flex-shrink: 0;
+  flex: 0 0 auto;
+
+  margin-left: auto;
 }
 
+/* Base común */
+
 .person-editor-actions__buttons button {
-  min-height: 34px;
-  height: 34px;
-  padding-inline: 13px;
+  min-width: 180px;
+  min-height: 44px;
+  height: 44px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  padding: 0 20px;
 
   border-radius: 999px !important;
 
-  font-size: 0.69rem;
-  font-weight: 850;
+  font-size: 0.78rem;
+  font-weight: 900 !important;
+  white-space: nowrap;
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease;
 }
 
 .person-editor-actions__buttons button mat-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 
-  font-size: 16px;
-  line-height: 16px;
+  margin: 0 !important;
+
+  font-size: 18px;
+  line-height: 18px;
+}
+
+/* =========================================================
+   BOTÓN CANCELAR
+========================================================= */
+
+.person-editor-cancel-btn {
+  border: 1px solid #9ebdc3 !important;
+
+  background: #ffffff !important;
+  color: #315e67 !important;
+
+  box-shadow: none !important;
+}
+
+.person-editor-cancel-btn mat-icon {
+  color: #315e67 !important;
+}
+
+.person-editor-cancel-btn:hover:not(:disabled) {
+  border-color: #6f9ba3 !important;
+
+  background: #eef6f7 !important;
+
+  transform: translateY(-1px);
+}
+
+/* Cancelar en edición */
+
+.person-editor-card--editing .person-editor-cancel-btn {
+  border-color: #bd9b56 !important;
+
+  color: #76530f !important;
+}
+
+.person-editor-card--editing
+  .person-editor-cancel-btn
+  mat-icon {
+  color: #76530f !important;
+}
+
+.person-editor-card--editing
+  .person-editor-cancel-btn:hover:not(:disabled) {
+  border-color: #a77a20 !important;
+
+  background: #fff6e3 !important;
+}
+
+/* =========================================================
+   BOTÓN GUARDAR / ACTUALIZAR
+========================================================= */
+
+.person-editor-save-btn {
+  border: 1px solid #08798a !important;
+
+  background: linear-gradient(
+    135deg,
+    #08798a 0%,
+    #0b91a5 100%
+  ) !important;
+
+  color: #ffffff !important;
+
+  box-shadow:
+    0 7px 18px rgba(8, 121, 138, 0.25),
+    0 2px 5px rgba(8, 121, 138, 0.12) !important;
+}
+
+.person-editor-save-btn mat-icon {
+  color: #ffffff !important;
+}
+
+.person-editor-save-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 10px 23px rgba(8, 121, 138, 0.32),
+    0 3px 7px rgba(8, 121, 138, 0.15) !important;
+}
+
+/* Guardar en modo edición */
+
+.person-editor-card--editing .person-editor-save-btn {
+  border-color: #c98500 !important;
+
+  background: linear-gradient(
+    135deg,
+    #c98500 0%,
+    #e0a32d 100%
+  ) !important;
+
+  box-shadow:
+    0 7px 18px rgba(153, 103, 8, 0.24),
+    0 2px 5px rgba(153, 103, 8, 0.12) !important;
+}
+
+.person-editor-card--editing
+  .person-editor-save-btn:hover:not(:disabled) {
+  box-shadow:
+    0 10px 23px rgba(153, 103, 8, 0.31),
+    0 3px 7px rgba(153, 103, 8, 0.15) !important;
+}
+
+/* Estado deshabilitado */
+
+.person-editor-actions__buttons button:disabled {
+  opacity: 0.55;
+
+  cursor: not-allowed;
+
+  transform: none;
+  box-shadow: none !important;
+}
+
+/* =========================================================
+   SEPARACIÓN CON LA FICHA LONGITUDINAL
+========================================================= */
+
+.person-editor-card + .longitudinal-summary-card,
+.person-editor-card + .longitudinal-tabs,
+.person-editor-card + .longitudinal-full-section {
+  margin-top: 24px !important;
 }
 
 /* =========================================================
    RESPONSIVE
 ========================================================= */
 
-@media (max-width: 1250px) {
-  .person-editor-grid,
-  .person-editor-grid--prevision {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 900px) {
-  .person-editor-grid,
-  .person-editor-grid--prevision {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .person-editor-actions {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .person-editor-actions__buttons {
-    justify-content: flex-end;
-  }
-}
-
-@media (max-width: 600px) {
   .person-editor-card {
-    scroll-margin-top: 82px;
-    padding: 12px 10px !important;
-  }
+    width: calc(100% - 20px);
 
-  .person-editor-card--editing::before {
-    left: 12px;
-    max-width: calc(100% - 24px);
-
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    padding: 20px 16px 18px !important;
   }
 
   .person-editor-grid,
@@ -467,11 +695,67 @@
     grid-column: auto;
   }
 
+  .person-editor-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .person-editor-actions > .empty-banner {
+    flex: none;
+
+    width: 100%;
+    max-width: none;
+  }
+
+  .person-editor-actions__buttons {
+    width: 100%;
+
+    margin-left: 0;
+
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 560px) {
+  .person-editor-card {
+    width: calc(100% - 12px);
+
+    margin-top: 18px;
+    padding: 18px 12px 16px !important;
+
+    border-radius: 17px !important;
+
+    scroll-margin-top: 82px;
+  }
+
+  .person-editor-card--editing::before {
+    left: 12px;
+
+    max-width: calc(100% - 24px);
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .person-editor-heading {
+    align-items: flex-start;
+  }
+
+  .person-editor-section {
+    padding: 12px 10px 6px;
+  }
+
+  .person-editor-section__header {
+    margin-inline: 0;
+  }
+
   .person-editor-actions__buttons {
     flex-direction: column-reverse;
   }
 
   .person-editor-actions__buttons button {
     width: 100%;
+    min-width: 0;
   }
 }

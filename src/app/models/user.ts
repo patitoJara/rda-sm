@@ -1,21 +1,25 @@
-import { Role } from './role';
+// src/app/models/user.ts
+
 import { Program } from './program';
+import { Role } from './role';
 
 export interface User {
   id: number | null;
-  firstName: string;
+
+  firstName: string | null;
   secondName: string | null;
   firstLastName: string | null;
   secondLastName: string | null;
-  email: string;
-  username: string;
-  password?: string;
+
+  email: string | null;
+  username: string | null;
+  password?: string | null;
   rut: string | null;
+
   createdAt?: string | null;
   updatedAt?: string | null;
   deletedAt?: string | null;
-  programs?: Program[]; // el backend puede devolver o esperar programas asociados
 
-  /** 👇 Agrega esta línea */
-  roles?: Role[]; // el backend puede devolver o esperar roles asociados
+  programs?: Program[];
+  roles?: Role[];
 }

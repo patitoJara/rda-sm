@@ -1,49 +1,49 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
-import {
-  ReactiveFormsModule,
-  FormBuilder,
-  Validators,
-  FormControl,
-  FormGroup,
-} from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import {
   AfterViewInit,
+  Component,
   ElementRef,
+  inject,
   OnDestroy,
+  OnInit,
   QueryList,
   ViewChild,
   ViewChildren,
 } from '@angular/core';
 
+import {
+  FormBuilder,
+  FormControl,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+
 import { RouterModule } from '@angular/router';
+
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
-import { HttpErrorResponse } from '@angular/common/http';
 
 import { throwError } from 'rxjs';
 import { finalize, switchMap } from 'rxjs/operators';
 
-import { PostulantService } from '@app/services/postulant.service';
 import { Postulant } from '@app/models/postulant';
-import { PreloadCatalogsService } from '@app/services/demand/preload-catalogs.service';
-import { TokenService } from '@app/services/token.service';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-
-// Angular Material
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-
 import { DemandEpisodeService } from '@app/services/demand/demand-episode.service';
+import { PreloadCatalogsService } from '@app/services/demand/preload-catalogs.service';
+import { PostulantService } from '@app/services/postulant.service';
 import { ProgramProfessionalService } from '@app/services/program-professional.service';
+import { TokenService } from '@app/services/token.service';
 
 import {
   DemandCatalogItem,
@@ -51,30 +51,11 @@ import {
   DemandService,
 } from '../../core/services/demand.service';
 
-type ActiveActionPanel =
-  | 'citation'
-  | 'attendance'
-  | 'interview'
-  | 'observation'
-  | 'reference'
-  | 'treatmentEntry'
-  | 'egressClosure'
-  | null;
-
-type SummarySectionId =
-  | 'demanda-actual'
-  | 'demandante'
-  | 'trayectoria'
-  | 'citaciones'
-  | 'observaciones'
-  | 'documentos'
-  | 'alertas';
-
-interface SummaryNavigationItem {
-  id: SummarySectionId;
-  label: string;
-  icon: string;
-}
+import {
+  ActiveActionPanel,
+  SummaryNavigationItem,
+  SummarySectionId,
+} from './models/demand-new-view.types';
 
 @Component({
   selector: 'app-demand-new',
@@ -291,22 +272,32 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   });
 
   episodeForm = this.fb.group({
-    episodeType: [{ value: '', disabled: true }],
-    originalRequestDate: [{ value: '', disabled: true }],
-    initialProgram: [{ value: '', disabled: true }],
-    currentProgram: [{ value: '', disabled: true }],
-    contactType: new FormControl<number | null>(null),
-    sender: new FormControl<number | null>(null),
-    diverter: new FormControl<number | null>(null),
-    previousTreatmentNumber: [{ value: '', disabled: true }],
-    currentState: [{ value: '', disabled: true }],
-    currentResult: [{ value: '', disabled: true }],
+    episodeTypeId: [null as number | null, Validators.required],
+
+    originalRequestDate: [this.getTodayForDateInput(), Validators.required],
+
+    initialProgramId: [null as number | null, Validators.required],
+    initialProgramName: [{ value: '', disabled: true }],
+    currentProgramName: [{ value: '', disabled: true }],
+
+    contactType: [null as number | null, Validators.required],
+    sender: [null as number | null],
+    diverter: [null as number | null],
+
+    previousTreatmentNumber: [0],
+
+    currentState: [{ value: 'EN TRÁMITE', disabled: true }],
+    currentResult: [{ value: 'AÚN SIN RESULTADO', disabled: true }],
+
     initialObservation: [''],
 
-    primarySubstanceId: new FormControl<number | null>(null),
-    secondarySubstances: new FormControl<
-      { substanceId: number; order: number }[]
-    >([]),
+    primarySubstanceId: [null as number | null],
+    secondarySubstances: [
+      [] as Array<{
+        substanceId: number;
+        order: number;
+      }>,
+    ],
   });
 
   // Estados vacíos reales: no mocks
@@ -583,13 +574,22 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   activeSummarySection: SummarySectionId = 'demanda-actual';
 
-  @ViewChildren('summarySection')
-  private summarySections!: QueryList<ElementRef<HTMLElement>>;
+  @ViewChildren('summarySection', {
+    read: ElementRef,
+  })
+  summarySections!: QueryList<ElementRef<HTMLElement>>;
 
   private summarySectionObserver: IntersectionObserver | null = null;
 
-  @ViewChild('personEditSection')
-  private personEditSection?: ElementRef<HTMLElement>;
+  @ViewChild('personEditSection', {
+    read: ElementRef,
+  })
+  personEditSection?: ElementRef<HTMLElement>;
+
+  @ViewChild('createEpisodeSection', {
+    read: ElementRef,
+  })
+  private createEpisodeSection?: ElementRef<HTMLElement>;
 
   ngOnInit(): void {
     this.loadCatalogs();
@@ -597,8 +597,15 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadDemandCatalogs();
     this.loadActiveProfessionals();
 
+    /*
+     * Cuando el usuario cambia manualmente el tipo de previsión,
+     * se debe limpiar la previsión seleccionada anteriormente.
+     *
+     * Cuando cargamos una persona desde patchPersonForm(),
+     * usamos emitEvent: false para no entrar aquí.
+     */
     this.personForm.get('intPrev')?.valueChanges.subscribe((id) => {
-      this.filterConvPrevByIntPrev(Number(id));
+      this.filterConvPrevByIntPrev(Number(id), true);
     });
 
     this.citationForm
@@ -1055,22 +1062,60 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     this.activeProgramId = this.tokenService.getActiveProgramId();
   }
 
-  private filterConvPrevByIntPrev(intPrevId: number): void {
-    this.personForm.get('convPrev')?.reset();
+  private filterConvPrevByIntPrev(
+    intPrevId: number,
+    clearCurrentSelection = false,
+  ): void {
+    const convPrevControl = this.personForm.get('convPrev');
 
     if (!intPrevId) {
       this.filteredConvPrev = [];
-      this.personForm.get('convPrev')?.disable();
+
+      convPrevControl?.reset(null, {
+        emitEvent: false,
+      });
+
+      convPrevControl?.disable({
+        emitEvent: false,
+      });
+
       return;
     }
 
     this.filteredConvPrev = this.convPrev.filter((item: any) => {
       const relatedId =
-        item?.intPrev?.id ?? item?.int_prev_id ?? item?.intPrevId;
-      return Number(relatedId) === intPrevId;
+        item?.intPrev?.id ?? item?.int_prev_id ?? item?.intPrevId ?? null;
+
+      return Number(relatedId) === Number(intPrevId);
     });
 
-    this.personForm.get('convPrev')?.enable();
+    convPrevControl?.enable({
+      emitEvent: false,
+    });
+
+    if (clearCurrentSelection) {
+      convPrevControl?.reset(null, {
+        emitEvent: false,
+      });
+
+      return;
+    }
+
+    const currentConvPrevId = Number(convPrevControl?.value);
+
+    if (!currentConvPrevId) {
+      return;
+    }
+
+    const currentExists = this.filteredConvPrev.some(
+      (item: any) => Number(item?.id) === currentConvPrevId,
+    );
+
+    if (!currentExists) {
+      convPrevControl?.reset(null, {
+        emitEvent: false,
+      });
+    }
   }
 
   showCreatePerson(): void {
@@ -1125,36 +1170,50 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   openEditPersonForm(): void {
     if (!this.selectedPerson?.id) {
+      this.personSaveError = 'No existe una persona seleccionada para editar.';
       return;
     }
 
     this.personSaveError = null;
-    this.patchPersonForm(this.selectedPerson);
 
     this.showDemandantDetails = false;
     this.showCreateEpisodeForm = false;
-    this.showCreatePersonForm = true;
     this.showBackToNavigation = false;
+
+    this.patchPersonForm(this.selectedPerson);
 
     this.personForm.markAsPristine();
     this.personForm.markAsUntouched();
 
-    setTimeout(() => {
-      const editSection = this.personEditSection?.nativeElement;
+    this.showCreatePersonForm = true;
 
-      if (!editSection) {
-        return;
-      }
+    /*
+     * Se esperan dos ciclos de renderizado:
+     * 1. Angular procesa el *ngIf.
+     * 2. El navegador calcula la posición real del card.
+     */
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const section = this.personEditSection?.nativeElement;
 
-      editSection.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
+        if (!section) {
+          console.warn(
+            '[DemandNew] No se encontró el card de edición de persona.',
+          );
+          return;
+        }
+
+        section.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest',
+        });
+
+        section.focus({
+          preventScroll: true,
+        });
       });
-
-      editSection.focus({
-        preventScroll: true,
-      });
-    }, 150);
+    });
   }
 
   closePersonForm(): void {
@@ -1214,21 +1273,26 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     this.episodeSummary = null;
 
     this.episodeForm.reset({
-      episodeType: '',
+      episodeTypeId: null,
       originalRequestDate: '',
-      initialProgram: '',
-      currentProgram: '',
+
+      initialProgramId: null,
+      initialProgramName: '',
+      currentProgramName: '',
+
       contactType: null,
       sender: null,
       diverter: null,
-      previousTreatmentNumber: '',
+
+      previousTreatmentNumber: 0,
+
       currentState: '',
       currentResult: '',
       initialObservation: '',
+
       primarySubstanceId: null,
       secondarySubstances: [],
     });
-
     this.secondarySubstanceMap = {};
 
     console.log('[DemandNew] RUN búsqueda longitudinal:', rut);
@@ -1367,11 +1431,26 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    const activeProgramId = this.tokenService.getActiveProgramId();
+    if (this.episodeForm.invalid) {
+      this.episodeForm.markAllAsTouched();
+      this.episodeSaveError =
+        'Complete los campos obligatorios antes de crear el episodio.';
+      return;
+    }
 
-    if (!activeProgramId) {
+    const activeProgramId = Number(this.tokenService.getActiveProgramId());
+
+    if (!Number.isFinite(activeProgramId) || activeProgramId <= 0) {
       this.episodeSaveError =
         'No fue posible identificar el programa activo para crear el episodio.';
+      return;
+    }
+
+    const responsibleUserId = Number(this.tokenService.getUserId());
+
+    if (!Number.isFinite(responsibleUserId) || responsibleUserId <= 0) {
+      this.episodeSaveError =
+        'No fue posible identificar al usuario responsable.';
       return;
     }
 
@@ -1379,17 +1458,20 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const payload = {
       postulantId: Number(this.selectedPerson.id),
-      initialProgramId: Number(activeProgramId),
+      initialProgramId: activeProgramId,
 
-      episodeTypeId: raw.episodeType ? Number(raw.episodeType) : null,
+      episodeTypeId: Number(raw.episodeTypeId),
+
       originalRequestDate:
         this.toStringOrNull(raw.originalRequestDate) ??
-        new Date().toISOString().slice(0, 10),
+        this.getTodayForDateInput(),
 
-      responsibleUserId: this.tokenService.getUserId(),
+      responsibleUserId,
 
-      contactTypeId: raw.contactType ? Number(raw.contactType) : null,
+      contactTypeId: Number(raw.contactType),
+
       senderId: raw.sender ? Number(raw.sender) : null,
+
       diverterId: raw.diverter ? Number(raw.diverter) : null,
 
       initialObservation: this.toStringOrNull(raw.initialObservation),
@@ -1398,9 +1480,15 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isSavingEpisode = true;
     this.episodeSaveError = null;
 
+    console.log('[DemandNew] Payload creación episodio:', payload);
+
     this.demandEpisodeService
       .createEpisode(payload)
-      .pipe(finalize(() => (this.isSavingEpisode = false)))
+      .pipe(
+        finalize(() => {
+          this.isSavingEpisode = false;
+        }),
+      )
       .subscribe({
         next: (episode) => {
           console.log('[DemandNew] Episodio creado:', episode);
@@ -1408,60 +1496,242 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
           this.createdEpisode = episode;
           this.episodeSummary = episode;
           this.episodeLoaded = true;
-          this.stageLoaded = !!episode?.currentStageId;
+
+          this.stageLoaded = Boolean(
+            episode?.currentStageId ??
+            episode?.currentStage?.id ??
+            episode?.stageId,
+          );
+
           this.showCreateEpisodeForm = false;
 
-          this.stageVisualState = episode?.currentStageId
-            ? `Etapa inicial creada: ${episode.currentStageId}`
-            : 'Episodio creado sin etapa informada';
+          this.stageVisualState = this.stageLoaded
+            ? 'Etapa inicial creada'
+            : 'Episodio creado';
 
           this.episodeForm.patchValue({
-            episodeType: episode?.episodeType?.id ?? raw.episodeType,
+            episodeTypeId:
+              episode?.episodeType?.id ??
+              episode?.episodeTypeId ??
+              raw.episodeTypeId,
+
             originalRequestDate:
               episode?.originalRequestDate ?? raw.originalRequestDate,
-            initialProgram: episode?.initialProgram?.name ?? '',
-            currentProgram: episode?.currentProgram?.name ?? '',
-            currentState: episode?.stateCode ?? '',
-            currentResult: episode?.resultCode ?? '',
+
+            initialProgramId:
+              episode?.initialProgram?.id ??
+              episode?.initialProgramId ??
+              activeProgramId,
+
+            initialProgramName:
+              episode?.initialProgram?.name ?? this.activeProgramName ?? '',
+
+            currentProgramName:
+              episode?.currentProgram?.name ??
+              episode?.initialProgram?.name ??
+              this.activeProgramName ??
+              '',
+
+            currentState:
+              episode?.state?.name ??
+              episode?.stateName ??
+              episode?.stateCode ??
+              'EN TRÁMITE',
+
+            currentResult:
+              episode?.result?.name ??
+              episode?.resultName ??
+              episode?.resultCode ??
+              'AÚN SIN RESULTADO',
+
             initialObservation:
               episode?.initialObservation ?? raw.initialObservation ?? '',
           });
-          const episodeId = Number(episode?.id ?? episode?.episodeId);
 
-          if (Number.isFinite(episodeId) && episodeId > 0) {
-            this.loadEpisodeLongitudinal(episodeId);
-          }
+          this.episodeForm.markAsPristine();
+          this.episodeForm.markAsUntouched();
+
+          /*
+           * No cargar todavía el longitudinal.
+           * El endpoint continúa respondiendo 403.
+           *
+           * const episodeId = Number(
+           *   episode?.id ?? episode?.episodeId,
+           * );
+           *
+           * if (Number.isFinite(episodeId) && episodeId > 0) {
+           *   this.loadEpisodeLongitudinal(episodeId);
+           * }
+           */
         },
-        error: (error) => {
+
+        error: (error: HttpErrorResponse) => {
           console.error('[DemandNew] Error creando episodio:', error);
 
-          if (error?.status === 403) {
+          if (error.status === 403) {
             this.episodeSaveError =
-              'No tiene permisos para crear episodios en el backend.';
+              'El backend rechazó la creación del episodio por permisos.';
             return;
           }
 
-          if (error?.status === 400 || error?.status === 409) {
+          if (error.status === 409) {
             this.episodeSaveError =
-              'No fue posible crear el episodio. Es posible que la persona ya tenga un episodio activo.';
+              error.error?.message || 'La persona ya tiene un episodio activo.';
+            return;
+          }
+
+          if (error.status === 400) {
+            this.episodeSaveError =
+              error.error?.message ||
+              'Los datos enviados para crear el episodio no son válidos.';
+            return;
+          }
+
+          if (
+            error.status === 0 ||
+            error.status === 502 ||
+            error.status === 503 ||
+            error.status === 504
+          ) {
+            this.episodeSaveError =
+              'El servicio de Gestión de Demanda no se encuentra disponible.';
             return;
           }
 
           this.episodeSaveError =
+            error.error?.message ||
             'No fue posible crear el episodio. Revise los datos e intente nuevamente.';
         },
       });
   }
 
   showCreateEpisode(): void {
+    if (!this.selectedPerson?.id) {
+      this.episodeSaveError =
+        'Debe seleccionar una persona antes de crear el episodio.';
+      return;
+    }
+
     if (this.createdEpisode || this.episodeLoaded) {
       this.episodeSaveError =
         'Ya existe un episodio asociado a esta persona. No se puede preparar uno nuevo hasta validar cierre o reversa.';
       return;
     }
 
+    const activeProgramId = Number(this.tokenService.getActiveProgramId());
+
+    if (!Number.isFinite(activeProgramId) || activeProgramId <= 0) {
+      this.episodeSaveError = 'No fue posible identificar el programa activo.';
+      return;
+    }
+
     this.episodeSaveError = null;
+    this.showCreatePersonForm = false;
+
+    this.prepareCreateEpisodeForm(activeProgramId);
+
     this.showCreateEpisodeForm = true;
+
+    setTimeout(() => {
+      const section = this.createEpisodeSection?.nativeElement;
+
+      if (!section) {
+        return;
+      }
+
+      const scrollContainer = document.querySelector(
+        '.demand-new-page',
+      ) as HTMLElement | null;
+
+      if (
+        scrollContainer &&
+        scrollContainer.scrollHeight > scrollContainer.clientHeight
+      ) {
+        const containerRect = scrollContainer.getBoundingClientRect();
+
+        const sectionRect = section.getBoundingClientRect();
+
+        const targetTop =
+          scrollContainer.scrollTop + sectionRect.top - containerRect.top - 18;
+
+        scrollContainer.scrollTo({
+          top: Math.max(0, targetTop),
+          behavior: 'smooth',
+        });
+      } else {
+        section.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }
+
+      section.focus({
+        preventScroll: true,
+      });
+    }, 120);
+  }
+
+  private prepareCreateEpisodeForm(activeProgramId: number): void {
+    const currentOriginalRequestDate =
+      this.episodeForm.controls.originalRequestDate.value;
+
+    this.episodeForm.patchValue({
+      originalRequestDate:
+        currentOriginalRequestDate || this.getTodayForDateInput(),
+
+      initialProgramId: activeProgramId,
+
+      initialProgramName: this.activeProgramName ?? '',
+
+      currentProgramName: this.activeProgramName ?? '',
+
+      currentState: 'EN TRÁMITE',
+      currentResult: 'AÚN SIN RESULTADO',
+
+      previousTreatmentNumber: 0,
+    });
+
+    this.episodeForm.markAsPristine();
+    this.episodeForm.markAsUntouched();
+  }
+
+  closeCreateEpisodeForm(): void {
+    if (this.isSavingEpisode) {
+      return;
+    }
+
+    this.episodeSaveError = null;
+    this.showCreateEpisodeForm = false;
+
+    this.episodeForm.markAsPristine();
+    this.episodeForm.markAsUntouched();
+  }
+
+  private calculatePreviousTreatmentNumber(data: any): number {
+    const previousEpisodes = data?.previousEpisodes ?? data?.episodes ?? [];
+
+    return previousEpisodes.filter((episode: any) => {
+      const hasEntryDate = Boolean(
+        episode.entryToTreatmentAt ?? episode.entry_to_treatment_at,
+      );
+
+      const hasEntryEvent = (episode.events ?? []).some(
+        (event: any) =>
+          event.eventType?.code === 'INGRESO_TRATAMIENTO' ||
+          event.eventTypeCode === 'INGRESO_TRATAMIENTO',
+      );
+
+      return hasEntryDate || hasEntryEvent;
+    }).length;
+  }
+
+  private getTodayForDateInput(): string {
+    const today = new Date();
+    const localDate = new Date(
+      today.getTime() - today.getTimezoneOffset() * 60_000,
+    );
+
+    return localDate.toISOString().slice(0, 10);
   }
 
   selectPrimarySubstance(id: number): void {
@@ -1529,9 +1799,10 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const raw = this.personForm.getRawValue();
-    const userId = this.tokenService.getUserId();
 
-    if (!userId) {
+    const userId = Number(this.tokenService.getUserId());
+
+    if (!Number.isFinite(userId) || userId <= 0) {
       this.personSaveError =
         'No fue posible identificar el usuario autenticado para guardar la persona.';
       return;
@@ -1552,70 +1823,329 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
+    /*
+     * Correspondencia del formulario con Postulant:
+     *
+     * raw.firstName       -> firstName
+     * raw.secondName      -> lastName
+     * raw.firstLastName   -> firstLastName
+     * raw.secondLastName  -> secondLastName
+     * raw.birthDate       -> birthdate
+     */
     const payload: Partial<Postulant> = {
-      user: { id: Number(userId) },
-      commune: { id: Number(raw.commune) },
-      sex: { id: Number(raw.sex) },
+      user: {
+        id: userId,
+      },
 
-      firstName: this.toStringOrNull(raw.firstName) ?? undefined,
-      lastName: this.toStringOrNull(raw.secondName) ?? undefined,
-      firstLastName: this.toStringOrNull(raw.firstLastName) ?? undefined,
-      secondLastName: this.toStringOrNull(raw.secondLastName) ?? undefined,
+      commune: {
+        id: Number(raw.commune),
+      },
+
+      sex: {
+        id: Number(raw.sex),
+      },
+
+      firstName: this.toStringOrNull(raw.firstName),
+
+      /*
+       * En Postulant, lastName representa
+       * el segundo nombre de la persona.
+       */
+      lastName: this.toStringOrNull(raw.secondName),
+
+      firstLastName: this.toStringOrNull(raw.firstLastName),
+
+      secondLastName: this.toStringOrNull(raw.secondLastName),
 
       rut: this.formatRut(raw.rut),
-      birthdate: this.formatDateForBackend(raw.birthDate) ?? undefined,
 
-      email: this.toStringOrNull(raw.email) ?? undefined,
-      phone: this.toStringOrNull(raw.phone) ?? undefined,
-      address: this.toStringOrNull(raw.address) ?? undefined,
+      birthdate: this.formatDateForBackend(raw.birthDate),
+
+      email: this.toStringOrNull(raw.email),
+
+      phone: this.toStringOrNull(raw.phone),
+
+      address: this.toStringOrNull(raw.address),
     };
 
+    /*
+     * La institución previsional se encuentra
+     * dentro del convenio previsional.
+     */
     if (raw.convPrev && raw.intPrev) {
       payload.convPrev = {
         id: Number(raw.convPrev),
-        intPrev: { id: Number(raw.intPrev) },
+
+        intPrev: {
+          id: Number(raw.intPrev),
+        },
       };
     }
 
-    const personId = Number(this.selectedPerson?.id);
+    const existingPersonId = Number(this.selectedPerson?.id);
 
-    const request$ = personId
-      ? this.postulantService.update(personId, payload)
-      : this.postulantService.create(payload);
+    const saveRequest$ =
+      Number.isFinite(existingPersonId) && existingPersonId > 0
+        ? this.postulantService.update(existingPersonId, payload)
+        : this.postulantService.create(payload);
 
     this.isSavingPerson = true;
     this.personSaveError = null;
 
-    request$.pipe(finalize(() => (this.isSavingPerson = false))).subscribe({
-      next: (savedPerson) => {
-        this.selectedPerson = savedPerson;
-        this.personLoaded = true;
-        this.personNotFound = false;
-        this.showCreatePersonForm = false;
-        this.patchPersonForm(savedPerson);
-      },
-      error: (error) => {
-        console.error('[DemandNew] Error guardando persona:', error);
+    saveRequest$
+      .pipe(
+        /*
+         * El PUT/POST puede devolver relaciones parciales.
+         * Después de guardar consultamos el postulante completo.
+         */
+        switchMap((savedPerson: Postulant) => {
+          const savedPersonId = Number(savedPerson?.id ?? existingPersonId);
 
-        if (error?.status === 403) {
+          if (!Number.isFinite(savedPersonId) || savedPersonId <= 0) {
+            return throwError(
+              () =>
+                new Error(
+                  'El backend no devolvió un identificador válido del postulante.',
+                ),
+            );
+          }
+
+          return this.postulantService.getById(savedPersonId);
+        }),
+
+        finalize(() => {
+          this.isSavingPerson = false;
+        }),
+      )
+      .subscribe({
+        next: (fullPostulant: Postulant) => {
+          console.log(
+            '[DemandNew] Persona completa después de guardar:',
+            fullPostulant,
+          );
+
+          const previousPerson = this.selectedPerson;
+
+          /*
+           * Consolidamos por seguridad.
+           *
+           * GET /postulants/{id} tiene prioridad.
+           * Se conservan relaciones anteriores cuando el GET
+           * no las devuelve, por ejemplo convPrev.
+           */
+          const updatedPerson: Postulant = {
+            ...(previousPerson ?? {}),
+            ...fullPostulant,
+
+            id: fullPostulant.id ?? previousPerson?.id,
+
+            user: fullPostulant.user ?? previousPerson?.user ?? payload.user,
+
+            commune: {
+              ...(previousPerson?.commune ?? {}),
+              ...(fullPostulant.commune ?? {}),
+
+              id: Number(raw.commune),
+            },
+
+            sex: {
+              ...(previousPerson?.sex ?? {}),
+              ...(fullPostulant.sex ?? {}),
+
+              id: Number(raw.sex),
+            },
+
+            firstName:
+              fullPostulant.firstName ??
+              payload.firstName ??
+              previousPerson?.firstName ??
+              null,
+
+            /*
+             * Segundo nombre del postulante.
+             */
+            lastName:
+              fullPostulant.lastName ??
+              payload.lastName ??
+              previousPerson?.lastName ??
+              null,
+
+            firstLastName:
+              fullPostulant.firstLastName ??
+              payload.firstLastName ??
+              previousPerson?.firstLastName ??
+              null,
+
+            secondLastName:
+              fullPostulant.secondLastName ??
+              payload.secondLastName ??
+              previousPerson?.secondLastName ??
+              null,
+
+            rut:
+              fullPostulant.rut ?? payload.rut ?? previousPerson?.rut ?? null,
+
+            birthdate:
+              fullPostulant.birthdate ??
+              payload.birthdate ??
+              previousPerson?.birthdate ??
+              null,
+
+            email:
+              fullPostulant.email ??
+              payload.email ??
+              previousPerson?.email ??
+              null,
+
+            phone:
+              fullPostulant.phone ??
+              payload.phone ??
+              previousPerson?.phone ??
+              null,
+
+            address:
+              fullPostulant.address ??
+              payload.address ??
+              previousPerson?.address ??
+              null,
+
+            /*
+             * El GET actual puede no devolver convPrev.
+             * Conservamos los datos enviados en el formulario.
+             */
+            convPrev:
+              raw.convPrev && raw.intPrev
+                ? {
+                    ...(previousPerson?.convPrev ?? {}),
+                    ...(fullPostulant.convPrev ?? {}),
+
+                    id: Number(raw.convPrev),
+
+                    intPrev: {
+                      ...(previousPerson?.convPrev?.intPrev ?? {}),
+                      ...(fullPostulant.convPrev?.intPrev ?? {}),
+
+                      id: Number(raw.intPrev),
+                    },
+                  }
+                : (fullPostulant.convPrev ?? previousPerson?.convPrev),
+          };
+
+          this.selectedPerson = updatedPerson;
+
+          this.personLoaded = true;
+          this.personNotFound = false;
+          this.personSaveError = null;
+
+          /*
+           * Reemplaza el postulante resumido dentro
+           * de todos los niveles longitudinales.
+           */
+          if (this.longitudinal) {
+            this.longitudinal = {
+              ...this.longitudinal,
+
+              postulant: updatedPerson,
+
+              activeEpisode: this.longitudinal.activeEpisode
+                ? {
+                    ...this.longitudinal.activeEpisode,
+
+                    postulant: updatedPerson,
+                  }
+                : this.longitudinal.activeEpisode,
+
+              episodes: Array.isArray(this.longitudinal.episodes)
+                ? this.longitudinal.episodes.map((episode: any) => ({
+                    ...episode,
+                    postulant: updatedPerson,
+                  }))
+                : this.longitudinal.episodes,
+            };
+          }
+
+          if (this.episodeSummary) {
+            this.episodeSummary = {
+              ...this.episodeSummary,
+              postulant: updatedPerson,
+            };
+          }
+
+          /*
+           * Carga el formulario usando únicamente
+           * datos propios del Postulant.
+           */
+          this.patchPersonForm(updatedPerson);
+
+          this.personForm.markAsPristine();
+          this.personForm.markAsUntouched();
+
+          this.showCreatePersonForm = false;
+          this.showDemandantDetails = true;
+
+          /*
+           * Recarga el longitudinal para actualizar eventos,
+           * etapas y episodios.
+           *
+           * loadEpisodeLongitudinal debe volver a obtener el
+           * postulante completo o fusionarlo con selectedPerson.
+           */
+          const episodeId =
+            Number(this.longitudinal?.activeEpisode?.id) ||
+            Number(this.episodeSummary?.id) ||
+            Number(this.episodeSummary?.episodeId) ||
+            0;
+
+          if (episodeId > 0) {
+            this.loadEpisodeLongitudinal(episodeId);
+          }
+        },
+
+        error: (error) => {
+          console.error(
+            '[DemandNew] Error guardando o recuperando persona:',
+            error,
+          );
+
+          if (error?.status === 403) {
+            this.personSaveError =
+              'No tiene permisos para guardar los datos de la persona.';
+            return;
+          }
+
+          if (error?.status === 409) {
+            this.personSaveError =
+              'Ya existe una persona registrada con este RUN.';
+            return;
+          }
+
+          if (error?.status === 400) {
+            this.personSaveError =
+              error?.error?.message ?? 'Los datos enviados no son válidos.';
+            return;
+          }
+
+          if (
+            error?.status === 0 ||
+            error?.status === 502 ||
+            error?.status === 503 ||
+            error?.status === 504
+          ) {
+            this.personSaveError =
+              'El servicio no respondió correctamente. Intente nuevamente en unos minutos.';
+            return;
+          }
+
           this.personSaveError =
-            'No tiene permisos para guardar los datos de la persona.';
-          return;
-        }
-
-        if (error?.status === 409) {
-          this.personSaveError =
-            'Ya existe una persona registrada con este RUN.';
-          return;
-        }
-
-        this.personSaveError =
-          'No fue posible guardar la persona. Revise los datos e intente nuevamente.';
-      },
-    });
+            'No fue posible guardar o recuperar todos los datos de la persona.';
+        },
+      });
   }
 
   saveInterview(): void {
+    if (!this.ensureCanManageCurrentEpisode()) {
+      return;
+    }
     this.interviewForm.markAllAsTouched();
 
     if (this.interviewForm.invalid || this.isSavingInterview) {
@@ -1805,6 +2335,9 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   saveObservation(): void {
+    if (!this.ensureCanManageCurrentEpisode()) {
+      return;
+    }
     this.observationForm.markAllAsTouched();
 
     if (this.observationForm.invalid || this.isSavingObservation) return;
@@ -1871,95 +2404,356 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private applyLongitudinalData(data: any): void {
-    this.longitudinal = data;
+    const summarizedPostulant =
+      data?.postulant ?? data?.activeEpisode?.postulant ?? null;
 
-    const postulant = data?.postulant ?? null;
     const activeEpisode = data?.activeEpisode ?? null;
-    const stages = data?.stages ?? [];
-    const events = data?.events ?? [];
+    const stages = Array.isArray(data?.stages) ? data.stages : [];
 
+    const events = Array.isArray(data?.events) ? data.events : [];
+
+    /*
+     * Primero conserva la respuesta longitudinal completa.
+     * La persona resumida será reemplazada después por el GET completo.
+     */
+    this.longitudinal = data;
     this.episodeEvents = events;
 
-    if (postulant) {
-      this.selectedPerson = postulant;
-      this.personLoaded = true;
-      this.personNotFound = false;
-      this.showCreatePersonForm = false;
-
-      this.personForm.patchValue({
-        rut: postulant.rut ?? '',
-        firstName: postulant.firstName ?? '',
-        secondName: postulant.secondName ?? '',
-        firstLastName: postulant.firstLastName ?? '',
-        secondLastName: postulant.secondLastName ?? '',
-        birthDate: this.parseBackendDate(postulant.birthdate),
-        phone: postulant.phone ?? '',
-        email: postulant.email ?? '',
-        address: postulant.address ?? '',
-      });
-    }
-
+    /*
+     * =====================================================
+     * EPISODIO ACTIVO
+     * =====================================================
+     */
     if (activeEpisode) {
       this.createdEpisode = activeEpisode;
       this.episodeSummary = activeEpisode;
       this.episodeLoaded = true;
       this.showCreateEpisodeForm = false;
 
-      this.episodeForm.patchValue({
-        episodeType: activeEpisode.episodeType?.name ?? '',
-        originalRequestDate: activeEpisode.originalRequestDate ?? '',
-        initialProgram: activeEpisode.initialProgram?.name ?? '',
-        currentProgram: activeEpisode.currentProgram?.name ?? '',
-        currentState: activeEpisode.stateCode ?? '',
-        currentResult: activeEpisode.resultCode ?? '',
-      });
+      this.episodeForm.patchValue(
+        {
+          episodeTypeId:
+            activeEpisode?.episodeType?.id ??
+            activeEpisode?.episodeTypeId ??
+            null,
+
+          originalRequestDate:
+            activeEpisode?.originalRequestDate ?? this.getTodayForDateInput(),
+
+          initialProgramId:
+            activeEpisode?.initialProgram?.id ??
+            activeEpisode?.initialProgramId ??
+            null,
+
+          initialProgramName: activeEpisode?.initialProgram?.name ?? '',
+
+          currentProgramName:
+            activeEpisode?.currentProgram?.name ??
+            activeEpisode?.initialProgram?.name ??
+            '',
+
+          currentState:
+            activeEpisode?.state?.name ?? activeEpisode?.stateCode ?? '',
+
+          currentResult:
+            activeEpisode?.result?.name ?? activeEpisode?.resultCode ?? '',
+        },
+        {
+          emitEvent: false,
+        },
+      );
+
+      this.episodeForm.markAsPristine();
+      this.episodeForm.markAsUntouched();
     } else {
       this.createdEpisode = null;
       this.episodeSummary = null;
       this.episodeLoaded = false;
-      this.showCreateEpisodeForm = true;
+      this.showCreateEpisodeForm = false;
     }
 
+    /*
+     * =====================================================
+     * ETAPA ACTUAL
+     * =====================================================
+     */
     const currentStage =
-      stages.find((stage: any) => stage.current === true) ?? stages[0] ?? null;
+      stages.find((stage: any) => stage?.current === true) ?? stages[0] ?? null;
 
     if (currentStage) {
       this.stageLoaded = true;
-      this.stageVisualState = `Etapa activa: ${currentStage.program?.name ?? 'Sin programa'} · ${currentStage.daysInStage ?? 0} días`;
+
+      this.stageVisualState = `Etapa activa: ${
+        currentStage?.program?.name ?? 'Sin programa'
+      } · ${currentStage?.daysInStage ?? 0} días`;
     } else {
       this.stageLoaded = false;
       this.stageVisualState = 'Sin etapa activa cargada';
     }
+
+    /*
+     * =====================================================
+     * PERSONA
+     * =====================================================
+     *
+     * El longitudinal entrega una versión resumida del
+     * postulante. Por eso usamos su ID para consultar:
+     *
+     * GET /api/v1/postulants/{id}
+     *
+     * Esa consulta devuelve:
+     * - lastName
+     * - commune
+     * - sex
+     * - user completo o parcial
+     * - demás datos propios del postulante
+     */
+    const postulantId = Number(summarizedPostulant?.id);
+
+    if (!Number.isFinite(postulantId) || postulantId <= 0) {
+      console.warn(
+        '[DemandNew] El longitudinal no contiene un postulante válido:',
+        summarizedPostulant,
+      );
+
+      this.selectedPerson = null;
+      this.personLoaded = false;
+      this.personNotFound = false;
+      this.showCreatePersonForm = false;
+
+      return;
+    }
+
+    this.postulantService.getById(postulantId).subscribe({
+      next: (fullPostulant: Postulant) => {
+        console.log(
+          '[DemandNew] Postulante completo recuperado:',
+          fullPostulant,
+        );
+
+        /*
+         * Consolida por seguridad.
+         *
+         * El GET completo tiene prioridad, pero se conservan
+         * propiedades del resumen que eventualmente no vengan.
+         */
+        const completePerson: Postulant = {
+          ...summarizedPostulant,
+          ...fullPostulant,
+
+          id: fullPostulant?.id ?? summarizedPostulant?.id,
+
+          firstName:
+            fullPostulant?.firstName ?? summarizedPostulant?.firstName ?? null,
+
+          /*
+           * Segundo nombre del postulante.
+           * No confundir con user.secondName.
+           */
+          lastName:
+            fullPostulant?.lastName ?? summarizedPostulant?.lastName ?? null,
+
+          firstLastName:
+            fullPostulant?.firstLastName ??
+            summarizedPostulant?.firstLastName ??
+            null,
+
+          secondLastName:
+            fullPostulant?.secondLastName ??
+            summarizedPostulant?.secondLastName ??
+            null,
+
+          rut: fullPostulant?.rut ?? summarizedPostulant?.rut ?? null,
+
+          birthdate:
+            fullPostulant?.birthdate ?? summarizedPostulant?.birthdate ?? null,
+
+          email: fullPostulant?.email ?? summarizedPostulant?.email ?? null,
+
+          phone: fullPostulant?.phone ?? summarizedPostulant?.phone ?? null,
+
+          address:
+            fullPostulant?.address ?? summarizedPostulant?.address ?? null,
+
+          commune: fullPostulant?.commune ?? summarizedPostulant?.commune,
+
+          sex: fullPostulant?.sex ?? summarizedPostulant?.sex,
+
+          convPrev: fullPostulant?.convPrev ?? summarizedPostulant?.convPrev,
+
+          user: fullPostulant?.user ?? summarizedPostulant?.user,
+        };
+
+        this.selectedPerson = completePerson;
+        this.personLoaded = true;
+        this.personNotFound = false;
+        this.showCreatePersonForm = false;
+
+        /*
+         * Reemplaza el postulante resumido dentro de todos
+         * los niveles de la ficha longitudinal.
+         */
+        this.longitudinal = {
+          ...data,
+
+          postulant: completePerson,
+
+          activeEpisode: activeEpisode
+            ? {
+                ...activeEpisode,
+                postulant: completePerson,
+              }
+            : null,
+
+          episodes: Array.isArray(data?.episodes)
+            ? data.episodes.map((episode: any) => ({
+                ...episode,
+                postulant: completePerson,
+              }))
+            : [],
+        };
+
+        /*
+         * Actualiza también el resumen del episodio.
+         */
+        if (this.episodeSummary) {
+          this.episodeSummary = {
+            ...this.episodeSummary,
+            postulant: completePerson,
+          };
+        }
+
+        /*
+         * Usa el método único de carga del formulario.
+         * Allí secondName se obtiene desde person.lastName.
+         */
+        this.patchPersonForm(completePerson);
+
+        this.personForm.markAsPristine();
+        this.personForm.markAsUntouched();
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            this.initializeSummarySectionObserver();
+          });
+        });
+      },
+
+      error: (error) => {
+        console.error(
+          '[DemandNew] No fue posible recuperar el postulante completo:',
+          error,
+        );
+
+        /*
+         * Respaldo: permite mostrar al menos los datos resumidos.
+         * No utiliza user.secondName para completar al postulante.
+         */
+        const fallbackPerson: Postulant = {
+          id: summarizedPostulant?.id,
+
+          firstName: summarizedPostulant?.firstName ?? null,
+
+          lastName: summarizedPostulant?.lastName ?? null,
+
+          firstLastName: summarizedPostulant?.firstLastName ?? null,
+
+          secondLastName: summarizedPostulant?.secondLastName ?? null,
+
+          rut: summarizedPostulant?.rut ?? null,
+
+          birthdate: summarizedPostulant?.birthdate ?? null,
+
+          email: summarizedPostulant?.email ?? null,
+
+          phone: summarizedPostulant?.phone ?? null,
+
+          address: summarizedPostulant?.address ?? null,
+
+          commune: summarizedPostulant?.commune,
+
+          sex: summarizedPostulant?.sex,
+
+          convPrev: summarizedPostulant?.convPrev,
+
+          user: summarizedPostulant?.user,
+        };
+
+        this.selectedPerson = fallbackPerson;
+        this.personLoaded = true;
+        this.personNotFound = false;
+        this.showCreatePersonForm = false;
+
+        this.longitudinal = {
+          ...data,
+
+          postulant: fallbackPerson,
+
+          activeEpisode: activeEpisode
+            ? {
+                ...activeEpisode,
+                postulant: fallbackPerson,
+              }
+            : null,
+
+          episodes: Array.isArray(data?.episodes)
+            ? data.episodes.map((episode: any) => ({
+                ...episode,
+                postulant: fallbackPerson,
+              }))
+            : [],
+        };
+
+        this.patchPersonForm(fallbackPerson);
+
+        this.searchError =
+          'La ficha longitudinal fue cargada, pero no fue posible recuperar todos los datos personales.';
+      },
+    });
   }
 
   loadEpisodeLongitudinal(episodeId: number): void {
-    if (!episodeId) return;
+    if (!episodeId) {
+      return;
+    }
 
     this.isLoadingLongitudinal = true;
     this.longitudinalError = null;
 
     this.demandEpisodeService
       .getLongitudinalByEpisodeId(episodeId)
-      .pipe(finalize(() => (this.isLoadingLongitudinal = false)))
+      .pipe(
+        finalize(() => {
+          this.isLoadingLongitudinal = false;
+        }),
+      )
       .subscribe({
         next: (response) => {
           console.log('[DemandNew] Longitudinal episodio:', response);
 
           const events = response?.events ?? [];
 
+          /*
+           * Diagnóstico de los eventos recibidos.
+           */
           console.table(
             events.map((event: any) => ({
               id: event?.id,
+
               eventTypeCode:
                 event?.eventType?.code ??
                 event?.eventTypeCode ??
                 event?.typeCode ??
                 event?.code ??
                 '',
+
               eventTypeName:
                 event?.eventType?.name ?? event?.eventTypeName ?? '',
+
               eventDate: event?.eventDate,
+
               eventTime: event?.eventTime,
+
               relatedEventId:
                 event?.relatedEventId ??
                 event?.relatedEvent?.id ??
@@ -1967,16 +2761,22 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
                 event?.citation?.id ??
                 event?.parentEventId ??
                 '',
+
               attendanceStatusId:
                 event?.attendanceStatus?.id ?? event?.attendanceStatusId ?? '',
+
               attendanceStatusName:
                 event?.attendanceStatus?.name ??
                 event?.attendanceStatusName ??
                 '',
+
               comment: event?.comment,
             })),
           );
 
+          /*
+           * Obtiene solamente los eventos de asistencia.
+           */
           const attendanceEvents = events.filter((event: any) => {
             const code = String(
               event?.eventType?.code ??
@@ -1994,21 +2794,199 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
           console.log('[DemandNew] Eventos ASISTENCIA:', attendanceEvents);
 
-          this.longitudinal = response;
+          /*
+           * El longitudinal devuelve un postulante resumido.
+           *
+           * Prioridad:
+           * 1. response.postulant
+           * 2. response.activeEpisode.postulant
+           */
+          const responsePostulant = (response?.postulant ??
+            response?.activeEpisode?.postulant ??
+            null) as Partial<Postulant> | null;
+
+          /*
+           * Consolida el postulante recibido con selectedPerson.
+           *
+           * Esto impide que una respuesta longitudinal resumida
+           * elimine lastName, commune, sex, convPrev o user.
+           */
+          let mergedPostulant: Postulant | null = null;
+
+          if (responsePostulant) {
+            mergedPostulant = {
+              ...(this.selectedPerson ?? {}),
+              ...responsePostulant,
+
+              id: responsePostulant.id ?? this.selectedPerson?.id,
+
+              user: responsePostulant.user ?? this.selectedPerson?.user,
+
+              commune:
+                responsePostulant.commune ?? this.selectedPerson?.commune,
+
+              sex: responsePostulant.sex ?? this.selectedPerson?.sex,
+
+              convPrev:
+                responsePostulant.convPrev ?? this.selectedPerson?.convPrev,
+
+              firstName:
+                responsePostulant.firstName ?? this.selectedPerson?.firstName,
+
+              /*
+               * El backend utiliza lastName como segundo nombre.
+               * El longitudinal actualmente puede no devolverlo.
+               */
+              lastName:
+                responsePostulant.lastName ?? this.selectedPerson?.lastName,
+
+              firstLastName:
+                responsePostulant.firstLastName ??
+                this.selectedPerson?.firstLastName,
+
+              secondLastName:
+                responsePostulant.secondLastName ??
+                this.selectedPerson?.secondLastName,
+
+              rut: responsePostulant.rut ?? this.selectedPerson?.rut,
+
+              birthdate:
+                responsePostulant.birthdate ?? this.selectedPerson?.birthdate,
+
+              email: responsePostulant.email ?? this.selectedPerson?.email,
+
+              phone: responsePostulant.phone ?? this.selectedPerson?.phone,
+
+              address:
+                responsePostulant.address ?? this.selectedPerson?.address,
+            };
+          } else if (this.selectedPerson) {
+            mergedPostulant = {
+              ...this.selectedPerson,
+            };
+          }
+
+          /*
+           * Mantiene sincronizada la persona seleccionada.
+           */
+          if (mergedPostulant) {
+            this.selectedPerson = mergedPostulant;
+            this.personLoaded = true;
+            this.personNotFound = false;
+          }
+
+          /*
+           * Mantiene toda la respuesta longitudinal,
+           * pero reemplaza sus postulantes resumidos por
+           * el objeto consolidado.
+           */
+          this.longitudinal = {
+            ...response,
+
+            postulant: mergedPostulant ?? response?.postulant,
+
+            activeEpisode: response?.activeEpisode
+              ? {
+                  ...response.activeEpisode,
+
+                  postulant:
+                    mergedPostulant ?? response.activeEpisode.postulant,
+                }
+              : response?.activeEpisode,
+
+            episodes: Array.isArray(response?.episodes)
+              ? response.episodes.map((episode: any) => ({
+                  ...episode,
+
+                  postulant: mergedPostulant ?? episode?.postulant,
+                }))
+              : response?.episodes,
+          };
+
           this.episodeEvents = events;
+
+          /*
+           * Mantiene actualizado el resumen del episodio.
+           */
+          if (response?.activeEpisode?.id) {
+            this.episodeSummary = {
+              ...this.episodeSummary,
+              ...response.activeEpisode,
+
+              postulant: mergedPostulant ?? response.activeEpisode.postulant,
+            };
+
+            this.episodeLoaded = true;
+
+            this.stageLoaded = Boolean(response.activeEpisode.currentStageId);
+          }
+
+          /*
+           * Actualiza el formulario solamente cuando existe
+           * una persona consolidada.
+           *
+           * No se ejecuta mientras el usuario está editando,
+           * para evitar sobrescribir cambios todavía no guardados.
+           */
+          if (mergedPostulant && !this.showCreatePersonForm) {
+            this.patchPersonForm(mergedPostulant);
+
+            this.personForm.markAsPristine();
+            this.personForm.markAsUntouched();
+          }
+
+          /*
+           * Reinicializa el observador una vez que Angular
+           * haya renderizado las secciones longitudinales.
+           */
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              this.initializeSummarySectionObserver();
+            });
+          });
         },
+
         error: (error) => {
           console.error('[DemandNew] Error cargando longitudinal:', error);
 
+          if (error?.status === 403) {
+            this.longitudinalError =
+              'No tiene permisos para consultar el historial del episodio.';
+            return;
+          }
+
+          if (error?.status === 404) {
+            this.longitudinalError =
+              'No se encontró el historial longitudinal del episodio.';
+            return;
+          }
+
+          if (
+            error?.status === 0 ||
+            error?.status === 502 ||
+            error?.status === 503 ||
+            error?.status === 504
+          ) {
+            this.longitudinalError =
+              'El servicio de Gestión de Demanda no respondió correctamente.';
+            return;
+          }
+
           this.longitudinalError =
-            error?.status === 403
-              ? 'No tiene permisos para consultar el historial del episodio.'
-              : 'No fue posible cargar el historial del episodio.';
+            'No fue posible cargar el historial del episodio.';
         },
       });
   }
 
   openActionPanel(panel: ActiveActionPanel): void {
+    /*
+     * Permite cerrar el panel aunque el episodio pertenezca
+     * actualmente a otro programa.
+     */
+    if (panel !== null && !this.ensureCanManageCurrentEpisode()) {
+      return;
+    }
+
     this.activeActionPanel = panel;
 
     this.citationError = null;
@@ -2245,6 +3223,9 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   saveCitation(): void {
+    if (!this.ensureCanManageCurrentEpisode()) {
+      return;
+    }
     this.citationForm.markAllAsTouched();
 
     if (this.citationForm.invalid || this.isSavingCitation) {
@@ -2362,6 +3343,9 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   saveAttendance(): void {
+    if (!this.ensureCanManageCurrentEpisode()) {
+      return;
+    }
     this.attendanceForm.markAllAsTouched();
 
     if (this.attendanceForm.invalid || this.isSavingAttendance) {
@@ -3103,5 +4087,54 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.episodeEvents.filter(
       (event: any) => event?.eventType?.code === 'OBSERVACION',
     );
+  }
+
+  get canManageCurrentEpisode(): boolean {
+    const sessionProgramId = Number(
+      this.activeProgramId ?? this.tokenService.getActiveProgramId(),
+    );
+
+    const episodeProgramId = Number(
+      this.episodeSummary?.currentProgram?.id ??
+        this.episodeSummary?.currentProgramId ??
+        this.longitudinal?.activeEpisode?.currentProgram?.id ??
+        this.longitudinal?.activeEpisode?.currentProgramId ??
+        0,
+    );
+
+    return (
+      sessionProgramId > 0 &&
+      episodeProgramId > 0 &&
+      sessionProgramId === episodeProgramId
+    );
+  }
+
+  get episodeProgramRestrictionMessage(): string {
+    if (this.canManageCurrentEpisode) {
+      return '';
+    }
+
+    const episodeProgramName =
+      this.episodeSummary?.currentProgram?.name ??
+      this.longitudinal?.activeEpisode?.currentProgram?.name ??
+      'otro programa';
+
+    return (
+      `Modo consulta: este episodio está actualmente bajo la responsabilidad de ` +
+      `${episodeProgramName}. El programa activo de la sesión no puede registrar ` +
+      `ni modificar gestiones.`
+    );
+  }
+
+  private ensureCanManageCurrentEpisode(): boolean {
+    if (this.canManageCurrentEpisode) {
+      return true;
+    }
+
+    this.longitudinalError = this.episodeProgramRestrictionMessage;
+
+    this.activeActionPanel = null;
+
+    return false;
   }
 }
