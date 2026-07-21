@@ -1,4 +1,4 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import {
@@ -136,7 +136,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   activeProgramName: string | null = null;
   activeProgramId: number | null = null;
-  stageVisualState = 'Pendiente de creaciÃ³n';
+  stageVisualState = 'Pendiente de creación';
 
   activeActionPanel: ActiveActionPanel = null;
 
@@ -294,8 +294,8 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     previousTreatmentNumber: [0],
 
-    currentState: [{ value: 'EN TRÃMITE', disabled: true }],
-    currentResult: [{ value: 'AÃšN SIN RESULTADO', disabled: true }],
+    currentState: [{ value: 'EN TRÁMITE', disabled: true }],
+    currentResult: [{ value: 'AÚN SIN RESULTADO', disabled: true }],
 
     initialObservation: [''],
 
@@ -308,7 +308,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     ],
   });
 
-  // Estados vacÃ­os reales: no mocks
+  // Estados vacíos reales: no mocks
   personLoaded = false;
   episodeLoaded = false;
   stageLoaded = false;
@@ -344,42 +344,42 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     'Segundo apellido',
     'Fecha nacimiento',
     'Sexo',
-    'TelÃ©fono',
+    'Teléfono',
     'Correo',
-    'DirecciÃ³n',
+    'Dirección',
     'Comuna',
-    'PrevisiÃ³n',
+    'Previsión',
   ];
 
   readonly episodeFields = [
-    'CÃ³digo episodio',
+    'Código episodio',
     'Tipo episodio',
     'Fecha solicitud original',
     'Programa inicial',
     'Programa actual',
-    'VÃ­a de ingreso',
+    'Vía de ingreso',
     'Remitente',
     'Derivador',
-    'NÃºmero de tratamiento previo',
+    'Número de tratamiento previo',
     'Estado actual',
     'Resultado actual',
-    'DÃ­as acumulados',
+    'Días acumulados',
     'Fecha ingreso a tratamiento',
     'Fecha egreso',
     'Motivo cierre',
-    'ObservaciÃ³n inicial',
+    'Observación inicial',
   ];
 
   readonly stageFields = [
     'Programa responsable',
     'Orden de etapa',
-    'Fecha recepciÃ³n',
+    'Fecha recepción',
     'Fecha cierre',
     'Estado de etapa',
     'Resultado de etapa',
     'Etapa actual',
     'Motivo cierre etapa',
-    'ObservaciÃ³n cierre etapa',
+    'Observación cierre etapa',
   ];
 
   readonly structuralSections = [
@@ -387,20 +387,20 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       icon: 'timeline',
       title: 'Eventos del episodio',
       subtitle:
-        'Registro cronolÃ³gico de citaciones, entrevistas, observaciones, ingreso, egreso y cierre.',
+        'Registro cronológico de citaciones, entrevistas, observaciones, ingreso, egreso y cierre.',
       empty: 'No existen eventos registrados.',
       fields: [
         'Tipo evento',
         'Fecha evento',
         'Hora evento',
-        'ProfesiÃ³n',
+        'Profesión',
         'Profesional',
-        'Estado citaciÃ³n',
+        'Estado citación',
         'Resultado asociado',
-        'Comentario de citaciÃ³n',
-        'ObservaciÃ³n general',
-        'PrÃ³xima acciÃ³n',
-        'Fecha prÃ³xima acciÃ³n',
+        'Comentario de citación',
+        'Observación general',
+        'Próxima acción',
+        'Fecha próxima acción',
         'Usuario que registra',
       ],
     },
@@ -408,15 +408,15 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       icon: 'sync_alt',
       title: 'Referencias entre programas',
       subtitle:
-        'Cierre de etapa origen y creaciÃ³n de etapa receptora sin reiniciar dÃ­as.',
+        'Cierre de etapa origen y creación de etapa receptora sin reiniciar días.',
       empty:
-        'No existen referencias registradas. Las referencias conservarÃ¡n la fecha original y los dÃ­as acumulados.',
+        'No existen referencias registradas. Las referencias conservarán la fecha original y los días acumulados.',
       fields: [
         'Programa origen',
         'Programa destino',
         'Fecha referencia',
         'Motivo referencia',
-        'ObservaciÃ³n',
+        'Observación',
         'Documento asociado',
         'Usuario que registra',
         'Impacto de la referencia',
@@ -426,13 +426,13 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       icon: 'science',
       title: 'Sustancias',
       subtitle:
-        'Sustancia principal, sustancias secundarias, nivel u orden y observaciÃ³n.',
+        'Sustancia principal, sustancias secundarias, nivel u orden y observación.',
       empty: 'No existen sustancias asociadas al episodio.',
       fields: [
         'Sustancia principal',
         'Sustancias secundarias',
         'Nivel / orden',
-        'ObservaciÃ³n',
+        'Observación',
       ],
     },
     {
@@ -453,14 +453,14 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       icon: 'notification_important',
       title: 'Alertas y seguimiento',
       subtitle:
-        'Alertas con prioridad, responsable, prÃ³xima acciÃ³n y estado de seguimiento.',
+        'Alertas con prioridad, responsable, próxima acción y estado de seguimiento.',
       empty: 'No existen alertas activas.',
       fields: [
         'Tipo alerta',
         'Nivel prioridad',
-        'DescripciÃ³n',
-        'AcciÃ³n realizada',
-        'PrÃ³xima acciÃ³n',
+        'Descripción',
+        'Acción realizada',
+        'Próxima acción',
         'Fecha comprometida',
         'Responsable',
         'Estado alerta',
@@ -468,20 +468,20 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     },
     {
       icon: 'verified_user',
-      title: 'AuditorÃ­a / decisiones crÃ­ticas',
+      title: 'Auditoría / decisiones críticas',
       subtitle:
-        'Trazabilidad de cierres, referencias, ingresos, egresos, rectificaciones y reversiÃ³n superior.',
+        'Trazabilidad de cierres, referencias, ingresos, egresos, rectificaciones y reversión superior.',
       empty:
-        'Las decisiones crÃ­ticas quedarÃ¡n registradas con usuario, fecha y autorizaciÃ³n.',
+        'Las decisiones críticas quedarán registradas con usuario, fecha y autorización.',
       fields: [
-        'AcciÃ³n crÃ­tica',
+        'Acción crítica',
         'Valor anterior',
         'Valor nuevo',
         'Motivo',
         'Usuario que ejecuta',
         'Usuario que autoriza',
-        'Fecha acciÃ³n',
-        'ReversiÃ³n / rectificaciÃ³n',
+        'Fecha acción',
+        'Reversión / rectificación',
       ],
     },
   ];
@@ -489,9 +489,9 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly operativeActions = [
     {
       icon: 'event_available',
-      title: 'Nueva citaciÃ³n',
+      title: 'Nueva citación',
       description:
-        'Registrar fecha, hora, profesional y comentario de citaciÃ³n.',
+        'Registrar fecha, hora, profesional y comentario de citación.',
       enabled: true,
       panel: 'citation' as const,
     },
@@ -499,22 +499,22 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       icon: 'how_to_reg',
       title: 'Registrar asistencia',
       description:
-        'Marcar si se presentÃ³, no se presentÃ³, reprogramÃ³ o quedÃ³ pendiente.',
+        'Marcar si se presentó, no se presentó, reprogramó o quedó pendiente.',
       enabled: true,
       panel: 'attendance' as const,
     },
     {
       icon: 'psychology',
-      title: 'Entrevista / evaluaciÃ³n',
+      title: 'Entrevista / evaluación',
       description:
-        'Registrar entrevista, evaluaciÃ³n clÃ­nica/social o antecedentes relevantes.',
+        'Registrar entrevista, evaluación clínica/social o antecedentes relevantes.',
       enabled: true,
       panel: 'interview' as const,
     },
     {
       icon: 'notes',
-      title: 'ObservaciÃ³n',
-      description: 'Agregar observaciÃ³n general del episodio o etapa.',
+      title: 'Observación',
+      description: 'Agregar observación general del episodio o etapa.',
       enabled: true,
       panel: 'observation' as const,
     },
@@ -522,7 +522,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       icon: 'sync_alt',
       title: 'Referir programa',
       description:
-        'Cerrar etapa origen y crear etapa receptora sin reiniciar dÃ­as.',
+        'Cerrar etapa origen y crear etapa receptora sin reiniciar días.',
       enabled: false,
       panel: 'reference' as const,
     },
@@ -536,7 +536,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     {
       icon: 'logout',
       title: 'Egreso / cierre',
-      description: 'Cerrar episodio con motivo, observaciÃ³n y auditorÃ­a.',
+      description: 'Cerrar episodio con motivo, observación y auditoría.',
       enabled: false,
       panel: 'egressClosure' as const,
     },
@@ -606,11 +606,11 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadActiveProfessionals();
 
     /*
-     * Cuando el usuario cambia manualmente el tipo de previsiÃ³n,
-     * se debe limpiar la previsiÃ³n seleccionada anteriormente.
+     * Cuando el usuario cambia manualmente el tipo de previsión,
+     * se debe limpiar la previsión seleccionada anteriormente.
      *
      * Cuando cargamos una persona desde patchPersonForm(),
-     * usamos emitEvent: false para no entrar aquÃ­.
+     * usamos emitEvent: false para no entrar aquí.
      */
     this.personForm.get('intPrev')?.valueChanges.subscribe((id) => {
       this.filterConvPrevByIntPrev(Number(id), true);
@@ -666,7 +666,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     ) as HTMLElement | null;
 
     if (!target) {
-      console.warn(`[DemandNew] No se encontrÃ³ la secciÃ³n: ${sectionId}`);
+      console.warn(`[DemandNew] No se encontró la sección: ${sectionId}`);
       return;
     }
 
@@ -677,7 +677,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       sectionId === 'demandante' ? 16 : (navigation?.offsetHeight ?? 0) + 46;
 
     /*
-     * Caso 1: el scroll estÃ¡ dentro de .demand-new-page.
+     * Caso 1: el scroll está dentro de .demand-new-page.
      */
     if (
       scrollContainer &&
@@ -721,7 +721,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (!anchor) {
       console.warn(
-        '[DemandNew] No se encontrÃ³ el ancla de navegaciÃ³n longitudinal.',
+        '[DemandNew] No se encontró el ancla de navegación longitudinal.',
       );
       return;
     }
@@ -999,9 +999,9 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isLoadingDemandCatalogs = false;
       },
       error: (error) => {
-        console.error('Error cargando catÃ¡logos de demanda', error);
+        console.error('Error cargando catálogos de demanda', error);
         this.demandCatalogsError =
-          'No fue posible cargar los catÃ¡logos de demanda desde el backend.';
+          'No fue posible cargar los catálogos de demanda desde el backend.';
 
         this.isLoadingDemandCatalogs = false;
       },
@@ -1124,7 +1124,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (rutControl.invalid) {
       this.searchError =
-        'El RUN ingresado no es vÃ¡lido. Revise el nÃºmero y el dÃ­gito verificador.';
+        'El RUN ingresado no es válido. Revise el número y el dígito verificador.';
       this.showCreatePersonForm = false;
       return;
     }
@@ -1170,7 +1170,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     /*
      * Se esperan dos ciclos de renderizado:
      * 1. Angular procesa el *ngIf.
-     * 2. El navegador calcula la posiciÃ³n real del card.
+     * 2. El navegador calcula la posición real del card.
      */
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -1178,7 +1178,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
         if (!section) {
           console.warn(
-            '[DemandNew] No se encontrÃ³ el card de ediciÃ³n de persona.',
+            '[DemandNew] No se encontró el card de edición de persona.',
           );
           return;
         }
@@ -1220,7 +1220,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.searchForm.invalid) {
-      this.searchError = 'Debe ingresar un RUN antes de realizar la bÃºsqueda.';
+      this.searchError = 'Debe ingresar un RUN antes de realizar la búsqueda.';
       return;
     }
 
@@ -1244,7 +1244,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     this.personLoaded = false;
     this.episodeLoaded = false;
     this.stageLoaded = false;
-    this.stageVisualState = 'Pendiente de creaciÃ³n';
+    this.stageVisualState = 'Pendiente de creación';
 
     this.filteredConvPrev = [];
     this.longitudinal = null;
@@ -1275,7 +1275,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     this.secondarySubstanceMap = {};
 
-    console.log('[DemandNew] RUN bÃºsqueda longitudinal:', rut);
+    console.log('[DemandNew] RUN búsqueda longitudinal:', rut);
 
     this.demandEpisodeService.getLongitudinalByRut(rut).subscribe({
       next: (data) => {
@@ -1292,7 +1292,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
         );
 
         /*
-         * Si el longitudinal estÃ¡ bloqueado o no existe,
+         * Si el longitudinal está bloqueado o no existe,
          * buscamos directamente la persona por RUN.
          */
         if (error?.status === 403 || error?.status === 404) {
@@ -1324,7 +1324,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
           if (!personId) {
             return throwError(
-              () => new Error('La persona recuperada no posee un ID vÃ¡lido.'),
+              () => new Error('La persona recuperada no posee un ID válido.'),
             );
           }
 
@@ -1355,8 +1355,8 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
           this.searchError =
             longitudinalStatus === 403
-              ? 'Se recuperaron los datos de la persona, pero actualmente no tiene autorizaciÃ³n para consultar su ficha longitudinal.'
-              : 'La persona estÃ¡ registrada, pero no posee una ficha longitudinal disponible.';
+              ? 'Se recuperaron los datos de la persona, pero actualmente no tiene autorización para consultar su ficha longitudinal.'
+              : 'La persona está registrada, pero no posee una ficha longitudinal disponible.';
         },
 
         error: (personError) => {
@@ -1370,7 +1370,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
             this.personLoaded = false;
             this.personNotFound = true;
 
-            // Solo cuando no existe se abre automÃ¡ticamente.
+            // Solo cuando no existe se abre automáticamente.
             this.showCreatePersonForm = true;
             this.showCreateEpisodeForm = false;
             this.showDemandantDetails = false;
@@ -1381,7 +1381,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
             this.stageVisualState = 'Persona no registrada';
 
             this.searchError =
-              'No se encontrÃ³ una persona registrada con ese RUN. Complete los datos para crearla.';
+              'No se encontró una persona registrada con ese RUN. Complete los datos para crearla.';
 
             return;
           }
@@ -1460,7 +1460,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isSavingEpisode = true;
     this.episodeSaveError = null;
 
-    console.log('[DemandNew] Payload creaciÃ³n episodio:', payload);
+    console.log('[DemandNew] Payload creación episodio:', payload);
 
     this.demandEpisodeService
       .createEpisode(payload)
@@ -1516,13 +1516,13 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
               episode?.state?.name ??
               episode?.stateName ??
               episode?.stateCode ??
-              'EN TRÃMITE',
+              'EN TRÁMITE',
 
             currentResult:
               episode?.result?.name ??
               episode?.resultName ??
               episode?.resultCode ??
-              'AÃšN SIN RESULTADO',
+              'AÚN SIN RESULTADO',
 
             initialObservation:
               episode?.initialObservation ?? raw.initialObservation ?? '',
@@ -1532,8 +1532,8 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
           this.episodeForm.markAsUntouched();
 
           /*
-           * No cargar todavÃ­a el longitudinal.
-           * El endpoint continÃºa respondiendo 403.
+           * No cargar todavía el longitudinal.
+           * El endpoint continúa respondiendo 403.
            *
            * const episodeId = Number(
            *   episode?.id ?? episode?.episodeId,
@@ -1550,7 +1550,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
           if (error.status === 403) {
             this.episodeSaveError =
-              'El backend rechazÃ³ la creaciÃ³n del episodio por permisos.';
+              'El backend rechazó la creación del episodio por permisos.';
             return;
           }
 
@@ -1563,7 +1563,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
           if (error.status === 400) {
             this.episodeSaveError =
               error.error?.message ||
-              'Los datos enviados para crear el episodio no son vÃ¡lidos.';
+              'Los datos enviados para crear el episodio no son válidos.';
             return;
           }
 
@@ -1574,7 +1574,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
             error.status === 504
           ) {
             this.episodeSaveError =
-              'El servicio de GestiÃ³n de Demanda no se encuentra disponible.';
+              'El servicio de Gestión de Demanda no se encuentra disponible.';
             return;
           }
 
@@ -1665,8 +1665,8 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
       currentProgramName: this.activeProgramName ?? '',
 
-      currentState: 'EN TRÃMITE',
-      currentResult: 'AÃšN SIN RESULTADO',
+      currentState: 'EN TRÁMITE',
+      currentResult: 'AÚN SIN RESULTADO',
 
       previousTreatmentNumber: 0,
     });
@@ -1840,7 +1840,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     };
 
     /*
-     * La instituciÃ³n previsional se encuentra
+     * La institución previsional se encuentra
      * dentro del convenio previsional.
      */
     if (raw.convPrev && raw.intPrev) {
@@ -1867,7 +1867,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(
         /*
          * El PUT/POST puede devolver relaciones parciales.
-         * DespuÃ©s de guardar consultamos el postulante completo.
+         * Después de guardar consultamos el postulante completo.
          */
         switchMap((savedPerson: Postulant) => {
           const savedPersonId = Number(savedPerson?.id ?? existingPersonId);
@@ -1876,7 +1876,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
             return throwError(
               () =>
                 new Error(
-                  'El backend no devolviÃ³ un identificador vÃ¡lido del postulante.',
+                  'El backend no devolvió un identificador válido del postulante.',
                 ),
             );
           }
@@ -1891,7 +1891,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe({
         next: (fullPostulant: Postulant) => {
           console.log(
-            '[DemandNew] Persona completa despuÃ©s de guardar:',
+            '[DemandNew] Persona completa después de guardar:',
             fullPostulant,
           );
 
@@ -2043,7 +2043,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
           }
 
           /*
-           * Carga el formulario usando Ãºnicamente
+           * Carga el formulario usando únicamente
            * datos propios del Postulant.
            */
           this.patchPersonForm(updatedPerson);
@@ -2092,7 +2092,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
           if (error?.status === 400) {
             this.personSaveError =
-              error?.error?.message ?? 'Los datos enviados no son vÃ¡lidos.';
+              error?.error?.message ?? 'Los datos enviados no son válidos.';
             return;
           }
 
@@ -2103,7 +2103,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
             error?.status === 504
           ) {
             this.personSaveError =
-              'El servicio no respondiÃ³ correctamente. Intente nuevamente en unos minutos.';
+              'El servicio no respondió correctamente. Intente nuevamente en unos minutos.';
             return;
           }
 
@@ -2237,7 +2237,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       intPrev: person.convPrev?.intPrev?.id ?? null,
       convPrev: person.convPrev?.id ?? null,
 
-      // TodavÃ­a no estÃ¡n disponibles directamente en Postulant.
+      // Todavía no están disponibles directamente en Postulant.
       contactName: '',
       contactDescription: '',
       contactCellphone: '',
@@ -2279,7 +2279,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (!episodeId) {
       this.observationError =
-        'No fue posible identificar el episodio para registrar la observaciÃ³n.';
+        'No fue posible identificar el episodio para registrar la observación.';
       return;
     }
 
@@ -2287,7 +2287,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (!programId) {
       this.observationError =
-        'No fue posible identificar el programa activo para registrar la observaciÃ³n.';
+        'No fue posible identificar el programa activo para registrar la observación.';
       return;
     }
 
@@ -2310,9 +2310,9 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(finalize(() => (this.isSavingObservation = false)))
       .subscribe({
         next: (event) => {
-          console.log('[DemandNew] ObservaciÃ³n registrada:', event);
+          console.log('[DemandNew] Observación registrada:', event);
 
-          this.observationSuccess = 'ObservaciÃ³n registrada correctamente.';
+          this.observationSuccess = 'Observación registrada correctamente.';
 
           this.observationForm.reset({
             comment: '',
@@ -2322,7 +2322,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
           this.loadEpisodeLongitudinal(episodeId);
         },
         error: (error) => {
-          console.error('[DemandNew] Error registrando observaciÃ³n:', error);
+          console.error('[DemandNew] Error registrando observación:', error);
 
           if (error?.status === 403) {
             this.observationError =
@@ -2331,7 +2331,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
           }
 
           this.observationError =
-            'No fue posible registrar la observaciÃ³n. Revise los datos e intente nuevamente.';
+            'No fue posible registrar la observación. Revise los datos e intente nuevamente.';
         },
       });
   }
@@ -2347,7 +2347,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     /*
      * Primero conserva la respuesta longitudinal completa.
-     * La persona resumida serÃ¡ reemplazada despuÃ©s por el GET completo.
+     * La persona resumida será reemplazada después por el GET completo.
      */
     this.longitudinal = data;
     this.episodeEvents = events;
@@ -2418,7 +2418,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.stageVisualState = `Etapa activa: ${
         currentStage?.program?.name ?? 'Sin programa'
-      } Â· ${currentStage?.daysInStage ?? 0} dÃ­as`;
+      } · ${currentStage?.daysInStage ?? 0} días`;
     } else {
       this.stageLoaded = false;
       this.stageVisualState = 'Sin etapa activa cargada';
@@ -2429,7 +2429,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
      * PERSONA
      * =====================================================
      *
-     * El longitudinal entrega una versiÃ³n resumida del
+     * El longitudinal entrega una versión resumida del
      * postulante. Por eso usamos su ID para consultar:
      *
      * GET /api/v1/postulants/{id}
@@ -2439,13 +2439,13 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
      * - commune
      * - sex
      * - user completo o parcial
-     * - demÃ¡s datos propios del postulante
+     * - demás datos propios del postulante
      */
     const postulantId = Number(summarizedPostulant?.id);
 
     if (!Number.isFinite(postulantId) || postulantId <= 0) {
       console.warn(
-        '[DemandNew] El longitudinal no contiene un postulante vÃ¡lido:',
+        '[DemandNew] El longitudinal no contiene un postulante válido:',
         summarizedPostulant,
       );
 
@@ -2547,7 +2547,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
         };
 
         /*
-         * Actualiza tambiÃ©n el resumen del episodio.
+         * Actualiza también el resumen del episodio.
          */
         if (this.episodeSummary) {
           this.episodeSummary = {
@@ -2557,8 +2557,8 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
         }
 
         /*
-         * Usa el mÃ©todo Ãºnico de carga del formulario.
-         * AllÃ­ secondName se obtiene desde person.lastName.
+         * Usa el método único de carga del formulario.
+         * Allí secondName se obtiene desde person.lastName.
          */
         this.patchPersonForm(completePerson);
 
@@ -2667,7 +2667,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
           const events = response?.events ?? [];
 
           /*
-           * DiagnÃ³stico de los eventos recibidos.
+           * Diagnóstico de los eventos recibidos.
            */
           console.table(
             events.map((event: any) => ({
@@ -2858,8 +2858,8 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
            * Actualiza el formulario solamente cuando existe
            * una persona consolidada.
            *
-           * No se ejecuta mientras el usuario estÃ¡ editando,
-           * para evitar sobrescribir cambios todavÃ­a no guardados.
+           * No se ejecuta mientras el usuario está editando,
+           * para evitar sobrescribir cambios todavía no guardados.
            */
           if (mergedPostulant && !this.showCreatePersonForm) {
             this.patchPersonForm(mergedPostulant);
@@ -2890,7 +2890,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
           if (error?.status === 404) {
             this.longitudinalError =
-              'No se encontrÃ³ el historial longitudinal del episodio.';
+              'No se encontró el historial longitudinal del episodio.';
             return;
           }
 
@@ -2901,7 +2901,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
             error?.status === 504
           ) {
             this.longitudinalError =
-              'El servicio de GestiÃ³n de Demanda no respondiÃ³ correctamente.';
+              'El servicio de Gestión de Demanda no respondió correctamente.';
             return;
           }
 
@@ -3141,11 +3141,11 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.isTodayCitation(item)) {
-      return 'CitaciÃ³n de hoy';
+      return 'Citación de hoy';
     }
 
     if (this.isFutureCitation(item)) {
-      return 'PrÃ³xima citaciÃ³n';
+      return 'Próxima citación';
     }
 
     return 'Sin fecha';
@@ -3169,7 +3169,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (!episodeId) {
       this.citationError =
-        'No fue posible identificar el episodio para registrar la citaciÃ³n.';
+        'No fue posible identificar el episodio para registrar la citación.';
       return;
     }
 
@@ -3177,7 +3177,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (!programId) {
       this.citationError =
-        'No fue posible identificar el programa activo para registrar la citaciÃ³n.';
+        'No fue posible identificar el programa activo para registrar la citación.';
       return;
     }
 
@@ -3188,13 +3188,13 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (!eventDate) {
       this.citationError =
-        'Debe seleccionar una fecha vÃ¡lida para la citaciÃ³n.';
+        'Debe seleccionar una fecha válida para la citación.';
       return;
     }
 
     if (!eventTime) {
       this.citationError =
-        'Debe ingresar una hora vÃ¡lida y seleccionar AM o PM.';
+        'Debe ingresar una hora válida y seleccionar AM o PM.';
       return;
     }
 
@@ -3236,9 +3236,9 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       )
       .subscribe({
         next: (event: any) => {
-          console.log('[DemandNew] CitaciÃ³n registrada:', event);
+          console.log('[DemandNew] Citación registrada:', event);
 
-          this.citationSuccess = 'CitaciÃ³n registrada correctamente.';
+          this.citationSuccess = 'Citación registrada correctamente.';
 
           this.citationForm.reset({
             eventDate: new Date(),
@@ -3254,7 +3254,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
         },
 
         error: (error: HttpErrorResponse) => {
-          console.error('[DemandNew] Error registrando citaciÃ³n:', error);
+          console.error('[DemandNew] Error registrando citación:', error);
 
           if (error.status === 403) {
             this.citationError =
@@ -3265,12 +3265,12 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
           if (error.status === 400) {
             this.citationError =
               error.error?.message ||
-              'Los datos de la citaciÃ³n no son vÃ¡lidos.';
+              'Los datos de la citación no son válidos.';
             return;
           }
 
           this.citationError =
-            'No fue posible registrar la citaciÃ³n. Revise los datos e intente nuevamente.';
+            'No fue posible registrar la citación. Revise los datos e intente nuevamente.';
         },
       });
   }
@@ -3309,7 +3309,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (!selectedCitation) {
       this.attendanceError =
-        'Debe seleccionar una citaciÃ³n vÃ¡lida para registrar asistencia.';
+        'Debe seleccionar una citación válida para registrar asistencia.';
       return;
     }
 
@@ -3346,7 +3346,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     };
 
     console.log('[DemandNew] Payload asistencia:', payload);
-    console.log('[DemandNew] CitaciÃ³n seleccionada:', selectedCitation);
+    console.log('[DemandNew] Citación seleccionada:', selectedCitation);
     console.log('[DemandNew] Episodio:', episodeId);
 
     this.isSavingAttendance = true;
@@ -3416,7 +3416,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
           /*
            * Cerramos directamente el card.
-           * No usamos closeActionPanel() porque todavÃ­a
+           * No usamos closeActionPanel() porque todavía
            * isSavingAttendance puede continuar en true
            * hasta que se ejecute finalize().
            */
@@ -3424,7 +3424,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
           /*
            * Recarga completa para actualizar:
-           * - estado de asistencia de la citaciÃ³n;
+           * - estado de asistencia de la citación;
            * - eventos registrados;
            * - citaciones pendientes;
            * - indicadores del episodio.
@@ -3903,7 +3903,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     const color = this.normalizeSemaphoreColor(value);
 
     if (color === 'ROJO') {
-      return 'AtenciÃ³n prioritaria';
+      return 'Atención prioritaria';
     }
 
     if (color === 'AMARILLO') {
@@ -3914,7 +3914,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       return 'Dentro de plazo';
     }
 
-    return 'Sin clasificaciÃ³n';
+    return 'Sin clasificación';
   }
 
   private normalizeSemaphoreColor(value: string | null | undefined): string {
@@ -4053,8 +4053,8 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       'otro programa';
 
     return (
-      `Modo consulta: este episodio estÃ¡ actualmente bajo la responsabilidad de ` +
-      `${episodeProgramName}. El programa activo de la sesiÃ³n no puede registrar ` +
+      `Modo consulta: este episodio está actualmente bajo la responsabilidad de ` +
+      `${episodeProgramName}. El programa activo de la sesión no puede registrar ` +
       `ni modificar gestiones.`
     );
   }
