@@ -73,6 +73,7 @@ import {
 } from './utils/demand-new-event.utils';
 
 import { extractArray } from './utils/demand-new-data.utils';
+import { getEventSortDate } from './utils/demand-new-history.utils';
 
 @Component({
   selector: 'app-demand-new',
@@ -3501,8 +3502,8 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     const events = [...(this.episodeEvents ?? [])];
 
     return events.sort((a: any, b: any) => {
-      const dateA = this.getEventSortDate(a);
-      const dateB = this.getEventSortDate(b);
+      const dateA = getEventSortDate(a);
+      const dateB = getEventSortDate(b);
 
       return dateB - dateA;
     });
@@ -3542,25 +3543,6 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleAllHistory(): void {
     this.showAllHistory = !this.showAllHistory;
-  }
-
-  private getEventSortDate(event: any): number {
-    const eventDate = String(event?.eventDate ?? '').trim();
-    const eventTime = String(event?.eventTime ?? '00:00:00')
-      .trim()
-      .slice(0, 8);
-
-    if (eventDate) {
-      const parsed = new Date(`${eventDate}T${eventTime}`).getTime();
-
-      if (!Number.isNaN(parsed)) {
-        return parsed;
-      }
-    }
-
-    const createdAt = new Date(event?.createdAt ?? '').getTime();
-
-    return Number.isNaN(createdAt) ? 0 : createdAt;
   }
 
   getEventTypeCode(event: any): string {
@@ -3956,5 +3938,6 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     return false;
   }
 }
+
 
 
