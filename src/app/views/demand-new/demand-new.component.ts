@@ -78,7 +78,10 @@ import {
 } from './utils/demand-new-data.utils';
 import { getEventSortDate } from './utils/demand-new-history.utils';
 import { todayDateOnly, toBackendDate } from './utils/demand-new-date.utils';
-import { calculatePreviousTreatmentNumber } from './utils/demand-new-episode.utils';
+import {
+  calculatePreviousTreatmentNumber,
+  getCurrentEpisodeId,
+} from './utils/demand-new-episode.utils';
 import { normalizeProfessionalForCitation } from './utils/demand-new-professional.utils';
 import {
   buildSecondarySubstances,
@@ -2040,7 +2043,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    const episodeId = this.getCurrentEpisodeId();
+    const episodeId = getCurrentEpisodeId(this.createdEpisode, this.episodeSummary);
 
     if (!episodeId) {
       this.interviewError =
@@ -2171,18 +2174,6 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  private getCurrentEpisodeId(): number | null {
-    const id =
-      this.createdEpisode?.id ??
-      this.createdEpisode?.episodeId ??
-      this.episodeSummary?.id ??
-      this.episodeSummary?.episodeId ??
-      null;
-
-    const parsed = Number(id);
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
-  }
-
   saveObservation(): void {
     if (!this.ensureCanManageCurrentEpisode()) {
       return;
@@ -2191,7 +2182,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.observationForm.invalid || this.isSavingObservation) return;
 
-    const episodeId = this.getCurrentEpisodeId();
+    const episodeId = getCurrentEpisodeId(this.createdEpisode, this.episodeSummary);
 
     if (!episodeId) {
       this.observationError =
@@ -3063,7 +3054,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    const episodeId = this.getCurrentEpisodeId();
+    const episodeId = getCurrentEpisodeId(this.createdEpisode, this.episodeSummary);
 
     if (!episodeId) {
       this.citationError =
@@ -3183,7 +3174,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    const episodeId = this.getCurrentEpisodeId();
+    const episodeId = getCurrentEpisodeId(this.createdEpisode, this.episodeSummary);
 
     if (!episodeId) {
       this.attendanceError =
@@ -3719,7 +3710,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get hasActiveEpisode(): boolean {
-    return !!this.getCurrentEpisodeId();
+    return !!getCurrentEpisodeId(this.createdEpisode, this.episodeSummary);
   }
 
   formatDisplayDate(value: any): string {
@@ -3828,3 +3819,5 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     return false;
   }
 }
+
+

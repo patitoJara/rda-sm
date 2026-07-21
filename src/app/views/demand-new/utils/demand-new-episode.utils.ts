@@ -15,3 +15,19 @@
     return hasEntryDate || hasEntryEvent;
   }).length;
 }
+
+export function getCurrentEpisodeId(
+  createdEpisode: any,
+  episodeSummary: any,
+): number | null {
+  const id =
+    createdEpisode?.id ??
+    createdEpisode?.episodeId ??
+    episodeSummary?.id ??
+    episodeSummary?.episodeId ??
+    null;
+
+  const parsed = Number(id);
+
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
