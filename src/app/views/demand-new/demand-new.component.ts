@@ -98,6 +98,7 @@ import {
 } from './utils/demand-new-citation.utils';
 import { filterObservationEvents } from './utils/demand-new-observation.utils';
 import { buildAttendancePayload } from './utils/demand-new-attendance.utils';
+import { handleAttendanceSuccess } from './actions/demand-new-attendance.actions';
 import {
   canManageEpisode,
   getEpisodeProgramRestrictionMessage,
@@ -3174,42 +3175,32 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
             },
           ]);
 
-          if (event?.id) {
-            this.episodeEvents = [
-              ...(this.episodeEvents ?? []).filter(
-                (item: any) => Number(item.id) !== Number(event.id),
-              ),
-              event,
-            ];
-          }
+          const attendanceResult = handleAttendanceSuccess({
+            event,
+            episodeEvents: this.episodeEvents,
 
-          this.attendanceSuccess = 'Asistencia registrada correctamente.';
+            resetForm: () => {
+              this.attendanceForm.reset({
+                citationEventId: null,
+                attendanceStatusId: null,
+                comment: '',
+              });
 
-          this.attendanceForm.reset({
-            citationEventId: null,
-            attendanceStatusId: null,
-            comment: '',
+              this.attendanceForm.markAsPristine();
+              this.attendanceForm.markAsUntouched();
+            },
+
+            closePanel: () => {
+              this.activeActionPanel = null;
+            },
+
+            reloadLongitudinal: () => {
+              this.loadEpisodeLongitudinal(episodeId);
+            },
           });
 
-          this.attendanceForm.markAsPristine();
-          this.attendanceForm.markAsUntouched();
-
-          /*
-           * Cerramos directamente el card.
-           * No usamos closeActionPanel() porque todavía
-           * isSavingAttendance puede continuar en true
-           * hasta que se ejecute finalize().
-           */
-          this.activeActionPanel = null;
-
-          /*
-           * Recarga completa para actualizar:
-           * - estado de asistencia de la citación;
-           * - eventos registrados;
-           * - citaciones pendientes;
-           * - indicadores del episodio.
-           */
-          this.loadEpisodeLongitudinal(episodeId);
+          this.episodeEvents = attendanceResult.episodeEvents;
+          this.attendanceSuccess = attendanceResult.successMessage;
         },
 
         error: (error: any) => {
