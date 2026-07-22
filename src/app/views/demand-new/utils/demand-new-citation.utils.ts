@@ -140,3 +140,94 @@ export function getCitationAttendanceLabel(
 
   return statusFromAttendance || statusFromCitation || 'Pendiente';
 }
+export function filterPendingCitationEvents(
+  citationEvents: any[],
+  episodeEvents: any[],
+): any[] {
+  return (citationEvents ?? []).filter((event: any) => {
+    const hasAttendance = !!getAttendanceForCitation(event, episodeEvents);
+
+    if (hasAttendance) {
+      return false;
+    }
+
+    const status = normalizeText(
+      event?.attendanceStatus?.code ??
+        event?.attendanceStatusCode ??
+        event?.attendanceStatusName,
+    );
+
+    return (
+      !status ||
+      status === 'PENDIENTE' ||
+      status === 'AGENDADO' ||
+      status === 'SIN_ESTADO'
+    );
+  });
+}
+
+export function findSelectedAttendanceCitation(
+  citationEventId: number | null | undefined,
+  pendingCitationEvents: any[],
+): any | null {
+  if (!citationEventId) {
+    return null;
+  }
+
+  return (
+    (pendingCitationEvents ?? []).find(
+      (item: any) => Number(item?.id) === Number(citationEventId),
+    ) ?? null
+  );
+}
+
+export function formatCitationOptionDate(item: any): string {
+  const value = String(item?.eventDate ?? '');
+
+  if (!value) {
+    return 'Sin fecha';
+  }
+
+  const parts = value.split('-');
+
+  if (parts.length === 3) {
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+  }
+
+  return value;
+}
+
+export function formatCitationOptionTime(item: any): string {
+  const value = String(item?.eventTime ?? '');
+
+  if (!value) {
+    return 'Sin hora';
+  }
+
+  return value.slice(0, 5);
+}
+
+export function getNextCitationNumberForProgram(
+  citationEvents: any[],
+  activeProgramId: number | null | undefined,
+): number {
+  const normalizedProgramId = Number(activeProgramId);
+
+  if (!normalizedProgramId) {
+    return 1;
+  }
+
+  const currentProgramCitations = (citationEvents ?? []).filter(
+    (event: any) => {
+      const eventProgramId =
+        event?.program?.id ??
+        event?.programId ??
+        event?.program_id ??
+        null;
+
+      return Number(eventProgramId) === normalizedProgramId;
+    },
+  );
+
+  return currentProgramCitations.length + 1;
+}

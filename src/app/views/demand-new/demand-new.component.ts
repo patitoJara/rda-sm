@@ -83,6 +83,11 @@ import {
   getCurrentEpisodeId,
 } from './utils/demand-new-episode.utils';
 import {
+  filterPendingCitationEvents,
+  findSelectedAttendanceCitation,
+  formatCitationOptionDate as resolveCitationOptionDate,
+  formatCitationOptionTime as resolveCitationOptionTime,
+  getNextCitationNumberForProgram,
   getAttendanceForCitation as findAttendanceForCitation,
   getCitationAttendanceLabel as resolveCitationAttendanceLabel,
   getCitationNumber as calculateCitationNumber,
@@ -3491,83 +3496,34 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get pendingCitationEvents(): any[] {
-    return this.citationEvents.filter((event: any) => {
-      const hasAttendance = !!this.getAttendanceForCitation(event);
-
-      if (hasAttendance) {
-        return false;
-      }
-
-      const status = normalizeText(
-        event?.attendanceStatus?.code ??
-          event?.attendanceStatusCode ??
-          event?.attendanceStatusName,
-      );
-
-      return (
-        !status ||
-        status === 'PENDIENTE' ||
-        status === 'AGENDADO' ||
-        status === 'SIN_ESTADO'
-      );
-    });
+    return filterPendingCitationEvents(
+      this.citationEvents,
+      this.episodeEvents,
+    );
   }
 
   get selectedAttendanceCitation(): any | null {
     const selectedId = this.attendanceForm.getRawValue().citationEventId;
 
-    if (!selectedId) {
-      return null;
-    }
-
-    return (
-      this.pendingCitationEvents.find(
-        (item: any) => Number(item.id) === Number(selectedId),
-      ) ?? null
+    return findSelectedAttendanceCitation(
+      selectedId,
+      this.pendingCitationEvents,
     );
   }
 
   formatCitationOptionDate(item: any): string {
-    const value = String(item?.eventDate ?? '');
-
-    if (!value) {
-      return 'Sin fecha';
-    }
-
-    const parts = value.split('-');
-
-    if (parts.length === 3) {
-      return `${parts[2]}-${parts[1]}-${parts[0]}`;
-    }
-
-    return value;
+    return resolveCitationOptionDate(item);
   }
 
   formatCitationOptionTime(item: any): string {
-    const value = String(item?.eventTime ?? '');
-
-    if (!value) {
-      return 'Sin hora';
-    }
-
-    return value.slice(0, 5);
+    return resolveCitationOptionTime(item);
   }
 
   getNextCitationNumberForActiveProgram(): number {
-    const activeProgramId = Number(this.tokenService.getActiveProgramId());
-
-    if (!activeProgramId) {
-      return 1;
-    }
-
-    const currentProgramCitations = this.citationEvents.filter((event: any) => {
-      const eventProgramId =
-        event?.program?.id ?? event?.programId ?? event?.program_id ?? null;
-
-      return Number(eventProgramId) === activeProgramId;
-    });
-
-    return currentProgramCitations.length + 1;
+    return getNextCitationNumberForProgram(
+      this.citationEvents,
+      this.tokenService.getActiveProgramId(),
+    );
   }
 
   getSemaphoreClass(value: string | null | undefined): string {
