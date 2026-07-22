@@ -98,7 +98,10 @@ import {
 } from './utils/demand-new-citation.utils';
 import { filterObservationEvents } from './utils/demand-new-observation.utils';
 import { buildAttendancePayload } from './utils/demand-new-attendance.utils';
-import { handleAttendanceSuccess } from './actions/demand-new-attendance.actions';
+import {
+  getAttendanceErrorMessage,
+  handleAttendanceSuccess,
+} from './actions/demand-new-attendance.actions';
 import {
   canManageEpisode,
   getEpisodeProgramRestrictionMessage,
@@ -3205,22 +3208,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
         error: (error: any) => {
           console.error('[DemandNew] Error registrando asistencia:', error);
-
-          if (error?.status === 403) {
-            this.attendanceError =
-              'No tiene permisos para registrar asistencia en el episodio.';
-            return;
-          }
-
-          if (error?.status === 400) {
-            this.attendanceError =
-              error?.error?.message ||
-              'No fue posible registrar la asistencia. Revise los datos ingresados.';
-            return;
-          }
-
-          this.attendanceError =
-            'No fue posible registrar la asistencia. Intente nuevamente.';
+          this.attendanceError = getAttendanceErrorMessage(error);
         },
       });
   }

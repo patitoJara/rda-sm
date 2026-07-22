@@ -36,3 +36,17 @@ export function handleAttendanceSuccess({
     successMessage: 'Asistencia registrada correctamente.',
   };
 }
+export function getAttendanceErrorMessage(error: any): string {
+  if (error?.status === 403) {
+    return 'No tiene permisos para registrar asistencia en el episodio.';
+  }
+
+  if (error?.status === 400) {
+    return (
+      error?.error?.message ||
+      'No fue posible registrar la asistencia. Revise los datos ingresados.'
+    );
+  }
+
+  return 'No fue posible registrar la asistencia. Intente nuevamente.';
+}
