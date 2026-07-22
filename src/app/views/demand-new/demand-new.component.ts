@@ -111,6 +111,7 @@ import {
   handleInterviewSuccess,
 } from './actions/demand-new-interview.actions';
 import {
+  buildCitationContext,
   handleCitationSuccess,
 } from './actions/demand-new-citation.actions';
 import {
@@ -3000,45 +3001,18 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const raw = this.citationForm.getRawValue();
 
-    const eventDate = formatDateForBackend(raw.eventDate);
-    const eventTime = buildEventTime(raw.eventHour, raw.eventPeriod);
+    const citationContext = buildCitationContext({
+      raw,
+      programId,
+      longitudinal: this.longitudinal,
+    });
 
-    if (!eventDate) {
-      this.citationError =
-        'Debe seleccionar una fecha válida para la citación.';
+    if (!citationContext.valid) {
+      this.citationError = citationContext.errorMessage;
       return;
     }
 
-    if (!eventTime) {
-      this.citationError =
-        'Debe ingresar una hora válida y seleccionar AM o PM.';
-      return;
-    }
-
-    const stageId =
-      this.longitudinal?.activeEpisode?.currentStageId ??
-      this.longitudinal?.stages?.find((stage: any) => stage?.current)?.id ??
-      null;
-
-    if (!stageId) {
-      this.citationError =
-        'No fue posible identificar la etapa activa del episodio.';
-      return;
-    }
-
-    const payload = {
-      eventTypeCode: 'CITACION',
-      eventDate,
-      eventTime,
-      stageId,
-      programId: Number(programId),
-      programProfessionalId: raw.programProfessionalId
-        ? Number(raw.programProfessionalId)
-        : null,
-      professionName: toStringOrNull(raw.professionName),
-      comment: toStringOrNull(raw.comment),
-      citationComment: toStringOrNull(raw.citationComment),
-    };
+    const payload = citationContext.payload;
 
     this.isSavingCitation = true;
     this.citationError = null;
