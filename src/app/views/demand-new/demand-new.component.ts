@@ -111,6 +111,9 @@ import {
   handleInterviewSuccess,
 } from './actions/demand-new-interview.actions';
 import {
+  handleCitationSuccess,
+} from './actions/demand-new-citation.actions';
+import {
   canManageEpisode,
   getEpisodeProgramRestrictionMessage,
 } from './utils/demand-new-permission.utils';
@@ -3050,19 +3053,14 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       )
       .subscribe({
         next: (event: any) => {
-          console.log('[DemandNew] Citación registrada:', event);
+          const citationResult = handleCitationSuccess(event);
 
-          this.citationSuccess = 'Citación registrada correctamente.';
+          this.citationSuccess =
+            citationResult.successMessage;
 
-          this.citationForm.reset({
-            eventDate: new Date(),
-            eventHour: '',
-            eventPeriod: 'AM',
-            programProfessionalId: null,
-            professionName: '',
-            comment: '',
-            citationComment: '',
-          });
+          this.citationForm.reset(
+            citationResult.resetValue,
+          );
 
           this.loadEpisodeLongitudinal(episodeId);
         },
