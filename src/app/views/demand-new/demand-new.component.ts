@@ -101,6 +101,7 @@ import { buildAttendancePayload } from './utils/demand-new-attendance.utils';
 import {
   getAttendanceErrorMessage,
   handleAttendanceSuccess,
+  validateAttendanceContext,
 } from './actions/demand-new-attendance.actions';
 import {
   canManageEpisode,
@@ -2075,7 +2076,10 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    const episodeId = getCurrentEpisodeId(this.createdEpisode, this.episodeSummary);
+    const episodeId = getCurrentEpisodeId(
+      this.createdEpisode,
+      this.episodeSummary,
+    );
 
     if (!episodeId) {
       this.interviewError =
@@ -2214,7 +2218,10 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.observationForm.invalid || this.isSavingObservation) return;
 
-    const episodeId = getCurrentEpisodeId(this.createdEpisode, this.episodeSummary);
+    const episodeId = getCurrentEpisodeId(
+      this.createdEpisode,
+      this.episodeSummary,
+    );
 
     if (!episodeId) {
       this.observationError =
@@ -2974,7 +2981,10 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    const episodeId = getCurrentEpisodeId(this.createdEpisode, this.episodeSummary);
+    const episodeId = getCurrentEpisodeId(
+      this.createdEpisode,
+      this.episodeSummary,
+    );
 
     if (!episodeId) {
       this.citationError =
@@ -3088,57 +3098,59 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.ensureCanManageCurrentEpisode()) {
       return;
     }
+
     this.attendanceForm.markAllAsTouched();
 
     if (this.attendanceForm.invalid || this.isSavingAttendance) {
       return;
     }
 
-    const episodeId = getCurrentEpisodeId(this.createdEpisode, this.episodeSummary);
+    const episodeId = getCurrentEpisodeId(
+      this.createdEpisode,
+      this.episodeSummary,
+    );
 
-    if (!episodeId) {
-      this.attendanceError =
-        'No fue posible identificar el episodio para registrar asistencia.';
-      return;
-    }
-
-    const programId = this.tokenService.getActiveProgramId();
-
-    if (!programId) {
-      this.attendanceError =
-        'No fue posible identificar el programa activo para registrar asistencia.';
-      return;
-    }
-
+    const programId = Number(this.tokenService.getActiveProgramId()) || null;
     const raw = this.attendanceForm.getRawValue();
 
     const selectedCitation = this.pendingCitationEvents.find(
       (item: any) => Number(item.id) === Number(raw.citationEventId),
     );
 
-    if (!selectedCitation) {
-      this.attendanceError =
-        'Debe seleccionar una citación válida para registrar asistencia.';
+    const contextValidation = validateAttendanceContext({
+      episodeId,
+      programId,
+      selectedCitation,
+    });
+
+    if (!contextValidation.valid) {
+      this.attendanceError = contextValidation.errorMessage;
       return;
     }
 
+    const {
+      episodeId: validEpisodeId,
+      programId: validProgramId,
+      selectedCitation: validSelectedCitation,
+    } = contextValidation;
+
     const payload = buildAttendancePayload({
       raw,
-      selectedCitation,
-      programId: Number(programId),
+      selectedCitation: validSelectedCitation,
+      programId: validProgramId,
       longitudinal: this.longitudinal,
     });
 
     console.log('[DemandNew] Payload asistencia:', payload);
-    console.log('[DemandNew] Citación seleccionada:', selectedCitation);
-    console.log('[DemandNew] Episodio:', episodeId);
+    console.log('[DemandNew] Citación seleccionada:', validSelectedCitation);
+    console.log('[DemandNew] Episodio:', validEpisodeId);
 
     this.isSavingAttendance = true;
     this.attendanceError = null;
     this.attendanceSuccess = null;
 
     this.demandEpisodeService
-      .createEvent(episodeId, payload)
+      .createEvent(validEpisodeId, payload)
       .pipe(
         finalize(() => {
           this.isSavingAttendance = false;
@@ -3198,7 +3210,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
             },
 
             reloadLongitudinal: () => {
-              this.loadEpisodeLongitudinal(episodeId);
+              this.loadEpisodeLongitudinal(validEpisodeId);
             },
           });
 
@@ -3208,6 +3220,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
         error: (error: any) => {
           console.error('[DemandNew] Error registrando asistencia:', error);
+
           this.attendanceError = getAttendanceErrorMessage(error);
         },
       });
@@ -3464,10 +3477,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get pendingCitationEvents(): any[] {
-    return filterPendingCitationEvents(
-      this.citationEvents,
-      this.episodeEvents,
-    );
+    return filterPendingCitationEvents(this.citationEvents, this.episodeEvents);
   }
 
   get selectedAttendanceCitation(): any | null {
@@ -3560,5 +3570,3 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     return false;
   }
 }
-
-

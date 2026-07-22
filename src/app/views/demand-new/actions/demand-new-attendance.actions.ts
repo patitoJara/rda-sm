@@ -25,7 +25,7 @@ export function handleAttendanceSuccess({
         ),
         event,
       ]
-    : episodeEvents ?? [];
+    : (episodeEvents ?? []);
 
   resetForm();
   closePanel();
@@ -49,4 +49,60 @@ export function getAttendanceErrorMessage(error: any): string {
   }
 
   return 'No fue posible registrar la asistencia. Intente nuevamente.';
+}
+export interface ValidateAttendanceContextParams {
+  episodeId: number | null;
+  programId: number | null;
+  selectedCitation: any;
+}
+
+export type AttendanceContextValidationResult =
+  | {
+      valid: false;
+      errorMessage: string;
+    }
+  | {
+      valid: true;
+      errorMessage: null;
+      episodeId: number;
+      programId: number;
+      selectedCitation: any;
+    };
+
+export function validateAttendanceContext({
+  episodeId,
+  programId,
+  selectedCitation,
+}: ValidateAttendanceContextParams): AttendanceContextValidationResult {
+  if (!episodeId) {
+    return {
+      valid: false,
+      errorMessage:
+        'No fue posible identificar el episodio para registrar asistencia.',
+    };
+  }
+
+  if (!programId) {
+    return {
+      valid: false,
+      errorMessage:
+        'No fue posible identificar el programa activo para registrar asistencia.',
+    };
+  }
+
+  if (!selectedCitation) {
+    return {
+      valid: false,
+      errorMessage:
+        'Debe seleccionar una citación válida para registrar asistencia.',
+    };
+  }
+
+  return {
+    valid: true,
+    errorMessage: null,
+    episodeId,
+    programId,
+    selectedCitation,
+  };
 }
