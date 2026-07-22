@@ -97,6 +97,10 @@ import {
   isTodayCitation as checkTodayCitation,
 } from './utils/demand-new-citation.utils';
 import { filterObservationEvents } from './utils/demand-new-observation.utils';
+import {
+  canManageEpisode,
+  getEpisodeProgramRestrictionMessage,
+} from './utils/demand-new-permission.utils';
 import { normalizeProfessionalForCitation } from './utils/demand-new-professional.utils';
 import {
   buildSecondarySubstances,
@@ -3623,39 +3627,19 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get canManageCurrentEpisode(): boolean {
-    const sessionProgramId = Number(
-      this.activeProgramId ?? this.tokenService.getActiveProgramId(),
-    );
-
-    const episodeProgramId = Number(
-      this.episodeSummary?.currentProgram?.id ??
-        this.episodeSummary?.currentProgramId ??
-        this.longitudinal?.activeEpisode?.currentProgram?.id ??
-        this.longitudinal?.activeEpisode?.currentProgramId ??
-        0,
-    );
-
-    return (
-      sessionProgramId > 0 &&
-      episodeProgramId > 0 &&
-      sessionProgramId === episodeProgramId
+    return canManageEpisode(
+      this.activeProgramId,
+      this.tokenService.getActiveProgramId(),
+      this.episodeSummary,
+      this.longitudinal,
     );
   }
 
   get episodeProgramRestrictionMessage(): string {
-    if (this.canManageCurrentEpisode) {
-      return '';
-    }
-
-    const episodeProgramName =
-      this.episodeSummary?.currentProgram?.name ??
-      this.longitudinal?.activeEpisode?.currentProgram?.name ??
-      'otro programa';
-
-    return (
-      `Modo consulta: este episodio está actualmente bajo la responsabilidad de ` +
-      `${episodeProgramName}. El programa activo de la sesión no puede registrar ` +
-      `ni modificar gestiones.`
+    return getEpisodeProgramRestrictionMessage(
+      this.canManageCurrentEpisode,
+      this.episodeSummary,
+      this.longitudinal,
     );
   }
 
