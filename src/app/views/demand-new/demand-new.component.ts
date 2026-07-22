@@ -108,6 +108,9 @@ import {
   handleObservationSuccess,
 } from './actions/demand-new-observation.actions';
 import {
+  handleInterviewSuccess,
+} from './actions/demand-new-interview.actions';
+import {
   canManageEpisode,
   getEpisodeProgramRestrictionMessage,
 } from './utils/demand-new-permission.utils';
@@ -2130,8 +2133,6 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(finalize(() => (this.isSavingInterview = false)))
       .subscribe({
         next: (event) => {
-          console.log('[DemandNew] Entrevista registrada:', event);
-
           if (event?.id) {
             this.episodeEvents = [
               ...(this.episodeEvents ?? []).filter(
@@ -2141,17 +2142,11 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
             ];
           }
 
-          this.interviewSuccess = 'Entrevista registrada correctamente.';
+          const interviewResult = handleInterviewSuccess(event);
 
-          this.interviewForm.reset({
-            eventDate: new Date(),
-            eventHour: '',
-            eventPeriod: 'AM',
-            comment: '',
-            observation: '',
-            nextAction: '',
-            nextActionDate: null,
-          });
+          this.interviewSuccess = interviewResult.successMessage;
+          this.interviewForm.reset(interviewResult.resetValue);
+
           this.loadEpisodeLongitudinal(episodeId);
         },
         error: (error) => {
