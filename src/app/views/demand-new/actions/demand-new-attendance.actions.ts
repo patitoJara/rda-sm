@@ -106,3 +106,38 @@ export function validateAttendanceContext({
     selectedCitation,
   };
 }
+export function logAttendanceResponse(event: any): void {
+  console.log('[DemandNew] Respuesta asistencia registrada:', event);
+
+  console.table([
+    {
+      id: event?.id,
+
+      eventTypeCode:
+        event?.eventType?.code ??
+        event?.eventTypeCode ??
+        event?.typeCode ??
+        event?.code ??
+        '',
+
+      relatedEventId:
+        event?.relatedEventId ??
+        event?.relatedEvent?.id ??
+        event?.citationEventId ??
+        event?.citation?.id ??
+        '',
+
+      attendanceStatusId:
+        event?.attendanceStatus?.id ??
+        event?.attendanceStatusId ??
+        '',
+
+      attendanceStatusName:
+        event?.attendanceStatus?.name ??
+        event?.attendanceStatusName ??
+        '',
+
+      comment: event?.comment,
+    },
+  ]);
+}

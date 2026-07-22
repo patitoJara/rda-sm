@@ -101,6 +101,7 @@ import { buildAttendancePayload } from './utils/demand-new-attendance.utils';
 import {
   getAttendanceErrorMessage,
   handleAttendanceSuccess,
+  logAttendanceResponse,
   validateAttendanceContext,
 } from './actions/demand-new-attendance.actions';
 import {
@@ -3158,38 +3159,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       )
       .subscribe({
         next: (event: any) => {
-          console.log('[DemandNew] Respuesta asistencia registrada:', event);
-
-          console.table([
-            {
-              id: event?.id,
-
-              eventTypeCode:
-                event?.eventType?.code ??
-                event?.eventTypeCode ??
-                event?.typeCode ??
-                event?.code ??
-                '',
-
-              relatedEventId:
-                event?.relatedEventId ??
-                event?.relatedEvent?.id ??
-                event?.citationEventId ??
-                event?.citation?.id ??
-                '',
-
-              attendanceStatusId:
-                event?.attendanceStatus?.id ?? event?.attendanceStatusId ?? '',
-
-              attendanceStatusName:
-                event?.attendanceStatus?.name ??
-                event?.attendanceStatusName ??
-                '',
-
-              comment: event?.comment,
-            },
-          ]);
-
+          logAttendanceResponse(event);
           const attendanceResult = handleAttendanceSuccess({
             event,
             episodeEvents: this.episodeEvents,
