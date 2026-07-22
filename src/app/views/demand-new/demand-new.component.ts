@@ -97,6 +97,7 @@ import {
   isTodayCitation as checkTodayCitation,
 } from './utils/demand-new-citation.utils';
 import { filterObservationEvents } from './utils/demand-new-observation.utils';
+import { buildAttendancePayload } from './utils/demand-new-attendance.utils';
 import {
   canManageEpisode,
   getEpisodeProgramRestrictionMessage,
@@ -3117,37 +3118,12 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    const payload = {
-      eventTypeCode: 'ASISTENCIA',
-
-      eventDate:
-        toStringOrNull(selectedCitation?.eventDate) ??
-        new Date().toISOString().slice(0, 10),
-
-      eventTime: selectedCitation?.eventTime ?? null,
-
-      stageId:
-        this.longitudinal?.activeEpisode?.currentStageId ??
-        this.longitudinal?.stages?.find((stage: any) => stage?.current)?.id ??
-        null,
-
+    const payload = buildAttendancePayload({
+      raw,
+      selectedCitation,
       programId: Number(programId),
-
-      relatedEventId: raw.citationEventId ? Number(raw.citationEventId) : null,
-
-      attendanceStatusId: raw.attendanceStatusId
-        ? Number(raw.attendanceStatusId)
-        : null,
-
-      programProfessionalId:
-        selectedCitation?.programProfessionalId ??
-        selectedCitation?.programProfessional?.id ??
-        null,
-
-      professionName: toStringOrNull(selectedCitation?.professionName),
-
-      comment: toStringOrNull(raw.comment),
-    };
+      longitudinal: this.longitudinal,
+    });
 
     console.log('[DemandNew] Payload asistencia:', payload);
     console.log('[DemandNew] Citación seleccionada:', selectedCitation);
