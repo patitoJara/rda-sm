@@ -114,6 +114,7 @@ import {
   handleCitationSuccess,
 } from './actions/demand-new-citation.actions';
 import { canManageEpisode } from './utils/demand-new-permission.utils';
+import { resetLoadedDemandView } from './state/demand-new-reset.state';
 import {
   getSemaphoreCssClass,
   getSemaphoreDescriptionText,
@@ -677,6 +678,23 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadActiveProgramContext();
     this.loadDemandCatalogs();
     this.loadActiveProfessionals();
+
+    /*
+     * Si el usuario cambia el RUN mientras existe una ficha cargada,
+     * se limpia la vista anterior sin salir del frontend.
+     */
+    this.searchForm.controls.rut.valueChanges.subscribe((value) => {
+      if (!this.selectedPerson) {
+        return;
+      }
+
+      const enteredRut = formatRut(String(value ?? ''));
+      const loadedRut = formatRut(String(this.selectedPerson.rut ?? ''));
+
+      if (enteredRut !== loadedRut) {
+        resetLoadedDemandView(this);
+      }
+    });
 
     /*
      * Cuando el usuario cambia manualmente el tipo de previsión,
