@@ -96,6 +96,7 @@ import {
   isFutureCitation as checkFutureCitation,
   isTodayCitation as checkTodayCitation,
 } from './utils/demand-new-citation.utils';
+import { filterObservationEvents } from './utils/demand-new-observation.utils';
 import { normalizeProfessionalForCitation } from './utils/demand-new-professional.utils';
 import {
   buildSecondarySubstances,
@@ -3618,9 +3619,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get observationEvents(): any[] {
-    return this.episodeEvents.filter(
-      (event: any) => event?.eventType?.code === 'OBSERVACION',
-    );
+    return filterObservationEvents(this.episodeEvents);
   }
 
   get canManageCurrentEpisode(): boolean {
