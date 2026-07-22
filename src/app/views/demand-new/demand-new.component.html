@@ -58,6 +58,15 @@
     </div>
   </div>
 
+  <!-- TIMBRE DE AGUA -->
+  <div
+    class="demand-page-readonly-watermark"
+    *ngIf="selectedPerson?.id && !canManageCurrentEpisode"
+    aria-hidden="true"
+  >
+    SOLO LECTURA
+  </div>
+
   <!-- BUSCADOR COMPACTO -->
   <mat-card class="search-card" [class.search-card--compact]="selectedPerson">
     <div class="search-card__title">
@@ -141,7 +150,7 @@
     #personEditSection
     tabindex="-1"
     class="person-editor-card"
-    [class.person-editor-card--editing]="selectedPerson?.id"
+    [class.person-editor-card--editing]="!!selectedPerson?.id"
     *ngIf="showCreatePersonForm"
   >
     <!-- ENCABEZADO -->
@@ -170,7 +179,7 @@
     <form [formGroup]="personForm" class="person-editor-form">
       <!-- =====================================================
        IDENTIFICACIÓN
-  ====================================================== -->
+      ====================================================== -->
       <section class="person-editor-section">
         <div class="person-editor-section__header">
           <div class="person-editor-section__icon">
@@ -338,7 +347,7 @@
 
       <!-- =====================================================
        PREVISIÓN DE SALUD
-  ====================================================== -->
+      ====================================================== -->
       <section class="person-editor-section">
         <div class="person-editor-section__header">
           <div class="person-editor-section__icon">
@@ -363,6 +372,10 @@
                 {{ item.name }}
               </mat-option>
             </mat-select>
+
+            <mat-error *ngIf="personForm.controls.intPrev.hasError('required')">
+              Debe seleccionar el tipo de previsión.
+            </mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
@@ -381,13 +394,19 @@
             <mat-hint *ngIf="!personForm.get('intPrev')?.value">
               Primero seleccione el tipo de previsión
             </mat-hint>
+
+            <mat-error
+              *ngIf="personForm.controls.convPrev.hasError('required')"
+            >
+              Debe seleccionar una previsión.
+            </mat-error>
           </mat-form-field>
         </div>
       </section>
 
       <!-- =====================================================
        REFERENTE DE CONTACTO
-  ====================================================== -->
+      ====================================================== -->
       <section class="person-editor-section">
         <div class="person-editor-section__header">
           <div class="person-editor-section__icon">
@@ -466,60 +485,49 @@
         <span>
           {{
             selectedPerson?.id
-              ? "Los cambios actualizarán los datos existentes de la persona."
-              : "Al guardar, la persona será registrada en el backend real de Demanda."
+              ? "Los cambios actualizarán los datos existentes de la persona y su referente de contacto."
+              : "Al guardar, la persona y su referente serán registrados en el backend."
           }}
         </span>
       </div>
 
-      <!-- ACCIONES -->
-      <div class="person-editor-actions">
-        <div class="empty-banner">
-          <mat-icon>info</mat-icon>
+      <div class="person-editor-actions__buttons">
+        <button
+          mat-stroked-button
+          type="button"
+          class="secondary-btn person-editor-cancel-btn"
+          [disabled]="isSavingPerson"
+          (click)="closePersonForm()"
+        >
+          <mat-icon>close</mat-icon>
+          <span>Cerrar sin guardar</span>
+        </button>
+
+        <button
+          mat-flat-button
+          type="button"
+          class="primary-btn person-editor-save-btn"
+          [disabled]="
+            personForm.invalid ||
+            isSavingPerson ||
+            (!!selectedPerson?.id && !canManageCurrentEpisode)
+          "
+          (click)="savePerson()"
+        >
+          <mat-icon>
+            {{ selectedPerson?.id ? "published_with_changes" : "save" }}
+          </mat-icon>
 
           <span>
             {{
-              selectedPerson?.id
-                ? "Los cambios actualizarán los datos existentes de la persona."
-                : "Al guardar, la persona será registrada en el backend real de Demanda."
+              isSavingPerson
+                ? "Guardando..."
+                : selectedPerson?.id
+                  ? "Actualizar persona"
+                  : "Guardar persona"
             }}
           </span>
-        </div>
-
-        <div class="person-editor-actions__buttons">
-          <button
-            mat-stroked-button
-            type="button"
-            class="secondary-btn person-editor-cancel-btn"
-            [disabled]="isSavingPerson"
-            (click)="closePersonForm()"
-          >
-            <mat-icon>close</mat-icon>
-            <span>Cerrar sin guardar</span>
-          </button>
-
-          <button
-            mat-flat-button
-            type="button"
-            class="primary-btn person-editor-save-btn"
-            [disabled]="personForm.invalid || isSavingPerson"
-            (click)="savePerson()"
-          >
-            <mat-icon>
-              {{ selectedPerson?.id ? "published_with_changes" : "save" }}
-            </mat-icon>
-
-            <span>
-              {{
-                isSavingPerson
-                  ? "Guardando..."
-                  : selectedPerson?.id
-                    ? "Actualizar persona"
-                    : "Guardar persona"
-              }}
-            </span>
-          </button>
-        </div>
+        </button>
       </div>
     </div>
   </mat-card>
@@ -529,14 +537,38 @@
     id="demandante"
     #summarySection
     class="longitudinal-summary-card longitudinal-anchor"
+    [class.longitudinal-summary-card--readonly]="
+      !!selectedPerson.id && !canManageCurrentEpisode
+    "
     [class.longitudinal-anchor--highlighted]="
       highlightedSummarySection === 'demandante'
     "
     *ngIf="selectedPerson"
   >
+    <!-- AVISO GENERAL DE SOLO LECTURA -->
+    <div
+      class="longitudinal-readonly-banner"
+      *ngIf="selectedPerson.id && !canManageCurrentEpisode"
+    >
+      <mat-icon>lock</mat-icon>
+
+      <div>
+        <strong>Ficha disponible en modo solo lectura</strong>
+
+        <span>
+          La demanda es gestionada por
+          {{
+            episodeSummary?.currentProgram?.name ||
+              createdEpisode?.currentProgram?.name ||
+              "otro programa"
+          }}.
+        </span>
+      </div>
+    </div>
+
     <!-- =====================================================
-       ENCABEZADO DEL DEMANDANTE
-  ====================================================== -->
+    ENCABEZADO DEL DEMANDANTE
+    ====================================================== -->
     <div class="summary-person-header">
       <div class="avatar-placeholder">
         <mat-icon>person</mat-icon>
@@ -573,9 +605,11 @@
 
         <strong>
           {{
-            episodeSummary?.stateCode ||
-              createdEpisode?.stateCode ||
-              "Sin estado"
+            episodeSummary?.state?.name ||
+              createdEpisode?.state?.name ||
+              formatStateLabel(
+                episodeSummary?.stateCode || createdEpisode?.stateCode
+              )
           }}
         </strong>
       </div>
@@ -672,10 +706,17 @@
         <div class="demandant-full-details__toolbar-text">
           <span class="detail-mode-label"> Vista completa del postulante </span>
 
-          <p>Revise la información antes de decidir si necesita modificarla.</p>
+          <p>
+            {{
+              canManageCurrentEpisode
+                ? "Revise la información antes de decidir si necesita modificarla."
+                : "Toda la información se encuentra disponible exclusivamente para consulta."
+            }}
+          </p>
         </div>
 
         <button
+          *ngIf="canManageCurrentEpisode"
           mat-flat-button
           type="button"
           class="edit-person-btn"
@@ -799,6 +840,55 @@
         </div>
       </section>
 
+      <!-- REFERENTE DE CONTACTO -->
+      <section class="demandant-detail-group">
+        <div class="demandant-detail-group__header">
+          <mat-icon>contact_emergency</mat-icon>
+
+          <div>
+            <h3>Referente de contacto</h3>
+            <p>
+              Persona de referencia para contactar cuando no sea posible ubicar
+              directamente al demandante.
+            </p>
+          </div>
+        </div>
+
+        <div class="demandant-detail-grid">
+          <div class="demandant-detail-item">
+            <span>Nombre del contacto</span>
+
+            <strong>
+              {{ selectedContact?.name || "No informado" }}
+            </strong>
+          </div>
+
+          <div class="demandant-detail-item">
+            <span>Parentesco o relación</span>
+
+            <strong>
+              {{ selectedContact?.description || "No informado" }}
+            </strong>
+          </div>
+
+          <div class="demandant-detail-item">
+            <span>Teléfono del contacto</span>
+
+            <strong>
+              {{ selectedContact?.cellphone || "No informado" }}
+            </strong>
+          </div>
+
+          <div class="demandant-detail-item">
+            <span>Correo del contacto</span>
+
+            <strong>
+              {{ selectedContact?.email || "No informado" }}
+            </strong>
+          </div>
+        </div>
+      </section>
+
       <!-- PREVISIÓN -->
       <section class="demandant-detail-group">
         <div class="demandant-detail-group__header">
@@ -860,7 +950,7 @@
       </div>
 
       <div class="indicator-box">
-        <span>Programa actual</span>
+        <span>Programa responsable de la demanda</span>
 
         <strong>
           {{
@@ -978,7 +1068,7 @@
           *ngFor="let action of operativeActions"
           type="button"
           class="dock-action-button"
-          [disabled]="!action.enabled"
+          [disabled]="!action.enabled || !canManageCurrentEpisode"
           (click)="openActionPanel(action.panel)"
         >
           <mat-icon>{{ action.icon }}</mat-icon>
@@ -1766,7 +1856,7 @@
       </div>
 
       <div class="summary-row">
-        <span>Programa actual</span>
+        <span>Programa responsable de la demanda</span>
         <strong>{{
           episodeSummary?.currentProgram?.name ||
             createdEpisode?.currentProgram?.name ||
@@ -1777,9 +1867,15 @@
 
       <div class="summary-row">
         <span>Estado</span>
-        <strong>{{
-          episodeSummary?.stateCode || createdEpisode?.stateCode || "Sin estado"
-        }}</strong>
+        <strong>
+          {{
+            episodeSummary?.state?.name ||
+              createdEpisode?.state?.name ||
+              formatStateLabel(
+                episodeSummary?.stateCode || createdEpisode?.stateCode
+              )
+          }}
+        </strong>
       </div>
 
       <div class="summary-row">

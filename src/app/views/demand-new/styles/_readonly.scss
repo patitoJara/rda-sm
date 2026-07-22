@@ -1,0 +1,34 @@
+/* =========================================================
+   MODO SOLO LECTURA GENERAL
+========================================================= */
+
+.demand-page-readonly-watermark {
+  position: fixed;
+  top: 55%;
+  left: 58%;
+  z-index: 35;
+
+  pointer-events: none;
+  user-select: none;
+
+  color: #b7791f;
+
+  font-size: clamp(68px, 8vw, 124px);
+  font-weight: 950;
+  letter-spacing: 10px;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  opacity: 0.075;
+
+  transform: translate(-50%, -50%) rotate(-17deg);
+}
+
+@media (max-width: 900px) {
+  .demand-page-readonly-watermark {
+    left: 50%;
+    font-size: clamp(48px, 10vw, 80px);
+    letter-spacing: 6px;
+  }
+}

@@ -5,5 +5,5 @@ export interface ContactCreateDto {
   description?: string;
   email?: string;
   cellphone?: string;
-  postulant: { id: number };
+  postulantId: number;
 }

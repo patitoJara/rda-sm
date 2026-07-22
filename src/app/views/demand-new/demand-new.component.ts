@@ -44,6 +44,9 @@ import { PreloadCatalogsService } from '@app/services/demand/preload-catalogs.se
 import { PostulantService } from '@app/services/postulant.service';
 import { ProgramProfessionalService } from '@app/services/program-professional.service';
 import { TokenService } from '@app/services/token.service';
+import { ContactService } from '@app/services/contact.service';
+import { Contact } from '@app/models/contact';
+import { ContactCreateDto } from '@app/models/contact-create.dto';
 
 import {
   DemandCatalogItem,
@@ -104,20 +107,13 @@ import {
   logAttendanceResponse,
   validateAttendanceContext,
 } from './actions/demand-new-attendance.actions';
-import {
-  handleObservationSuccess,
-} from './actions/demand-new-observation.actions';
-import {
-  handleInterviewSuccess,
-} from './actions/demand-new-interview.actions';
+import { handleObservationSuccess } from './actions/demand-new-observation.actions';
+import { handleInterviewSuccess } from './actions/demand-new-interview.actions';
 import {
   buildCitationContext,
   handleCitationSuccess,
 } from './actions/demand-new-citation.actions';
-import {
-  canManageEpisode,
-  getEpisodeProgramRestrictionMessage,
-} from './utils/demand-new-permission.utils';
+import { canManageEpisode } from './utils/demand-new-permission.utils';
 import {
   getSemaphoreCssClass,
   getSemaphoreDescriptionText,
@@ -165,6 +161,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly programProfessionalService = inject(
     ProgramProfessionalService,
   );
+  private readonly contactService = inject(ContactService);
 
   demandCatalogs: DemandCatalogsDTO | null = null;
 
@@ -333,12 +330,19 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       validators: [Validators.required],
     }),
 
-    intPrev: new FormControl<number | null>(null),
-
-    convPrev: new FormControl<number | null>({
-      value: null,
-      disabled: true,
+    intPrev: new FormControl<number | null>(null, {
+      validators: [Validators.required],
     }),
+
+    convPrev: new FormControl<number | null>(
+      {
+        value: null,
+        disabled: true,
+      },
+      {
+        validators: [Validators.required],
+      },
+    ),
 
     contactName: [''],
     contactDescription: [''],
@@ -385,6 +389,8 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   searched = false;
   personNotFound = false;
   selectedPerson: Postulant | null = null;
+  selectedContact: Contact | null = null;
+
   searchError: string | null = null;
   personSaveError: string | null = null;
   showCreatePersonForm = false;
@@ -1151,6 +1157,12 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
+    if (!this.canManageCurrentEpisode) {
+      this.personSaveError = null;
+      this.showCreatePersonForm = false;
+      return;
+    }
+
     this.personSaveError = null;
 
     this.showDemandantDetails = false;
@@ -1231,10 +1243,14 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isSearching = true;
     this.searched = true;
     this.personNotFound = false;
+
     this.selectedPerson = null;
+    this.selectedContact = null;
+
     this.searchError = null;
     this.personSaveError = null;
     this.longitudinalError = null;
+
     this.showCreatePersonForm = false;
     this.showCreateEpisodeForm = false;
 
@@ -1248,6 +1264,18 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     this.episodeEvents = [];
     this.createdEpisode = null;
     this.episodeSummary = null;
+
+    this.personForm.patchValue(
+      {
+        contactName: '',
+        contactDescription: '',
+        contactCellphone: '',
+        contactEmail: '',
+      },
+      {
+        emitEvent: false,
+      },
+    );
 
     this.episodeForm.reset({
       episodeTypeId: null,
@@ -1270,6 +1298,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       primarySubstanceId: null,
       secondarySubstances: [],
     });
+
     this.secondarySubstanceMap = {};
 
     console.log('[DemandNew] RUN búsqueda longitudinal:', rut);
@@ -1300,6 +1329,89 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isSearching = false;
         this.searchError =
           'No fue posible consultar la ficha longitudinal. Intente nuevamente o contacte a soporte.';
+      },
+    });
+  }
+
+  private loadContactByPostulant(postulantId: number): void {
+    if (!Number.isFinite(postulantId) || postulantId <= 0) {
+      this.selectedContact = null;
+
+      this.personForm.patchValue(
+        {
+          contactName: '',
+          contactDescription: '',
+          contactCellphone: '',
+          contactEmail: '',
+        },
+        {
+          emitEvent: false,
+        },
+      );
+
+      return;
+    }
+
+    this.contactService.getByPostulant(postulantId).subscribe({
+      next: (contact: Contact) => {
+        console.log('[DemandNew] Contacto del postulante recuperado:', contact);
+
+        this.selectedContact = contact;
+
+        this.personForm.patchValue(
+          {
+            contactName: contact?.name ?? '',
+            contactDescription: contact?.description ?? '',
+            contactCellphone: contact?.cellphone ?? '',
+            contactEmail: contact?.email ?? '',
+          },
+          {
+            emitEvent: false,
+          },
+        );
+      },
+
+      error: (error: HttpErrorResponse) => {
+        if (error.status === 404) {
+          console.log(
+            '[DemandNew] El postulante no posee un contacto registrado.',
+          );
+
+          this.selectedContact = null;
+
+          this.personForm.patchValue(
+            {
+              contactName: '',
+              contactDescription: '',
+              contactCellphone: '',
+              contactEmail: '',
+            },
+            {
+              emitEvent: false,
+            },
+          );
+
+          return;
+        }
+
+        console.error(
+          '[DemandNew] Error recuperando contacto del postulante:',
+          error,
+        );
+
+        this.selectedContact = null;
+
+        this.personForm.patchValue(
+          {
+            contactName: '',
+            contactDescription: '',
+            contactCellphone: '',
+            contactEmail: '',
+          },
+          {
+            emitEvent: false,
+          },
+        );
       },
     });
   }
@@ -1728,12 +1840,28 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   savePerson(): void {
+    if (this.selectedPerson?.id && !this.canManageCurrentEpisode) {
+      this.personSaveError =
+        'La ficha está disponible únicamente en modo consulta.';
+      return;
+    }
+
     if (this.personForm.invalid || this.isSavingPerson) {
       this.personForm.markAllAsTouched();
       return;
     }
 
     const raw = this.personForm.getRawValue();
+
+    if (!raw.intPrev) {
+      this.personSaveError = 'Debe seleccionar el tipo de previsión.';
+      return;
+    }
+
+    if (!raw.convPrev) {
+      this.personSaveError = 'Debe seleccionar una previsión.';
+      return;
+    }
 
     const userId = Number(this.tokenService.getUserId());
 
@@ -1750,6 +1878,21 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (!raw.commune) {
       this.personSaveError = 'Debe seleccionar una comuna.';
+      return;
+    }
+
+    if (!raw.firstName?.trim()) {
+      this.personSaveError = 'El primer nombre es obligatorio.';
+      return;
+    }
+
+    if (!raw.firstLastName?.trim()) {
+      this.personSaveError = 'El primer apellido es obligatorio.';
+      return;
+    }
+
+    if (!raw.birthDate) {
+      this.personSaveError = 'La fecha de nacimiento es obligatoria.';
       return;
     }
 
@@ -1817,6 +1960,19 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       };
     }
 
+    const contactPayload: ContactCreateDto = {
+      name: raw.contactName?.trim() ?? '',
+      description: toStringOrNull(raw.contactDescription) ?? undefined,
+      cellphone: toStringOrNull(raw.contactCellphone) ?? undefined,
+      email: toStringOrNull(raw.contactEmail) ?? undefined,
+
+      /*
+       * Se asignará el ID definitivo después de guardar
+       * o actualizar el postulante.
+       */
+      postulantId: 0,
+    };
+
     const existingPersonId = Number(this.selectedPerson?.id);
 
     const saveRequest$ =
@@ -1844,6 +2000,54 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
                 ),
             );
           }
+
+          const completeContactPayload: ContactCreateDto = {
+            ...contactPayload,
+            postulantId: savedPersonId,
+          };
+
+          const hasContactData = Boolean(
+            completeContactPayload.name ||
+            completeContactPayload.description ||
+            completeContactPayload.cellphone ||
+            completeContactPayload.email,
+          );
+
+          const existingContactId = Number(this.selectedContact?.id);
+
+          if (Number.isFinite(existingContactId) && existingContactId > 0) {
+            return this.contactService
+              .update(existingContactId, completeContactPayload)
+              .pipe(
+                switchMap((savedContact: Contact) => {
+                  console.log(
+                    '[DemandNew] Contacto actualizado correctamente:',
+                    savedContact,
+                  );
+
+                  this.selectedContact = savedContact;
+
+                  return this.postulantService.getById(savedPersonId);
+                }),
+              );
+          }
+
+          if (hasContactData) {
+            return this.contactService.createDto(completeContactPayload).pipe(
+              switchMap((savedContact: Contact) => {
+                console.log(
+                  '[DemandNew] Contacto creado correctamente:',
+                  savedContact,
+                );
+
+                this.selectedContact = savedContact;
+
+                return this.postulantService.getById(savedPersonId);
+              }),
+            );
+          }
+
+          this.selectedContact = null;
 
           return this.postulantService.getById(savedPersonId);
         }),
@@ -2038,7 +2242,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
         error: (error) => {
           console.error(
-            '[DemandNew] Error guardando o recuperando persona:',
+            '[DemandNew] Error guardando persona o referente de contacto:',
             error,
           );
 
@@ -2072,7 +2276,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
           }
 
           this.personSaveError =
-            'No fue posible guardar o recuperar todos los datos de la persona.';
+            'No fue posible guardar todos los datos de la persona y su referente de contacto.';
         },
       });
   }
@@ -2196,10 +2400,10 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       convPrev: person.convPrev?.id ?? null,
 
       // Todavía no están disponibles directamente en Postulant.
-      contactName: '',
-      contactDescription: '',
-      contactCellphone: '',
-      contactEmail: '',
+      contactName: this.selectedContact?.name ?? '',
+      contactDescription: this.selectedContact?.description ?? '',
+      contactCellphone: this.selectedContact?.cellphone ?? '',
+      contactEmail: this.selectedContact?.email ?? '',
     });
 
     const intPrevId = person.convPrev?.intPrev?.id;
@@ -2506,6 +2710,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
          * Allí secondName se obtiene desde person.lastName.
          */
         this.patchPersonForm(completePerson);
+        this.loadContactByPostulant(postulantId);
 
         this.personForm.markAsPristine();
         this.personForm.markAsUntouched();
@@ -2583,6 +2788,7 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
         };
 
         this.patchPersonForm(fallbackPerson);
+        this.loadContactByPostulant(postulantId);
 
         this.searchError =
           'La ficha longitudinal fue cargada, pero no fue posible recuperar todos los datos personales.';
@@ -3029,12 +3235,9 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
         next: (event: any) => {
           const citationResult = handleCitationSuccess(event);
 
-          this.citationSuccess =
-            citationResult.successMessage;
+          this.citationSuccess = citationResult.successMessage;
 
-          this.citationForm.reset(
-            citationResult.resetValue,
-          );
+          this.citationForm.reset(citationResult.resetValue);
 
           this.loadEpisodeLongitudinal(episodeId);
         },
@@ -3473,6 +3676,30 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  formatStateLabel(value: string | null | undefined): string {
+    if (!value) {
+      return 'Sin estado';
+    }
+
+    const normalized = String(value).trim().toUpperCase();
+
+    const labels: Record<string, string> = {
+      EN_TRAMITE: 'En trámite',
+      ACTIVO: 'Activo',
+      CERRADO: 'Cerrado',
+      FINALIZADO: 'Finalizado',
+      PENDIENTE: 'Pendiente',
+    };
+
+    return (
+      labels[normalized] ??
+      normalized
+        .toLowerCase()
+        .replace(/_/g, ' ')
+        .replace(/^\w/, (letter) => letter.toUpperCase())
+    );
+  }
+
   get observationEvents(): any[] {
     return filterObservationEvents(this.episodeEvents);
   }
@@ -3486,20 +3713,10 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  get episodeProgramRestrictionMessage(): string {
-    return getEpisodeProgramRestrictionMessage(
-      this.canManageCurrentEpisode,
-      this.episodeSummary,
-      this.longitudinal,
-    );
-  }
-
   private ensureCanManageCurrentEpisode(): boolean {
     if (this.canManageCurrentEpisode) {
       return true;
     }
-
-    this.longitudinalError = this.episodeProgramRestrictionMessage;
 
     this.activeActionPanel = null;
 

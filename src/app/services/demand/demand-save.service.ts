@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { Observable, forkJoin, from, of } from 'rxjs';
 import { switchMap, catchError, map } from 'rxjs/operators';
 
@@ -27,11 +27,11 @@ export class DemandSaveService {
 
   /**
    * ============================================================
-   * 🔵 SAVE DEMAND (full pipeline)
+   * ðŸ”µ SAVE DEMAND (full pipeline)
    * ============================================================
    */
   saveDemand(form: any): Observable<any> {
-    console.log('%c🚀 Iniciando SAVE DEMAND', 'color:#4caf50; font-size:16px');
+    console.log('%cðŸš€ Iniciando SAVE DEMAND', 'color:#4caf50; font-size:16px');
 
     //const userId = this.tokenService.getUserId();
     const userId = this.tokenService.getUserProfile()?.id ?? null;
@@ -40,29 +40,29 @@ export class DemandSaveService {
     const programObj = this.getActiveProgramObj();
 
     if (!userId || !programObj?.id) {
-      return of({ error: '❌ Sesión inválida o programa no encontrado.' });
+      return of({ error: 'âŒ SesiÃ³n invÃ¡lida o programa no encontrado.' });
     }
 
-    // Transformación de campos
+    // TransformaciÃ³n de campos
     const payloads = this.buildPayloads(form, userId, programObj.id);
 
     // ============================================================
-    // 🟦 PASO 1 → CREAR POSTULANTE
+    // ðŸŸ¦ PASO 1 â†’ CREAR POSTULANTE
     // ============================================================
     return this.postulantService.create(payloads.postulant).pipe(
       switchMap((postulant: any) => {
-        console.log('🟢 Postulante creado:', postulant);
+        console.log('ðŸŸ¢ Postulante creado:', postulant);
 
         // Reemplazar ID real
-        payloads.contact.postulant.id = postulant.id;
+        payloads.contact.postulantId = postulant.id;
         payloads.register.postulant.id = postulant.id;
 
         // ============================================================
-        // PASO 2 → CREAR CONTACTO (opcional)
+        // PASO 2 â†’ CREAR CONTACTO (opcional)
         // ============================================================
         return this.contactService.createDto(payloads.contact).pipe(
           catchError(() => {
-            console.warn('⚠ No se pudo crear contacto (no bloqueante)');
+            console.warn('âš  No se pudo crear contacto (no bloqueante)');
             return of(null);
           }),
           map((contact) => ({ postulant, contact }))
@@ -70,7 +70,7 @@ export class DemandSaveService {
       }),
 
       // ============================================================
-      // PASO 3 → CREAR REGISTER
+      // PASO 3 â†’ CREAR REGISTER
       // ============================================================
       switchMap(({ postulant }) => {
         return this.registerService.create(payloads.register).pipe(
@@ -79,10 +79,10 @@ export class DemandSaveService {
       }),
 
       switchMap(({ postulant, register }) => {
-        console.log('🟢 Register creado:', register);
+        console.log('ðŸŸ¢ Register creado:', register);
 
         // ============================================================
-        // PASO 4 → MOVIMIENTOS (si existen)
+        // PASO 4 â†’ MOVIMIENTOS (si existen)
         // ============================================================
         const movementsCalls = payloads.movements.map((mv) => {
           mv.register = this.packRegister(register);
@@ -90,7 +90,7 @@ export class DemandSaveService {
         });
 
         // ============================================================
-        // PASO 5 → SUSTANCIAS
+        // PASO 5 â†’ SUSTANCIAS
         // ============================================================
         const substancesCalls = payloads.substances.map((sb) => {
           sb.register = this.packRegister(register);
@@ -119,14 +119,14 @@ export class DemandSaveService {
       }),
 
       catchError((err) => {
-        console.error('❌ Error en SAVE DEMAND:', err);
+        console.error('âŒ Error en SAVE DEMAND:', err);
         return of({ error: err });
       })
     );
   }
 
   // ================================================================
-  // 🟩 Construcción de Payloads
+  // ðŸŸ© ConstrucciÃ³n de Payloads
   // ================================================================
   private buildPayloads(form: any, userId: number, programId: number) {
 
@@ -161,16 +161,7 @@ export class DemandSaveService {
       description: form.value.description,
       email: form.value.emailPostulant,
       cellphone: form.value.cellphone,
-      postulant: {
-        id: 0, // se reemplaza
-        user: { id: userId },
-        commune: { id: form.value.commune },
-        sex: { id: form.value.sex },
-        convPrev: {
-          id: form.value.convPrev,
-          intPrev: { id: form.value.intPrev },
-        },
-      },
+      postulantId: 0,
     };
 
     // ----------------------------
@@ -202,7 +193,7 @@ export class DemandSaveService {
     };
 
     // ----------------------------
-    // MOVEMENT PAYLOADS (1…4)
+    // MOVEMENT PAYLOADS (1â€¦4)
     // ----------------------------
     
     const movements: any[] = [];
@@ -250,7 +241,7 @@ export class DemandSaveService {
   }
 
   // ================================================================
-  // 🟧 Empaquetar Register completo
+  // ðŸŸ§ Empaquetar Register completo
   // ================================================================
   private packRegister(register: any) {
     return {
@@ -270,7 +261,7 @@ export class DemandSaveService {
   }
 
   // ================================================================
-  // 🟦 Programa activo
+  // ðŸŸ¦ Programa activo
   // ================================================================
   private getActiveProgramObj(): any {
     const active = this.tokenService.getActiveProgram();
@@ -280,3 +271,4 @@ export class DemandSaveService {
     return programs.find((p: any) => p.name === active) || null;
   }
 }
+

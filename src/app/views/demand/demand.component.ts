@@ -1,5 +1,5 @@
-/********************************************************************
- * 🟦 DEMAND COMPONENT — VERSION REFACTORIZADA
+﻿/********************************************************************
+ * ðŸŸ¦ DEMAND COMPONENT â€” VERSION REFACTORIZADA
  * Usa los 7 servicios: preload, rutSearch, save, previousRecords,
  * edit, utils y token.
  ********************************************************************/
@@ -108,8 +108,8 @@ const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 export class DemandComponent implements OnInit, PendingChangesComponent {
   private loader = inject(LoaderService);
 
-  canClearForm = false; // 🧹 botón limpiar
-  canEditPostulant = false; // ✏️ botón editar
+  canClearForm = false; // ðŸ§¹ botÃ³n limpiar
+  canEditPostulant = false; // âœï¸ botÃ³n editar
 
   currentAction: 'NEW' | 'EDIT' | 'CLONE_SAME_PROGRAM' | 'CLONE_OTHER_PROGRAM' =
     'NEW';
@@ -119,7 +119,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   private panelCerradoManualmente = false;
   uiReady = false;
 
-  actionLabel: string = 'Gestión de Demanda';
+  actionLabel: string = 'GestiÃ³n de Demanda';
 
   mostrarBloqueoPostulante = false;
   mostrarBloqueoReferente = false;
@@ -131,14 +131,14 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   secondaryMap: { [id: number]: number } = {};
 
   // =========================
-  // 🔐 FLAGS DE EDICIÓN
+  // ðŸ” FLAGS DE EDICIÃ“N
   // =========================
 
   saving = false;
   numerosTratamiento: number[] = Array.from({ length: 11 }, (_, i) => i);
 
   // =========================
-  // 🧩 FORMULARIO
+  // ðŸ§© FORMULARIO
   // =========================
 
   form!: FormGroup;
@@ -159,7 +159,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   isSearchingRut = false;
 
   // =========================
-  // CATÁLOGOS
+  // CATÃLOGOS
   // =========================
 
   communes: any[] = [];
@@ -182,13 +182,13 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   mostrarPanelFichas = false;
 
   // =========================
-  // SESIÓN
+  // SESIÃ“N
   // =========================
 
   fullName = '';
   activeProgram: string | null = null;
 
-  observacionesDraft: string[] = []; // múltiples observaciones UI
+  observacionesDraft: string[] = []; // mÃºltiples observaciones UI
   observacionEnEdicion: string | null = null;
 
   edad: number | null = null;
@@ -226,14 +226,14 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     'actions',
   ];
   // ============================================================
-  // 🟦 INICIO
+  // ðŸŸ¦ INICIO
   // ============================================================
 
   ngOnInit(): void {
     this.initForm();
     this.loadSessionContext();
 
-    // 🔹 Suscripciones reactivas (una sola vez)
+    // ðŸ”¹ Suscripciones reactivas (una sola vez)
     this.form
       .get('result')
       ?.valueChanges.pipe(distinctUntilChanged())
@@ -252,12 +252,12 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
         this.edad = this.utils.getEdadDesdeFecha(value);
       });
 
-    // 🔹 Carga de catálogos
+    // ðŸ”¹ Carga de catÃ¡logos
     this.loadCatalogs().then(() => {
       queueMicrotask(() => {
         this.nuevaDemanda(); // RESET REAL
 
-        // Aplicar reglas una vez después de cargar todo
+        // Aplicar reglas una vez despuÃ©s de cargar todo
         this.aplicarReglaIngresoTratamiento();
         this.onFechaSolicitudChange(this.form.get('fechaSolicitud')?.value);
         this.edad = this.utils.getEdadDesdeFecha(
@@ -273,12 +273,12 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   /* ==================================================
-   🔒 CONTROL DE CAMBIOS SIN GUARDAR
+   ðŸ”’ CONTROL DE CAMBIOS SIN GUARDAR
 ================================================== */
   hasPendingChanges(): boolean {
     if (this.saving) return false;
 
-    // Si el botón guardar está deshabilitado,
+    // Si el botÃ³n guardar estÃ¡ deshabilitado,
     // no hay cambios relevantes
     if (this.isSaveDisabled()) return false;
 
@@ -294,7 +294,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   private setupReactiveListeners(): void {
-    // 🔥 Resultado → aplicar regla clínica
+    // ðŸ”¥ Resultado â†’ aplicar regla clÃ­nica
     this.form
       .get('result')
       ?.valueChanges.pipe(distinctUntilChanged())
@@ -324,20 +324,20 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   private loadSessionContext(): void {
-    // 👤 Usuario
+    // ðŸ‘¤ Usuario
     const profile = this.tokenService.getUserProfile();
     this.fullName = profile?.fullName?.trim() ?? '';
 
-    // 🏥 Programa activo (ES STRING)
+    // ðŸ¥ Programa activo (ES STRING)
     this.activeProgram = this.tokenService.getActiveProgram();
 
-    console.log('🧪 CONTEXTO SESIÓN');
+    console.log('ðŸ§ª CONTEXTO SESIÃ“N');
     console.log('Usuario:', this.fullName);
     console.log('Programa:', this.activeProgram);
   }
 
   // ============================================================
-  // 🟦 FORMULARIO
+  // ðŸŸ¦ FORMULARIO
   // ============================================================
   initForm(): void {
     const now = new Date();
@@ -363,7 +363,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       emailPostulant: ['', [Validators.email, Validators.pattern(EMAIL_REGEX)]],
       contactDescription: [''],
 
-      // Previsión
+      // PrevisiÃ³n
       intPrev: [null, Validators.required],
       convPrev: [{ value: null, disabled: true }, Validators.required],
 
@@ -384,7 +384,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       fechaSolicitud: [null, Validators.required],
 
       // ===============================
-      // 🟦 NUEVA ATENCIÓN (FORM AUXILIAR)
+      // ðŸŸ¦ NUEVA ATENCIÃ“N (FORM AUXILIAR)
       // ===============================
       newDate: [now],
       newHour: [currentTime],
@@ -395,7 +395,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   // ============================================================
-  // 📦 CARGAR CATÁLOGOS
+  // ðŸ“¦ CARGAR CATÃLOGOS
   // ============================================================
   loadCatalogs(): Promise<void> {
     this.isLoading = true;
@@ -420,7 +420,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
           this.results = data.results;
           this.states = data.state;
 
-          // 🔑 BUSCAR VALORES POR DEFECTO
+          // ðŸ”‘ BUSCAR VALORES POR DEFECTO
           const estadoEnTramite = this.states.find(
             (s) => s.name === 'EN TRAMITE',
           );
@@ -453,9 +453,9 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       panelClass: 'dialog-ficha-clinica',
       disableClose: true,
       data: {
-        title: 'Eliminar citación',
+        title: 'Eliminar citaciÃ³n',
         message:
-          'Esta citación aún no ha sido guardada y se perderá definitivamente.',
+          'Esta citaciÃ³n aÃºn no ha sido guardada y se perderÃ¡ definitivamente.',
         icon: 'warning',
         color: 'warn',
         confirmText: 'Eliminar',
@@ -479,7 +479,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       data: {
         professions: this.professions,
         states: this.states,
-        citacion, // 👈 perfecto
+        citacion, // ðŸ‘ˆ perfecto
       },
     });
 
@@ -505,7 +505,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       data: {
         professions: this.professions,
         states: this.states,
-        citacion: movement, // 🔥 IMPORTANTE
+        citacion: movement, // ðŸ”¥ IMPORTANTE
       },
     });
 
@@ -532,9 +532,9 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       panelClass: 'dialog-ficha-clinica',
       disableClose: true,
       data: {
-        title: 'Eliminar citación',
+        title: 'Eliminar citaciÃ³n',
         message:
-          'Esta citación aún no ha sido guardada y se perderá definitivamente.',
+          'Esta citaciÃ³n aÃºn no ha sido guardada y se perderÃ¡ definitivamente.',
         icon: 'warning',
         color: 'warn',
         confirmText: 'Eliminar',
@@ -563,15 +563,15 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
         width: '420px',
         disableClose: true,
         data: {
-          title: 'Nueva Citación',
+          title: 'Nueva CitaciÃ³n',
           message:
-            'No se puede agendar una nueva citación mientras exista una citación con estado AGENDADO. Debe cambiar el estado de la anterior.',
+            'No se puede agendar una nueva citaciÃ³n mientras exista una citaciÃ³n con estado AGENDADO. Debe cambiar el estado de la anterior.',
           icon: 'warning',
           confirmText: 'Aceptar',
         },
       });
 
-      return; // 🚫 corta ejecución
+      return; // ðŸš« corta ejecuciÃ³n
     }
 
     const dialogRef = this.dialog.open(CitacionModalComponent, {
@@ -587,7 +587,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     dialogRef.afterClosed().subscribe((movement) => {
       if (!movement) return;
 
-      // 🔥 exactamente igual que addMovement()
+      // ðŸ”¥ exactamente igual que addMovement()
       this.movements = [...this.movements, movement];
       this.form.markAsDirty();
       this.cdRef.detectChanges();
@@ -609,7 +609,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       .subscribe((result: any) => {
         if (!result?.observacion) return;
 
-        // 🔥 AQUÍ ESTÁ LA CLAVE
+        // ðŸ”¥ AQUÃ ESTÃ LA CLAVE
         const bloque = this.buildObservacionBloque(result.observacion);
 
         this.observacionesDraft.push(bloque);
@@ -644,12 +644,12 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       this.ultimoContextoObservacion.usuario === usuario &&
       this.ultimoContextoObservacion.programa === programa;
 
-    // 🔁 MISMO usuario + programa + fecha → SOLO HORA
+    // ðŸ” MISMO usuario + programa + fecha â†’ SOLO HORA
     if (mismoContexto) {
       return `Hora: ${hora}
         ${texto}`;
     }
-    // 🆕 NUEVO CONTEXTO → encabezado completo
+    // ðŸ†• NUEVO CONTEXTO â†’ encabezado completo
     this.ultimoContextoObservacion = {
       fecha,
       usuario,
@@ -672,7 +672,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   // ============================================================
-  // 🟦 Crear Register Movimiento de Atención
+  // ðŸŸ¦ Crear Register Movimiento de AtenciÃ³n
   // ============================================================
   addMovement(): void {
     const { newDate, newHour, newProfession, newProfessional } =
@@ -691,7 +691,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       __isDirty: true,
     };
 
-    // 🔥 CLAVE: nueva referencia (mat-table refresca)
+    // ðŸ”¥ CLAVE: nueva referencia (mat-table refresca)
     this.movements = [...this.movements, newMovement];
     this.cdRef.detectChanges();
 
@@ -704,7 +704,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   // ============================================================
-  // 🟦 Cancela Register Movimiento de Atención
+  // ðŸŸ¦ Cancela Register Movimiento de AtenciÃ³n
   // ============================================================
   setMovementState(movement: any, accion: string): void {
     const stateChanged = movement.state !== accion;
@@ -738,7 +738,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   // ============================================================
-  // 🟦 Crear y update Register Movimiento de Atención
+  // ðŸŸ¦ Crear y update Register Movimiento de AtenciÃ³n
   // ============================================================
 
   private async syncRegisterMovements(
@@ -746,7 +746,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     movements: any[],
   ): Promise<void> {
     for (const m of movements) {
-      // ❌ datos incompletos
+      // âŒ datos incompletos
       if (
         !m.date_attention ||
         !m.hour_attention ||
@@ -756,7 +756,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
         continue;
       }
 
-      // 🟢 NUEVO → CREATE
+      // ðŸŸ¢ NUEVO â†’ CREATE
       if (!m.id) {
         const created: any = await firstValueFrom(
           this.registerMovementService.create({
@@ -774,7 +774,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
         continue;
       }
 
-      // 🟡 EXISTENTE + CAMBIO → UPDATE (REEMPLAZO COMPLETO)
+      // ðŸŸ¡ EXISTENTE + CAMBIO â†’ UPDATE (REEMPLAZO COMPLETO)
       if (m.__isDirty) {
         await firstValueFrom(
           this.registerMovementService.update(m.id, {
@@ -795,7 +795,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   // ===========================================================
-  // 🔁 Builder Datos de Contactos
+  // ðŸ” Builder Datos de Contactos
   // ===========================================================
   private buildContactPayload(): any {
     return {
@@ -807,7 +807,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   // ===========================================================
-  // 🔁 Builder Register
+  // ðŸ” Builder Register
   // ===========================================================
   private buildRegisterPayload(userId: number): any {
     if (!this.register) {
@@ -840,7 +840,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     };
   }
   // ===========================================================
-  // 🔁 ACTUALIZAR DEMANDA (MISMA BASE QUE GUARDAR)
+  // ðŸ” ACTUALIZAR DEMANDA (MISMA BASE QUE GUARDAR)
   // ===========================================================
   async updateDemand(): Promise<boolean> {
     if (!this.register) return false;
@@ -849,7 +849,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     const registerId = register.id;
 
     if (!this.validateEditDemand()) {
-      console.error('Formulario inválido (EDIT)');
+      console.error('Formulario invÃ¡lido (EDIT)');
       return false;
     }
 
@@ -862,7 +862,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     this.saving = true;
 
     try {
-      // 🟦 PASO 1
+      // ðŸŸ¦ PASO 1
       await this.demandUpdateService.updateDemand(
         registerId,
         this.form.getRawValue(),
@@ -873,7 +873,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
         this.register,
       );
 
-      // 🟦 PASO 2
+      // ðŸŸ¦ PASO 2
 
       if (this.observacionesDraft.length > 0) {
         const base = this.register?.description || '';
@@ -890,18 +890,18 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
         registerPayload,
       );
 
-      // 🔥 PASO 3
+      // ðŸ”¥ PASO 3
       await this.syncRegisterMovements(registerId, this.movements);
 
-      // 🔥 PASO 3.5
+      // ðŸ”¥ PASO 3.5
       await this.updateSubstances(registerId);
 
-      // 🔄 PASO 4
+      // ðŸ”„ PASO 4
       this.register = await firstValueFrom(
         this.registerService.getById(registerId),
       );
 
-      // 🟦 PASO 5
+      // ðŸŸ¦ PASO 5
       this.utils.cargarFichaCompletaEnFormulario(this.form, this.register);
 
       this.observacionesDraft = [];
@@ -913,10 +913,10 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
 
       this.cdRef.detectChanges();
 
-      console.log('✅ Demanda actualizada correctamente');
+      console.log('âœ… Demanda actualizada correctamente');
       return true;
     } catch (error) {
-      console.error('❌ Error al actualizar la demanda', error);
+      console.error('âŒ Error al actualizar la demanda', error);
       return false;
     } finally {
       this.saving = false;
@@ -926,19 +926,19 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   //----------------------------------------------------------------------------------------------------
 
   async updateSubstances(registerId: number): Promise<void> {
-    // 1️⃣ Anular sustancias actuales (soft delete)
+    // 1ï¸âƒ£ Anular sustancias actuales (soft delete)
     await firstValueFrom(
       this.registerSubstanceService.deleteByRegisterId(registerId),
     );
 
-    // 2️⃣ Obtener valores desde el formulario
+    // 2ï¸âƒ£ Obtener valores desde el formulario
     const principal = this.extractId(this.form.value.substance);
 
     const secondaries: number[] = (this.form.value.secondarySubstances || [])
       .map((s: any) => this.extractId(s))
       .filter((s: number | null): s is number => s !== null && s !== principal);
 
-    // 🟢 Principal
+    // ðŸŸ¢ Principal
     if (principal) {
       await firstValueFrom(
         this.registerSubstanceServiceDto.create({
@@ -949,7 +949,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       );
     }
 
-    // 🟡 Secundarias
+    // ðŸŸ¡ Secundarias
     let orden = 1;
 
     for (const s of secondaries) {
@@ -964,15 +964,15 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
 
       orden++;
     }
-    console.log('✅ Sustancias actualizadas (DTO)');
+    console.log('âœ… Sustancias actualizadas (DTO)');
   }
 
   // ===========================================================
-  // 💾 GUARDAR DEMANDA (sin tipo de previsión)
+  // ðŸ’¾ GUARDAR DEMANDA (sin tipo de previsiÃ³n)
   // ===========================================================
   async saveDemand(): Promise<boolean> {
     // ===============================================
-    // 🔎 VALIDACIÓN ÚNICA (NEW)
+    // ðŸ”Ž VALIDACIÃ“N ÃšNICA (NEW)
     // ===============================================
     if (!this.validateNewDemand()) {
       this.showValidationDialog();
@@ -985,15 +985,15 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     const fechaSolicitud = this.form.get('fechaSolicitud')?.value;
 
     // ===============================================
-    // 🔹 SESIÓN USUARIO
+    // ðŸ”¹ SESIÃ“N USUARIO
     // ===============================================
     if (!userId) {
-      this.showValidationDialog('Sesión inválida. Inicie sesión nuevamente.');
+      this.showValidationDialog('SesiÃ³n invÃ¡lida. Inicie sesiÃ³n nuevamente.');
       return false;
     }
 
     // ===============================================
-    // 🔹 PROGRAMA ACTIVO
+    // ðŸ”¹ PROGRAMA ACTIVO
     // ===============================================
     if (!programId) {
       this.showValidationDialog('No hay programa activo asociado al usuario.');
@@ -1002,7 +1002,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
 
     try {
       // ===============================================================
-      // 🟦 PASO 1: CREAR POSTULANTE
+      // ðŸŸ¦ PASO 1: CREAR POSTULANTE
       // ===============================================================
       const postulantPayload: PostulantCreateDto = {
         user: { id: userId },
@@ -1035,7 +1035,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       );
 
       // ===============================================================
-      // 🟦 PASO 2: CONTACTO
+      // ðŸŸ¦ PASO 2: CONTACTO
       // ===============================================================
       const contact = await firstValueFrom(
         this.contactService.createDto({
@@ -1043,12 +1043,12 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
           description: raw.contactDescription?.trim() || null,
           email: raw.emailPostulant?.trim() || null,
           cellphone: raw.cellphone?.trim() || null,
-          postulant: { id: postulant.id! },
+          postulantId: postulant.id!,
         }),
       );
 
       // ===============================================================
-      // 🟦 PASO 3: REGISTER
+      // ðŸŸ¦ PASO 3: REGISTER
       // ===============================================================
       const register = await firstValueFrom(
         this.registerService.create({
@@ -1075,12 +1075,12 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       );
 
       // ===============================================================
-      // 🟦 PASO 4: MOVIMIENTOS
+      // ðŸŸ¦ PASO 4: MOVIMIENTOS
       // ===============================================================
       await this.syncRegisterMovements(register.id, this.movements);
 
       // ===============================================================
-      // 🟦 PASO 5: SUSTANCIAS
+      // ðŸŸ¦ PASO 5: SUSTANCIAS
       // ===============================================================
       const principal = this.extractId(raw.substance);
 
@@ -1108,7 +1108,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
             register: { id: register.id },
             substance: { id: s },
             level: 'Secundaria',
-            order: orden, // 👈 clave
+            order: orden, // ðŸ‘ˆ clave
           }),
         );
 
@@ -1116,7 +1116,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       }
 
       // ===============================================================
-      // 🔄 RECARGA
+      // ðŸ”„ RECARGA
       // ===============================================================
       this.register = await firstValueFrom(
         this.registerService.getById(register.id),
@@ -1125,10 +1125,10 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       this.utils.cargarFichaCompletaEnFormulario(this.form, this.register);
 
       // ===============================================================
-      // 🔄 PASA A EDIT
+      // ðŸ”„ PASA A EDIT
       // ===============================================================
       this.currentAction = 'EDIT';
-      this.actionLabel = '🔵 Modificando Demanda';
+      this.actionLabel = 'ðŸ”µ Modificando Demanda';
 
       this.bloquearCamposPostulante();
       this.bloquearCamposReferente();
@@ -1154,13 +1154,13 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
 
       return true;
     } catch (error) {
-      console.error('❌ Error guardar la demanda', error);
+      console.error('âŒ Error guardar la demanda', error);
       return false;
     }
   }
 
   // ===========================================================
-  // 💾 GUARDAR CLON DE DEMANDA (delegado a DemandCloneService)
+  // ðŸ’¾ GUARDAR CLON DE DEMANDA (delegado a DemandCloneService)
   // ===========================================================
   async saveDemandClone(): Promise<boolean> {
     if (!this.validateCloneDemand()) {
@@ -1190,7 +1190,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     const programObj = programList.find((p: any) => p.name === activeProgram);
 
     if (!programObj?.id) {
-      this.showValidationDialog('Programa activo inválido.');
+      this.showValidationDialog('Programa activo invÃ¡lido.');
       return false;
     }
 
@@ -1255,17 +1255,17 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
 
       return true;
     } catch (error) {
-      console.error('❌ Error guardando demanda (CLONE)', error);
+      console.error('âŒ Error guardando demanda (CLONE)', error);
       return false;
     }
   }
 
   // ============================================================
-  // 🟦 CARGAR DEMANDA COMPLETA (EDIT / USAR FICHA)
+  // ðŸŸ¦ CARGAR DEMANDA COMPLETA (EDIT / USAR FICHA)
   // ============================================================
   private async loadDemandCompleta(registerId: number): Promise<void> {
     this.isLoading = true;
-    this.cargandoPrevision = true; // 🔒 bloquear reacciones
+    this.cargandoPrevision = true; // ðŸ”’ bloquear reacciones
 
     try {
       const [register, substances, movements] = await Promise.all([
@@ -1281,50 +1281,50 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       this.register = register;
 
       // ============================
-      // 🟦 DATOS BASE (REGISTER)
+      // ðŸŸ¦ DATOS BASE (REGISTER)
       // ============================
       this.utils.cargarFichaCompletaEnFormulario(this.form, register);
 
       this.setEstadoFormularioFromRegister(register);
 
-      // 🔥 aplicar regla al abrir en edición
+      // ðŸ”¥ aplicar regla al abrir en ediciÃ³n
       this.filterStateByResult(this.form.get('result')?.value);
 
       // ============================
-      // 🟦 POSTULANTE COMPLETO (CLAVE)
+      // ðŸŸ¦ POSTULANTE COMPLETO (CLAVE)
       // ============================
       const postulant = await firstValueFrom(
         this.postulantService.getById(register.postulant.id),
       );
 
       // ============================
-      // 🟦 PREVISIÓN (DESDE POSTULANT)
+      // ðŸŸ¦ PREVISIÃ“N (DESDE POSTULANT)
       // ============================
       const intPrevId = postulant.convPrev?.intPrev?.id ?? null;
       const convPrevId = postulant.convPrev?.id ?? null;
 
       if (intPrevId) {
-        // 1️⃣ setear tipo previsión SIN eventos
+        // 1ï¸âƒ£ setear tipo previsiÃ³n SIN eventos
         this.form.get('intPrev')?.setValue(intPrevId, { emitEvent: false });
 
-        // 2️⃣ filtrar previsiones
+        // 2ï¸âƒ£ filtrar previsiones
         this.filterConvPrevByIntPrev(intPrevId);
 
-        // 3️⃣ habilitar convPrev
+        // 3ï¸âƒ£ habilitar convPrev
         const convPrevControl = this.form.get('convPrev');
         convPrevControl?.enable({ emitEvent: false });
 
-        // 4️⃣ setear previsión real
+        // 4ï¸âƒ£ setear previsiÃ³n real
         if (convPrevId) {
           convPrevControl?.setValue(convPrevId, { emitEvent: false });
         }
 
-        // 5️⃣ aplicar reglas clínicas UNA vez
+        // 5ï¸âƒ£ aplicar reglas clÃ­nicas UNA vez
         this.aplicarReglaPrevision(intPrevId);
       }
 
       // ============================
-      // 🟦 CONTACTO (FULL)
+      // ðŸŸ¦ CONTACTO (FULL)
       // ============================
       if (register.contact?.id) {
         const contact = await firstValueFrom(
@@ -1343,7 +1343,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       }
 
       // ============================
-      // 🟦 MOVIMIENTOS
+      // ðŸŸ¦ MOVIMIENTOS
       // ============================
       this.movements = (movements ?? [])
         .filter((m: any) => Number(m.register?.id) === Number(register.id))
@@ -1354,7 +1354,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
         }));
 
       // ============================
-      // 🟦 SUSTANCIAS
+      // ðŸŸ¦ SUSTANCIAS
       // ============================
       const principal = substances.find((s: any) => s.level === 'Principal');
 
@@ -1371,14 +1371,14 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       );
 
       // ============================
-      // 🟦 UI FINAL
+      // ðŸŸ¦ UI FINAL
       // ============================
       this.form.markAsPristine();
       this.form.markAsUntouched();
 
       //this.cdRef.detectChanges();
     } catch (err) {
-      console.error('❌ Error cargando demanda completa', err);
+      console.error('âŒ Error cargando demanda completa', err);
     } finally {
       this.cargandoPrevision = false;
       this.isLoading = false;
@@ -1386,7 +1386,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   // ============================================================
-  // 🔍 FILTRADO DE PREVISIONES SEGÚN TIPO
+  // ðŸ” FILTRADO DE PREVISIONES SEGÃšN TIPO
   // ============================================================
   filterConvPrevByIntPrev(typeId: number): void {
     const convPrevControl = this.form.get('convPrev');
@@ -1399,7 +1399,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       return;
     }
 
-    // 1️⃣ Filtrar por asociación real
+    // 1ï¸âƒ£ Filtrar por asociaciÃ³n real
     this.filteredConvPrev = this.convPrev.filter(
       (p: any) => Number(p.intPrev?.id) === Number(typeId),
     );
@@ -1411,21 +1411,21 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       return;
     }
 
-    // 🔑 Habilitar correctamente
+    // ðŸ”‘ Habilitar correctamente
     convPrevControl?.enable({ emitEvent: false });
     convPrevControl?.updateValueAndValidity({ emitEvent: false });
 
-    // 2️⃣ Si ya hay una previsión válida, NO pisarla
+    // 2ï¸âƒ£ Si ya hay una previsiÃ³n vÃ¡lida, NO pisarla
     const currentValue = convPrevControl?.value;
     const sigueSiendoValida = this.filteredConvPrev.some(
       (p) => p.id === currentValue,
     );
 
     if (sigueSiendoValida) {
-      return; // 👈 CLAVE
+      return; // ðŸ‘ˆ CLAVE
     }
 
-    // 3️⃣ Regla de negocio: FONASA → FONASA A
+    // 3ï¸âƒ£ Regla de negocio: FONASA â†’ FONASA A
     let selected = null;
 
     if (Number(typeId) === 1) {
@@ -1492,7 +1492,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       return;
     }
 
-    // 🔴 DISTINTO DE NINGUNA
+    // ðŸ”´ DISTINTO DE NINGUNA
     if (actualNoRelevante && actualNoRelevante !== ninguna) {
       this.form.patchValue(
         {
@@ -1504,7 +1504,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       return;
     }
 
-    // 🟢 ES NINGUNA
+    // ðŸŸ¢ ES NINGUNA
     if (actualNoRelevante === ninguna) {
       this.form.patchValue(
         {
@@ -1522,11 +1522,11 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   selectPrincipal(id: number) {
     this.utils.selectPrincipal(this.form, id);
 
-    // ❌ si era secundaria, eliminar
+    // âŒ si era secundaria, eliminar
     if (this.secondaryMap[id]) {
       delete this.secondaryMap[id];
 
-      // 🔥 REORDENAR TODO
+      // ðŸ”¥ REORDENAR TODO
       const ordered = Object.entries(this.secondaryMap).sort(
         (a, b) => a[1] - b[1],
       );
@@ -1591,7 +1591,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       this.secondaryMap[id] = max + 1;
     }
 
-    // 🔥 SIEMPRE REORDENAR
+    // ðŸ”¥ SIEMPRE REORDENAR
     const ordered = Object.entries(this.secondaryMap).sort(
       (a, b) => a[1] - b[1],
     );
@@ -1605,7 +1605,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     this.syncFormSecondary();
   }
   // ===========================================================
-  // 🧾 Métodos del formulario
+  // ðŸ§¾ MÃ©todos del formulario
   // ===========================================================
   onSubmit(): void {
     if (this.isSaveDisabled()) return;
@@ -1629,14 +1629,14 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   // ===========================================================
-  // 🧮 Métodos auxiliares
+  // ðŸ§® MÃ©todos auxiliares
   // ===========================================================
   onChangeGroup(field: string): void {
     const controlName = `asistencia${field}`;
-    const asistencia = this.form.get(controlName)?.value; // "Ninguna" | "Se presentó" | "No se presentó"
+    const asistencia = this.form.get(controlName)?.value; // "Ninguna" | "Se presentÃ³" | "No se presentÃ³"
     setTimeout(() => {
       // ================================
-      // SI ELIGE "Ninguna" → cerrar bloques siguientes
+      // SI ELIGE "Ninguna" â†’ cerrar bloques siguientes
       // ================================
       if (asistencia === 'Ninguna') {
         if (field === '1') {
@@ -1676,7 +1676,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       }
 
       // ================================
-      // SI ELIGE "Se presentó" o "No se presentó"
+      // SI ELIGE "Se presentÃ³" o "No se presentÃ³"
       // habilitar el siguiente bloque
       // ================================
       switch (field) {
@@ -1693,7 +1693,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
           break;
 
         case '4':
-          //////console.log('📁 Registro pasa a histórico:', this.form.value);
+          //////console.log('ðŸ“ Registro pasa a histÃ³rico:', this.form.value);
           break;
       }
 
@@ -1702,16 +1702,16 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   // ============================================================
-  // 🔠 FORMATEAR Y VALIDAR RUT EN VIVO
+  // ðŸ”  FORMATEAR Y VALIDAR RUT EN VIVO
   // ============================================================
   autoFormatRut(event: any): void {
     this.panelCerradoManualmente = false;
     let value = event.target.value.toUpperCase();
 
-    // Solo números y K
+    // Solo nÃºmeros y K
     value = value.replace(/[^0-9K]/g, '');
 
-    // Máx 9 caracteres
+    // MÃ¡x 9 caracteres
     if (value.length > 9) {
       value = value.slice(0, 9);
     }
@@ -1719,7 +1719,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     if (value.length < 2) {
       const control = this.form.get('rut');
       control?.setValue(value, { emitEvent: false });
-      control?.updateValueAndValidity({ emitEvent: false }); // 🔑 CLAVE
+      control?.updateValueAndValidity({ emitEvent: false }); // ðŸ”‘ CLAVE
       return;
     }
 
@@ -1771,9 +1771,9 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       .join(' ')
       .trim();
 
-    const rut = raw.rut ?? '-'; // 👈 aquí tomas el RUT
+    const rut = raw.rut ?? '-'; // ðŸ‘ˆ aquÃ­ tomas el RUT
 
-    // ✅ generar HTML (NO imprime)
+    // âœ… generar HTML (NO imprime)
     const html = this.report.generateFromMovement({
       numero,
       movement,
@@ -1784,7 +1784,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       rut,
     });
 
-    // ✅ imprimir sin robar foco
+    // âœ… imprimir sin robar foco
     this.report.printHtml(html);
   }
 
@@ -1828,7 +1828,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       return;
     }
 
-    // 🔥 Liberar SIEMPRE antes del diálogo
+    // ðŸ”¥ Liberar SIEMPRE antes del diÃ¡logo
     this.loader.unlock();
     this.saving = false;
     if (success) {
@@ -1842,7 +1842,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       width: '520px',
       disableClose: true,
       data: {
-        title: 'Operación exitosa',
+        title: 'OperaciÃ³n exitosa',
         message: mensaje,
         icon: 'check_circle',
         confirmText: 'Aceptar',
@@ -1864,24 +1864,24 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   validateNewDemand(): boolean {
-    // 🔴 0️⃣ RUT obligatorio y válido
+    // ðŸ”´ 0ï¸âƒ£ RUT obligatorio y vÃ¡lido
     const rutControl = this.form.get('rut');
 
     if (!rutControl || rutControl.invalid) {
       rutControl?.markAsTouched();
-      this.showValidationDialog('Debe ingresar un RUT válido.');
+      this.showValidationDialog('Debe ingresar un RUT vÃ¡lido.');
       return false;
     }
 
-    // 1️⃣ Sustancia principal
+    // 1ï¸âƒ£ Sustancia principal
     if (!this.validatePrincipal()) {
       this.showValidationDialog(
-        'Debe seleccionar una sustancia principal válida.',
+        'Debe seleccionar una sustancia principal vÃ¡lida.',
       );
       return false;
     }
 
-    // 2️⃣ Validación general Angular
+    // 2ï¸âƒ£ ValidaciÃ³n general Angular
     if (this.form.invalid) {
       this.marcarErrores();
 
@@ -1913,28 +1913,28 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   validateEditDemand(): boolean {
     const fechaSolicitud = this.form.get('fechaSolicitud')?.value;
 
-    // 1️⃣ fecha Solicitud
+    // 1ï¸âƒ£ fecha Solicitud
     if (!fechaSolicitud) {
       this.showValidationDialog(
         'Debe ingresar la fecha de solicitud antes de guardar la demanda.',
       );
       return false;
     }
-    // 1️⃣ Sustancia principal
+    // 1ï¸âƒ£ Sustancia principal
     if (!this.validatePrincipal()) {
       this.showValidationDialog(
-        'Debe seleccionar una sustancia principal válida.',
+        'Debe seleccionar una sustancia principal vÃ¡lida.',
       );
       return false;
     }
 
-    // 2️⃣ Registro cargado
+    // 2ï¸âƒ£ Registro cargado
     if (!this.register?.id) {
-      this.showValidationDialog('La demanda no está cargada correctamente.');
+      this.showValidationDialog('La demanda no estÃ¡ cargada correctamente.');
       return false;
     }
 
-    // 3️⃣ Validación Angular completa
+    // 3ï¸âƒ£ ValidaciÃ³n Angular completa
     if (this.form.invalid) {
       this.marcarErrores();
 
@@ -1963,7 +1963,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   // ============================================================
-  // 🔧 UTILIDAD: normaliza valores ID (select / array / null)
+  // ðŸ”§ UTILIDAD: normaliza valores ID (select / array / null)
   // ============================================================
   private extractId(val: any): number | null {
     if (val === null || val === undefined) return null;
@@ -2013,12 +2013,12 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   private aplicarReglaPrevision(intPrevId: number): void {
-    // ⛔ Catálogos aún no cargados
+    // â›” CatÃ¡logos aÃºn no cargados
     if (!this.catalogsReady()) return;
 
-    // 🟢 SOLO si es NEW aplicamos regla automática
+    // ðŸŸ¢ SOLO si es NEW aplicamos regla automÃ¡tica
     if (this.currentAction === 'NEW') {
-      // 🟢 FONASA
+      // ðŸŸ¢ FONASA
       if (intPrevId === 1) {
         const ninguna = this.getNotRelevanteNinguna();
         const sinResultado = this.getResultadoSinResultado();
@@ -2040,7 +2040,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
         return;
       }
 
-      // 🔴 NO FONASA (NEW) → fuerza valores
+      // ðŸ”´ NO FONASA (NEW) â†’ fuerza valores
       const noRelevante = this.getNoRelevantePorPrevision();
       const historico = this.getResultadoHistorico();
       const noAceptado = this.getEstadoNoAceptado();
@@ -2063,15 +2063,15 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       this.dialog.open(ConfirmDialogOkComponent, {
         disableClose: true,
         data: {
-          title: 'Importante – Previsión de Salud debe ser FONASA',
+          title: 'Importante â€“ PrevisiÃ³n de Salud debe ser FONASA',
           message: `
-          El postulante <strong>no cumple con el requisito de previsión de salud</strong>
+          El postulante <strong>no cumple con el requisito de previsiÃ³n de salud</strong>
           para optar al tratamiento.<br><br>
 
-          El registro quedará marcado como:<br>
-          • <strong>No relevante: Por previsión de salud</strong><br>
-          • <strong>Resultado: Histórico</strong><br>
-          • <strong>Estado: No aceptado</strong><br><br>
+          El registro quedarÃ¡ marcado como:<br>
+          â€¢ <strong>No relevante: Por previsiÃ³n de salud</strong><br>
+          â€¢ <strong>Resultado: HistÃ³rico</strong><br>
+          â€¢ <strong>Estado: No aceptado</strong><br><br>
 
           <strong>El registro puede continuar.</strong><br>
           La responsabilidad del ingreso recae en el profesional entrevistador.
@@ -2082,7 +2082,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
         },
       });
     } else {
-      // 🔔 CASO MODIFY → solo avisar si NO es FONASA
+      // ðŸ”” CASO MODIFY â†’ solo avisar si NO es FONASA
       if (intPrevId !== 1) {
         const actualNoRelevante = this.form.get('notRelevants')?.value;
         const actualResultado = this.form.get('result')?.value;
@@ -2099,23 +2099,23 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
           actualResultado === historico &&
           actualEstado === noAceptado;
 
-        // 🟢 Si ya está correcto → no hacer nada
+        // ðŸŸ¢ Si ya estÃ¡ correcto â†’ no hacer nada
         if (yaEstaCorrecto) return;
 
-        // 🔔 Si NO está correcto → mostrar advertencia
+        // ðŸ”” Si NO estÃ¡ correcto â†’ mostrar advertencia
         this.dialog.open(ConfirmDialogOkComponent, {
           disableClose: true,
           data: {
-            title: 'Previsión de Salud debe ser FONASA',
+            title: 'PrevisiÃ³n de Salud debe ser FONASA',
             message: `
           <strong>Importante</strong><br><br>
-          El postulante <strong>no cumple con el requisito de previsión de salud</strong>
+          El postulante <strong>no cumple con el requisito de previsiÃ³n de salud</strong>
           para optar al tratamiento.<br><br>
 
           La demanda debiera estar de la siguiente forma:<br><br>
-          • NO RELEVANTE / NO CORRESPONDE = POR PREVISIÓN DE SALUD<br>
-          • RESULTADO = HISTÓRICO<br>
-          • ESTADO = NO ACEPTADO<br><br>
+          â€¢ NO RELEVANTE / NO CORRESPONDE = POR PREVISIÃ“N DE SALUD<br>
+          â€¢ RESULTADO = HISTÃ“RICO<br>
+          â€¢ ESTADO = NO ACEPTADO<br><br>
 
           La responsabilidad del ingreso recae en el profesional entrevistador.
         `,
@@ -2139,12 +2139,12 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   editarPostulante(): void {
-    // 🔑 Resolver contexto manualmente
+    // ðŸ”‘ Resolver contexto manualmente
     const postulantId =
       this.register?.postulant?.id ?? this.fichaAnterior?.postulant?.id;
 
     if (!postulantId) {
-      console.warn('⚠️ No hay postulante disponible para editar');
+      console.warn('âš ï¸ No hay postulante disponible para editar');
       return;
     }
 
@@ -2158,24 +2158,24 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       .subscribe((updated: boolean) => {
         if (!updated) return;
 
-        // 🔵 EDITAR DEMANDA EXISTENTE
+        // ðŸ”µ EDITAR DEMANDA EXISTENTE
         if (this.register?.id) {
           this.loadDemandCompleta(this.register.id);
           return;
         }
 
-        // 🟠 USAR DATOS / CLONE
+        // ðŸŸ  USAR DATOS / CLONE
         this.reloadPostulant();
       });
   }
 
   editarReferente(): void {
-    // 🔑 Resolver contexto manualmente
+    // ðŸ”‘ Resolver contexto manualmente
     const contactId =
       this.register?.contact?.id ?? this.fichaAnterior?.contact?.id;
 
     if (!contactId) {
-      console.warn('⚠️ No hay referente disponible para editar');
+      console.warn('âš ï¸ No hay referente disponible para editar');
       return;
     }
 
@@ -2203,7 +2203,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       const intPrevId = p.convPrev?.intPrev?.id ?? null;
       const convPrevId = p.convPrev?.id ?? null;
 
-      // 🔑 1️⃣ RECARGAR OPCIONES DEL COMBO (SIN REGLAS)
+      // ðŸ”‘ 1ï¸âƒ£ RECARGAR OPCIONES DEL COMBO (SIN REGLAS)
       if (intPrevId) {
         this.filteredConvPrev = this.convPrev.filter(
           (c) => Number(c.intPrev?.id) === Number(intPrevId),
@@ -2212,7 +2212,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
         this.filteredConvPrev = [];
       }
 
-      // 🔑 2️⃣ MOSTRAR EXACTAMENTE LO QUE VIENE DE BD
+      // ðŸ”‘ 2ï¸âƒ£ MOSTRAR EXACTAMENTE LO QUE VIENE DE BD
       this.form.patchValue(
         {
           firstName: p.firstName ?? '',
@@ -2299,7 +2299,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     const invalid: string[] = [];
 
     if (this.form.get('rut')?.invalid) {
-      return ['RUT válido'];
+      return ['RUT vÃ¡lido'];
     }
     Object.keys(this.form.controls).forEach((key) => {
       const control = this.form.get(key);
@@ -2312,13 +2312,13 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   private fieldLabels: Record<string, string> = {
-    rut: 'RUT válido',
+    rut: 'RUT vÃ¡lido',
     firstName: 'Nombre',
     firstLastName: 'Apellido paterno',
     commune: 'Comuna',
     sex: 'Sexo',
-    intPrev: 'Tipo de previsión',
-    convPrev: 'Previsión',
+    intPrev: 'Tipo de previsiÃ³n',
+    convPrev: 'PrevisiÃ³n',
     substance: 'Sustancia principal',
     contactTypes: 'Tipo de contacto',
     senders: 'Origen de la demanda',
@@ -2354,7 +2354,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     if (!ingreso || !aceptado || !enTramite || !ninguna) return;
 
     if (resultadoActual === ingreso) {
-      // 🟢 INGRESO A TRATAMIENTO
+      // ðŸŸ¢ INGRESO A TRATAMIENTO
       this.form.patchValue(
         {
           state: aceptado,
@@ -2363,7 +2363,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
         { emitEvent: false },
       );
     } else {
-      // 🔵 Cualquier otro resultado
+      // ðŸ”µ Cualquier otro resultado
       this.form.patchValue(
         {
           state: enTramite,
@@ -2433,8 +2433,8 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
 
   get citacionHeaderText(): string {
     return this.citacionCollapsed
-      ? '➕ Agregar citación'
-      : '📝 Agregando citación';
+      ? 'âž• Agregar citaciÃ³n'
+      : 'ðŸ“ Agregando citaciÃ³n';
   }
 
   private moverFocoSeguro(): void {
@@ -2462,12 +2462,12 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   //  desde aqui hacia abajo manejo del comportamiento  del formulario
   // ----------------------------------------------------------------------------------------------------------
 
-  //🔍 FLUJO RUT (INICIO REAL)
+  //ðŸ” FLUJO RUT (INICIO REAL)
 
   private procesarFichas(registros: any[]): void {
     if (!Array.isArray(registros)) {
       console.error(
-        '❌ procesarFichas recibió algo que NO es array',
+        'âŒ procesarFichas recibiÃ³ algo que NO es array',
         registros,
       );
       return;
@@ -2480,7 +2480,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     );
 
     if (!activeProgram) {
-      console.error('❌ Programa activo no encontrado');
+      console.error('âŒ Programa activo no encontrado');
       return;
     }
 
@@ -2506,12 +2506,12 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
 
     const fullFormat = /^\d{1,2}\.\d{3}\.\d{3}-[0-9K]$/;
     if (!fullFormat.test(rut)) {
-      console.log('⛔ Formato incompleto');
+      console.log('â›” Formato incompleto');
       return;
     }
 
     if (control?.hasError('rutInvalido')) {
-      console.log('⛔ RUT inválido');
+      console.log('â›” RUT invÃ¡lido');
       return;
     }
     this.searchByRut();
@@ -2536,23 +2536,23 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
         this.registerService.getAllByRut(rut),
       );
 
-      // 🔎 Registrar búsqueda
+      // ðŸ”Ž Registrar bÃºsqueda
       this.ultimoRutBuscado = rut;
 
-      // 🧹 LIMPIEZA SIEMPRE
+      // ðŸ§¹ LIMPIEZA SIEMPRE
       this.fichasMismoPrograma = [];
       this.fichasOtrosProgramas = [];
       this.mostrarPanelFichas = false;
 
-      // 🚫 SI NO HAY REGISTROS → NO MOSTRAR PANEL
+      // ðŸš« SI NO HAY REGISTROS â†’ NO MOSTRAR PANEL
       if (!registros || registros.length === 0) {
         return;
       }
 
-      // 👉 Clasificación pura
+      // ðŸ‘‰ ClasificaciÃ³n pura
       this.procesarFichas(registros);
 
-      // ✅ SOLO SI QUEDÓ ALGO CLASIFICADO
+      // âœ… SOLO SI QUEDÃ“ ALGO CLASIFICADO
       if (
         this.fichasMismoPrograma.length > 0 ||
         this.fichasOtrosProgramas.length > 0
@@ -2561,14 +2561,14 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
         this.toggleBodyScroll(true);
       }
     } catch (e) {
-      console.error('❌ Error buscando por RUT', e);
+      console.error('âŒ Error buscando por RUT', e);
     } finally {
       this.isSearchingRut = false;
     }
   }
 
   //-------------------------------------------------------------------------------------------------------
-  //🚦 ACCIONES DE USUARIO
+  //ðŸš¦ ACCIONES DE USUARIO
   //-------------------------------------------------------------------------------------------------------
 
   async usarDatos(f: any): Promise<void> {
@@ -2578,14 +2578,14 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     this.register = null;
     this.fichaAnterior = f;
 
-    // 🔑 TRAER POSTULANTE COMPLETO
+    // ðŸ”‘ TRAER POSTULANTE COMPLETO
     const postulant = await firstValueFrom(
       this.postulantService.getById(f.postulant.id),
     );
-    // 🔑 PREVISIÓN DESDE REGISTER
+    // ðŸ”‘ PREVISIÃ“N DESDE REGISTER
     const intPrevId = postulant.convPrev?.intPrev?.id ?? null;
     const convPrevId = postulant.convPrev?.id ?? null;
-    // 🧩 PATCH GENERAL (SIN convPrev)
+    // ðŸ§© PATCH GENERAL (SIN convPrev)
     this.form.patchValue(
       {
         rut: postulant.rut,
@@ -2602,10 +2602,10 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
         commune: postulant.commune?.id ?? null,
         sex: postulant.sex?.id ?? null,
 
-        // 👈 SOLO tipo previsión
+        // ðŸ‘ˆ SOLO tipo previsiÃ³n
         intPrev: intPrevId,
 
-        // ✅ referente
+        // âœ… referente
         name: f.contact?.name ?? '',
         cellphone: f.contact?.cellphone ?? '',
         emailPostulant: f.contact?.email ?? '',
@@ -2620,18 +2620,18 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     setTimeout(() => {
       const rawBirth = this.form.get('birthDate')?.value;
       this.edad = this.utils.getEdadDesdeFecha(rawBirth);
-      console.log('🧪 EDAD calculada (post patch):', this.edad);
+      console.log('ðŸ§ª EDAD calculada (post patch):', this.edad);
     });
 
-    // 1️⃣ Mostrar tipo previsión (visual)
+    // 1ï¸âƒ£ Mostrar tipo previsiÃ³n (visual)
     this.form.get('intPrev')?.setValue(intPrevId, { emitEvent: false });
-    // 2️⃣ Mostrar SOLO la opción correcta (sin reglas)
+    // 2ï¸âƒ£ Mostrar SOLO la opciÃ³n correcta (sin reglas)
     this.filteredConvPrev = this.convPrev.filter(
       (p: any) => Number(p.intPrev?.id) === Number(intPrevId),
     );
-    // 3️⃣ Mostrar previsión real
+    // 3ï¸âƒ£ Mostrar previsiÃ³n real
     this.form.get('convPrev')?.setValue(convPrevId, { emitEvent: false });
-    // 4️⃣ Asegurar estado BLOQUEADO (porque no es NEW)
+    // 4ï¸âƒ£ Asegurar estado BLOQUEADO (porque no es NEW)
     this.form.get('convPrev')?.disable({ emitEvent: false });
     this.form.get('intPrev')?.disable({ emitEvent: false });
 
@@ -2641,7 +2641,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   //-------------------------------------------------------------------------------------------------------
-  //🛠 HELPERS DE MODO / RESET
+  //ðŸ›  HELPERS DE MODO / RESET
   //-------------------------------------------------------------------------------------------------------
 
   private bloquearCamposPostulante(): void {
@@ -2703,7 +2703,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   //-------------------------------------------------------------------------------------------------------
-  //🧮 ESTADO DE GUARDADO
+  //ðŸ§® ESTADO DE GUARDADO
   //-------------------------------------------------------------------------------------------------------
 
   isSaveDisabled(): boolean {
@@ -2759,10 +2759,10 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   //-------------------------------------------------------------------------------------------------------
   cerrarPanelFichas(): void {
     this.panelCerradoManualmente = true;
-    // 🔥 CLAVE: permitir volver a buscar el mismo RUT
+    // ðŸ”¥ CLAVE: permitir volver a buscar el mismo RUT
     this.ultimoRutBuscado = null;
     this.toggleBodyScroll(false);
-    // 👉 cerrar NO decide lógica clínica
+    // ðŸ‘‰ cerrar NO decide lÃ³gica clÃ­nica
     this.mostrarPanelFichas = false;
   }
 
@@ -2789,76 +2789,76 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     f: any,
     accion: 'EDITAR' | 'USAR_DATOS',
   ): Promise<void> {
-    this.loader.lock(); // 🔒 BLOQUEAR VISTA
+    this.loader.lock(); // ðŸ”’ BLOQUEAR VISTA
 
     try {
       // ==================================================
-      // 🧹 0️⃣ RESET TOTAL — FORMULARIO COMO RECIÉN CARGADO
+      // ðŸ§¹ 0ï¸âƒ£ RESET TOTAL â€” FORMULARIO COMO RECIÃ‰N CARGADO
       // ==================================================
       this.ultimoRutBuscado = null;
       this.estadoFormulario = null;
       this.mostrarBloqueoPostulante = false;
       this.mostrarBloqueoDemanda = false;
 
-      // 🔹 Estado lógico
+      // ðŸ”¹ Estado lÃ³gico
       this.register = null;
       this.fichaAnterior = null;
       this.cargandoPrevision = false;
 
-      // 🔹 Estado UI
+      // ðŸ”¹ Estado UI
       this.mostrarPanelFichas = false;
       this.toggleBodyScroll(false);
 
-      // 🔹 Flags UX
+      // ðŸ”¹ Flags UX
       this.panelCerradoManualmente = false;
 
-      // 🔹 Secciones dinámicas
+      // ðŸ”¹ Secciones dinÃ¡micas
       this.movements = [];
       this.citacionCollapsed = true;
 
-      // 🔹 Estado de campos — TODO habilitado
+      // ðŸ”¹ Estado de campos â€” TODO habilitado
       this.habilitarCamposPostulante();
       this.habilitarCamposReferente();
       this.habilitarEstadoDemanda();
 
       this.mostrarBloqueoPostulante = false;
 
-      // 🔹 Reset duro del formulario
+      // ðŸ”¹ Reset duro del formulario
       this.form.reset();
       this.form.markAsPristine();
       this.form.markAsUntouched();
 
-      // 🔹 Flags UI base
+      // ðŸ”¹ Flags UI base
       this.canClearForm = false;
       this.canEditPostulant = false;
 
       this.ocultarBotonesEdicion();
       // ==================================================
-      // 🧭 1️⃣ CONTEXTO DE PROGRAMA ACTIVO
+      // ðŸ§­ 1ï¸âƒ£ CONTEXTO DE PROGRAMA ACTIVO
       // ==================================================
 
       const activeProgramId = this.getActiveProgramId();
 
       // ==================================================
-      // 🔵 CASO 1: FICHA DEL MISMO PROGRAMA
+      // ðŸ”µ CASO 1: FICHA DEL MISMO PROGRAMA
       // ==================================================
       if (f.program?.id === activeProgramId) {
         // ----------------------------------------------
-        // 🔵 A. EDITAR DEMANDA EXISTENTE
+        // ðŸ”µ A. EDITAR DEMANDA EXISTENTE
         // ----------------------------------------------
         if (accion === 'EDITAR') {
           this.currentAction = 'EDIT';
-          this.actionLabel = '🔵 Modificando Demanda';
-          // 🔥 AQUÍ ESTABA EL PROBLEMA
+          this.actionLabel = 'ðŸ”µ Modificando Demanda';
+          // ðŸ”¥ AQUÃ ESTABA EL PROBLEMA
           this.loadDemandCompleta(f.id);
 
           queueMicrotask(() => {
-            // 🎛️ UI
+            // ðŸŽ›ï¸ UI
             this.canClearForm = true;
             this.canEditPostulant = true;
             this.habilitarBotonesEdicion();
 
-            // 🔒 Bloqueos
+            // ðŸ”’ Bloqueos
             //this.bloquearCamposPostulante();
             this.bloquearCamposReferente();
             this.mostrarBloqueoPostulante = true;
@@ -2870,34 +2870,34 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
         }
 
         // ----------------------------------------------
-        // 🟠 B. USAR DATOS (MISMO PROGRAMA)
+        // ðŸŸ  B. USAR DATOS (MISMO PROGRAMA)
         // ----------------------------------------------
         else {
           this.currentAction = 'CLONE_SAME_PROGRAM';
           this.actionLabel =
-            '🟠 Nueva Demanda (usando datos del mismo programa)';
+            'ðŸŸ  Nueva Demanda (usando datos del mismo programa)';
           this.usarDatos(f);
         }
       }
 
       // ==================================================
-      // 🟣 CASO 2: FICHA DE OTRO PROGRAMA
+      // ðŸŸ£ CASO 2: FICHA DE OTRO PROGRAMA
       // ==================================================
       else {
         this.currentAction = 'CLONE_OTHER_PROGRAM';
-        this.actionLabel = '🟠 Nueva Demanda (usando datos de otro programa)';
+        this.actionLabel = 'ðŸŸ  Nueva Demanda (usando datos de otro programa)';
         this.usarDatos(f);
       }
 
       // ==================================================
-      // 📦 2️⃣ CARGA DE DATOS (NEUTRA, SIN DECISIÓN)
+      // ðŸ“¦ 2ï¸âƒ£ CARGA DE DATOS (NEUTRA, SIN DECISIÃ“N)
       // ==================================================
       queueMicrotask(() => {
-        // 🎛️ UI
+        // ðŸŽ›ï¸ UI
         this.canClearForm = true;
         this.canEditPostulant = true;
         this.habilitarBotonesEdicion();
-        // 🔒 Bloqueos
+        // ðŸ”’ Bloqueos
         this.bloquearCamposPostulante();
         this.bloquearCamposReferente();
 
@@ -2906,7 +2906,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     } catch (error) {
       console.error(error);
     } finally {
-      this.loader.unlock(); // 🔓 SIEMPRE LIBERAR
+      this.loader.unlock(); // ðŸ”“ SIEMPRE LIBERAR
     }
   }
 
@@ -2915,16 +2915,16 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   // ==================================================
 
   nuevaDemanda(): void {
-    // 🧹 Estado base
+    // ðŸ§¹ Estado base
     this.resetFormularioBase();
 
     this.currentAction = 'NEW';
-    this.actionLabel = '🟢 Nueva Demanda';
+    this.actionLabel = 'ðŸŸ¢ Nueva Demanda';
 
-    // 🧠 Defaults clínicos
+    // ðŸ§  Defaults clÃ­nicos
     this.aplicarValoresPorDefectoNuevaDemanda();
 
-    // 🎛️ UI
+    // ðŸŽ›ï¸ UI
     this.canClearForm = false;
     this.canEditPostulant = false;
     this.estadoFormulario = null;
@@ -2936,36 +2936,36 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
   }
 
   // ==================================================
-  // 🧹 RESET TOTAL — FORMULARIO COMO RECIÉN CARGADO
+  // ðŸ§¹ RESET TOTAL â€” FORMULARIO COMO RECIÃ‰N CARGADO
   // ==================================================
 
   private resetFormularioBase(): void {
-    // 🔹 Estado lógico
+    // ðŸ”¹ Estado lÃ³gico
     this.register = null;
     this.fichaAnterior = null;
     this.cargandoPrevision = false;
 
-    // 🔹 Estado UI
+    // ðŸ”¹ Estado UI
     this.mostrarPanelFichas = false;
     this.toggleBodyScroll(false);
 
-    // 🔹 Flags UX
+    // ðŸ”¹ Flags UX
     this.panelCerradoManualmente = false;
 
-    // 🔹 Secciones dinámicas
+    // ðŸ”¹ Secciones dinÃ¡micas
     this.movements = [];
     this.citacionCollapsed = true;
 
-    // 🔹 Estado de campos — TODO habilitado
+    // ðŸ”¹ Estado de campos â€” TODO habilitado
     this.habilitarCamposPostulante();
     this.habilitarCamposReferente();
     this.habilitarEstadoDemanda();
 
-    // 🔹 Reset duro del formulario
+    // ðŸ”¹ Reset duro del formulario
     this.form.reset({
       birthDate: null,
       substance: null,
-      secondarySubstances: [], // 👈 CLAVE ABSOLUTA
+      secondarySubstances: [], // ðŸ‘ˆ CLAVE ABSOLUTA
     });
 
     this.observacionesDraft = [];
@@ -2989,17 +2989,17 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
 
     const sinResultadoId = this.getResultadoSinResultado();
 
-    // 1️⃣ Resultado clínico REAL (no "AÚN SIN RESULTADO")
+    // 1ï¸âƒ£ Resultado clÃ­nico REAL (no "AÃšN SIN RESULTADO")
     if (resultado && resultado.id !== sinResultadoId) {
       return resultado.name.toUpperCase();
     }
 
-    // 2️⃣ Estado de la demanda
+    // 2ï¸âƒ£ Estado de la demanda
     if (estado) {
       return estado.name.toUpperCase();
     }
 
-    // 3️⃣ Ingreso en curso (SOLO si es demanda nueva)
+    // 3ï¸âƒ£ Ingreso en curso (SOLO si es demanda nueva)
     if (this.currentAction === 'NEW') {
       const iniciado =
         !!this.form.get('rut')?.value ||
@@ -3019,7 +3019,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     const sinResultadoId = this.getResultadoSinResultado();
 
     if (resultado && resultado.id !== sinResultadoId) {
-      return '#2e7d32'; // verde clínico real
+      return '#2e7d32'; // verde clÃ­nico real
     }
 
     if (estado) {
@@ -3034,9 +3034,9 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
       case 'AGENDADO':
         return 'Agendado';
       case 'SE_PRESENTO':
-        return 'Se presentó';
+        return 'Se presentÃ³';
       case 'NO_SE_PRESENTO':
-        return 'No se presentó';
+        return 'No se presentÃ³';
       case 'CANCELA_PROGRAMA':
         return 'Cancela programa';
       default:
@@ -3112,3 +3112,4 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
     );
   }
 }
+
