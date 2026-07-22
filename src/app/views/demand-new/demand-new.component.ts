@@ -105,6 +105,9 @@ import {
   validateAttendanceContext,
 } from './actions/demand-new-attendance.actions';
 import {
+  handleObservationSuccess,
+} from './actions/demand-new-observation.actions';
+import {
   canManageEpisode,
   getEpisodeProgramRestrictionMessage,
 } from './utils/demand-new-permission.utils';
@@ -2257,14 +2260,10 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(finalize(() => (this.isSavingObservation = false)))
       .subscribe({
         next: (event) => {
-          console.log('[DemandNew] Observación registrada:', event);
+          const observationResult = handleObservationSuccess(event);
 
-          this.observationSuccess = 'Observación registrada correctamente.';
-
-          this.observationForm.reset({
-            comment: '',
-            observation: '',
-          });
+          this.observationSuccess = observationResult.successMessage;
+          this.observationForm.reset(observationResult.resetValue);
 
           this.loadEpisodeLongitudinal(episodeId);
         },
