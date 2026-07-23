@@ -115,6 +115,7 @@ import {
 } from './actions/demand-new-citation.actions';
 import { canManageEpisode } from './utils/demand-new-permission.utils';
 import { resetLoadedDemandView } from './state/demand-new-reset.state';
+import { DemandNewPersonState } from './state/demand-new-person.state';
 import {
   getSemaphoreCssClass,
   getSemaphoreDescriptionText,
@@ -152,7 +153,7 @@ import {
     MatNativeDateModule,
   ],
 })
-export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
+export class DemandNewComponent extends DemandNewPersonState implements OnInit, AfterViewInit, OnDestroy {
   private fb = inject(FormBuilder);
   private postulantService = inject(PostulantService);
   private preloadCatalogs = inject(PreloadCatalogsService);
@@ -178,8 +179,6 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isLoadingDemandCatalogs = false;
   demandCatalogsError = '';
-
-  showDemandantDetails = false;
 
   sexes: any[] = [];
   communes: any[] = [];
@@ -385,16 +384,6 @@ export class DemandNewComponent implements OnInit, AfterViewInit, OnDestroy {
   episodeLoaded = false;
   stageLoaded = false;
 
-  isSearching = false;
-  isSavingPerson = false;
-  searched = false;
-  personNotFound = false;
-  selectedPerson: Postulant | null = null;
-  selectedContact: Contact | null = null;
-
-  searchError: string | null = null;
-  personSaveError: string | null = null;
-  showCreatePersonForm = false;
   showCreateEpisodeForm = false;
 
   isSavingEpisode = false;

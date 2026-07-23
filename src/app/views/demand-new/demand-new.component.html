@@ -133,11 +133,6 @@
         <span>Persona encontrada. Ficha longitudinal cargada.</span>
       </div>
 
-      <div class="empty-banner warning" *ngIf="personNotFound">
-        <mat-icon>person_add</mat-icon>
-        <span>No se encontró una persona registrada con ese RUN.</span>
-      </div>
-
       <div class="empty-banner error" *ngIf="searchError">
         <mat-icon>error</mat-icon>
         <span>{{ searchError }}</span>

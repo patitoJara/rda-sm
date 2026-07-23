@@ -1,4 +1,4 @@
-﻿export interface DemandNewResetTarget {
+export interface DemandNewResetTarget {
   selectedPerson: any | null;
   selectedContact: any | null;
 
@@ -10,6 +10,9 @@
   personLoaded: boolean;
   episodeLoaded: boolean;
   stageLoaded: boolean;
+
+  searched: boolean;
+  personNotFound: boolean;
 
   showDemandantDetails: boolean;
   showCreatePersonForm: boolean;
@@ -49,6 +52,9 @@ export function resetLoadedDemandView(target: DemandNewResetTarget): void {
   target.personLoaded = false;
   target.episodeLoaded = false;
   target.stageLoaded = false;
+
+  target.searched = false;
+  target.personNotFound = false;
 
   target.showDemandantDetails = false;
   target.showCreatePersonForm = false;
