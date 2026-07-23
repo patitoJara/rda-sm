@@ -1226,7 +1226,12 @@ export class DemandNewComponent extends DemandNewEpisodeState implements OnInit,
     }
 
     if (this.searchForm.invalid) {
-      this.searchError = 'Debe ingresar un RUN antes de realizar la búsqueda.';
+      const rutControl = this.searchForm.controls.rut;
+
+      this.searchError = rutControl.hasError('required')
+        ? 'Debe ingresar un RUN antes de realizar la búsqueda.'
+        : null;
+
       return;
     }
 
