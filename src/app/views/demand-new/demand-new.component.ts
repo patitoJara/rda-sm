@@ -48,11 +48,7 @@ import { ContactService } from '@app/services/contact.service';
 import { Contact } from '@app/models/contact';
 import { ContactCreateDto } from '@app/models/contact-create.dto';
 
-import {
-  DemandCatalogItem,
-  DemandCatalogsDTO,
-  DemandService,
-} from '../../core/services/demand.service';
+import { DemandService } from '../../core/services/demand.service';
 
 import {
   ActiveActionPanel,
@@ -116,7 +112,7 @@ import {
 import { canManageEpisode } from './utils/demand-new-permission.utils';
 import { resetLoadedDemandView } from './state/demand-new-reset.state';
 import { rutValidator } from '../../core/validator/rut.validator';
-import { DemandNewLongitudinalState } from './state/demand-new-longitudinal.state';
+import { DemandNewCatalogState } from './state/demand-new-catalog.state';
 import {
   getSemaphoreCssClass,
   getSemaphoreDescriptionText,
@@ -154,7 +150,7 @@ import {
     MatNativeDateModule,
   ],
 })
-export class DemandNewComponent extends DemandNewLongitudinalState implements OnInit, AfterViewInit, OnDestroy {
+export class DemandNewComponent extends DemandNewCatalogState implements OnInit, AfterViewInit, OnDestroy {
   private fb = inject(FormBuilder);
   private postulantService = inject(PostulantService);
   private preloadCatalogs = inject(PreloadCatalogsService);
@@ -165,21 +161,6 @@ export class DemandNewComponent extends DemandNewLongitudinalState implements On
     ProgramProfessionalService,
   );
   private readonly contactService = inject(ContactService);
-
-  demandCatalogs: DemandCatalogsDTO | null = null;
-
-  episodeTypes: DemandCatalogItem[] = [];
-  eventTypes: DemandCatalogItem[] = [];
-  attendanceStatuses: DemandCatalogItem[] = [];
-  closureReasons: DemandCatalogItem[] = [];
-  programPopulations: DemandCatalogItem[] = [];
-  programModalities: DemandCatalogItem[] = [];
-  programPlans: DemandCatalogItem[] = [];
-  regions: DemandCatalogItem[] = [];
-  cities: DemandCatalogItem[] = [];
-
-  isLoadingDemandCatalogs = false;
-  demandCatalogsError = '';
 
   sexes: any[] = [];
   communes: any[] = [];
