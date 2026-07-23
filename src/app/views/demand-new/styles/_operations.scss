@@ -888,3 +888,20 @@
     width: 100%;
   }
 }
+/* Estado visual de botones operativos deshabilitados */
+.operation-actions .primary-btn:disabled,
+.operation-actions .primary-btn.mat-mdc-button-disabled {
+  background: #c7d7da !important;
+  color: #6f858a !important;
+  box-shadow: none !important;
+  opacity: 0.72;
+  cursor: not-allowed !important;
+  pointer-events: none;
+  filter: grayscale(0.45);
+  transform: none !important;
+}
+
+.operation-actions .primary-btn:disabled mat-icon,
+.operation-actions .primary-btn.mat-mdc-button-disabled mat-icon {
+  color: #6f858a !important;
+}

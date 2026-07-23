@@ -1565,6 +1565,12 @@
               <mat-option value="AM">AM</mat-option>
               <mat-option value="PM">PM</mat-option>
             </mat-select>
+
+            <mat-error
+              *ngIf="interviewForm.controls.eventPeriod.hasError('required')"
+            >
+              Debe seleccionar AM o PM para registrar la hora de la entrevista.
+            </mat-error>
           </mat-form-field>
         </div>
 

@@ -116,7 +116,7 @@ import {
 import { canManageEpisode } from './utils/demand-new-permission.utils';
 import { resetLoadedDemandView } from './state/demand-new-reset.state';
 import { rutValidator } from '../../core/validator/rut.validator';
-import { DemandNewEpisodeState } from './state/demand-new-episode.state';
+import { DemandNewActionsState } from './state/demand-new-actions.state';
 import {
   getSemaphoreCssClass,
   getSemaphoreDescriptionText,
@@ -154,7 +154,7 @@ import {
     MatNativeDateModule,
   ],
 })
-export class DemandNewComponent extends DemandNewEpisodeState implements OnInit, AfterViewInit, OnDestroy {
+export class DemandNewComponent extends DemandNewActionsState implements OnInit, AfterViewInit, OnDestroy {
   private fb = inject(FormBuilder);
   private postulantService = inject(PostulantService);
   private preloadCatalogs = inject(PreloadCatalogsService);
@@ -201,26 +201,6 @@ export class DemandNewComponent extends DemandNewEpisodeState implements OnInit,
 
   activeProgramName: string | null = null;
   activeProgramId: number | null = null;
-
-  activeActionPanel: ActiveActionPanel = null;
-
-  isSavingObservation = false;
-  observationError: string | null = null;
-  observationSuccess: string | null = null;
-
-  isSavingCitation = false;
-  citationError: string | null = null;
-  citationSuccess: string | null = null;
-
-  isSavingAttendance = false;
-  attendanceError: string | null = null;
-  attendanceSuccess: string | null = null;
-
-  isSavingInterview = false;
-  interviewError: string | null = null;
-  interviewSuccess: string | null = null;
-
-  showBackToNavigation = false;
   highlightedSummarySection: SummarySectionId | null = null;
 
   historyDisplayLimit = 8;
@@ -256,8 +236,8 @@ export class DemandNewComponent extends DemandNewEpisodeState implements OnInit,
 
   interviewForm = this.fb.group({
     eventDate: [new Date(), Validators.required],
-    eventHour: ['', [Validators.pattern(/^(0?[1-9]|1[0-2]):[0-5][0-9]$/)]],
-    eventPeriod: ['AM'],
+    eventHour: ['', [Validators.required, Validators.pattern(/^(0?[1-9]|1[0-2]):[0-5][0-9]$/)]],
+    eventPeriod: ['AM', Validators.required],
     comment: ['', Validators.required],
     observation: ['', Validators.required],
     nextAction: [''],
