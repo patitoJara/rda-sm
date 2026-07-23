@@ -112,7 +112,7 @@ import {
 import { canManageEpisode } from './utils/demand-new-permission.utils';
 import { resetLoadedDemandView } from './state/demand-new-reset.state';
 import { rutValidator } from '../../core/validator/rut.validator';
-import { DemandNewCatalogState } from './state/demand-new-catalog.state';
+import { DemandNewAuxiliaryCatalogState } from './state/demand-new-auxiliary-catalog.state';
 import {
   getSemaphoreCssClass,
   getSemaphoreDescriptionText,
@@ -150,7 +150,7 @@ import {
     MatNativeDateModule,
   ],
 })
-export class DemandNewComponent extends DemandNewCatalogState implements OnInit, AfterViewInit, OnDestroy {
+export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implements OnInit, AfterViewInit, OnDestroy {
   private fb = inject(FormBuilder);
   private postulantService = inject(PostulantService);
   private preloadCatalogs = inject(PreloadCatalogsService);
@@ -161,20 +161,7 @@ export class DemandNewComponent extends DemandNewCatalogState implements OnInit,
     ProgramProfessionalService,
   );
   private readonly contactService = inject(ContactService);
-
-  sexes: any[] = [];
-  communes: any[] = [];
-  intPrev: any[] = [];
-  convPrev: any[] = [];
-  filteredConvPrev: any[] = [];
-
-  substances: any[] = [];
   secondarySubstanceMap: { [id: number]: number } = {};
-
-  professions: any[] = [];
-  contactTypes: any[] = [];
-  senders: any[] = [];
-  diverters: any[] = [];
 
   searchForm = this.fb.group({
     rut: ['', [Validators.required, rutValidator()]],
