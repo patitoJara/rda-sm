@@ -106,6 +106,15 @@
         <mat-error *ngIf="searchForm.controls.rut.hasError('required')">
           El RUN es obligatorio para iniciar la búsqueda.
         </mat-error>
+
+        <mat-error
+          *ngIf="
+            !searchForm.controls.rut.hasError('required') &&
+            searchForm.controls.rut.hasError('rutInvalido')
+          "
+        >
+          El RUN ingresado no es válido. Revise el número y el dígito verificador.
+        </mat-error>
       </mat-form-field>
 
       <button mat-flat-button class="primary-btn" type="submit">

@@ -115,7 +115,8 @@ import {
 } from './actions/demand-new-citation.actions';
 import { canManageEpisode } from './utils/demand-new-permission.utils';
 import { resetLoadedDemandView } from './state/demand-new-reset.state';
-import { DemandNewPersonState } from './state/demand-new-person.state';
+import { rutValidator } from '../../core/validator/rut.validator';
+import { DemandNewEpisodeState } from './state/demand-new-episode.state';
 import {
   getSemaphoreCssClass,
   getSemaphoreDescriptionText,
@@ -153,7 +154,7 @@ import {
     MatNativeDateModule,
   ],
 })
-export class DemandNewComponent extends DemandNewPersonState implements OnInit, AfterViewInit, OnDestroy {
+export class DemandNewComponent extends DemandNewEpisodeState implements OnInit, AfterViewInit, OnDestroy {
   private fb = inject(FormBuilder);
   private postulantService = inject(PostulantService);
   private preloadCatalogs = inject(PreloadCatalogsService);
@@ -195,12 +196,11 @@ export class DemandNewComponent extends DemandNewPersonState implements OnInit, 
   diverters: any[] = [];
 
   searchForm = this.fb.group({
-    rut: ['', Validators.required],
+    rut: ['', [Validators.required, rutValidator()]],
   });
 
   activeProgramName: string | null = null;
   activeProgramId: number | null = null;
-  stageVisualState = 'Pendiente de creación';
 
   activeActionPanel: ActiveActionPanel = null;
 
@@ -265,7 +265,6 @@ export class DemandNewComponent extends DemandNewPersonState implements OnInit, 
   });
 
   longitudinal: any | null = null;
-  episodeEvents: any[] = [];
   isLoadingLongitudinal = false;
   longitudinalError: string | null = null;
 
@@ -381,15 +380,6 @@ export class DemandNewComponent extends DemandNewPersonState implements OnInit, 
 
   // Estados vacíos reales: no mocks
   personLoaded = false;
-  episodeLoaded = false;
-  stageLoaded = false;
-
-  showCreateEpisodeForm = false;
-
-  isSavingEpisode = false;
-  episodeSaveError: string | null = null;
-  createdEpisode: any | null = null;
-  episodeSummary: any | null = null;
 
   readonly flowSteps = [
     'Persona',
