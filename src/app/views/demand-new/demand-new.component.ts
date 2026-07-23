@@ -116,7 +116,7 @@ import {
 import { canManageEpisode } from './utils/demand-new-permission.utils';
 import { resetLoadedDemandView } from './state/demand-new-reset.state';
 import { rutValidator } from '../../core/validator/rut.validator';
-import { DemandNewActionsState } from './state/demand-new-actions.state';
+import { DemandNewLongitudinalState } from './state/demand-new-longitudinal.state';
 import {
   getSemaphoreCssClass,
   getSemaphoreDescriptionText,
@@ -154,7 +154,7 @@ import {
     MatNativeDateModule,
   ],
 })
-export class DemandNewComponent extends DemandNewActionsState implements OnInit, AfterViewInit, OnDestroy {
+export class DemandNewComponent extends DemandNewLongitudinalState implements OnInit, AfterViewInit, OnDestroy {
   private fb = inject(FormBuilder);
   private postulantService = inject(PostulantService);
   private preloadCatalogs = inject(PreloadCatalogsService);
@@ -243,14 +243,6 @@ export class DemandNewComponent extends DemandNewActionsState implements OnInit,
     nextAction: [''],
     nextActionDate: [null as Date | null],
   });
-
-  longitudinal: any | null = null;
-  isLoadingLongitudinal = false;
-  longitudinalError: string | null = null;
-
-  professionals: any[] = [];
-  isLoadingProfessionals = false;
-  professionalsError: string | null = null;
 
   observationForm = this.fb.group({
     comment: ['', Validators.required],
