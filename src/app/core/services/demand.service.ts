@@ -257,13 +257,6 @@ export class DemandService {
     );
   }
 
-  createDocument(episodeId: number, payload: FormData): Observable<any> {
-    return this.http.post<any>(
-      `${this.demandUrl}/episodes/${episodeId}/documents`,
-      payload
-    );
-  }
-
   closeEpisode(
     episodeId: number,
     payload: CloseEpisodeRequest

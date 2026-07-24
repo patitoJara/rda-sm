@@ -1,0 +1,326 @@
+<div class="episode-documents">
+  <div class="document-toolbar">
+    <div class="document-summary">
+      <span class="document-count">
+        {{ documents.length }}
+      </span>
+
+      <span>
+        {{
+          documents.length === 1
+            ? "documento registrado"
+            : "documentos registrados"
+        }}
+      </span>
+    </div>
+
+    <button
+      *ngIf="canManage"
+      mat-flat-button
+      type="button"
+      class="upload-toggle"
+      (click)="toggleUploadForm()"
+    >
+      <mat-icon>
+        {{ showUploadForm ? "close" : "upload_file" }}
+      </mat-icon>
+
+      {{ showUploadForm ? "Cerrar" : "Subir documento" }}
+    </button>
+  </div>
+
+  <form
+    *ngIf="showUploadForm && canManage"
+    class="document-upload-form"
+    [formGroup]="uploadForm"
+    (ngSubmit)="uploadDocument()"
+  >
+    <div class="upload-form-heading">
+      <mat-icon>cloud_upload</mat-icon>
+
+      <div>
+        <strong>Agregar documento</strong>
+        <span>
+          Seleccione el tipo documental y el archivo que desea
+          asociar al episodio.
+        </span>
+      </div>
+    </div>
+
+    <div class="upload-form-fields">
+      <mat-form-field appearance="outline">
+        <mat-label>Tipo de documento</mat-label>
+
+        <mat-select
+          formControlName="documentTypeCode"
+          [disabled]="loadingTypes || uploading"
+        >
+          <mat-option
+            *ngFor="let type of documentTypes"
+            [value]="type.code"
+          >
+            {{ type.name }}
+          </mat-option>
+        </mat-select>
+
+        <mat-error
+          *ngIf="
+            uploadForm.controls.documentTypeCode.hasError(
+              'required'
+            )
+          "
+        >
+          Debe seleccionar un tipo de documento.
+        </mat-error>
+      </mat-form-field>
+
+      <input
+        #uploadFileInput
+        type="file"
+        hidden
+        (change)="onFileSelected($event)"
+      />
+
+      <button
+        mat-stroked-button
+        type="button"
+        class="select-file-button"
+        [disabled]="uploading"
+        (click)="uploadFileInput.click()"
+      >
+        <mat-icon>attach_file</mat-icon>
+        Seleccionar archivo
+      </button>
+    </div>
+
+    <div
+      class="selected-file"
+      *ngIf="selectedFile"
+    >
+      <mat-icon>insert_drive_file</mat-icon>
+
+      <div>
+        <strong>{{ selectedFile.name }}</strong>
+        <span>{{ formatFileSize(selectedFile.size) }}</span>
+      </div>
+
+      <button
+        mat-icon-button
+        type="button"
+        matTooltip="Quitar archivo"
+        [disabled]="uploading"
+        (click)="selectedFile = null"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div
+      class="upload-requirements"
+      *ngIf="!canUpload && !uploading"
+    >
+      <strong>Para subir el documento debes completar:</strong>
+
+      <div
+        class="upload-requirement"
+        [class.upload-requirement--complete]="
+          hasSelectedDocumentType
+        "
+      >
+        <mat-icon>
+          {{
+            hasSelectedDocumentType
+              ? "check_circle"
+              : "radio_button_unchecked"
+          }}
+        </mat-icon>
+
+        <span>Seleccionar el tipo de documento.</span>
+      </div>
+
+      <div
+        class="upload-requirement"
+        [class.upload-requirement--complete]="
+          hasSelectedFile
+        "
+      >
+        <mat-icon>
+          {{
+            hasSelectedFile
+              ? "check_circle"
+              : "radio_button_unchecked"
+          }}
+        </mat-icon>
+
+        <span>Seleccionar el archivo que se cargará.</span>
+      </div>
+    </div>
+        
+    <div class="upload-form-actions">
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="uploading"
+        (click)="cancelUpload()"
+      >
+        Cancelar
+      </button>
+
+      <button
+        mat-flat-button
+        type="submit"
+        class="upload-submit"
+        [disabled]="!canUpload"
+      >
+        <mat-icon>
+          {{ uploading ? "hourglass_empty" : "cloud_upload" }}
+        </mat-icon>
+
+        {{ uploading ? "Subiendo..." : "Subir documento" }}
+      </button>
+    </div>
+  </form>
+
+  <mat-progress-bar
+    *ngIf="
+      loading ||
+      uploading ||
+      actionDocumentId !== null
+    "
+    mode="indeterminate"
+  ></mat-progress-bar>
+
+  <div
+    class="document-message document-message--success"
+    *ngIf="successMessage"
+  >
+    <mat-icon>check_circle</mat-icon>
+    <span>{{ successMessage }}</span>
+  </div>
+
+  <div
+    class="document-message document-message--error"
+    *ngIf="errorMessage"
+  >
+    <mat-icon>warning</mat-icon>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <div
+    class="document-empty-state"
+    *ngIf="!loading && !documents.length"
+  >
+    <mat-icon>folder_open</mat-icon>
+
+    <div>
+      <strong>No existen documentos asociados</strong>
+      <span>
+        Los documentos cargados para este episodio aparecerán
+        en esta sección.
+      </span>
+    </div>
+  </div>
+
+  <div
+    class="episode-document-list"
+    *ngIf="!loading && documents.length"
+  >
+    <article
+      class="episode-document-item"
+      *ngFor="
+        let item of documents;
+        trackBy: trackDocument
+      "
+    >
+      <div class="episode-document-icon">
+        <mat-icon>
+          {{ getDocumentIcon(item) }}
+        </mat-icon>
+      </div>
+
+      <div class="episode-document-info">
+        <strong>
+          {{ item.originalFilename || "Documento sin nombre" }}
+        </strong>
+
+        <span class="document-type">
+          {{ getDocumentTypeName(item.documentTypeCode) }}
+        </span>
+
+        <div class="document-metadata">
+          <span>
+            <mat-icon>data_usage</mat-icon>
+            {{ formatFileSize(item.fileSize) }}
+          </span>
+
+          <span>
+            <mat-icon>link</mat-icon>
+            {{ getAssociationLabel(item) }}
+          </span>
+
+          <span *ngIf="item.uploadedAt">
+            <mat-icon>schedule</mat-icon>
+            {{ item.uploadedAt | date: "dd-MM-yyyy HH:mm" }}
+          </span>
+
+          <span *ngIf="item.uploadedByUser?.name">
+            <mat-icon>person</mat-icon>
+            {{ item.uploadedByUser?.name }}
+          </span>
+        </div>
+      </div>
+
+      <div class="document-actions">
+        <button
+          mat-icon-button
+          type="button"
+          matTooltip="Visualizar documento"
+          [disabled]="actionDocumentId !== null"
+          (click)="openDocument(item)"
+        >
+          <mat-icon>visibility</mat-icon>
+        </button>
+
+        <button
+          mat-icon-button
+          type="button"
+          matTooltip="Descargar documento"
+          [disabled]="actionDocumentId !== null"
+          (click)="downloadDocument(item)"
+        >
+          <mat-icon>download</mat-icon>
+        </button>
+
+        <ng-container *ngIf="canManage">
+          <input
+            #replaceFileInput
+            type="file"
+            hidden
+            (change)="replaceDocument(item, $event)"
+          />
+
+          <button
+            mat-icon-button
+            type="button"
+            matTooltip="Reemplazar documento"
+            [disabled]="actionDocumentId !== null"
+            (click)="replaceFileInput.click()"
+          >
+            <mat-icon>published_with_changes</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            type="button"
+            class="delete-document-button"
+            matTooltip="Eliminar documento"
+            [disabled]="actionDocumentId !== null"
+            (click)="deleteDocument(item)"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </ng-container>
+      </div>
+    </article>
+  </div>
+</div>

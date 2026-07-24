@@ -113,7 +113,8 @@
             searchForm.controls.rut.hasError('rutInvalido')
           "
         >
-          El RUN ingresado no es válido. Revise el número y el dígito verificador.
+          El RUN ingresado no es válido. Revise el número y el dígito
+          verificador.
         </mat-error>
       </mat-form-field>
 
@@ -139,7 +140,21 @@
 
       <div class="empty-banner success" *ngIf="selectedPerson">
         <mat-icon>check_circle</mat-icon>
-        <span>Persona encontrada. Ficha longitudinal cargada.</span>
+
+        <span
+          *ngIf="
+            createdEpisode || episodeSummary || longitudinal?.activeEpisode;
+            else personWithoutEpisodeMessage
+          "
+        >
+          Persona encontrada. Ficha longitudinal cargada.
+        </span>
+
+        <ng-template #personWithoutEpisodeMessage>
+          <span>
+            Persona registrada. Puede preparar un episodio de demanda.
+          </span>
+        </ng-template>
       </div>
 
       <div class="empty-banner error" *ngIf="searchError">
@@ -927,7 +942,7 @@
     <!-- =====================================================
        INDICADORES DEL EPISODIO
   ====================================================== -->
-    <div class="summary-indicators">
+    <div class="summary-indicators" *ngIf="hasCurrentEpisode">
       <div class="indicator-box">
         <span>Fecha solicitud original</span>
 
@@ -968,12 +983,17 @@
 
       <div class="indicator-box">
         <span>Resultado</span>
-
         <strong>
           {{
-            episodeSummary?.resultCode ||
-              createdEpisode?.resultCode ||
+            formatResultLabel(
+              episodeSummary?.result?.name ||
+                episodeSummary?.resultName ||
+                episodeSummary?.resultCode ||
+                createdEpisode?.result?.name ||
+                createdEpisode?.resultName ||
+                createdEpisode?.resultCode,
               "Sin resultado"
+            )
           }}
         </strong>
       </div>
@@ -987,7 +1007,7 @@
     <!-- =====================================================
        LÍNEA DE VIDA DEL EPISODIO
   ====================================================== -->
-    <div class="episode-life-line">
+    <div class="episode-life-line" *ngIf="hasCurrentEpisode">
       <div class="life-step active">
         <span></span>
 
@@ -1045,11 +1065,19 @@
         <strong>Resultado</strong>
 
         <small>
-          {{
-            episodeSummary?.resultCode ||
-              createdEpisode?.resultCode ||
-              "Pendiente"
-          }}
+          <strong>
+            {{
+              formatResultLabel(
+                episodeSummary?.result?.name ||
+                  episodeSummary?.resultName ||
+                  episodeSummary?.resultCode ||
+                  createdEpisode?.result?.name ||
+                  createdEpisode?.resultName ||
+                  createdEpisode?.resultCode,
+                "Sin resultado"
+              )
+            }}
+          </strong>
         </small>
       </div>
     </div>
@@ -1057,7 +1085,10 @@
     <!-- =====================================================
        ACCIONES OPERATIVAS
   ====================================================== -->
-    <div class="operative-dock">
+    <div
+      class="operative-dock"
+      *ngIf="hasCurrentEpisode && canManageCurrentEpisode"
+    >
       <div class="operative-dock__title">
         <mat-icon>bolt</mat-icon>
 
@@ -1084,8 +1115,15 @@
 
   <!-- PANEL OPERATIVO CENTRALIZADO -->
   <mat-card
+    #activeActionSection
+    tabindex="-1"
     class="actions-card action-forms-card"
-    *ngIf="selectedPerson && activeActionPanel"
+    *ngIf="
+      selectedPerson &&
+      hasCurrentEpisode &&
+      canManageCurrentEpisode &&
+      activeActionPanel
+    "
   >
     <div
       class="operation-panel-shell"
@@ -1816,7 +1854,7 @@
   <div
     id="longitudinal-navigation-anchor"
     class="longitudinal-navigation-anchor"
-    *ngIf="selectedPerson"
+    *ngIf="selectedPerson && hasCurrentEpisode"
     aria-hidden="true"
   ></div>
 
@@ -1824,7 +1862,7 @@
   <nav
     id="longitudinal-navigation"
     class="longitudinal-tabs"
-    *ngIf="selectedPerson"
+    *ngIf="selectedPerson && hasCurrentEpisode"
     aria-label="Secciones de la ficha del episodio"
   >
     <div class="longitudinal-tabs__scroll">
@@ -1851,6 +1889,7 @@
     id="demanda-actual"
     #summarySection
     class="current-demand-grid longitudinal-anchor"
+    [class.current-demand-grid--without-episode]="!hasCurrentEpisode"
     [class.longitudinal-anchor--highlighted]="
       highlightedSummarySection === 'demanda-actual'
     "
@@ -1865,7 +1904,7 @@
         </div>
       </div>
 
-      <div class="summary-row">
+      <div class="summary-row" *ngIf="hasCurrentEpisode">
         <span>Programa responsable de la demanda</span>
         <strong>{{
           episodeSummary?.currentProgram?.name ||
@@ -1875,7 +1914,7 @@
         }}</strong>
       </div>
 
-      <div class="summary-row">
+      <div class="summary-row" *ngIf="hasCurrentEpisode">
         <span>Estado</span>
         <strong>
           {{
@@ -1888,16 +1927,25 @@
         </strong>
       </div>
 
-      <div class="summary-row">
+      <div class="summary-row" *ngIf="hasCurrentEpisode">
         <span>Resultado</span>
-        <strong>{{
-          episodeSummary?.resultCode ||
-            createdEpisode?.resultCode ||
-            "Sin resultado"
-        }}</strong>
+
+        <strong>
+          {{
+            formatResultLabel(
+              episodeSummary?.result?.name ||
+                episodeSummary?.resultName ||
+                episodeSummary?.resultCode ||
+                createdEpisode?.result?.name ||
+                createdEpisode?.resultName ||
+                createdEpisode?.resultCode,
+              "Sin resultado"
+            )
+          }}
+        </strong>
       </div>
 
-      <div class="summary-row">
+      <div class="summary-row" *ngIf="hasCurrentEpisode">
         <span>Última gestión</span>
         <strong>
           {{
@@ -1910,6 +1958,14 @@
               : "Sin gestión registrada"
           }}
         </strong>
+      </div>
+
+      <div class="empty-banner" *ngIf="!hasCurrentEpisode">
+        <mat-icon>info</mat-icon>
+        <span>
+          No existe un episodio de demanda activo. Puede crear uno para iniciar
+          la gestión.
+        </span>
       </div>
 
       <div class="card-actions-preview">
@@ -1937,6 +1993,7 @@
       id="trayectoria"
       #summarySection
       class="current-demand-card longitudinal-anchor"
+      *ngIf="hasCurrentEpisode"
       [class.longitudinal-anchor--highlighted]="
         highlightedSummarySection === 'trayectoria'
       "
@@ -1967,7 +2024,7 @@
       </div>
     </mat-card>
 
-    <mat-card class="current-demand-card">
+    <mat-card class="current-demand-card" *ngIf="hasCurrentEpisode">
       <div class="card-header compact-card-header">
         <mat-icon>monitoring</mat-icon>
         <div>
@@ -2024,12 +2081,58 @@
         </div>
 
         <div>
-          <span>Programa activo</span>
-          <strong>{{ activeProgramName || "Sin programa" }}</strong>
+          <span>Programa responsable</span>
+
+          <strong>
+            {{
+              episodeSummary?.currentProgram?.name ||
+                createdEpisode?.currentProgram?.name ||
+                episodeSummary?.initialProgram?.name ||
+                createdEpisode?.initialProgram?.name ||
+                "Sin programa"
+            }}
+          </strong>
+        </div>
+
+        <div>
+          <span>Tratamientos previos</span>
+
+          <strong>
+            {{
+              episodeSummary?.previousTreatmentNumber ??
+                createdEpisode?.previousTreatmentNumber ??
+                0
+            }}
+          </strong>
         </div>
       </div>
     </mat-card>
   </section>
+
+  <!-- CONFIRMACIÓN DE CREACIÓN DEL EPISODIO -->
+  <div
+    class="episode-save-success"
+    *ngIf="episodeSaveSuccess"
+    role="status"
+    aria-live="polite"
+  >
+    <mat-icon>check_circle</mat-icon>
+
+    <div class="episode-save-success__content">
+      <strong>Episodio creado correctamente</strong>
+      <span>{{ episodeSaveSuccess }}</span>
+    </div>
+
+    <button
+      mat-icon-button
+      type="button"
+      matTooltip="Cerrar confirmación"
+      aria-label="Cerrar confirmación"
+      (click)="episodeSaveSuccess = null"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
 
   <!-- CREAR EPISODIO -->
   <mat-card
@@ -2068,7 +2171,11 @@
       </button>
     </div>
 
-    <form [formGroup]="episodeForm" class="episode-form-grid operation-form">
+    <form
+      [formGroup]="episodeForm"
+      class="episode-form-grid operation-form"
+      autocomplete="off"
+    >
       <div class="episode-form-section-title span-full">
         <mat-icon>assignment</mat-icon>
 
@@ -2091,7 +2198,27 @@
       <mat-form-field appearance="outline">
         <mat-label>Fecha solicitud original</mat-label>
         <mat-icon matPrefix>event</mat-icon>
-        <input matInput type="date" formControlName="originalRequestDate" />
+
+        <input
+          matInput
+          [matDatepicker]="originalRequestDatePicker"
+          formControlName="originalRequestDate"
+          placeholder="dd/mm/aaaa"
+          readonly
+        />
+
+        <mat-datepicker-toggle
+          matIconSuffix
+          [for]="originalRequestDatePicker"
+        ></mat-datepicker-toggle>
+
+        <mat-datepicker #originalRequestDatePicker></mat-datepicker>
+
+        <mat-error
+          *ngIf="episodeForm.controls.originalRequestDate.hasError('required')"
+        >
+          La fecha de solicitud es obligatoria.
+        </mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
@@ -2153,14 +2280,41 @@
 
       <mat-form-field appearance="outline">
         <mat-label>Número de tratamientos previos</mat-label>
+
         <mat-icon matPrefix>repeat</mat-icon>
 
         <input
           matInput
           type="number"
+          min="0"
+          step="1"
+          inputmode="numeric"
+          name="treatmentHistoryCount"
+          autocomplete="off"
           formControlName="previousTreatmentNumber"
-          readonly
         />
+
+        <mat-hint class="previous-treatment-hint">
+          Valor propuesto según el historial. Puede corregirlo antes de crear el
+          episodio.
+        </mat-hint>
+
+        <mat-error
+          *ngIf="
+            episodeForm.controls.previousTreatmentNumber.hasError('required')
+          "
+        >
+          Debe indicar el número de tratamientos previos.
+        </mat-error>
+
+        <mat-error
+          *ngIf="
+            episodeForm.controls.previousTreatmentNumber.hasError('min') ||
+            episodeForm.controls.previousTreatmentNumber.hasError('pattern')
+          "
+        >
+          Ingrese un número entero igual o mayor que cero.
+        </mat-error>
       </mat-form-field>
 
       <div class="episode-form-section-title span-full">
@@ -2269,12 +2423,46 @@
     </div>
 
     <div class="create-episode-actions">
-      <div class="empty-banner">
+      <div class="episode-traceability-notice">
+        <mat-icon>verified_user</mat-icon>
+
+        <div>
+          <strong>Registro sujeto a trazabilidad</strong>
+
+          <p>
+            Revise cuidadosamente toda la información antes de crear el
+            episodio. Una vez registrado, sus datos no podrán modificarse ni
+            eliminarse directamente. Cualquier corrección posterior deberá
+            realizarse mediante el procedimiento de reversa autorizado.
+          </p>
+
+          <p class="episode-traceability-notice__secondary">
+            Al crear el episodio se generará automáticamente la primera etapa
+            asociada al programa actual.
+          </p>
+        </div>
+      </div>
+
+      <div
+        class="episode-required-summary"
+        *ngIf="missingEpisodeRequiredFields.length"
+      >
         <mat-icon>info</mat-icon>
-        <span>
-          Al crear el episodio se generará automáticamente la primera etapa por
-          programa.
-        </span>
+
+        <div>
+          <strong> Para continuar, complete los datos obligatorios: </strong>
+
+          <ul>
+            <li *ngFor="let field of missingEpisodeRequiredFields">
+              {{ field }}
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="empty-banner error" *ngIf="episodeSaveError">
+        <mat-icon>error</mat-icon>
+        <span>{{ episodeSaveError }}</span>
       </div>
 
       <div class="create-episode-actions__buttons">
@@ -2293,24 +2481,24 @@
           mat-flat-button
           class="primary-btn"
           type="button"
-          [disabled]="isSavingEpisode || !selectedPerson"
+          [disabled]="isSavingEpisode || !selectedPerson || episodeForm.invalid"
           (click)="createEpisode()"
         >
-          <mat-icon>save</mat-icon>
+          <mat-icon>
+            {{ isSavingEpisode ? "hourglass_empty" : "save" }}
+          </mat-icon>
 
           {{ isSavingEpisode ? "Creando episodio..." : "Crear episodio" }}
         </button>
-      </div>
-
-      <div class="empty-banner error" *ngIf="episodeSaveError">
-        <mat-icon>error</mat-icon>
-        <span>{{ episodeSaveError }}</span>
       </div>
     </div>
   </mat-card>
 
   <!-- BLOQUES SECUNDARIOS DE LA FICHA -->
-  <section class="longitudinal-detail-grid" *ngIf="selectedPerson">
+  <section
+    class="longitudinal-detail-grid"
+    *ngIf="selectedPerson && hasCurrentEpisode"
+  >
     <mat-card
       id="citaciones"
       #summarySection
@@ -2461,7 +2649,10 @@
   </section>
 
   <!-- DOCUMENTOS DEL EPISODIO -->
-  <section class="longitudinal-full-section" *ngIf="selectedPerson">
+  <section
+    class="longitudinal-full-section"
+    *ngIf="selectedPerson && hasCurrentEpisode && currentDocumentEpisodeId"
+  >
     <mat-card
       id="documentos"
       #summarySection
@@ -2475,55 +2666,16 @@
 
         <div>
           <h3>Documentos del episodio</h3>
+
           <p>Archivos y antecedentes asociados a la demanda actual.</p>
         </div>
       </div>
 
-      <ng-container
-        *ngIf="longitudinal?.documents?.length; else noEpisodeDocuments"
-      >
-        <div class="episode-document-list">
-          <article
-            class="episode-document-item"
-            *ngFor="let document of longitudinal.documents"
-          >
-            <div class="episode-document-icon">
-              <mat-icon>insert_drive_file</mat-icon>
-            </div>
-
-            <div class="episode-document-info">
-              <strong>
-                {{
-                  document?.name ||
-                    document?.fileName ||
-                    document?.originalFilename ||
-                    "Documento sin nombre"
-                }}
-              </strong>
-
-              <span>
-                {{
-                  document?.documentType?.name ||
-                    document?.documentTypeName ||
-                    document?.contentType ||
-                    "Documento del episodio"
-                }}
-              </span>
-
-              <small *ngIf="document?.createdAt">
-                Registrado:
-                {{ formatDisplayDate(document.createdAt) }}
-              </small>
-            </div>
-          </article>
-        </div>
-      </ng-container>
-
-      <ng-template #noEpisodeDocuments>
-        <div class="empty-line">
-          No existen documentos asociados a este episodio.
-        </div>
-      </ng-template>
+      <app-episode-documents
+        [episodeId]="currentDocumentEpisodeId"
+        [stageId]="currentDocumentStageId"
+        [canManage]="canManageCurrentEpisode"
+      ></app-episode-documents>
     </mat-card>
   </section>
 

@@ -72,6 +72,7 @@ export const routes: Routes = [
           icon: 'insights',
           roles: ['ADMIN', 'SUPERVISOR'],
           iconColor: '#1565c0',
+          hidden: true,
         },
       },
 
@@ -184,6 +185,7 @@ export const routes: Routes = [
           icon: 'sync_alt',
           roles: ['ADMIN', 'ADMINISTRATIVO'],
           iconColor: '#ef6c00',
+          hidden: true,
         },
       },
 
@@ -202,6 +204,7 @@ export const routes: Routes = [
           icon: 'list_alt',
           roles: ['ADMIN', 'SUPERVISOR'],
           iconColor: '#1565c0',
+          hidden: true,
         },
       },
 
@@ -567,6 +570,9 @@ export const routes: Routes = [
         path: 'commune',
         redirectTo: 'cities',
         pathMatch: 'full',
+        data: {
+          hidden: true,
+        },
       },
 
       {
