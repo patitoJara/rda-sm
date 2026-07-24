@@ -3509,6 +3509,172 @@ export class DemandNewComponent
     })[0];
   }
 
+  get episodeOperationalSummary(): {
+    days: number;
+    waitingLabel: string;
+    waitingTone: 'success' | 'warning' | 'danger' | 'neutral';
+    requestDate: string;
+    state: string;
+    program: string;
+    lastManagementTitle: string;
+    lastManagementDetail: string;
+    nextActionTitle: string;
+    nextActionDetail: string;
+    nextActionTone: 'info' | 'warning' | 'danger';
+    nextActionIcon: string;
+    result: string;
+    resultPending: boolean;
+  } {
+    const episode = this.episodeSummary ?? this.createdEpisode ?? {};
+
+    const days = Math.max(0, Number(episode?.accumulatedDays ?? 0));
+
+    const semaphoreCode = String(episode?.semaphoreColor ?? '')
+      .trim()
+      .toUpperCase();
+
+    const waitingStopped = episode?.waitingStopped === true;
+
+    let waitingLabel = 'Sin clasificación de plazo';
+    let waitingTone: 'success' | 'warning' | 'danger' | 'neutral' = 'neutral';
+
+    if (waitingStopped) {
+      waitingLabel = 'Conteo de espera detenido';
+      waitingTone = 'neutral';
+    } else if (semaphoreCode === 'VERDE') {
+      waitingLabel = 'Dentro de plazo';
+      waitingTone = 'success';
+    } else if (semaphoreCode === 'AMARILLO' || semaphoreCode === 'NARANJO') {
+      waitingLabel = 'Requiere seguimiento';
+      waitingTone = 'warning';
+    } else if (semaphoreCode === 'ROJO') {
+      waitingLabel = 'Atención prioritaria';
+      waitingTone = 'danger';
+    }
+
+    const requestDate = formatDisplayDateValue(episode?.originalRequestDate);
+
+    const stateValue =
+      episode?.state?.name ?? episode?.stateName ?? episode?.stateCode ?? null;
+
+    const state = this.formatStateLabel(stateValue);
+
+    const program =
+      episode?.currentProgram?.name ??
+      episode?.initialProgram?.name ??
+      this.activeProgramName ??
+      'Sin programa responsable';
+
+    const formatCodeLabel = (value: unknown, fallback: string): string => {
+      const text = String(value ?? '')
+        .trim()
+        .toLowerCase()
+        .replace(/_/g, ' ')
+        .replace(/\s+/g, ' ');
+
+      if (!text) {
+        return fallback;
+      }
+
+      return text.charAt(0).toUpperCase() + text.slice(1);
+    };
+
+    const lastEvent = this.lastEpisodeEvent;
+
+    const lastManagementTitle = lastEvent
+      ? (lastEvent?.eventType?.name ??
+        lastEvent?.eventTypeName ??
+        formatCodeLabel(
+          lastEvent?.eventType?.code ??
+            lastEvent?.eventTypeCode ??
+            lastEvent?.event_type_code,
+          'Gestión registrada',
+        ))
+      : 'Sin gestiones registradas';
+
+    const lastManagementDetail = lastEvent
+      ? `${formatDisplayDateValue(
+          lastEvent?.eventDate ?? lastEvent?.createdAt,
+        )}${
+          lastEvent?.eventTime
+            ? ` · ${formatDisplayTimeValue(lastEvent.eventTime)}`
+            : ''
+        }`
+      : 'El episodio todavía no registra actividades.';
+
+    let nextActionTitle = 'Definir próxima gestión';
+    let nextActionDetail =
+      'No existe una citación o actividad próxima programada.';
+    let nextActionTone: 'info' | 'warning' | 'danger' = 'warning';
+    let nextActionIcon = 'event_available';
+
+    const expiredCitation = this.expiredPendingCitationEvents[0] ?? null;
+
+    const pendingCitation = this.currentPendingCitationEvents[0] ?? null;
+
+    if (expiredCitation) {
+      nextActionTitle = 'Regularizar asistencia pendiente';
+      nextActionDetail = `La citación del ${this.formatCitationOptionDate(
+        expiredCitation,
+      )} se encuentra vencida.`;
+      nextActionTone = 'danger';
+      nextActionIcon = 'notification_important';
+    } else if (pendingCitation) {
+      const citationDate = this.formatCitationOptionDate(pendingCitation);
+
+      const citationTime = this.formatCitationOptionTime(pendingCitation);
+
+      nextActionTitle = 'Citación programada';
+      nextActionDetail = citationTime
+        ? `${citationDate} · ${citationTime}`
+        : citationDate;
+
+      nextActionTone = 'info';
+      nextActionIcon = 'event';
+    } else if (!this.canManageCurrentEpisode) {
+      nextActionTitle = 'Seguimiento por programa responsable';
+      nextActionDetail = `La continuidad de la demanda corresponde a ${program}.`;
+      nextActionTone = 'info';
+      nextActionIcon = 'visibility';
+    }
+
+    const resultValue =
+      episode?.result?.name ??
+      episode?.resultName ??
+      episode?.resultCode ??
+      null;
+
+    const resultCode = String(
+      episode?.result?.code ?? episode?.resultCode ?? '',
+    )
+      .trim()
+      .toUpperCase();
+
+    const result = formatResultLabelValue(resultValue, 'Sin resultado');
+
+    const resultPending =
+      !resultCode ||
+      resultCode === 'AUN_SIN_RESULTADO' ||
+      resultCode === 'LISTA_ESPERA';
+
+    return {
+      days,
+      waitingLabel,
+      waitingTone,
+      requestDate,
+      state,
+      program,
+      lastManagementTitle,
+      lastManagementDetail,
+      nextActionTitle,
+      nextActionDetail,
+      nextActionTone,
+      nextActionIcon,
+      result,
+      resultPending,
+    };
+  }
+
   get orderedEpisodeEvents(): any[] {
     const events = [...(this.episodeEvents ?? [])];
 

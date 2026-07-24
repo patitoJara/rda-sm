@@ -939,152 +939,191 @@
       </section>
     </div>
 
-    <!-- =====================================================
-       INDICADORES DEL EPISODIO
-  ====================================================== -->
-    <div class="summary-indicators" *ngIf="hasCurrentEpisode">
-      <div class="indicator-box">
-        <span>Fecha solicitud original</span>
+        <!-- =====================================================
+       SITUACIÓN OPERATIVA DE LA DEMANDA
+    ====================================================== -->
+    <section
+      class="episode-operational-summary"
+      *ngIf="hasCurrentEpisode"
+      aria-labelledby="episodeOperationalTitle"
+    >
+      <div class="operational-summary-header">
+        <div class="operational-summary-header__icon">
+          <mat-icon>monitor_heart</mat-icon>
+        </div>
 
-        <strong>
-          {{
-            formatDisplayDate(
-              episodeSummary?.originalRequestDate ||
-                createdEpisode?.originalRequestDate
-            )
-          }}
-        </strong>
+        <div>
+          <span>SITUACIÓN ACTUAL</span>
+
+          <h2 id="episodeOperationalTitle">
+            Resumen operativo de la demanda
+          </h2>
+
+          <p>
+            Información prioritaria para conocer el estado del episodio y
+            orientar la siguiente gestión.
+          </p>
+        </div>
       </div>
 
-      <div class="indicator-box danger">
-        <span>Días acumulados</span>
+      <div class="operational-summary-grid">
+        <!-- TIEMPO DE ESPERA -->
+        <article
+          class="operational-summary-card"
+          [ngClass]="
+            'operational-summary-card--' +
+            episodeOperationalSummary.waitingTone
+          "
+        >
+          <div class="operational-summary-card__icon">
+            <mat-icon>schedule</mat-icon>
+          </div>
 
-        <strong>
-          {{
-            episodeSummary?.accumulatedDays ??
-              createdEpisode?.accumulatedDays ??
-              0
-          }}
-        </strong>
+          <div class="operational-summary-card__content">
+            <span>TIEMPO DE ESPERA</span>
+
+            <strong class="operational-summary-card__number">
+              {{ episodeOperationalSummary.days }}
+              {{
+                episodeOperationalSummary.days === 1
+                  ? "día"
+                  : "días"
+              }}
+            </strong>
+
+            <small>
+              {{ episodeOperationalSummary.waitingLabel }}
+            </small>
+
+            <p>
+              Solicitud recibida:
+              {{ episodeOperationalSummary.requestDate }}
+            </p>
+          </div>
+        </article>
+
+        <!-- ESTADO Y PROGRAMA RESPONSABLE -->
+        <article
+          class="operational-summary-card operational-summary-card--state"
+        >
+          <div class="operational-summary-card__icon">
+            <mat-icon>assignment_turned_in</mat-icon>
+          </div>
+
+          <div class="operational-summary-card__content">
+            <span>ESTADO ACTUAL</span>
+
+            <strong>
+              {{ episodeOperationalSummary.state }}
+            </strong>
+
+            <small>Programa responsable</small>
+
+            <p>
+              {{ episodeOperationalSummary.program }}
+            </p>
+          </div>
+        </article>
+
+        <!-- ÚLTIMA GESTIÓN -->
+        <article
+          class="operational-summary-card operational-summary-card--management"
+        >
+          <div class="operational-summary-card__icon">
+            <mat-icon>history</mat-icon>
+          </div>
+
+          <div class="operational-summary-card__content">
+            <span>ÚLTIMA GESTIÓN</span>
+
+            <strong>
+              {{ episodeOperationalSummary.lastManagementTitle }}
+            </strong>
+
+            <small>
+              {{ episodeOperationalSummary.lastManagementDetail }}
+            </small>
+
+            <p>
+              {{ episodeEvents.length }}
+              {{
+                episodeEvents.length === 1
+                  ? "gestión registrada"
+                  : "gestiones registradas"
+              }}
+            </p>
+          </div>
+        </article>
+
+        <!-- PRÓXIMA ACCIÓN -->
+        <article
+          class="operational-summary-card"
+          [ngClass]="
+            'operational-summary-card--action-' +
+            episodeOperationalSummary.nextActionTone
+          "
+        >
+          <div class="operational-summary-card__icon">
+            <mat-icon>
+              {{ episodeOperationalSummary.nextActionIcon }}
+            </mat-icon>
+          </div>
+
+          <div class="operational-summary-card__content">
+            <span>PRÓXIMA ACCIÓN</span>
+
+            <strong>
+              {{ episodeOperationalSummary.nextActionTitle }}
+            </strong>
+
+            <p>
+              {{ episodeOperationalSummary.nextActionDetail }}
+            </p>
+          </div>
+        </article>
       </div>
 
-      <div class="indicator-box">
-        <span>Programa responsable de la demanda</span>
-
-        <strong>
-          {{
-            episodeSummary?.currentProgram?.name ||
-              createdEpisode?.currentProgram?.name ||
-              activeProgramName ||
-              "Sin programa"
-          }}
-        </strong>
-      </div>
-
-      <div class="indicator-box">
-        <span>Resultado</span>
-        <strong>
-          {{
-            formatResultLabel(
-              episodeSummary?.result?.name ||
-                episodeSummary?.resultName ||
-                episodeSummary?.resultCode ||
-                createdEpisode?.result?.name ||
-                createdEpisode?.resultName ||
-                createdEpisode?.resultCode,
-              "Sin resultado"
-            )
-          }}
-        </strong>
-      </div>
-
-      <div class="indicator-box">
-        <span>Eventos</span>
-        <strong>{{ episodeEvents.length || 0 }}</strong>
-      </div>
-    </div>
-
-    <!-- =====================================================
-       LÍNEA DE VIDA DEL EPISODIO
-  ====================================================== -->
-    <div class="episode-life-line" *ngIf="hasCurrentEpisode">
-      <div class="life-step active">
-        <span></span>
-
-        <strong>Solicitud</strong>
-
-        <small>
-          {{
-            episodeSummary?.originalRequestDate ||
-              createdEpisode?.originalRequestDate ||
-              "Pendiente"
-          }}
-        </small>
-      </div>
-
-      <div class="life-step" [class.active]="episodeEvents.length > 0">
-        <span></span>
-
-        <strong>Gestiones</strong>
-
-        <small> {{ episodeEvents.length || 0 }} eventos </small>
-      </div>
-
+      <!-- RESULTADO ACTUAL -->
       <div
-        class="life-step"
-        [class.active]="
-          !!(
-            episodeSummary?.currentProgram?.name ||
-            createdEpisode?.currentProgram?.name ||
-            activeProgramName
-          )
+        class="operational-result-strip"
+        [class.operational-result-strip--pending]="
+          episodeOperationalSummary.resultPending
+        "
+        [class.operational-result-strip--defined]="
+          !episodeOperationalSummary.resultPending
         "
       >
-        <span></span>
-
-        <strong>Programa</strong>
-
-        <small>
-          {{
-            episodeSummary?.currentProgram?.name ||
-              createdEpisode?.currentProgram?.name ||
-              activeProgramName ||
-              "Pendiente"
-          }}
-        </small>
-      </div>
-
-      <div
-        class="life-step"
-        [class.active]="
-          !!(episodeSummary?.resultCode || createdEpisode?.resultCode)
-        "
-      >
-        <span></span>
-
-        <strong>Resultado</strong>
-
-        <small>
-          <strong>
+        <div class="operational-result-strip__icon">
+          <mat-icon>
             {{
-              formatResultLabel(
-                episodeSummary?.result?.name ||
-                  episodeSummary?.resultName ||
-                  episodeSummary?.resultCode ||
-                  createdEpisode?.result?.name ||
-                  createdEpisode?.resultName ||
-                  createdEpisode?.resultCode,
-                "Sin resultado"
-              )
+              episodeOperationalSummary.resultPending
+                ? "pending_actions"
+                : "task_alt"
             }}
+          </mat-icon>
+        </div>
+
+        <div>
+          <span>RESULTADO ACTUAL</span>
+
+          <strong>
+            {{ episodeOperationalSummary.result }}
           </strong>
-        </small>
+
+          <p>
+            {{
+              episodeOperationalSummary.resultPending
+                ? "Pendiente de evaluación y definición de resultado."
+                : "El episodio posee un resultado formal registrado."
+            }}
+          </p>
+        </div>
       </div>
-    </div>
+    </section>
 
     <!-- =====================================================
        ACCIONES OPERATIVAS
-  ====================================================== -->
+    ====================================================== -->
     <div
       class="operative-dock"
       *ngIf="hasCurrentEpisode && canManageCurrentEpisode"
