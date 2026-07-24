@@ -482,6 +482,14 @@
   grid-template-columns: 1.25fr 0.9fr 0.85fr;
 }
 
+.current-demand-grid--without-episode {
+  grid-template-columns: 1fr;
+}
+
+.current-demand-grid--without-episode .current-demand-card--main {
+  width: 100%;
+}
+
 .longitudinal-detail-grid {
   grid-template-columns: 1.25fr 0.95fr 0.8fr;
 }

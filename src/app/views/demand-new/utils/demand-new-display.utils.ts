@@ -34,3 +34,43 @@ export function formatDisplayTime(value: any): string {
 
   return String(value).trim().slice(0, 5);
 }
+
+const RESULT_LABELS: Record<string, string> = {
+  LISTA_ESPERA: 'Lista de espera',
+  AUN_SIN_RESULTADO: 'Aún sin resultado',
+  REFERENCIA: 'Referencia',
+  INGRESO_TRATAMIENTO: 'Ingreso a tratamiento',
+  EGRESO: 'Egreso',
+  NO_ES_PERFIL: 'No es perfil',
+  NO_CORRESPONDE: 'No corresponde',
+  ABANDONO: 'Abandono',
+};
+
+export function formatResultLabel(
+  value: unknown,
+  fallback = 'Sin resultado',
+): string {
+  const code = String(value ?? '')
+    .trim()
+    .toUpperCase();
+
+  if (!code) {
+    return fallback;
+  }
+
+  const configuredLabel = RESULT_LABELS[code];
+
+  if (configuredLabel) {
+    return configuredLabel;
+  }
+
+  const normalized = code
+    .toLowerCase()
+    .replace(/_/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return normalized
+    ? normalized.charAt(0).toUpperCase() + normalized.slice(1)
+    : fallback;
+}

@@ -49,6 +49,7 @@ import { Contact } from '@app/models/contact';
 import { ContactCreateDto } from '@app/models/contact-create.dto';
 
 import { DemandService } from '../../core/services/demand.service';
+import { EpisodeDocumentsComponent } from './documents/episode-documents.component';
 
 import {
   ActiveActionPanel,
@@ -117,10 +118,13 @@ import {
   getSemaphoreCssClass,
   getSemaphoreDescriptionText,
 } from './utils/demand-new-semaphore.utils';
+
 import {
   formatDisplayDate as formatDisplayDateValue,
   formatDisplayTime as formatDisplayTimeValue,
+  formatResultLabel as formatResultLabelValue,
 } from './utils/demand-new-display.utils';
+
 import { normalizeProfessionalForCitation } from './utils/demand-new-professional.utils';
 import {
   buildSecondarySubstances,
@@ -148,9 +152,13 @@ import {
     MatProgressBarModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    EpisodeDocumentsComponent,
   ],
 })
-export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implements OnInit, AfterViewInit, OnDestroy {
+export class DemandNewComponent
+  extends DemandNewAuxiliaryCatalogState
+  implements OnInit, AfterViewInit, OnDestroy
+{
   private fb = inject(FormBuilder);
   private postulantService = inject(PostulantService);
   private preloadCatalogs = inject(PreloadCatalogsService);
@@ -161,7 +169,6 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
     ProgramProfessionalService,
   );
   private readonly contactService = inject(ContactService);
-  secondarySubstanceMap: { [id: number]: number } = {};
 
   searchForm = this.fb.group({
     rut: ['', [Validators.required, rutValidator()]],
@@ -204,7 +211,13 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
 
   interviewForm = this.fb.group({
     eventDate: [new Date(), Validators.required],
-    eventHour: ['', [Validators.required, Validators.pattern(/^(0?[1-9]|1[0-2]):[0-5][0-9]$/)]],
+    eventHour: [
+      '',
+      [
+        Validators.required,
+        Validators.pattern(/^(0?[1-9]|1[0-2]):[0-5][0-9]$/),
+      ],
+    ],
     eventPeriod: ['AM', Validators.required],
     comment: ['', Validators.required],
     observation: ['', Validators.required],
@@ -302,14 +315,17 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
     sender: [null as number | null],
     diverter: [null as number | null],
 
-    previousTreatmentNumber: [0],
+    previousTreatmentNumber: [
+      0,
+      [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)],
+    ],
 
     currentState: [{ value: 'EN TRÁMITE', disabled: true }],
     currentResult: [{ value: 'AÚN SIN RESULTADO', disabled: true }],
 
     initialObservation: [''],
 
-    primarySubstanceId: [null as number | null],
+    primarySubstanceId: [null as number | null, Validators.required],
     secondarySubstances: [
       [] as Array<{
         substanceId: number;
@@ -317,9 +333,6 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
       }>,
     ],
   });
-
-  // Estados vacíos reales: no mocks
-  personLoaded = false;
 
   readonly flowSteps = [
     'Persona',
@@ -591,6 +604,11 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
     read: ElementRef,
   })
   private createEpisodeSection?: ElementRef<HTMLElement>;
+
+  @ViewChild('activeActionSection', {
+    read: ElementRef,
+  })
+  private activeActionSection?: ElementRef<HTMLElement>;
 
   ngOnInit(): void {
     this.loadCatalogs();
@@ -1402,6 +1420,12 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
 
           this.patchPersonForm(person);
 
+          /*
+           * La persona puede existir sin ficha longitudinal.
+           * En ese caso, el referente debe consultarse por separado.
+           */
+          this.loadContactByPostulant(Number(person.id));
+
           this.stageVisualState = 'Ficha longitudinal no disponible';
 
           this.searchError =
@@ -1418,6 +1442,7 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
 
           if (personError?.status === 404) {
             this.selectedPerson = null;
+            this.selectedContact = null;
             this.personLoaded = false;
             this.personNotFound = true;
 
@@ -1447,6 +1472,24 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
             'No fue posible recuperar los datos completos de la persona.';
         },
       });
+  }
+
+  get missingEpisodeRequiredFields(): string[] {
+    const missingFields: string[] = [];
+
+    if (this.episodeForm.controls.episodeTypeId.hasError('required')) {
+      missingFields.push('Tipo de episodio');
+    }
+
+    if (this.episodeForm.controls.contactType.hasError('required')) {
+      missingFields.push('Vía de ingreso');
+    }
+
+    if (this.episodeForm.controls.primarySubstanceId.hasError('required')) {
+      missingFields.push('Sustancia principal');
+    }
+
+    return missingFields;
   }
 
   createEpisode(): void {
@@ -1493,6 +1536,11 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
 
       episodeTypeId: Number(raw.episodeTypeId),
 
+      previousTreatmentNumber: Math.max(
+        0,
+        Math.trunc(Number(raw.previousTreatmentNumber ?? 0)),
+      ),
+
       originalRequestDate:
         toStringOrNull(raw.originalRequestDate) ?? getTodayForDateInput(),
 
@@ -1509,6 +1557,7 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
 
     this.isSavingEpisode = true;
     this.episodeSaveError = null;
+    this.episodeSaveSuccess = null;
 
     console.log('[DemandNew] Payload creación episodio:', payload);
 
@@ -1526,6 +1575,41 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
           this.createdEpisode = episode;
           this.episodeSummary = episode;
           this.episodeLoaded = true;
+          /*
+           * La persona ya posee un episodio.
+           * Se eliminan los avisos anteriores de ficha inexistente.
+           */
+          this.searchError = null;
+          this.longitudinalError = null;
+
+          const episodeReference = episode?.episodeCode
+            ? ` ${episode.episodeCode}`
+            : episode?.id
+              ? ` N.º ${episode.id}`
+              : '';
+
+          const savedPreviousTreatmentNumber = Math.max(
+            0,
+            Math.trunc(
+              Number(
+                episode?.previousTreatmentNumber ??
+                  raw.previousTreatmentNumber ??
+                  0,
+              ),
+            ),
+          );
+
+          const savedProgramName =
+            episode?.initialProgram?.name ??
+            episode?.currentProgram?.name ??
+            this.activeProgramName ??
+            'el programa actual';
+
+          this.episodeSaveSuccess =
+            `El episodio${episodeReference} fue creado correctamente. ` +
+            `Se generó la etapa inicial en ${savedProgramName}. ` +
+            `Número de tratamientos previos registrado: ` +
+            `${savedPreviousTreatmentNumber}.`;
 
           this.stageLoaded = Boolean(
             episode?.currentStageId ??
@@ -1544,6 +1628,11 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
               episode?.episodeType?.id ??
               episode?.episodeTypeId ??
               raw.episodeTypeId,
+
+            previousTreatmentNumber:
+              episode?.previousTreatmentNumber ??
+              raw.previousTreatmentNumber ??
+              0,
 
             originalRequestDate:
               episode?.originalRequestDate ?? raw.originalRequestDate,
@@ -1568,11 +1657,12 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
               episode?.stateCode ??
               'EN TRÁMITE',
 
-            currentResult:
+            currentResult: formatResultLabelValue(
               episode?.result?.name ??
-              episode?.resultName ??
-              episode?.resultCode ??
-              'AÚN SIN RESULTADO',
+                episode?.resultName ??
+                episode?.resultCode,
+              'Aún sin resultado',
+            ),
 
             initialObservation:
               episode?.initialObservation ?? raw.initialObservation ?? '',
@@ -1582,21 +1672,18 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
           this.episodeForm.markAsUntouched();
 
           /*
-           * No cargar todavía el longitudinal.
-           * El endpoint continúa respondiendo 403.
+           * La respuesta del POST ya permite actualizar la
+           * vista inmediata del episodio.
            *
-           * const episodeId = Number(
-           *   episode?.id ?? episode?.episodeId,
-           * );
-           *
-           * if (Number.isFinite(episodeId) && episodeId > 0) {
-           *   this.loadEpisodeLongitudinal(episodeId);
-           * }
+           * La ficha longitudinal podrá recargarse cuando el
+           * endpoint esté disponible para el programa activo.
            */
         },
 
         error: (error: HttpErrorResponse) => {
           console.error('[DemandNew] Error creando episodio:', error);
+
+          this.episodeSaveSuccess = null;
 
           if (error.status === 403) {
             this.episodeSaveError =
@@ -1656,6 +1743,7 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
     }
 
     this.episodeSaveError = null;
+    this.episodeSaveSuccess = null;
     this.showCreatePersonForm = false;
 
     this.prepareCreateEpisodeForm(activeProgramId);
@@ -1702,26 +1790,36 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
   }
 
   private prepareCreateEpisodeForm(activeProgramId: number): void {
-    const currentOriginalRequestDate =
-      this.episodeForm.controls.originalRequestDate.value;
+    this.secondarySubstanceMap = {};
 
-    this.episodeForm.patchValue({
-      originalRequestDate: currentOriginalRequestDate || getTodayForDateInput(),
+    this.episodeForm.reset({
+      episodeTypeId: null,
+      originalRequestDate: getTodayForDateInput(),
 
       initialProgramId: activeProgramId,
-
       initialProgramName: this.activeProgramName ?? '',
-
       currentProgramName: this.activeProgramName ?? '',
+
+      contactType: null,
+      sender: null,
+      diverter: null,
+
+      previousTreatmentNumber: calculatePreviousTreatmentNumber(
+        this.longitudinal,
+      ),
 
       currentState: 'EN TRÁMITE',
       currentResult: 'AÚN SIN RESULTADO',
 
-      previousTreatmentNumber: 0,
+      initialObservation: '',
+
+      primarySubstanceId: null,
+      secondarySubstances: [],
     });
 
     this.episodeForm.markAsPristine();
     this.episodeForm.markAsUntouched();
+    this.episodeForm.updateValueAndValidity();
   }
 
   closeCreateEpisodeForm(): void {
@@ -1747,6 +1845,9 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
     }
 
     this.syncSecondarySubstances();
+
+    this.episodeForm.controls.primarySubstanceId.updateValueAndValidity();
+    this.episodeForm.updateValueAndValidity();
   }
 
   toggleSecondarySubstance(id: number): void {
@@ -2117,6 +2218,16 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
           this.personLoaded = true;
           this.personNotFound = false;
           this.personSaveError = null;
+          this.searchError = null;
+          this.searched = true;
+
+          if (
+            !this.createdEpisode &&
+            !this.episodeSummary &&
+            !this.longitudinal?.activeEpisode
+          ) {
+            this.stageVisualState = 'Persona registrada sin episodio';
+          }
 
           /*
            * Reemplaza el postulante resumido dentro
@@ -3065,6 +3176,25 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
         observation: '',
       });
     }
+    if (panel !== null) {
+      setTimeout(() => {
+        const section = this.activeActionSection?.nativeElement;
+
+        if (!section) {
+          return;
+        }
+
+        section.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest',
+        });
+
+        section.focus({
+          preventScroll: true,
+        });
+      });
+    }
   }
 
   isExpiredCitation(item: any): boolean {
@@ -3597,12 +3727,55 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
     return !!getCurrentEpisodeId(this.createdEpisode, this.episodeSummary);
   }
 
+  get currentDocumentEpisodeId(): number | null {
+    const episodeId =
+      getCurrentEpisodeId(this.createdEpisode, this.episodeSummary) ??
+      this.longitudinal?.activeEpisode?.id ??
+      this.longitudinal?.episode?.id ??
+      null;
+
+    const numericEpisodeId = Number(episodeId);
+
+    return Number.isFinite(numericEpisodeId) && numericEpisodeId > 0
+      ? numericEpisodeId
+      : null;
+  }
+
+  get currentDocumentStageId(): number | null {
+    const stages = Array.isArray(this.longitudinal?.stages)
+      ? this.longitudinal.stages
+      : [];
+
+    const currentStage = stages.find(
+      (stage: any) => stage?.isCurrent === true || stage?.active === true,
+    );
+
+    const stageId =
+      this.createdEpisode?.currentStageId ??
+      this.episodeSummary?.currentStageId ??
+      this.longitudinal?.activeEpisode?.currentStageId ??
+      this.longitudinal?.currentStage?.id ??
+      this.longitudinal?.activeStage?.id ??
+      currentStage?.id ??
+      null;
+
+    const numericStageId = Number(stageId);
+
+    return Number.isFinite(numericStageId) && numericStageId > 0
+      ? numericStageId
+      : null;
+  }
+
   formatDisplayDate(value: any): string {
     return formatDisplayDateValue(value);
   }
 
   formatDisplayTime(value: any): string {
     return formatDisplayTimeValue(value);
+  }
+
+  formatResultLabel(value: unknown, fallback = 'Sin resultado'): string {
+    return formatResultLabelValue(value, fallback);
   }
 
   toggleDemandantDetails(): void {
@@ -3646,7 +3819,23 @@ export class DemandNewComponent extends DemandNewAuxiliaryCatalogState implement
     return filterObservationEvents(this.episodeEvents);
   }
 
+  get hasCurrentEpisode(): boolean {
+    return (
+      !!this.createdEpisode ||
+      !!this.episodeSummary ||
+      !!this.longitudinal?.activeEpisode
+    );
+  }
+
   get canManageCurrentEpisode(): boolean {
+    /*
+     * Si la persona todavía no posee episodio, no existe una
+     * responsabilidad programática que pueda bloquear la ficha.
+     */
+    if (!this.hasCurrentEpisode) {
+      return true;
+    }
+
     return canManageEpisode(
       this.activeProgramId,
       this.tokenService.getActiveProgramId(),

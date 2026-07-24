@@ -1,0 +1,367 @@
+:host {
+  display: block;
+}
+
+.episode-documents {
+  display: grid;
+  gap: 18px;
+}
+
+.document-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.document-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #52656b;
+  font-size: 0.9rem;
+}
+
+.document-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 9px;
+  color: #ffffff;
+  font-weight: 700;
+  background: #0b7f90;
+  border-radius: 999px;
+}
+
+.upload-toggle,
+.upload-submit {
+  color: #ffffff !important;
+  background: linear-gradient(
+    135deg,
+    #08778a,
+    #0b91a5
+  ) !important;
+}
+
+.document-upload-form {
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+  background: #f4fafb;
+  border: 1px solid #cce4e8;
+  border-radius: 16px;
+}
+
+.upload-form-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.upload-form-heading > mat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: #08778a;
+  background: #dff2f5;
+  border-radius: 12px;
+}
+
+.upload-form-heading div {
+  display: grid;
+  gap: 3px;
+}
+
+.upload-form-heading strong {
+  color: #173f47;
+  font-size: 1rem;
+}
+
+.upload-form-heading span {
+  color: #60747a;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.upload-form-fields {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.upload-form-fields mat-form-field {
+  width: 100%;
+}
+
+.select-file-button {
+  min-height: 56px;
+  color: #08778a;
+  border-color: #87c5ce;
+}
+
+.selected-file {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #ffffff;
+  border: 1px solid #d4e5e8;
+  border-radius: 12px;
+}
+
+.selected-file > mat-icon {
+  color: #0b8293;
+}
+
+.selected-file div {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
+}
+
+.selected-file strong {
+  overflow: hidden;
+  color: #263d43;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selected-file span {
+  color: #6c7f84;
+  font-size: 0.8rem;
+}
+
+.upload-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.document-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px 15px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  border: 1px solid;
+  border-radius: 12px;
+}
+
+.document-message--success {
+  color: #17613b;
+  background: #edf9f2;
+  border-color: #a7d8bc;
+}
+
+.document-message--error {
+  color: #8c2f2f;
+  background: #fff1f1;
+  border-color: #e6b4b4;
+}
+
+.document-message mat-icon {
+  flex: 0 0 auto;
+}
+
+.document-empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 120px;
+  padding: 24px;
+  color: #61747a;
+  text-align: left;
+  background: #f8fbfc;
+  border: 1px dashed #bdd5da;
+  border-radius: 14px;
+}
+
+.document-empty-state > mat-icon {
+  width: 38px;
+  height: 38px;
+  color: #7baab2;
+  font-size: 38px;
+}
+
+.document-empty-state div {
+  display: grid;
+  gap: 3px;
+}
+
+.document-empty-state strong {
+  color: #38545b;
+}
+
+.document-empty-state span {
+  font-size: 0.86rem;
+}
+
+.episode-document-list {
+  display: grid;
+  gap: 12px;
+}
+
+.episode-document-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 15px;
+  background: #ffffff;
+  border: 1px solid #dbe7e9;
+  border-radius: 14px;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.episode-document-item:hover {
+  border-color: #9bcbd2;
+  box-shadow: 0 8px 22px rgb(13 92 105 / 10%);
+  transform: translateY(-1px);
+}
+
+.episode-document-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  color: #08778a;
+  background: #e5f5f7;
+  border-radius: 13px;
+}
+
+.episode-document-icon mat-icon {
+  width: 26px;
+  height: 26px;
+  font-size: 26px;
+}
+
+.episode-document-info {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.episode-document-info > strong {
+  overflow: hidden;
+  color: #243b41;
+  font-size: 0.96rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.document-type {
+  color: #08778a;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.document-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 3px;
+  color: #6c7c81;
+  font-size: 0.78rem;
+}
+
+.document-metadata span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.document-metadata mat-icon {
+  width: 15px;
+  height: 15px;
+  font-size: 15px;
+}
+
+.document-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.document-actions button {
+  color: #47666d;
+}
+
+.document-actions button:hover:not(:disabled) {
+  color: #08778a;
+  background: #e8f5f7;
+}
+
+.document-actions .delete-document-button {
+  color: #b04444;
+}
+
+.document-actions .delete-document-button:hover:not(:disabled) {
+  color: #932f2f;
+  background: #fff0f0;
+}
+
+@media (max-width: 820px) {
+  .document-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .upload-toggle {
+    width: 100%;
+  }
+
+  .upload-form-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .select-file-button {
+    width: 100%;
+  }
+
+  .episode-document-item {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .document-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+    padding-top: 8px;
+    border-top: 1px solid #edf2f3;
+  }
+}
+
+@media (max-width: 560px) {
+  .episode-document-item {
+    grid-template-columns: 1fr;
+  }
+
+  .episode-document-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .document-actions {
+    grid-column: auto;
+    justify-content: flex-start;
+  }
+
+  .upload-form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .upload-form-actions button {
+    width: 100%;
+  }
+}

@@ -645,6 +645,148 @@
   }
 }
 
-.create-episode-trigger {
-  background: red !important;
+/* Estado visual del botón Crear episodio deshabilitado */
+.create-episode-actions__buttons .primary-btn:disabled,
+.create-episode-actions__buttons .primary-btn.mat-mdc-button-disabled {
+  background: #c7d7da !important;
+  color: #6f858a !important;
+  box-shadow: none !important;
+  opacity: 0.72;
+  cursor: not-allowed !important;
+  pointer-events: none;
+  filter: grayscale(0.45);
+  transform: none !important;
+}
+
+.create-episode-actions__buttons .primary-btn:disabled mat-icon,
+.create-episode-actions__buttons
+  .primary-btn.mat-mdc-button-disabled
+  mat-icon {
+  color: #6f858a !important;
+}
+/* ============================================================
+   DATOS OBLIGATORIOS PENDIENTES DEL EPISODIO
+============================================================ */
+
+.episode-required-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  width: 100%;
+  padding: 14px 16px;
+  box-sizing: border-box;
+
+  border: 1px solid #e1c46a;
+  border-radius: 12px;
+
+  background: #fff9e8;
+  color: #59480f;
+
+  mat-icon {
+    flex: 0 0 auto;
+    margin-top: 1px;
+    color: #a66f00;
+  }
+
+  strong {
+    display: block;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 26px;
+
+    margin: 7px 0 0;
+    padding-left: 20px;
+  }
+
+  li {
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+}
+
+.previous-treatment-hint {
+  display: block;
+  margin-top: 3px;
+  color: #455a64;
+  font-size: 0.86rem;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: normal;
+}
+
+:host ::ng-deep .previous-treatment-hint {
+  display: block !important;
+  margin-top: 5px !important;
+  color: #37474f !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  line-height: 20px !important;
+  letter-spacing: 0 !important;
+  white-space: normal !important;
+}
+
+.episode-save-success {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  width: 100%;
+  margin: 0 0 18px;
+  padding: 16px 18px;
+  box-sizing: border-box;
+
+  border: 1px solid #77b99a;
+  border-radius: 14px;
+
+  background: #ecf8f1;
+  color: #174f36;
+
+  box-shadow: 0 8px 22px rgba(23, 79, 54, 0.1);
+
+  > mat-icon {
+    flex: 0 0 auto;
+    margin-top: 2px;
+    color: #23875b;
+  }
+
+  > button {
+    flex: 0 0 auto;
+    margin: -8px -8px -8px auto;
+    color: #356b55;
+  }
+}
+
+.episode-save-success__content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+
+  strong {
+    font-size: 1rem;
+    font-weight: 800;
+  }
+
+  span {
+    font-size: 0.92rem;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+}
+
+@media (max-width: 640px) {
+  .episode-required-summary ul {
+    display: block;
+  }
+
+  .episode-required-summary li + li {
+    margin-top: 4px;
+  }
 }

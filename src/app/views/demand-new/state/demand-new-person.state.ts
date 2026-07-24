@@ -1,4 +1,4 @@
-﻿import { Contact } from '@app/models/contact';
+import { Contact } from '@app/models/contact';
 import { Postulant } from '@app/models/postulant';
 
 export abstract class DemandNewPersonState {
@@ -8,6 +8,7 @@ export abstract class DemandNewPersonState {
   isSavingPerson = false;
   searched = false;
   personNotFound = false;
+  personLoaded = false;
 
   selectedPerson: Postulant | null = null;
   selectedContact: Contact | null = null;

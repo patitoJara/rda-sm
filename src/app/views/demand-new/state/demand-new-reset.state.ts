@@ -25,6 +25,7 @@ export interface DemandNewResetTarget {
   searchError: string | null;
   personSaveError: string | null;
   episodeSaveError: string | null;
+  episodeSaveSuccess: string | null;
   longitudinalError: string | null;
 
   citationError: string | null;
@@ -67,6 +68,7 @@ export function resetLoadedDemandView(target: DemandNewResetTarget): void {
   target.searchError = null;
   target.personSaveError = null;
   target.episodeSaveError = null;
+  target.episodeSaveSuccess = null;
   target.longitudinalError = null;
 
   target.citationError = null;
