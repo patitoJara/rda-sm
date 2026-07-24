@@ -1,10 +1,94 @@
 @use '../../shared/styles/maintainer-page.scss' as *;
 
-.episode-types-table {
-  max-height: none !important;
-  overflow-y: visible !important;
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
 }
 
-.table-card {
-  overflow: visible !important;
+.episode-types-table {
+  width: 100%;
+  min-width: 1540px;
+}
+
+.mat-column-id {
+  width: 72px;
+  min-width: 72px;
+}
+
+.mat-column-code {
+  min-width: 240px;
+}
+
+.mat-column-name {
+  min-width: 220px;
+}
+
+.mat-column-description {
+  min-width: 320px;
+}
+
+.mat-column-createdAt,
+.mat-column-updatedAt,
+.mat-column-deletedAt {
+  min-width: 155px;
+  white-space: nowrap;
+}
+
+.mat-column-estado {
+  min-width: 110px;
+}
+
+.mat-column-acciones {
+  width: 120px;
+  min-width: 120px;
+}
+
+.description-cell {
+  max-width: 420px;
+  line-height: 1.45;
+  white-space: normal;
+}
+
+.code-badge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 230px;
+  padding: 5px 10px;
+  overflow-wrap: anywhere;
+  color: #075f6d;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  background: #e8f6f8;
+  border: 1px solid #b9dde2;
+  border-radius: 999px;
+}
+
+.status-badge.inactive {
+  color: #805500;
+  background: #fff4d6;
+  border-color: #e7c56b;
+}
+
+.action-buttons {
+  flex-wrap: nowrap;
+}
+
+.no-data-row td {
+  padding: 32px 20px;
+  color: #607077;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .episode-types-table {
+    min-width: 1420px;
+  }
+
+  .description-cell {
+    max-width: 340px;
+  }
 }

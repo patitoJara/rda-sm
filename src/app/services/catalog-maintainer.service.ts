@@ -100,6 +100,24 @@ export class CatalogMaintainerService {
     });
   }
 
+  getInactive(resource: string): Observable<CatalogItem[]> {
+    return this.http.get<CatalogItem[]>(
+      `${this.MAINTAINERS_URL}/${resource}/inactive`,
+    );
+  }
+
+  getDeleted(resource: string): Observable<CatalogItem[]> {
+    return this.http.get<CatalogItem[]>(
+      `${this.MAINTAINERS_URL}/${resource}/deleted`,
+    );
+  }
+
+  getAllRaw(resource: string): Observable<CatalogItem[]> {
+    return this.http.get<CatalogItem[]>(
+      `${this.MAINTAINERS_URL}/${resource}/all`,
+    );
+  }
+
   getById(resource: string, id: number): Observable<CatalogItem> {
     return this.http.get<CatalogItem>(
       `${this.MAINTAINERS_URL}/${resource}/${id}`,
