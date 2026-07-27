@@ -20,7 +20,7 @@ import {
   Validators,
 } from '@angular/forms';
 
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -169,6 +169,10 @@ export class DemandNewComponent
     ProgramProfessionalService,
   );
   private readonly contactService = inject(ContactService);
+  private readonly route = inject(ActivatedRoute);
+
+  private requestedEpisodeId: number | null = null;
+  private requestedMode: 'view' | 'manage' | null = null;
 
   searchForm = this.fb.group({
     rut: ['', [Validators.required, rutValidator()]],
@@ -611,6 +615,20 @@ export class DemandNewComponent
   private activeActionSection?: ElementRef<HTMLElement>;
 
   ngOnInit(): void {
+    const queryParamMap = this.route.snapshot.queryParamMap;
+    const requestedRut = formatRut(queryParamMap.get('rut'));
+    const requestedEpisodeId = Number(queryParamMap.get('episodeId'));
+    const requestedMode = queryParamMap.get('mode');
+
+    this.requestedEpisodeId =
+      Number.isFinite(requestedEpisodeId) && requestedEpisodeId > 0
+        ? requestedEpisodeId
+        : null;
+
+    this.requestedMode =
+      requestedMode === 'view' || requestedMode === 'manage'
+        ? requestedMode
+        : null;
     this.loadCatalogs();
     this.loadActiveProgramContext();
     this.loadDemandCatalogs();
@@ -649,6 +667,12 @@ export class DemandNewComponent
       ?.valueChanges.subscribe((programProfessionalId) => {
         this.applySelectedProfessionalToCitation(Number(programProfessionalId));
       });
+    if (requestedRut) {
+      this.searchForm.controls.rut.setValue(requestedRut, {
+        emitEvent: false,
+      });
+      this.searchPerson();
+    }
   }
 
   ngAfterViewInit(): void {
@@ -1268,6 +1292,20 @@ export class DemandNewComponent
         console.log('[DemandNew] Longitudinal recibido:', data);
 
         this.applyLongitudinalData(data);
+
+        const loadedEpisodeId = Number(
+          data?.activeEpisode?.id ??
+            data?.activeEpisode?.episodeId ??
+            0,
+        );
+
+        if (
+          this.requestedEpisodeId &&
+          this.requestedEpisodeId !== loadedEpisodeId
+        ) {
+          this.loadEpisodeLongitudinal(this.requestedEpisodeId);
+        }
+
         this.isSearching = false;
       },
 
@@ -3994,6 +4032,9 @@ export class DemandNewComponent
   }
 
   get canManageCurrentEpisode(): boolean {
+    if (this.requestedMode === 'view') {
+      return false;
+    }
     /*
      * Si la persona todavía no posee episodio, no existe una
      * responsabilidad programática que pueda bloquear la ficha.

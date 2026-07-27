@@ -1,8 +1,15 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+
+import {
+  PageDTO,
+  PrioritizedEpisodeDTO,
+  PrioritizedEpisodeQuery,
+  SupervisorDashboardDTO,
+} from '../models/demand-priority.models';
 
 export interface DemandCatalogItem {
   id: number;
@@ -188,12 +195,41 @@ export class DemandService {
     );
   }
 
-  getPrioritizedEpisodes(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.demandUrl}/episodes/prioritized`);
+  getPrioritizedEpisodes(
+    query: PrioritizedEpisodeQuery = {},
+  ): Observable<PageDTO<PrioritizedEpisodeDTO>> {
+    let params = new HttpParams()
+      .set('page', String(query.page ?? 0))
+      .set('size', String(query.size ?? 20));
+
+    if (
+      query.programId !== null &&
+      query.programId !== undefined
+    ) {
+      params = params.set(
+        'programId',
+        String(query.programId),
+      );
+    }
+
+    if (query.stateCode) {
+      params = params.set('stateCode', query.stateCode);
+    }
+
+    if (query.resultCode) {
+      params = params.set('resultCode', query.resultCode);
+    }
+
+    return this.http.get<PageDTO<PrioritizedEpisodeDTO>>(
+      `${this.demandUrl}/episodes/prioritized`,
+      { params },
+    );
   }
 
-  getSupervisorDashboard(): Observable<any> {
-    return this.http.get<any>(`${this.demandUrl}/dashboard/supervisor`);
+  getSupervisorDashboard(): Observable<SupervisorDashboardDTO> {
+    return this.http.get<SupervisorDashboardDTO>(
+      `${this.demandUrl}/dashboard/supervisor`,
+    );
   }
 
   createEpisode(payload: CreateEpisodeRequest): Observable<EpisodeDTO> {
