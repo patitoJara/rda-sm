@@ -1100,7 +1100,7 @@
               <span>Citaciones</span>
               <strong>{{ citationEvents.length }}</strong>
               <small>
-                {{ currentPendingCitationEvents.length }} pendientes
+                {{ pendingCitationEvents.length }} sin asistencia · {{ currentPendingCitationEvents.length }} próximas
               </small>
             </div>
           </article>
@@ -1116,8 +1116,8 @@
 
           <article
             class="operational-milestone"
-            [class.operational-milestone--completed]="feedbackEvents.length"
-            [class.operational-milestone--pending]="!feedbackEvents.length"
+            [class.operational-milestone--completed]="feedbackEvents.length || !episodeOperationalSummary.resultPending"
+            [class.operational-milestone--pending]="!feedbackEvents.length && episodeOperationalSummary.resultPending"
           >
             <mat-icon>assignment_turned_in</mat-icon>
             <div>
@@ -1126,14 +1126,18 @@
                 {{
                   feedbackEvents.length
                     ? formatDisplayDate(feedbackEvents[0].eventDate)
-                    : "Pendiente"
+                    : episodeOperationalSummary.resultPending
+                      ? "Pendiente"
+                      : "Resultado heredado"
                 }}
               </strong>
               <small>
                 {{
                   feedbackEvents.length
                     ? "Decisión registrada"
-                    : "Sin decisión registrada"
+                    : episodeOperationalSummary.resultPending
+                      ? "Sin decisión registrada"
+                      : episodeOperationalSummary.result
                 }}
               </small>
             </div>
@@ -2223,6 +2227,69 @@
           }}
         </strong>
       </div>
+      <div class="empty-banner" *ngIf="!hasCurrentEpisode">
+        <mat-icon>info</mat-icon>
+        <span>
+          No existe un episodio de demanda activo. Puede crear uno para iniciar
+          la gestión.
+        </span>
+      </div>
+
+      <div class="card-actions-preview">
+        <button
+          mat-flat-button
+          class="create-episode-trigger"
+          type="button"
+          [disabled]="!selectedPerson || episodeLoaded || !!createdEpisode"
+          (click)="showCreateEpisode()"
+        >
+          <mat-icon>add_circle</mat-icon>
+
+          {{
+            !selectedPerson
+              ? "Buscar persona primero"
+              : episodeLoaded || createdEpisode
+                ? "Episodio ya existente"
+                : "Crear episodio de demanda"
+          }}
+        </button>
+      </div>
+    </mat-card>
+
+    <mat-card
+      id="trayectoria"
+      #summarySection
+      class="current-demand-card longitudinal-anchor"
+      *ngIf="hasCurrentEpisode"
+      [class.longitudinal-anchor--highlighted]="
+        highlightedSummarySection === 'trayectoria'
+      "
+    >
+      <div class="card-header compact-card-header">
+        <mat-icon>timeline</mat-icon>
+        <div>
+          <h3>Trayectoria resumida</h3>
+          <p>Etapa actual y recorrido por programa.</p>
+        </div>
+      </div>
+
+      <div class="trajectory-line">
+        <div class="trajectory-dot"></div>
+        <div>
+          <strong>{{
+            episodeSummary?.currentProgram?.name ||
+              createdEpisode?.currentProgram?.name ||
+              activeProgramName ||
+              "Programa actual"
+          }}</strong>
+          <span>{{ stageVisualState || "Etapa pendiente" }}</span>
+        </div>
+      </div>
+
+      <div class="empty-line" *ngIf="!episodeLoaded && !createdEpisode">
+        No existe episodio activo cargado. Prepare el episodio si corresponde.
+      </div>
+
 
       <section class="episode-milestones" *ngIf="hasCurrentEpisode">
         <div class="episode-milestones__header">
@@ -2325,7 +2392,11 @@
 
           <ng-template #noFeedback>
             <span class="episode-milestone__pending">
-              Pendiente
+              {{
+                episodeOperationalSummary.resultPending
+                  ? "Pendiente"
+                  : "Resultado heredado: " + episodeOperationalSummary.result
+              }}
             </span>
           </ng-template>
         </div>
@@ -2345,68 +2416,6 @@
           </strong>
         </div>
       </section>
-      <div class="empty-banner" *ngIf="!hasCurrentEpisode">
-        <mat-icon>info</mat-icon>
-        <span>
-          No existe un episodio de demanda activo. Puede crear uno para iniciar
-          la gestión.
-        </span>
-      </div>
-
-      <div class="card-actions-preview">
-        <button
-          mat-flat-button
-          class="create-episode-trigger"
-          type="button"
-          [disabled]="!selectedPerson || episodeLoaded || !!createdEpisode"
-          (click)="showCreateEpisode()"
-        >
-          <mat-icon>add_circle</mat-icon>
-
-          {{
-            !selectedPerson
-              ? "Buscar persona primero"
-              : episodeLoaded || createdEpisode
-                ? "Episodio ya existente"
-                : "Crear episodio de demanda"
-          }}
-        </button>
-      </div>
-    </mat-card>
-
-    <mat-card
-      id="trayectoria"
-      #summarySection
-      class="current-demand-card longitudinal-anchor"
-      *ngIf="hasCurrentEpisode"
-      [class.longitudinal-anchor--highlighted]="
-        highlightedSummarySection === 'trayectoria'
-      "
-    >
-      <div class="card-header compact-card-header">
-        <mat-icon>timeline</mat-icon>
-        <div>
-          <h3>Trayectoria resumida</h3>
-          <p>Etapa actual y recorrido por programa.</p>
-        </div>
-      </div>
-
-      <div class="trajectory-line">
-        <div class="trajectory-dot"></div>
-        <div>
-          <strong>{{
-            episodeSummary?.currentProgram?.name ||
-              createdEpisode?.currentProgram?.name ||
-              activeProgramName ||
-              "Programa actual"
-          }}</strong>
-          <span>{{ stageVisualState || "Etapa pendiente" }}</span>
-        </div>
-      </div>
-
-      <div class="empty-line" *ngIf="!episodeLoaded && !createdEpisode">
-        No existe episodio activo cargado. Prepare el episodio si corresponde.
-      </div>
     </mat-card>
 
     <mat-card class="current-demand-card" *ngIf="hasCurrentEpisode">
