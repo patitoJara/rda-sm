@@ -3417,7 +3417,7 @@ export class DemandNewComponent
       this.citationTypes.find(
         (item: any) => item?.code === code,
       )?.name ??
-      `Citación ${this.getCitationNumber(citation)}`
+      'Citación histórica'
     );
   }
   getCitationNumber(item: any): number {
