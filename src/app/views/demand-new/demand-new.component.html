@@ -33,7 +33,7 @@
       <ul>
         <li>Un solo episodio activo por persona.</li>
         <li>La fecha original de solicitud no se reinicia.</li>
-        <li>La referencia crea una nueva etapa, no un nuevo episodio.</li>
+        <li>La derivación crea una nueva etapa, no un nuevo episodio.</li>
         <li>
           El KPI de espera se detiene con el ingreso efectivo a tratamiento.
         </li>
@@ -1083,9 +1083,117 @@
         </article>
       </div>
 
+      <!-- HITOS OPERATIVOS DEL RESUMEN -->
+      <section class="operational-milestones">
+        <div class="operational-milestones__heading">
+          <mat-icon>account_tree</mat-icon>
+          <div>
+            <span>RUTA DEL EPISODIO</span>
+            <strong>Hitos principales de la demanda</strong>
+          </div>
+        </div>
+
+        <div class="operational-milestones__grid">
+          <article class="operational-milestone operational-milestone--citation">
+            <mat-icon>event</mat-icon>
+            <div>
+              <span>Citaciones</span>
+              <strong>{{ citationEvents.length }}</strong>
+              <small>
+                {{ currentPendingCitationEvents.length }} pendientes
+              </small>
+            </div>
+          </article>
+
+          <article class="operational-milestone operational-milestone--interview">
+            <mat-icon>groups</mat-icon>
+            <div>
+              <span>Entrevistas asistidas</span>
+              <strong>{{ attendedInterviewCitations.length }}</strong>
+              <small>Asistencias confirmadas</small>
+            </div>
+          </article>
+
+          <article
+            class="operational-milestone"
+            [class.operational-milestone--completed]="feedbackEvents.length"
+            [class.operational-milestone--pending]="!feedbackEvents.length"
+          >
+            <mat-icon>assignment_turned_in</mat-icon>
+            <div>
+              <span>Retroalimentación</span>
+              <strong>
+                {{
+                  feedbackEvents.length
+                    ? formatDisplayDate(feedbackEvents[0].eventDate)
+                    : "Pendiente"
+                }}
+              </strong>
+              <small>
+                {{
+                  feedbackEvents.length
+                    ? "Decisión registrada"
+                    : "Sin decisión registrada"
+                }}
+              </small>
+            </div>
+          </article>
+
+          <article
+            class="operational-milestone operational-milestone--commitment"
+            [class.operational-milestone--commitment-leve]="
+              feedbackEvents.length &&
+              getFeedbackCommitmentLabel(feedbackEvents[0]) === 'Leve'
+            "
+            [class.operational-milestone--commitment-moderado]="
+              feedbackEvents.length &&
+              getFeedbackCommitmentLabel(feedbackEvents[0]) === 'Moderado'
+            "
+            [class.operational-milestone--commitment-severo]="
+              feedbackEvents.length &&
+              getFeedbackCommitmentLabel(feedbackEvents[0]) === 'Severo'
+            "
+          >
+            <mat-icon>psychology</mat-icon>
+            <div>
+              <span>Compromiso biopsicosocial</span>
+              <strong>
+                {{
+                  feedbackEvents.length
+                    ? getFeedbackCommitmentLabel(feedbackEvents[0])
+                    : "Sin evaluación"
+                }}
+              </strong>
+              <small>Nivel registrado</small>
+            </div>
+          </article>
+
+          <article
+            class="operational-milestone"
+            [class.operational-milestone--completed]="episodeClosureDate"
+            [class.operational-milestone--pending]="!episodeClosureDate"
+          >
+            <mat-icon>event_busy</mat-icon>
+            <div>
+              <span>Cierre</span>
+              <strong>
+                {{
+                  episodeClosureDate
+                    ? formatDisplayDate(episodeClosureDate)
+                    : "Pendiente"
+                }}
+              </strong>
+              <small>
+                {{ episodeClosureDate ? "Demanda cerrada" : "Demanda abierta" }}
+              </small>
+            </div>
+          </article>
+        </div>
+      </section>
       <!-- RESULTADO ACTUAL -->
       <div
         class="operational-result-strip"
+        [ngClass]="'operational-result-strip--' + operationalResultTone"
         [class.operational-result-strip--pending]="
           episodeOperationalSummary.resultPending
         "
@@ -1185,7 +1293,7 @@
                         : activeActionPanel === "treatmentEntry"
                           ? "fact_check"
                           : activeActionPanel === "egressClosure"
-                            ? "logout"
+                            ? "event_busy"
                             : "construction"
             }}
           </mat-icon>
@@ -1200,15 +1308,15 @@
                 : activeActionPanel === "attendance"
                   ? "Registrar asistencia"
                   : activeActionPanel === "interview"
-                    ? "Entrevista / evaluación"
+                    ? "Retroalimentación"
                     : activeActionPanel === "observation"
                       ? "Registrar observación"
                       : activeActionPanel === "reference"
-                        ? "Referir programa"
+                        ? "Derivar a otro programa"
                         : activeActionPanel === "treatmentEntry"
                           ? "Ingreso a tratamiento"
                           : activeActionPanel === "egressClosure"
-                            ? "Egreso / cierre"
+                            ? "Cierre"
                             : "Acción en preparación"
             }}
           </h3>
@@ -1219,15 +1327,15 @@
                 : activeActionPanel === "attendance"
                   ? "Marque si la persona se presentó, no se presentó o fue reprogramada."
                   : activeActionPanel === "interview"
-                    ? "Registre entrevista, evaluación clínica/social o antecedentes relevantes."
+                    ? "Registre la decisión adoptada para la continuidad de la demanda."
                     : activeActionPanel === "observation"
                       ? "Registre una observación general del episodio."
                       : activeActionPanel === "reference"
                         ? "Cierre la etapa de origen y prepare la continuidad en el programa receptor."
                         : activeActionPanel === "treatmentEntry"
-                          ? "Registre el ingreso efectivo a tratamiento y detenga el KPI de espera."
+                          ? "Registre el ingreso efectivo a tratamiento y detenga el KPI de espera. La demanda permanecerá abierta hasta registrar el Cierre."
                           : activeActionPanel === "egressClosure"
-                            ? "Registre el egreso formal, el motivo de cierre y la trazabilidad de la decisión."
+                            ? "Registre la fecha de cierre de la demanda."
                             : "Complete la información correspondiente a la acción seleccionada."
             }}
           </p>
@@ -1240,6 +1348,41 @@
         [formGroup]="citationForm"
         class="operation-form operation-form--citation"
       >
+        <div class="citation-type-intro span-full">
+          <mat-icon>format_list_numbered</mat-icon>
+
+          <div>
+            <strong>Tipo de citación</strong>
+            <span>
+              Puede registrar los tipos disponibles sin depender de una asistencia previa.
+            </span>
+          </div>
+        </div>
+
+        <mat-form-field appearance="outline" class="span-full">
+          <mat-label>Tipo de citación</mat-label>
+          <mat-icon matPrefix>event_note</mat-icon>
+
+          <mat-select formControlName="citationTypeCode">
+            <mat-option
+              *ngFor="let item of citationTypes"
+              [value]="item.code"
+              [disabled]="isCitationTypeRegistered(item.code)"
+            >
+              {{ item.name }}
+
+              <span *ngIf="isCitationTypeRegistered(item.code)">
+                — registrada
+              </span>
+            </mat-option>
+          </mat-select>
+
+          <mat-error
+            *ngIf="citationForm.controls.citationTypeCode.hasError('required')"
+          >
+            Debe seleccionar el tipo de citación.
+          </mat-error>
+        </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Facultativo</mat-label>
           <mat-icon matPrefix>person</mat-icon>
@@ -1379,20 +1522,7 @@
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="span-2">
-          <mat-label>Comentario breve</mat-label>
-          <mat-icon matPrefix>short_text</mat-icon>
 
-          <input
-            matInput
-            formControlName="comment"
-            placeholder="Ej: Primera citación registrada"
-          />
-
-          <mat-error *ngIf="citationForm.controls.comment.hasError('required')">
-            El comentario es obligatorio.
-          </mat-error>
-        </mat-form-field>
 
         <mat-form-field appearance="outline" class="span-full">
           <mat-label>Comentario de citación</mat-label>
@@ -1429,7 +1559,7 @@
           <mat-select formControlName="citationEventId">
             <mat-select-trigger>
               <ng-container *ngIf="selectedAttendanceCitation as selected">
-                Citación {{ getCitationNumber(selected) }}
+                {{ getCitationDisplayName(selected) }}
                 ·
                 {{ formatCitationOptionDate(selected) }}
                 ·
@@ -1455,7 +1585,7 @@
             >
               <div class="citation-option__main">
                 <strong>
-                  Citación {{ getCitationNumber(item) }}
+                  {{ getCitationDisplayName(item) }}
                   ·
                   {{ formatCitationOptionDate(item) }}
                   ·
@@ -1577,29 +1707,46 @@
         </div>
       </form>
 
-      <!-- FORMULARIO ENTREVISTA / EVALUACIÓN -->
+      <!-- FORMULARIO RETROALIMENTACIÓN -->
       <form
         *ngIf="activeActionPanel === 'interview'"
         [formGroup]="interviewForm"
-        class="operation-form operation-form--interview"
+        class="operation-form operation-form--feedback"
       >
+        <div class="empty-banner success span-full" *ngIf="interviewSuccess">
+          <mat-icon>check_circle</mat-icon>
+          <span>{{ interviewSuccess }}</span>
+        </div>
+        <div class="feedback-intro span-full">
+          <mat-icon>assignment_turned_in</mat-icon>
+
+          <div>
+            <strong>Decisión de continuidad</strong>
+            <span>
+              Registre el compromiso biopsicosocial y el resultado definido
+              para la persona.
+            </span>
+          </div>
+        </div>
+
         <mat-form-field appearance="outline">
-          <mat-label>Fecha entrevista</mat-label>
+          <mat-label>Fecha de retroalimentación</mat-label>
           <mat-icon matPrefix>event</mat-icon>
 
           <input
             matInput
-            [matDatepicker]="interviewDatePicker"
+            [matDatepicker]="feedbackDatePicker"
             formControlName="eventDate"
             placeholder="dd/mm/aaaa"
+            readonly
           />
 
           <mat-datepicker-toggle
-            matIconSuffix
-            [for]="interviewDatePicker"
+            matSuffix
+            [for]="feedbackDatePicker"
           ></mat-datepicker-toggle>
 
-          <mat-datepicker #interviewDatePicker></mat-datepicker>
+          <mat-datepicker #feedbackDatePicker></mat-datepicker>
 
           <mat-error
             *ngIf="interviewForm.controls.eventDate.hasError('required')"
@@ -1610,7 +1757,7 @@
 
         <div class="time-period-grid">
           <mat-form-field appearance="outline" class="time-hour-field">
-            <mat-label>Hora entrevista</mat-label>
+            <mat-label>Hora</mat-label>
             <mat-icon matPrefix>schedule</mat-icon>
 
             <input
@@ -1621,6 +1768,7 @@
               maxlength="5"
               (blur)="formatInterviewHourInput()"
             />
+
             <mat-error
               *ngIf="interviewForm.controls.eventHour.hasError('required')"
             >
@@ -1646,78 +1794,92 @@
             <mat-error
               *ngIf="interviewForm.controls.eventPeriod.hasError('required')"
             >
-              Debe seleccionar AM o PM para registrar la hora de la entrevista.
+              Debe seleccionar AM o PM.
             </mat-error>
           </mat-form-field>
         </div>
 
-        <mat-form-field appearance="outline" class="span-2">
-          <mat-label>Comentario breve</mat-label>
-          <mat-icon matPrefix>short_text</mat-icon>
-          <input
-            matInput
-            formControlName="comment"
-            placeholder="Ej: Entrevista inicial realizada"
-          />
+        <mat-form-field appearance="outline">
+          <mat-label>Profesional que la realizó</mat-label>
+          <mat-icon matPrefix>person</mat-icon>
+
+          <mat-select
+            formControlName="programProfessionalId"
+            (selectionChange)="onInterviewProfessionalChange($event.value)"
+          >
+            <mat-option
+              *ngFor="let item of professionals"
+              [value]="item.id"
+            >
+              {{ item.name }}
+              <span *ngIf="item.professionName">
+                — {{ item.professionName }}
+              </span>
+            </mat-option>
+          </mat-select>
 
           <mat-error
-            *ngIf="interviewForm.controls.comment.hasError('required')"
+            *ngIf="
+              interviewForm.controls.programProfessionalId.hasError('required')
+            "
           >
-            El comentario es obligatorio.
+            Debe seleccionar el profesional.
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="span-full">
-          <mat-label>Detalle de entrevista / evaluación</mat-label>
+        <mat-form-field appearance="outline">
+          <mat-label>Compromiso biopsicosocial</mat-label>
           <mat-icon matPrefix>psychology</mat-icon>
-          <textarea
-            matInput
-            rows="4"
-            formControlName="observation"
-            placeholder="Registre antecedentes, evaluación o aspectos relevantes."
-          ></textarea>
+
+          <mat-select formControlName="biopsychosocialCommitmentCode">
+            <mat-option
+              *ngFor="let item of biopsychosocialCommitmentLevels"
+              [value]="item.code"
+            >
+              {{ item.name }}
+            </mat-option>
+          </mat-select>
 
           <mat-error
-            *ngIf="interviewForm.controls.observation.hasError('required')"
+            *ngIf="
+              interviewForm.controls.biopsychosocialCommitmentCode.hasError(
+                'required'
+              )
+            "
           >
-            El detalle de entrevista es obligatorio.
+            Debe seleccionar el nivel de compromiso.
           </mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Próxima acción</mat-label>
-          <mat-icon matPrefix>next_plan</mat-icon>
-          <input
-            matInput
-            formControlName="nextAction"
-            placeholder="Ej: Nueva citación, ingreso, referencia"
-          />
+          <mat-label>Resultado</mat-label>
+          <mat-icon matPrefix>fact_check</mat-icon>
+
+          <mat-select formControlName="resultCode">
+            <mat-option
+              *ngFor="let item of results"
+              [value]="item.code"
+            >
+              {{ item.name }}
+            </mat-option>
+          </mat-select>
+
+          <mat-error
+            *ngIf="interviewForm.controls.resultCode.hasError('required')"
+          >
+            Debe seleccionar el resultado.
+          </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Fecha próxima acción</mat-label>
-          <mat-icon matPrefix>event_repeat</mat-icon>
-
-          <input
-            matInput
-            [matDatepicker]="nextActionDatePicker"
-            formControlName="nextActionDate"
-            placeholder="dd/mm/aaaa"
-          />
-
-          <mat-datepicker-toggle
-            matIconSuffix
-            [for]="nextActionDatePicker"
-          ></mat-datepicker-toggle>
-
-          <mat-datepicker #nextActionDatePicker></mat-datepicker>
-        </mat-form-field>
-        <div class="empty-banner success span-2" *ngIf="interviewSuccess">
-          <mat-icon>check_circle</mat-icon>
-          <span>{{ interviewSuccess }}</span>
+        <div class="feedback-kpi-note span-full">
+          <mat-icon>info</mat-icon>
+          <span>
+            Si el resultado es Ingreso a tratamiento, esta fecha registrará el ingreso y detendrá el
+            KPI de espera. La demanda permanecerá abierta hasta registrar el Cierre.
+          </span>
         </div>
 
-        <div class="empty-banner error span-2" *ngIf="interviewError">
+        <div class="empty-banner error span-full" *ngIf="interviewError">
           <mat-icon>error</mat-icon>
           <span>{{ interviewError }}</span>
         </div>
@@ -1799,19 +1961,66 @@
         </div>
       </div>
 
-      <div
-        class="operation-pending-state"
+      <!-- FORMULARIO CIERRE -->
+      <form
         *ngIf="activeActionPanel === 'egressClosure'"
+        [formGroup]="closureForm"
+        class="operation-form operation-form--closure"
       >
-        <mat-icon>logout</mat-icon>
-        <div>
-          <strong>Formulario en preparación</strong>
+        <div class="empty-banner success span-full" *ngIf="closureSuccess">
+          <mat-icon>check_circle</mat-icon>
+          <span>{{ closureSuccess }}</span>
+        </div>
+
+        <div class="closure-intro span-full">
+          <mat-icon>event_busy</mat-icon>
+
+          <div>
+            <strong>Cierre de la demanda</strong>
+            <span>
+              Registre la fecha en que finaliza formalmente la demanda.
+            </span>
+          </div>
+        </div>
+
+        <mat-form-field appearance="outline" class="span-full">
+          <mat-label>Fecha de cierre</mat-label>
+
+          <input
+            matInput
+            [matDatepicker]="closureDatePicker"
+            formControlName="closureDate"
+            placeholder="dd/mm/aaaa"
+            readonly
+          />
+
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="closureDatePicker"
+          ></mat-datepicker-toggle>
+
+          <mat-datepicker #closureDatePicker></mat-datepicker>
+
+          <mat-error
+            *ngIf="closureForm.controls.closureDate.hasError('required')"
+          >
+            La fecha de cierre es obligatoria.
+          </mat-error>
+        </mat-form-field>
+
+        <div class="closure-warning span-full">
+          <mat-icon>warning</mat-icon>
+
           <span>
-            Esta acción registrará el egreso formal, el motivo de cierre, las
-            observaciones y la trazabilidad correspondiente.
+            Al guardar, el episodio quedará cerrado con la fecha seleccionada.
           </span>
         </div>
-      </div>
+
+        <div class="empty-banner error span-full" *ngIf="closureError">
+          <mat-icon>error</mat-icon>
+          <span>{{ closureError }}</span>
+        </div>
+      </form>
 
       <div class="operation-actions">
         <button
@@ -1822,6 +2031,22 @@
         >
           <mat-icon>close</mat-icon>
           Cancelar
+        </button>
+        <button
+          *ngIf="activeActionPanel === 'egressClosure'"
+          mat-flat-button
+          class="primary-btn"
+          type="button"
+          [disabled]="
+            closureForm.invalid ||
+            isSavingClosure ||
+            !!closureSuccess ||
+            isLoadingLongitudinal
+          "
+          (click)="saveClosure()"
+        >
+          <mat-icon>lock</mat-icon>
+          {{ isSavingClosure ? "Cerrando..." : "Guardar cierre" }}
         </button>
 
         <button
@@ -1865,7 +2090,7 @@
           (click)="saveInterview()"
         >
           <mat-icon>save</mat-icon>
-          {{ isSavingInterview ? "Guardando..." : "Guardar entrevista" }}
+          {{ isSavingInterview ? "Guardando..." : "Guardar retroalimentación" }}
         </button>
 
         <button
@@ -1999,6 +2224,127 @@
         </strong>
       </div>
 
+      <section class="episode-milestones" *ngIf="hasCurrentEpisode">
+        <div class="episode-milestones__header">
+          <mat-icon>event_note</mat-icon>
+
+          <div>
+            <h4>Hitos del episodio</h4>
+            <p>Fechas principales del proceso de atención.</p>
+          </div>
+        </div>
+
+        <div class="episode-milestone">
+          <div class="episode-milestone__label">
+            <mat-icon>flag</mat-icon>
+            <span>Origen de la demanda</span>
+          </div>
+
+          <strong>
+            {{
+              episodeOriginDate
+                ? formatDisplayDate(episodeOriginDate)
+                : "Sin fecha registrada"
+            }}
+          </strong>
+        </div>
+
+        <div class="episode-milestone episode-milestone--stacked">
+          <div class="episode-milestone__label">
+            <mat-icon>groups</mat-icon>
+            <span>Entrevistas realizadas</span>
+          </div>
+
+          <div
+            class="episode-milestone__list"
+            *ngIf="attendedInterviewCitations.length; else noInterviews"
+          >
+            <div
+              class="episode-milestone__item"
+              *ngFor="let citation of attendedInterviewCitations"
+            >
+              <span>{{ getCitationDisplayName(citation) }}</span>
+
+              <strong>
+                {{
+                  formatDisplayDate(
+                    citation.eventDate || citation.citationDate
+                  )
+                }}
+              </strong>
+            </div>
+          </div>
+
+          <ng-template #noInterviews>
+            <span class="episode-milestone__pending">
+              Sin entrevistas asistidas
+            </span>
+          </ng-template>
+        </div>
+
+        <div class="episode-milestone episode-milestone--stacked">
+          <div class="episode-milestone__label">
+            <mat-icon>assignment_turned_in</mat-icon>
+            <span>Retroalimentación</span>
+          </div>
+
+          <div
+            class="episode-milestone__list"
+            *ngIf="feedbackEvents.length; else noFeedback"
+          >
+            <div
+              class="episode-milestone__item episode-milestone__item--feedback"
+              *ngFor="let feedback of feedbackEvents"
+            >
+              <strong>{{ formatDisplayDate(feedback.eventDate) }}</strong>
+
+              <strong>{{ getEventProfessionalName(feedback) }}</strong>
+
+              <span>
+                {{ getEventProfessionName(feedback) || "Profesión no informada" }}
+              </span>
+
+              <span>
+                Compromiso:
+                {{ getFeedbackCommitmentLabel(feedback) }}
+              </span>
+
+              <span>
+                Resultado:
+                {{
+                  formatResultLabel(
+                    feedback.result?.name ||
+                      feedback.resultName ||
+                      feedback.resultCode,
+                    "Sin resultado"
+                  )
+                }}
+              </span>
+            </div>
+          </div>
+
+          <ng-template #noFeedback>
+            <span class="episode-milestone__pending">
+              Pendiente
+            </span>
+          </ng-template>
+        </div>
+
+        <div class="episode-milestone">
+          <div class="episode-milestone__label">
+            <mat-icon>event_busy</mat-icon>
+            <span>Cierre</span>
+          </div>
+
+          <strong>
+            {{
+              episodeClosureDate
+                ? formatDisplayDate(episodeClosureDate)
+                : "Pendiente"
+            }}
+          </strong>
+        </div>
+      </section>
       <div class="empty-banner" *ngIf="!hasCurrentEpisode">
         <mat-icon>info</mat-icon>
         <span>
@@ -2566,7 +2912,7 @@
 
                 <div>
                   <span class="citation-sequence-badge">
-                    Citación {{ getCitationNumber(citation) }}
+                    {{ getCitationDisplayName(citation) }}
                   </span>
                   <strong>{{ formatDisplayDate(citation.eventDate) }}</strong>
                   <span>{{ formatDisplayTime(citation.eventTime) }}</span>
@@ -2615,9 +2961,13 @@
                 }}
               </span>
 
-              <span>
-                Estado asistencia:
-                {{ getCitationAttendanceLabel(citation) }}
+              <span
+                class="citation-attendance-status"
+                [ngClass]="getCitationAttendanceClass(citation)"
+              >
+                <mat-icon>how_to_reg</mat-icon>
+                <span>Estado asistencia</span>
+                <strong>{{ getCitationAttendanceLabel(citation) }}</strong>
               </span>
             </div>
           </article>
@@ -2992,7 +3342,7 @@
                 <span>Citación relacionada</span>
 
                 <strong>
-                  Citación {{ getCitationNumber(relatedCitation) }}
+                  {{ getCitationDisplayName(relatedCitation) }}
                   ·
                   {{ formatDisplayDate(relatedCitation.eventDate) }}
                   ·

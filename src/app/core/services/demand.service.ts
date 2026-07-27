@@ -21,6 +21,8 @@ export interface DemandCatalogsDTO {
   episodeTypes: DemandCatalogItem[];
   eventTypes: DemandCatalogItem[];
   attendanceStatuses: DemandCatalogItem[];
+  citationTypes: DemandCatalogItem[];
+  biopsychosocialCommitmentLevels: DemandCatalogItem[];
   closureReasons: DemandCatalogItem[];
   programPopulations: DemandCatalogItem[];
   programModalities: DemandCatalogItem[];
@@ -220,6 +222,9 @@ export class DemandService {
       params = params.set('resultCode', query.resultCode);
     }
 
+    if (query.sort) {
+      params = params.set('sort', query.sort);
+    }
     return this.http.get<PageDTO<PrioritizedEpisodeDTO>>(
       `${this.demandUrl}/episodes/prioritized`,
       { params },

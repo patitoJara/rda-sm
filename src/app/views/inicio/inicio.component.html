@@ -235,6 +235,24 @@
       </div>
     </div>
 
+    <details class="column-help">
+      <summary>
+        <mat-icon>help_outline</mat-icon>
+        Significado de columnas
+      </summary>
+
+      <div class="column-help__grid">
+        <span><strong>Solic.</strong> Fecha original de la demanda.</span>
+        <span><strong>C1-E1</strong> Primera citación a primera entrevista.</span>
+        <span><strong>C2-E1</strong> Segunda citación a primera entrevista.</span>
+        <span><strong>C1-E2</strong> Primera citación a segunda entrevista.</span>
+        <span><strong>C2-E2</strong> Segunda citación a segunda entrevista.</span>
+        <span><strong>Opc.</strong> Entrevista opcional.</span>
+        <span><strong>Retro.</strong> Fecha de Retroalimentación.</span>
+        <span><strong>Comp. BPS</strong> Compromiso biopsicosocial.</span>
+        <span><strong>Últ. gest.</strong> Última gestión registrada.</span>
+      </div>
+    </details>
     <mat-progress-bar
       *ngIf="loadingEpisodes"
       mode="indeterminate"
@@ -286,11 +304,13 @@
         mat-table
         [dataSource]="episodes"
         [trackBy]="trackByEpisodeId"
+        matSort
+        (matSortChange)="onSortChange($event)"
       >
         <!-- SEMÁFORO -->
         <ng-container matColumnDef="semaphore">
-          <th mat-header-cell *matHeaderCellDef>
-            Prioridad
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <span matTooltip="Prioridad por semáforo">Pri.</span>
           </th>
 
           <td mat-cell *matCellDef="let row">
@@ -300,31 +320,29 @@
               [matTooltip]="getSemaphoreLabel(row.semaphoreColor)"
             >
               <span class="semaphore__dot"></span>
-
-              {{ row.semaphoreColor || "Sin dato" }}
             </span>
           </td>
         </ng-container>
 
         <!-- DÍAS -->
         <ng-container matColumnDef="days">
-          <th mat-header-cell *matHeaderCellDef>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
             Días
           </th>
 
           <td mat-cell *matCellDef="let row">
-            <div class="waiting-days">
-              <strong>{{ row.accumulatedDays ?? 0 }}</strong>
-              <span>
-                {{ getSemaphoreLabel(row.semaphoreColor) }}
-              </span>
+            <div
+              class="waiting-days"
+              [matTooltip]="getSemaphoreLabel(row.semaphoreColor)"
+            >
+              <strong>{{ row.accumulatedDays ?? 0 }} d</strong>
             </div>
           </td>
         </ng-container>
 
         <!-- PERSONA -->
         <ng-container matColumnDef="person">
-          <th mat-header-cell *matHeaderCellDef>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
             Persona
           </th>
 
@@ -344,7 +362,7 @@
 
         <!-- RUN -->
         <ng-container matColumnDef="rut">
-          <th mat-header-cell *matHeaderCellDef>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
             RUN
           </th>
 
@@ -357,18 +375,87 @@
 
         <!-- FECHA SOLICITUD -->
         <ng-container matColumnDef="requestDate">
-          <th mat-header-cell *matHeaderCellDef>
-            Solicitud
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <span matTooltip="Fecha original de la demanda">Solic.</span>
           </th>
 
           <td mat-cell *matCellDef="let row">
-            {{ formatDisplayDate(row.originalRequestDate) }}
+            {{ formatCompactDate(row.originalRequestDate) }}
           </td>
         </ng-container>
 
+        <!-- PRIMERA CITACIÓN / PRIMERA ENTREVISTA -->
+        <ng-container matColumnDef="citationFirstFirst">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <span matTooltip="Primera citación a primera entrevista">C1-E1</span>
+          </th>
+          <td mat-cell *matCellDef="let row" class="compact-date-cell">
+            {{ formatCompactDate(row.firstCitationFirstInterviewDate) }}
+          </td>
+        </ng-container>
+
+        <!-- SEGUNDA CITACIÓN / PRIMERA ENTREVISTA -->
+        <ng-container matColumnDef="citationSecondFirst">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <span matTooltip="Segunda citación a primera entrevista">C2-E1</span>
+          </th>
+          <td mat-cell *matCellDef="let row" class="compact-date-cell">
+            {{ formatCompactDate(row.secondCitationFirstInterviewDate) }}
+          </td>
+        </ng-container>
+
+        <!-- PRIMERA CITACIÓN / SEGUNDA ENTREVISTA -->
+        <ng-container matColumnDef="citationFirstSecond">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <span matTooltip="Primera citación a segunda entrevista">C1-E2</span>
+          </th>
+          <td mat-cell *matCellDef="let row" class="compact-date-cell">
+            {{ formatCompactDate(row.firstCitationSecondInterviewDate) }}
+          </td>
+        </ng-container>
+
+        <!-- SEGUNDA CITACIÓN / SEGUNDA ENTREVISTA -->
+        <ng-container matColumnDef="citationSecondSecond">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <span matTooltip="Segunda citación a segunda entrevista">C2-E2</span>
+          </th>
+          <td mat-cell *matCellDef="let row" class="compact-date-cell">
+            {{ formatCompactDate(row.secondCitationSecondInterviewDate) }}
+          </td>
+        </ng-container>
+
+        <!-- ENTREVISTA OPCIONAL -->
+        <ng-container matColumnDef="optionalInterview">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <span matTooltip="Entrevista opcional">Opc.</span>
+          </th>
+          <td mat-cell *matCellDef="let row" class="compact-date-cell">
+            {{ formatCompactDate(row.optionalInterviewDate) }}
+          </td>
+        </ng-container>
+
+        <!-- RETROALIMENTACIÓN -->
+        <ng-container matColumnDef="feedback">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <span matTooltip="Fecha de Retroalimentación">Retro.</span>
+          </th>
+          <td mat-cell *matCellDef="let row" class="compact-date-cell">
+            {{ formatCompactDate(row.feedbackDate) }}
+          </td>
+        </ng-container>
+
+        <!-- CIERRE -->
+        <ng-container matColumnDef="closure">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <span matTooltip="Fecha de cierre">Cierre</span>
+          </th>
+          <td mat-cell *matCellDef="let row" class="compact-date-cell">
+            {{ formatCompactDate(row.closureDate) }}
+          </td>
+        </ng-container>
         <!-- PROGRAMA -->
         <ng-container matColumnDef="program">
-          <th mat-header-cell *matHeaderCellDef>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
             Programa responsable
           </th>
 
@@ -381,7 +468,7 @@
 
         <!-- RESULTADO -->
         <ng-container matColumnDef="result">
-          <th mat-header-cell *matHeaderCellDef>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
             Resultado
           </th>
 
@@ -398,22 +485,48 @@
           </td>
         </ng-container>
 
+        <!-- COMPROMISO BIOPSICOSOCIAL -->
+        <ng-container matColumnDef="commitment">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <span matTooltip="Compromiso biopsicosocial">Comp. BPS</span>
+          </th>
+
+          <td mat-cell *matCellDef="let row">
+            <span
+              class="commitment"
+              [ngClass]="
+                getCommitmentClass(row.biopsychosocialCommitmentCode)
+              "
+            >
+              {{ getCommitmentLabel(row.biopsychosocialCommitmentCode) }}
+            </span>
+          </td>
+        </ng-container>
         <!-- ÚLTIMA GESTIÓN -->
         <ng-container matColumnDef="lastManagement">
-          <th mat-header-cell *matHeaderCellDef>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
             Última gestión
           </th>
 
           <td mat-cell *matCellDef="let row">
-            <span class="management-value">
-              {{ row.lastManagement || "Sin gestión registrada" }}
-            </span>
+            <div class="management-value">
+              <strong>
+                {{ row.lastManagement || "Sin gestión registrada" }}
+              </strong>
+
+              <small *ngIf="row.lastManagementDate">
+                {{ formatCompactDate(row.lastManagementDate) }}
+                <ng-container *ngIf="row.lastManagementTime">
+                  · {{ formatCompactTime(row.lastManagementTime) }}
+                </ng-container>
+              </small>
+            </div>
           </td>
         </ng-container>
 
         <!-- ACCIÓN SUGERIDA -->
         <ng-container matColumnDef="suggestedAction">
-          <th mat-header-cell *matHeaderCellDef>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
             Acción sugerida
           </th>
 
@@ -430,7 +543,7 @@
 
         <!-- ACCIONES -->
         <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
             Acciones
           </th>
 

@@ -45,6 +45,7 @@ export class DemandEpisodeService {
       size?: number;
       programId?: number | null;
       stateCode?: string | null;
+      biopsychosocialCommitmentCode?: string | null;
       resultCode?: string | null;
       sort?: string | null;
     } = {},
@@ -86,6 +87,38 @@ export class DemandEpisodeService {
     return this.http.post<any>(`${this.resourceUrl}/episodes`, payload);
   }
 
+  createCitation(
+    episodeId: number,
+    payload: {
+      stageId?: number | null;
+      citationDate: string;
+      citationTime: string;
+      citationTypeCode: string;
+      professionalUserId?: number | null;
+      programProfessionalId?: number | null;
+      professionName?: string | null;
+      programId?: number | null;
+      citationComment?: string | null;
+      nextAction?: string | null;
+      nextActionDate?: string | null;
+    },
+  ): Observable<any> {
+    return this.http.post<any>(
+      `${this.resourceUrl}/episodes/${episodeId}/citations`,
+      payload,
+    );
+  }
+  closeEpisode(
+    episodeId: number,
+    payload: {
+      closureDate: string;
+    },
+  ): Observable<any> {
+    return this.http.post<any>(
+      `${this.resourceUrl}/episodes/${episodeId}/close`,
+      payload,
+    );
+  }
   createEvent(
     episodeId: number,
     payload: {
@@ -112,6 +145,7 @@ export class DemandEpisodeService {
       nextAction?: string | null;
       nextActionDate?: string | null;
 
+      biopsychosocialCommitmentCode?: string | null;
       resultCode?: string | null;
       stateCode?: string | null;
     },

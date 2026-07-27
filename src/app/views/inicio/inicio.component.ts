@@ -29,6 +29,7 @@ import {
 } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
@@ -68,6 +69,7 @@ interface ResultOption {
     MatPaginatorModule,
     MatProgressBarModule,
     MatSelectModule,
+    MatSortModule,
     MatTableModule,
     MatTooltipModule,
   ],
@@ -109,12 +111,42 @@ export class InicioComponent implements OnInit, OnDestroy {
     'person',
     'rut',
     'requestDate',
+    'citationFirstFirst',
+    'citationSecondFirst',
+    'citationFirstSecond',
+    'citationSecondSecond',
+    'optionalInterview',
+    'feedback',
+    'closure',
     'program',
     'result',
+    'commitment',
     'lastManagement',
     'suggestedAction',
     'actions',
   ];
+
+  readonly sortFieldMap: Record<string, string> = {
+    semaphore: 'semaphoreColor',
+    days: 'accumulatedDays',
+    person: 'personName',
+    rut: 'rut',
+    requestDate: 'originalRequestDate',
+    citationFirstFirst: 'firstCitationFirstInterviewDate',
+    citationSecondFirst: 'secondCitationFirstInterviewDate',
+    citationFirstSecond: 'firstCitationSecondInterviewDate',
+    citationSecondSecond: 'secondCitationSecondInterviewDate',
+    optionalInterview: 'optionalInterviewDate',
+    feedback: 'feedbackDate',
+    closure: 'closureDate',
+    program: 'currentProgram.name',
+    result: 'resultCode',
+    commitment: 'biopsychosocialCommitmentCode',
+    lastManagement: 'lastManagementDate',
+    suggestedAction: 'suggestedAction',
+  };
+
+  currentSort: string | null = null;
 
   readonly resultOptions: ResultOption[] = [
     {
@@ -123,11 +155,11 @@ export class InicioComponent implements OnInit, OnDestroy {
     },
     {
       code: 'AUN_SIN_RESULTADO',
-      name: 'AÃºn sin resultado',
+      name: 'Aún sin resultado',
     },
     {
       code: 'REFERENCIA',
-      name: 'Referencia',
+      name: 'Derivación',
     },
     {
       code: 'INGRESO_TRATAMIENTO',
@@ -200,6 +232,17 @@ export class InicioComponent implements OnInit, OnDestroy {
     this.loadEpisodes();
   }
 
+  onSortChange(sort: Sort): void {
+    const backendField = this.sortFieldMap[sort.active];
+
+    this.currentSort =
+      backendField && sort.direction
+        ? `${backendField},${sort.direction}`
+        : null;
+
+    this.pageIndex = 0;
+    this.loadEpisodes();
+  }
   onPageChange(event: PageEvent): void {
     this.pageIndex = event.pageIndex;
     this.pageSize = event.pageSize;
@@ -235,6 +278,55 @@ export class InicioComponent implements OnInit, OnDestroy {
       responsibleProgramId === this.activeProgramId
     );
   }
+  formatCompactDate(value: string | null | undefined): string {
+    const text = String(value ?? '').trim();
+
+    if (!text) {
+      return '—';
+    }
+
+    const parts = text.slice(0, 10).split('-');
+
+    if (parts.length !== 3) {
+      return text;
+    }
+
+    return `${parts[2]}/${parts[1]}/${parts[0].slice(-2)}`;
+  }
+
+  formatCompactTime(value: string | null | undefined): string {
+    const text = String(value ?? '').trim();
+
+    return text
+      ? text.slice(0, 5)
+      : '';
+  }
+
+  getCommitmentLabel(value: string | null | undefined): string {
+    const code = String(value ?? '').trim().toUpperCase();
+
+    const labels: Record<string, string> = {
+      LEVE: 'Leve',
+      MODERADO: 'Moderado',
+      SEVERO: 'Severo',
+    };
+
+    return labels[code] ?? 'Sin evaluación';
+  }
+
+  getCommitmentClass(value: string | null | undefined): string {
+    const code = String(value ?? '').trim().toLowerCase();
+
+    if (
+      code === 'leve' ||
+      code === 'moderado' ||
+      code === 'severo'
+    ) {
+      return `commitment--${code}`;
+    }
+
+    return 'commitment--neutral';
+  }
   formatDisplayDate(value: string | null | undefined): string {
     const text = String(value ?? '').trim();
 
@@ -257,14 +349,14 @@ export class InicioComponent implements OnInit, OnDestroy {
       .toUpperCase();
 
     const labels: Record<string, string> = {
-      EN_TRAMITE: 'En trÃ¡mite',
+      EN_TRAMITE: 'En trámite',
       LISTA_ESPERA: 'Lista de espera',
       INGRESADO: 'Ingresado',
       EGRESADO: 'Egresado',
       CERRADO: 'Cerrado',
     };
 
-    return labels[code] ?? this.formatCodeLabel(code, 'Sin estado');
+    return labels[code] ?? 'Sin estado';
   }
 
   formatResultLabel(value: string | null | undefined): string {
@@ -288,10 +380,10 @@ export class InicioComponent implements OnInit, OnDestroy {
       VERDE: 'Dentro de plazo',
       AMARILLO: 'Seguimiento',
       NARANJO: 'Prioridad alta',
-      ROJO: 'Caso crÃ­tico',
+      ROJO: 'Caso crítico',
     };
 
-    return labels[code] ?? 'Sin clasificaciÃ³n';
+    return labels[code] ?? 'Sin clasificación';
   }
 
   getSemaphoreClass(value: string | null | undefined): string {
@@ -336,7 +428,7 @@ export class InicioComponent implements OnInit, OnDestroy {
       hour12: false,
     });
 
-    return `${date} â€” ${time}`;
+    return `${date} — ${time}`;
   }
 
   trackByEpisodeId(
@@ -390,6 +482,7 @@ export class InicioComponent implements OnInit, OnDestroy {
         size: this.pageSize,
         programId: filters.programId,
         resultCode: filters.resultCode || null,
+        sort: this.currentSort,
       })
       .pipe(
         finalize(() => {
