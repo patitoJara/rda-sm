@@ -1,128 +1,498 @@
-<section class="inicio-page">
-  <div class="inicio-hero">
-    <div class="hero-content">
-      <div class="hero-badge">
-        <mat-icon>health_and_safety</mat-icon>
-        Sistema institucional DSSM
-      </div>
+<section class="priority-page">
+  <!-- ENCABEZADO -->
+  <header class="priority-hero">
+    <div class="priority-hero__content">
+      <span class="priority-hero__eyebrow">
+        <mat-icon>format_list_numbered</mat-icon>
+        Gestión operativa
+      </span>
 
-      <h1>
-        <span class="welcome-line">Bienvenido/a,</span>
-        <span class="name-line">{{ fullName }}</span>
-      </h1>
+      <h1>Bandeja priorizada de demanda</h1>
 
       <p>
-        Gestión de Demanda de Atención de Tratamiento de Drogas. Seguimiento
-        longitudinal por persona, episodios, etapas por programa y trazabilidad
-        completa de eventos.
+        Episodios activos ordenados por días acumulados, nivel de alerta,
+        antigüedad de la solicitud y necesidad de gestión.
       </p>
 
-      <div class="hero-actions">
-        <a mat-flat-button routerLink="/demand-new">
-          <mat-icon>add_circle</mat-icon>
-          Gestión de demanda asistencial
-        </a>
+      <div class="priority-hero__meta">
+        <span>
+          <mat-icon>business</mat-icon>
+          {{ activeProgram || "Programas autorizados" }}
+        </span>
 
-        <a mat-stroked-button routerLink="/demand-list">
-          <mat-icon>format_list_bulleted</mat-icon>
-          Listado de demandas
-        </a>
+        <span>
+          <mat-icon>person</mat-icon>
+          {{ fullName }}
+        </span>
 
-        <a mat-stroked-button routerLink="/analytics">
-          <mat-icon>monitoring</mat-icon>
-          Panel estratégico
-        </a>
-      </div>
-    </div>
-
-    <div class="hero-panel">
-      <div class="panel-icon">
-        <mat-icon>account_tree</mat-icon>
-      </div>
-
-      <span class="panel-label">Programa activo</span>
-      <strong>{{ activeProgram || "Sin programa" }}</strong>
-
-      <small>
-        Rol actual:
-        <b>{{ activeRole || "Sin rol" }}</b>
-      </small>
-    </div>
-  </div>
-
-  <div class="quick-grid">
-    <mat-card class="quick-card">
-      <div class="quick-icon">
-        <mat-icon>apps</mat-icon>
-      </div>
-
-      <div>
-        <span class="label">Programas disponibles</span>
-
-        <ul class="chip-list" *ngIf="programs.length">
-          <li *ngFor="let p of programs" [class.active]="p === activeProgram">
-            <mat-icon *ngIf="p === activeProgram">check_circle</mat-icon>
-            {{ p }}
-          </li>
-        </ul>
-
-        <span class="empty-value" *ngIf="!programs.length">
-          Sin programas asignados
+        <span>
+          <mat-icon>schedule</mat-icon>
+          {{ currentDateLabel }}
         </span>
       </div>
-    </mat-card>
+    </div>
 
-    <mat-card class="quick-card">
-      <div class="quick-icon">
-        <mat-icon>security</mat-icon>
+    <div class="priority-hero__actions">
+      <a mat-flat-button routerLink="/demand-new">
+        <mat-icon>person_search</mat-icon>
+        Buscar o crear demanda
+      </a>
+
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="loadingDashboard || loadingEpisodes"
+        (click)="refresh()"
+      >
+        <mat-icon>refresh</mat-icon>
+        Actualizar
+      </button>
+    </div>
+  </header>
+
+  <mat-progress-bar
+    *ngIf="loadingDashboard"
+    mode="indeterminate"
+  ></mat-progress-bar>
+
+  <!-- INDICADORES -->
+  <section
+    class="metrics-grid"
+    aria-label="Indicadores operativos de demanda"
+  >
+    <mat-card class="metric-card metric-card--active">
+      <div class="metric-card__icon">
+        <mat-icon>folder_open</mat-icon>
       </div>
 
       <div>
-        <span class="label">Roles disponibles</span>
-
-        <ul class="chip-list">
-          <li *ngFor="let r of roles" [class.active]="r === activeRole">
-            <mat-icon *ngIf="r === activeRole">check_circle</mat-icon>
-            {{ r }}
-          </li>
-        </ul>
+        <span>Demandas activas</span>
+        <strong>{{ dashboard?.activeDemands ?? 0 }}</strong>
+        <small>Episodios actualmente en gestión</small>
       </div>
     </mat-card>
 
-    <mat-card class="quick-card">
-      <div class="quick-icon">
-        <mat-icon>person</mat-icon>
+    <mat-card class="metric-card metric-card--waiting">
+      <div class="metric-card__icon">
+        <mat-icon>hourglass_top</mat-icon>
       </div>
 
       <div>
-        <span class="label">Usuario</span>
-        <strong class="value">{{ fullName || "Sin nombre" }}</strong>
+        <span>Lista de espera</span>
+        <strong>{{ dashboard?.waitingList ?? 0 }}</strong>
+        <small>Personas con espera activa</small>
       </div>
     </mat-card>
 
-    <mat-card class="quick-card">
-      <div class="quick-icon">
-        <mat-icon>calendar_today</mat-icon>
+    <mat-card class="metric-card metric-card--critical">
+      <div class="metric-card__icon">
+        <mat-icon>warning</mat-icon>
       </div>
 
       <div>
-        <span class="label">Fecha y hora actual</span>
-        <strong class="value">
-          {{ currentDateLabel }}
-        </strong>
+        <span>Casos en rojo</span>
+        <strong>{{ dashboard?.redCases ?? 0 }}</strong>
+        <small>Requieren atención prioritaria</small>
       </div>
     </mat-card>
+
+    <mat-card class="metric-card metric-card--citation">
+      <div class="metric-card__icon">
+        <mat-icon>event_busy</mat-icon>
+      </div>
+
+      <div>
+        <span>Sin primera citación</span>
+        <strong>{{ dashboard?.withoutFirstCitation ?? 0 }}</strong>
+        <small>Casos aún sin citación registrada</small>
+      </div>
+    </mat-card>
+
+    <mat-card class="metric-card metric-card--average">
+      <div class="metric-card__icon">
+        <mat-icon>query_stats</mat-icon>
+      </div>
+
+      <div>
+        <span>Promedio de espera</span>
+        <strong>{{ averageDaysLabel }} días</strong>
+        <small>Promedio de días acumulados</small>
+      </div>
+    </mat-card>
+  </section>
+
+  <div
+    class="dashboard-error"
+    *ngIf="dashboardError"
+  >
+    <mat-icon>info</mat-icon>
+    <span>{{ dashboardError }}</span>
   </div>
 
-  <div class="inicio-note">
-    <mat-icon>info</mat-icon>
+  <!-- FILTROS -->
+  <mat-card class="filters-card">
+    <div class="filters-card__heading">
+      <div>
+        <span>FILTROS DE BANDEJA</span>
+        <h2>Acotar demandas visibles</h2>
+      </div>
+
+      <small>
+        Los filtros se aplican sobre el conjunto completo desde backend.
+      </small>
+    </div>
+
+    <form
+      class="filters-form"
+      [formGroup]="filtersForm"
+      (ngSubmit)="applyFilters()"
+    >
+      <mat-form-field appearance="outline">
+        <mat-label>Programa responsable</mat-label>
+        <mat-icon matPrefix>business</mat-icon>
+
+        <mat-select formControlName="programId">
+          <mat-option [value]="null">
+            Todos los programas autorizados
+          </mat-option>
+
+          <mat-option
+            *ngFor="let program of programs"
+            [value]="program.id"
+          >
+            {{ program.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Resultado actual</mat-label>
+        <mat-icon matPrefix>fact_check</mat-icon>
+
+        <mat-select formControlName="resultCode">
+          <mat-option value="">
+            Todos los resultados
+          </mat-option>
+
+          <mat-option
+            *ngFor="let result of resultOptions"
+            [value]="result.code"
+          >
+            {{ result.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div class="filters-form__actions">
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="loadingEpisodes"
+          (click)="clearFilters()"
+        >
+          <mat-icon>filter_alt_off</mat-icon>
+          Limpiar
+        </button>
+
+        <button
+          mat-flat-button
+          type="submit"
+          [disabled]="loadingEpisodes"
+        >
+          <mat-icon>filter_alt</mat-icon>
+          Aplicar filtros
+        </button>
+      </div>
+    </form>
+
+    <div class="filters-limitation">
+      <mat-icon>info</mat-icon>
+
+      <span>
+        La búsqueda por nombre o RUN, profesional, semáforo y rango de días
+        será incorporada cuando dichos filtros estén disponibles en la API.
+      </span>
+    </div>
+  </mat-card>
+
+  <!-- BANDEJA -->
+  <mat-card class="priority-table-card">
+    <div class="table-heading">
+      <div>
+        <span>BANDEJA DE TRABAJO</span>
+        <h2>Demandas ordenadas por prioridad</h2>
+
+        <p>
+          Los casos con mayor cantidad de días acumulados aparecen primero.
+        </p>
+      </div>
+
+      <div class="table-heading__total">
+        <strong>{{ totalElements }}</strong>
+        <span>
+          {{ totalElements === 1 ? "demanda" : "demandas" }}
+        </span>
+      </div>
+    </div>
+
+    <mat-progress-bar
+      *ngIf="loadingEpisodes"
+      mode="indeterminate"
+    ></mat-progress-bar>
+
+    <div
+      class="table-error"
+      *ngIf="episodesError"
+    >
+      <mat-icon>error_outline</mat-icon>
+
+      <div>
+        <strong>No fue posible cargar la bandeja</strong>
+        <span>{{ episodesError }}</span>
+      </div>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="loadEpisodes()"
+      >
+        Reintentar
+      </button>
+    </div>
+
+    <div
+      class="table-empty"
+      *ngIf="
+        !loadingEpisodes &&
+        !episodesError &&
+        !episodes.length
+      "
+    >
+      <mat-icon>playlist_remove</mat-icon>
+
+      <div>
+        <strong>Sin demandas para los filtros seleccionados</strong>
+        <span>
+          Modifique los filtros o actualice la bandeja.
+        </span>
+      </div>
+    </div>
+
+    <div
+      class="table-wrapper"
+      *ngIf="!episodesError && episodes.length"
+    >
+      <table
+        mat-table
+        [dataSource]="episodes"
+        [trackBy]="trackByEpisodeId"
+      >
+        <!-- SEMÁFORO -->
+        <ng-container matColumnDef="semaphore">
+          <th mat-header-cell *matHeaderCellDef>
+            Prioridad
+          </th>
+
+          <td mat-cell *matCellDef="let row">
+            <span
+              class="semaphore"
+              [ngClass]="getSemaphoreClass(row.semaphoreColor)"
+              [matTooltip]="getSemaphoreLabel(row.semaphoreColor)"
+            >
+              <span class="semaphore__dot"></span>
+
+              {{ row.semaphoreColor || "Sin dato" }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- DÍAS -->
+        <ng-container matColumnDef="days">
+          <th mat-header-cell *matHeaderCellDef>
+            Días
+          </th>
+
+          <td mat-cell *matCellDef="let row">
+            <div class="waiting-days">
+              <strong>{{ row.accumulatedDays ?? 0 }}</strong>
+              <span>
+                {{ getSemaphoreLabel(row.semaphoreColor) }}
+              </span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- PERSONA -->
+        <ng-container matColumnDef="person">
+          <th mat-header-cell *matHeaderCellDef>
+            Persona
+          </th>
+
+          <td mat-cell *matCellDef="let row">
+            <div class="person-cell">
+              <div class="person-cell__icon">
+                <mat-icon>person</mat-icon>
+              </div>
+
+              <div>
+                <strong>{{ row.personName || "Sin nombre" }}</strong>
+                <span>{{ row.episodeCode || "Sin código" }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- RUN -->
+        <ng-container matColumnDef="rut">
+          <th mat-header-cell *matHeaderCellDef>
+            RUN
+          </th>
+
+          <td mat-cell *matCellDef="let row">
+            <strong class="rut-value">
+              {{ row.rut || "Sin RUN" }}
+            </strong>
+          </td>
+        </ng-container>
+
+        <!-- FECHA SOLICITUD -->
+        <ng-container matColumnDef="requestDate">
+          <th mat-header-cell *matHeaderCellDef>
+            Solicitud
+          </th>
+
+          <td mat-cell *matCellDef="let row">
+            {{ formatDisplayDate(row.originalRequestDate) }}
+          </td>
+        </ng-container>
+
+        <!-- PROGRAMA -->
+        <ng-container matColumnDef="program">
+          <th mat-header-cell *matHeaderCellDef>
+            Programa responsable
+          </th>
+
+          <td mat-cell *matCellDef="let row">
+            <span class="program-value">
+              {{ row.currentProgram?.name || "Sin programa" }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- RESULTADO -->
+        <ng-container matColumnDef="result">
+          <th mat-header-cell *matHeaderCellDef>
+            Resultado
+          </th>
+
+          <td mat-cell *matCellDef="let row">
+            <div class="result-cell">
+              <strong>
+                {{ formatResultLabel(row.resultCode) }}
+              </strong>
+
+              <span>
+                {{ formatStateLabel(row.stateCode) }}
+              </span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- ÚLTIMA GESTIÓN -->
+        <ng-container matColumnDef="lastManagement">
+          <th mat-header-cell *matHeaderCellDef>
+            Última gestión
+          </th>
+
+          <td mat-cell *matCellDef="let row">
+            <span class="management-value">
+              {{ row.lastManagement || "Sin gestión registrada" }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- ACCIÓN SUGERIDA -->
+        <ng-container matColumnDef="suggestedAction">
+          <th mat-header-cell *matHeaderCellDef>
+            Acción sugerida
+          </th>
+
+          <td mat-cell *matCellDef="let row">
+            <div class="suggested-action">
+              <mat-icon>assistant_direction</mat-icon>
+
+              <span>
+                {{ row.suggestedAction || "Revisar continuidad" }}
+              </span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- ACCIONES -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>
+            Acciones
+          </th>
+
+          <td mat-cell *matCellDef="let row">
+            <div class="row-actions">
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Ver ficha longitudinal"
+                aria-label="Ver ficha longitudinal"
+                (click)="openEpisode(row, 'view')"
+              >
+                <mat-icon>visibility</mat-icon>
+              </button>
+
+              <button
+                *ngIf="canManageEpisode(row)"
+                mat-flat-button
+                type="button"
+                matTooltip="Gestionar episodio"
+                (click)="openEpisode(row, 'manage')"
+              >
+                <mat-icon>arrow_forward</mat-icon>
+                Gestionar
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr
+          mat-header-row
+          *matHeaderRowDef="displayedColumns; sticky: true"
+        ></tr>
+
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns"
+          [class.priority-row--critical]="
+            row.semaphoreColor === 'ROJO'
+          "
+        ></tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      *ngIf="!episodesError"
+      [length]="totalElements"
+      [pageIndex]="pageIndex"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      showFirstLastButtons
+      aria-label="Paginación de demandas priorizadas"
+      (page)="onPageChange($event)"
+    ></mat-paginator>
+  </mat-card>
+
+  <div class="privacy-note">
+    <mat-icon>shield</mat-icon>
 
     <span>
-      Utilice el menú lateral o los accesos rápidos para consultar, crear y dar
-      seguimiento a la demanda asistencial, revisar el listado o consultar el
-      panel estratégico.
+      La bandeja muestra únicamente información necesaria para priorizar la
+      gestión. Los demás antecedentes se consultan en la ficha longitudinal.
     </span>
-
-    <a routerLink="/about" class="about-link"> Acerca del sistema </a>
   </div>
 </section>
