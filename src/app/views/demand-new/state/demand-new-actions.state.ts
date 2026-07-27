@@ -1,4 +1,4 @@
-﻿import { ActiveActionPanel } from '../models/demand-new-view.types';
+import { ActiveActionPanel } from '../models/demand-new-view.types';
 import { DemandNewEpisodeState } from './demand-new-episode.state';
 
 export abstract class DemandNewActionsState extends DemandNewEpisodeState {
@@ -19,6 +19,10 @@ export abstract class DemandNewActionsState extends DemandNewEpisodeState {
   isSavingInterview = false;
   interviewError: string | null = null;
   interviewSuccess: string | null = null;
+
+  isSavingClosure = false;
+  closureError: string | null = null;
+  closureSuccess: string | null = null;
 
   showBackToNavigation = false;
 }

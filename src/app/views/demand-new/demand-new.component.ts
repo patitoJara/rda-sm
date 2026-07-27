@@ -96,6 +96,15 @@ import {
   isFutureCitation as checkFutureCitation,
   isTodayCitation as checkTodayCitation,
 } from './utils/demand-new-citation.utils';
+import {
+  resolveCitationTypeCode,
+  validateCitationSchedule,
+} from './utils/demand-new-citation-schedule.utils';
+import {
+  filterFeedbackEvents,
+  filterPresentedCitations,
+  getCommitmentLevelLabel,
+} from './utils/demand-new-milestone.utils';
 import { filterObservationEvents } from './utils/demand-new-observation.utils';
 import { buildAttendancePayload } from './utils/demand-new-attendance.utils';
 import {
@@ -105,7 +114,14 @@ import {
   validateAttendanceContext,
 } from './actions/demand-new-attendance.actions';
 import { handleObservationSuccess } from './actions/demand-new-observation.actions';
-import { handleInterviewSuccess } from './actions/demand-new-interview.actions';
+import {
+  buildClosureContext,
+  getClosureSuccessMessage,
+} from './actions/demand-new-closure.actions';
+import {
+  buildFeedbackContext,
+  handleFeedbackSuccess,
+} from './actions/demand-new-interview.actions';
 import {
   buildCitationContext,
   handleCitationSuccess,
@@ -189,6 +205,7 @@ export class DemandNewComponent
   private summaryHighlightTimeout: ReturnType<typeof setTimeout> | null = null;
 
   citationForm = this.fb.group({
+    citationTypeCode: ['', Validators.required],
     eventDate: new FormControl<Date | null>(new Date(), Validators.required),
     eventHour: ['', Validators.required],
     eventPeriod: ['AM', Validators.required],
@@ -197,7 +214,6 @@ export class DemandNewComponent
       Validators.required,
     ),
     professionName: ['', Validators.required],
-    comment: ['', Validators.required],
     citationComment: [''],
   });
 
@@ -213,6 +229,13 @@ export class DemandNewComponent
     comment: ['', Validators.required],
   });
 
+  readonly allowedFeedbackResultCodes = new Set([
+    'LISTA_ESPERA',
+    'INGRESO_TRATAMIENTO',
+    'REFERENCIA',
+    'ABANDONO',
+  ]);
+
   interviewForm = this.fb.group({
     eventDate: [new Date(), Validators.required],
     eventHour: [
@@ -223,12 +246,18 @@ export class DemandNewComponent
       ],
     ],
     eventPeriod: ['AM', Validators.required],
-    comment: ['', Validators.required],
-    observation: ['', Validators.required],
-    nextAction: [''],
-    nextActionDate: [null as Date | null],
+    programProfessionalId: new FormControl<number | null>(
+      null,
+      Validators.required,
+    ),
+    professionName: [''],
+    biopsychosocialCommitmentCode: ['', Validators.required],
+    resultCode: ['', Validators.required],
   });
 
+  closureForm = this.fb.group({
+    closureDate: [new Date(), Validators.required],
+  });
   observationForm = this.fb.group({
     comment: ['', Validators.required],
     observation: [''],
@@ -343,7 +372,7 @@ export class DemandNewComponent
     'Episodio',
     'Etapa por programa',
     'Eventos',
-    'Referencias',
+    'Derivaciones',
   ];
 
   readonly personFields = [
@@ -416,20 +445,20 @@ export class DemandNewComponent
     },
     {
       icon: 'sync_alt',
-      title: 'Referencias entre programas',
+      title: 'Derivaciones entre programas',
       subtitle:
         'Cierre de etapa origen y creación de etapa receptora sin reiniciar días.',
       empty:
-        'No existen referencias registradas. Las referencias conservarán la fecha original y los días acumulados.',
+        'No existen derivaciones registradas. Las referencias conservarán la fecha original y los días acumulados.',
       fields: [
         'Programa origen',
         'Programa destino',
-        'Fecha referencia',
-        'Motivo referencia',
+        'Fecha derivación',
+        'Motivo derivación',
         'Observación',
         'Documento asociado',
         'Usuario que registra',
-        'Impacto de la referencia',
+        'Impacto de la derivación',
       ],
     },
     {
@@ -480,7 +509,7 @@ export class DemandNewComponent
       icon: 'verified_user',
       title: 'Auditoría / decisiones críticas',
       subtitle:
-        'Trazabilidad de cierres, referencias, ingresos, egresos, rectificaciones y reversión superior.',
+        'Trazabilidad de cierres, derivaciones, ingresos, egresos, rectificaciones y reversión superior.',
       empty:
         'Las decisiones críticas quedarán registradas con usuario, fecha y autorización.',
       fields: [
@@ -499,9 +528,9 @@ export class DemandNewComponent
   readonly operativeActions = [
     {
       icon: 'event_available',
-      title: 'Nueva citación',
+      title: 'Citación',
       description:
-        'Registrar fecha, hora, profesional y comentario de citación.',
+        'Agendar uno de los tipos de citación definidos para el episodio.',
       enabled: true,
       panel: 'citation' as const,
     },
@@ -515,9 +544,9 @@ export class DemandNewComponent
     },
     {
       icon: 'psychology',
-      title: 'Entrevista / evaluación',
+      title: 'Retroalimentación',
       description:
-        'Registrar entrevista, evaluación clínica/social o antecedentes relevantes.',
+        'Registrar la decisión adoptada para la continuidad de la demanda.',
       enabled: true,
       panel: 'interview' as const,
     },
@@ -530,24 +559,17 @@ export class DemandNewComponent
     },
     {
       icon: 'sync_alt',
-      title: 'Referir programa',
+      title: 'Derivar a otro programa',
       description:
         'Cerrar etapa origen y crear etapa receptora sin reiniciar días.',
       enabled: false,
       panel: 'reference' as const,
     },
     {
-      icon: 'fact_check',
-      title: 'Ingreso a tratamiento',
-      description: 'Registrar ingreso efectivo y detener KPI de espera.',
-      enabled: false,
-      panel: 'treatmentEntry' as const,
-    },
-    {
       icon: 'logout',
-      title: 'Egreso / cierre',
-      description: 'Cerrar episodio con motivo, observación y auditoría.',
-      enabled: false,
+      title: 'Cierre',
+      description: 'Registrar la fecha de cierre de la demanda.',
+      enabled: true,
       panel: 'egressClosure' as const,
     },
   ];
@@ -965,6 +987,20 @@ export class DemandNewComponent
     );
   }
 
+  onInterviewProfessionalChange(
+    programProfessionalId: number | null,
+  ): void {
+    const selected = this.professions.find(
+      (item: any) => Number(item?.id) === Number(programProfessionalId),
+    );
+
+    this.interviewForm.patchValue(
+      {
+        professionName: selected?.professionName ?? '',
+      },
+      { emitEvent: false },
+    );
+  }
   private loadDemandCatalogs(): void {
     this.isLoadingDemandCatalogs = true;
     this.demandCatalogsError = '';
@@ -976,6 +1012,9 @@ export class DemandNewComponent
         this.episodeTypes = catalogs.episodeTypes ?? [];
         this.eventTypes = catalogs.eventTypes ?? [];
         this.attendanceStatuses = catalogs.attendanceStatuses ?? [];
+        this.citationTypes = catalogs.citationTypes ?? [];
+        this.biopsychosocialCommitmentLevels =
+          catalogs.biopsychosocialCommitmentLevels ?? [];
         this.closureReasons = catalogs.closureReasons ?? [];
         this.programPopulations = catalogs.programPopulations ?? [];
         this.programModalities = catalogs.programModalities ?? [];
@@ -1008,6 +1047,14 @@ export class DemandNewComponent
         this.senders = data.senders ?? [];
         this.diverters = data.diverters ?? [];
         this.professions = data.professions?.content ?? data.professions ?? [];
+
+        const loadedResults = data.results?.content ?? data.results ?? [];
+
+        this.results = loadedResults.filter((item: any) =>
+          this.allowedFeedbackResultCodes.has(
+            String(item?.code ?? '').trim().toUpperCase(),
+          ),
+        );
       },
       error: () => {
         this.sexes = [];
@@ -2376,6 +2423,7 @@ export class DemandNewComponent
     if (!this.ensureCanManageCurrentEpisode()) {
       return;
     }
+
     this.interviewForm.markAllAsTouched();
 
     if (this.interviewForm.invalid || this.isSavingInterview) {
@@ -2389,7 +2437,7 @@ export class DemandNewComponent
 
     if (!episodeId) {
       this.interviewError =
-        'No fue posible identificar el episodio para registrar entrevista.';
+        'No fue posible identificar el episodio para registrar la retroalimentación.';
       return;
     }
 
@@ -2397,41 +2445,34 @@ export class DemandNewComponent
 
     if (!programId) {
       this.interviewError =
-        'No fue posible identificar el programa activo para registrar entrevista.';
+        'No fue posible identificar el programa activo para registrar la retroalimentación.';
       return;
     }
 
-    const raw = this.interviewForm.getRawValue();
+    const feedbackContext = buildFeedbackContext({
+      raw: this.interviewForm.getRawValue(),
+      programId,
+      longitudinal: this.longitudinal,
+    });
 
-    const eventTime = buildEventTime(
-      toStringOrNull(raw.eventHour),
-      toStringOrNull(raw.eventPeriod) ?? 'AM',
-    );
-
-    const payload = {
-      eventTypeCode: 'ENTREVISTA',
-      eventDate:
-        toStringOrNull(raw.eventDate) ?? new Date().toISOString().slice(0, 10),
-      eventTime,
-      programId: Number(programId),
-      comment: toStringOrNull(raw.comment),
-      observation: toStringOrNull(raw.observation),
-      nextAction: toStringOrNull(raw.nextAction),
-      nextActionDate: toBackendDate(raw.nextActionDate),
-    };
-
-    console.log('[DemandNew] Payload entrevista:', payload);
-    console.log('[DemandNew] Episodio:', episodeId);
+    if (!feedbackContext.valid) {
+      this.interviewError = feedbackContext.errorMessage;
+      return;
+    }
 
     this.isSavingInterview = true;
     this.interviewError = null;
     this.interviewSuccess = null;
 
     this.demandEpisodeService
-      .createEvent(episodeId, payload)
-      .pipe(finalize(() => (this.isSavingInterview = false)))
+      .createEvent(episodeId, feedbackContext.payload)
+      .pipe(
+        finalize(() => {
+          this.isSavingInterview = false;
+        }),
+      )
       .subscribe({
-        next: (event) => {
+        next: (event: any) => {
           if (event?.id) {
             this.episodeEvents = [
               ...(this.episodeEvents ?? []).filter(
@@ -2441,34 +2482,124 @@ export class DemandNewComponent
             ];
           }
 
-          const interviewResult = handleInterviewSuccess(event);
+          const feedbackResult = handleFeedbackSuccess(event);
 
-          this.interviewSuccess = interviewResult.successMessage;
-          this.interviewForm.reset(interviewResult.resetValue);
+          this.interviewSuccess = feedbackResult.successMessage;
+          this.interviewForm.reset(feedbackResult.resetValue);
 
           this.loadEpisodeLongitudinal(episodeId);
-        },
-        error: (error) => {
-          console.error('[DemandNew] Error registrando entrevista:', error);
 
-          if (error?.status === 403) {
+          // Cerrar el panel después de mostrar la confirmación.
+          setTimeout(() => {
+            if (this.activeActionPanel === 'interview') {
+              this.closeActionPanel();
+            }
+          }, 2200);
+        },
+
+        error: (error: HttpErrorResponse) => {
+          console.error(
+            '[DemandNew] Error registrando retroalimentación:',
+            error,
+          );
+
+          if (error.status === 403) {
             this.interviewError =
-              'No tiene permisos para registrar entrevista en el episodio.';
+              'No tiene permisos para registrar la retroalimentación.';
             return;
           }
 
-          if (error?.status === 400) {
+          if (error.status === 400) {
             this.interviewError =
-              'No fue posible registrar la entrevista. Revise si el backend acepta eventTypeCode ENTREVISTA.';
+              error.error?.message ||
+              'Los datos de la retroalimentación no son válidos.';
             return;
           }
 
           this.interviewError =
-            'No fue posible registrar la entrevista. Intente nuevamente.';
+            'No fue posible registrar la retroalimentación. Intente nuevamente.';
         },
       });
   }
 
+  saveClosure(): void {
+    if (!this.ensureCanManageCurrentEpisode()) {
+      return;
+    }
+
+    this.closureForm.markAllAsTouched();
+
+    if (this.closureForm.invalid || this.isSavingClosure) {
+      return;
+    }
+
+    const episodeId = getCurrentEpisodeId(
+      this.createdEpisode,
+      this.episodeSummary,
+    );
+
+    if (!episodeId) {
+      this.closureError =
+        'No fue posible identificar el episodio que se desea cerrar.';
+      return;
+    }
+
+    const closureContext = buildClosureContext({
+      raw: this.closureForm.getRawValue(),
+      originalRequestDate: this.episodeOriginDate,
+      episodeEvents: this.episodeEvents ?? [],
+    });
+
+    if (!closureContext.valid) {
+      this.closureError = closureContext.errorMessage;
+      return;
+    }
+
+    this.isSavingClosure = true;
+    this.closureError = null;
+    this.closureSuccess = null;
+
+    this.demandEpisodeService
+      .closeEpisode(episodeId, closureContext.payload)
+      .pipe(
+        finalize(() => {
+          this.isSavingClosure = false;
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.closureSuccess = getClosureSuccessMessage();
+
+          setTimeout(() => {
+            if (this.activeActionPanel === 'egressClosure') {
+              this.closeActionPanel();
+            }
+
+            this.loadEpisodeLongitudinal(episodeId);
+          }, 2200);
+        },
+
+        error: (error: HttpErrorResponse) => {
+          console.error('[DemandNew] Error cerrando demanda:', error);
+
+          if (error.status === 403) {
+            this.closureError =
+              'No tiene permisos para cerrar esta demanda.';
+            return;
+          }
+
+          if (error.status === 400) {
+            this.closureError =
+              error.error?.message ||
+              'La fecha de cierre no es válida.';
+            return;
+          }
+
+          this.closureError =
+            'No fue posible cerrar la demanda. Intente nuevamente.';
+        },
+      });
+  }
   private patchPersonForm(person: Postulant): void {
     const birthDate = parseBackendDate(person.birthdate);
 
@@ -3178,12 +3309,12 @@ export class DemandNewComponent
 
     if (panel === 'citation') {
       this.citationForm.reset({
+        citationTypeCode: null,
         eventDate: new Date(),
         eventHour: '',
         eventPeriod: 'AM',
         programProfessionalId: null,
         professionName: '',
-        comment: '',
         citationComment: '',
       });
     }
@@ -3201,13 +3332,21 @@ export class DemandNewComponent
         eventDate: new Date(),
         eventHour: '',
         eventPeriod: 'AM',
-        comment: '',
-        observation: '',
-        nextAction: '',
-        nextActionDate: null,
+        programProfessionalId: null,
+        professionName: '',
+        biopsychosocialCommitmentCode: null,
+        resultCode: null,
       });
     }
 
+    if (panel === 'egressClosure') {
+      this.closureError = null;
+      this.closureSuccess = null;
+
+      this.closureForm.reset({
+        closureDate: new Date(),
+      });
+    }
     if (panel === 'observation') {
       this.observationForm.reset({
         comment: '',
@@ -3253,6 +3392,34 @@ export class DemandNewComponent
     );
   }
 
+  isCitationTypeRegistered(code: string): boolean {
+    const events = this.citationEvents;
+
+    return events.some(
+      (event: any) =>
+        resolveCitationTypeCode(
+          event,
+          events,
+          this.citationTypes,
+        ) === code,
+    );
+  }
+  getCitationDisplayName(citation: any): string {
+    const events = this.citationEvents;
+
+    const code = resolveCitationTypeCode(
+      citation,
+      events,
+      this.citationTypes,
+    );
+
+    return (
+      this.citationTypes.find(
+        (item: any) => item?.code === code,
+      )?.name ??
+      `Citación ${this.getCitationNumber(citation)}`
+    );
+  }
   getCitationNumber(item: any): number {
     return calculateCitationNumber(item, this.citationEvents);
   }
@@ -3261,6 +3428,31 @@ export class DemandNewComponent
     return findAttendanceForCitation(citation, this.episodeEvents);
   }
 
+  getCitationAttendanceClass(citation: any): string {
+    const status = this.getCitationAttendanceLabel(citation)
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toUpperCase();
+
+    if (status.includes('NO SE PRESENTO')) {
+      return 'citation-attendance-status--absent';
+    }
+
+    if (status.includes('SE PRESENTO')) {
+      return 'citation-attendance-status--present';
+    }
+
+    if (status.includes('REPROGRAM')) {
+      return 'citation-attendance-status--rescheduled';
+    }
+
+    if (status.includes('CANCEL')) {
+      return 'citation-attendance-status--cancelled';
+    }
+
+    return 'citation-attendance-status--pending';
+  }
   getCitationAttendanceLabel(citation: any): string {
     return resolveCitationAttendanceLabel(citation, this.episodeEvents);
   }
@@ -3330,12 +3522,27 @@ export class DemandNewComponent
 
     const payload = citationContext.payload;
 
+    const scheduleValidation = validateCitationSchedule({
+      citationTypeCode: payload.citationTypeCode,
+      citationDate: payload.citationDate,
+      citationTime: payload.citationTime,
+      citationEvents: this.citationEvents,
+      citationTypes: this.citationTypes,
+    });
+
+    if (!scheduleValidation.valid) {
+      this.citationError =
+        scheduleValidation.errorMessage ??
+        'La fecha y hora no respetan el orden de las citaciones.';
+      return;
+    }
+
     this.isSavingCitation = true;
     this.citationError = null;
     this.citationSuccess = null;
 
     this.demandEpisodeService
-      .createEvent(episodeId, payload)
+      .createCitation(episodeId, payload)
       .pipe(
         finalize(() => {
           this.isSavingCitation = false;
@@ -3502,35 +3709,31 @@ export class DemandNewComponent
   }
 
   formatInterviewHourInput(): void {
-    const control = this.interviewForm.get('eventHour');
-    const value = String(control?.value ?? '').trim();
+    const raw = String(this.interviewForm.get('eventHour')?.value ?? '')
+      .replace(/\D/g, '')
+      .slice(0, 4);
 
-    if (!value) {
+    if (!raw) {
+      this.interviewForm.patchValue(
+        { eventHour: '' },
+        { emitEvent: false },
+      );
       return;
     }
 
-    const parts = value.split(':');
+    let formatted = raw;
 
-    if (parts.length !== 2) {
-      return;
+    if (raw.length >= 3) {
+      formatted = `${raw.slice(0, raw.length - 2)}:${raw.slice(-2)}`;
     }
 
-    const hour = Number(parts[0]);
-    const minutes = Number(parts[1]);
-
-    if (
-      Number.isNaN(hour) ||
-      Number.isNaN(minutes) ||
-      hour < 1 ||
-      hour > 12 ||
-      minutes < 0 ||
-      minutes > 59
-    ) {
-      return;
+    if (formatted.length === 4 && !formatted.startsWith('0')) {
+      formatted = `0${formatted}`;
     }
 
-    control?.setValue(
-      `${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`,
+    this.interviewForm.patchValue(
+      { eventHour: formatted },
+      { emitEvent: false },
     );
   }
 
@@ -3688,6 +3891,39 @@ export class DemandNewComponent
       .trim()
       .toUpperCase();
 
+    // Próxima acción definida por Retroalimentación.
+    if (this.canManageCurrentEpisode) {
+      if (resultCode === 'REFERENCIA') {
+        nextActionTitle = 'Derivar a otro programa';
+        nextActionDetail =
+          'La Retroalimentación definió una derivación. Registre el programa de destino.';
+        nextActionTone = 'warning';
+        nextActionIcon = 'sync_alt';
+      } else if (resultCode === 'INGRESO_TRATAMIENTO') {
+        nextActionTitle = 'Registrar cierre de la demanda';
+        nextActionDetail =
+          'El ingreso a tratamiento ya fue registrado. La demanda permanecerá abierta hasta registrar su fecha de cierre.';
+        nextActionTone = 'warning';
+        nextActionIcon = 'event_busy';
+      } else if (resultCode === 'ABANDONO') {
+        nextActionTitle = 'Registrar cierre por abandono';
+        nextActionDetail =
+          'La Retroalimentación registró abandono. Corresponde cerrar formalmente la demanda.';
+        nextActionTone = 'danger';
+        nextActionIcon = 'event_busy';
+      } else if (
+        resultCode === 'LISTA_ESPERA' &&
+        !expiredCitation &&
+        !pendingCitation
+      ) {
+        nextActionTitle = 'Programar próxima gestión';
+        nextActionDetail =
+          'La persona continúa en lista de espera y no registra una próxima actividad.';
+        nextActionTone = 'warning';
+        nextActionIcon = 'event_available';
+      }
+    }
+
     const result = formatResultLabelValue(resultValue, 'Sin resultado');
 
     const resultPending =
@@ -3713,6 +3949,46 @@ export class DemandNewComponent
     };
   }
 
+  get operationalResultTone():
+    | 'pending'
+    | 'waiting'
+    | 'success'
+    | 'reference'
+    | 'danger' {
+    const episode =
+      this.longitudinal?.activeEpisode ??
+      this.episodeSummary ??
+      this.createdEpisode ??
+      null;
+
+    const resultCode = String(
+      episode?.result?.code ?? episode?.resultCode ?? '',
+    )
+      .trim()
+      .toUpperCase();
+
+    if (!resultCode || resultCode === 'AUN_SIN_RESULTADO') {
+      return 'pending';
+    }
+
+    if (resultCode === 'LISTA_ESPERA') {
+      return 'waiting';
+    }
+
+    if (resultCode === 'INGRESO_TRATAMIENTO') {
+      return 'success';
+    }
+
+    if (resultCode === 'REFERENCIA') {
+      return 'reference';
+    }
+
+    if (resultCode === 'ABANDONO') {
+      return 'danger';
+    }
+
+    return 'pending';
+  }
   get orderedEpisodeEvents(): any[] {
     const events = [...(this.episodeEvents ?? [])];
 
@@ -3839,12 +4115,22 @@ export class DemandNewComponent
   }
 
   getEventProfessionalName(event: any): string | null {
+    const programProfessionalId = Number(
+      event?.programProfessionalId ??
+        event?.programProfessional?.id ??
+        null,
+    );
+
+    const loadedProfessional = this.professions.find(
+      (item: any) => Number(item?.id) === programProfessionalId,
+    );
+
     return (
       event?.programProfessionalName ??
-      event?.professionalName ??
       event?.programProfessional?.name ??
       event?.professional?.name ??
       event?.professionalUser?.name ??
+      loadedProfessional?.name ??
       null
     );
   }
@@ -3872,25 +4158,87 @@ export class DemandNewComponent
     );
   }
 
+  get episodeOriginDate(): string | null {
+    return (
+      this.episodeSummary?.originalRequestDate ??
+      this.createdEpisode?.originalRequestDate ??
+      this.longitudinal?.activeEpisode?.originalRequestDate ??
+      null
+    );
+  }
+
+  get attendedInterviewCitations(): any[] {
+    return filterPresentedCitations(
+      this.citationEvents,
+      this.episodeEvents ?? [],
+    );
+  }
+
+  get feedbackEvents(): any[] {
+    return filterFeedbackEvents(
+      this.episodeEvents ?? [],
+    );
+  }
+
+  get episodeClosureDate(): string | null {
+    return (
+      this.episodeSummary?.closedAt ??
+      this.createdEpisode?.closedAt ??
+      this.longitudinal?.activeEpisode?.closedAt ??
+      null
+    );
+  }
+
+  getFeedbackCommitmentLabel(event: any): string {
+    return getCommitmentLevelLabel(event);
+  }
   get citationEvents(): any[] {
-    return (this.episodeEvents ?? [])
-      .filter((event: any) => {
+    const events = (this.episodeEvents ?? []).filter(
+      (event: any) => {
         const code = String(
-          event?.eventType?.code ?? event?.eventTypeCode ?? '',
+          event?.eventType?.code ??
+            event?.eventTypeCode ??
+            '',
         )
           .toUpperCase()
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '');
 
         return code === 'CITACION' || code === 'NUEVA_CITACION';
-      })
-      .sort((a: any, b: any) => {
-        const dateA = `${a.eventDate ?? ''}T${a.eventTime ?? '00:00:00'}`;
-        const dateB = `${b.eventDate ?? ''}T${b.eventTime ?? '00:00:00'}`;
-        return dateB.localeCompare(dateA);
-      });
-  }
+      },
+    );
 
+    return events.sort((left: any, right: any) => {
+      const leftCode = resolveCitationTypeCode(
+        left,
+        events,
+        this.citationTypes,
+      );
+      const rightCode = resolveCitationTypeCode(
+        right,
+        events,
+        this.citationTypes,
+      );
+
+      const leftOrder = this.citationTypes.findIndex(
+        (item: any) => item?.code === leftCode,
+      );
+      const rightOrder = this.citationTypes.findIndex(
+        (item: any) => item?.code === rightCode,
+      );
+
+      if (leftOrder !== rightOrder) {
+        return leftOrder - rightOrder;
+      }
+
+      const leftDate =
+        `${left?.eventDate ?? ''}T${left?.eventTime ?? '00:00:00'}`;
+      const rightDate =
+        `${right?.eventDate ?? ''}T${right?.eventTime ?? '00:00:00'}`;
+
+      return leftDate.localeCompare(rightDate);
+    });
+  }
   get pendingCitationEvents(): any[] {
     return filterPendingCitationEvents(this.citationEvents, this.episodeEvents);
   }

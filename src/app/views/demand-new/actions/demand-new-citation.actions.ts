@@ -2,19 +2,17 @@ import {
   formatDateForBackend,
   toStringOrNull,
 } from '../utils/demand-new-format.utils';
-import {
-  buildEventTime,
-} from '../utils/demand-new-event.utils';
+import { buildEventTime } from '../utils/demand-new-event.utils';
 
 export interface CitationSuccessResult {
   successMessage: string;
   resetValue: {
+    citationTypeCode: null;
     eventDate: Date;
     eventHour: string;
     eventPeriod: string;
     programProfessionalId: null;
     professionName: string;
-    comment: string;
     citationComment: string;
   };
 }
@@ -26,14 +24,13 @@ export interface CitationContextInput {
 }
 
 export interface CitationPayload {
-  eventTypeCode: 'CITACION';
-  eventDate: string;
-  eventTime: string;
   stageId: number;
+  citationDate: string;
+  citationTime: string;
+  citationTypeCode: string;
   programId: number;
   programProfessionalId: number | null;
   professionName: string | null;
-  comment: string | null;
   citationComment: string | null;
 }
 
@@ -52,13 +49,21 @@ export function buildCitationContext(
 ): CitationContextResult {
   const { raw, programId, longitudinal } = input;
 
-  const eventDate = formatDateForBackend(raw.eventDate);
-  const eventTime = buildEventTime(
+  const citationTypeCode = toStringOrNull(raw.citationTypeCode);
+  const citationDate = formatDateForBackend(raw.eventDate);
+  const citationTime = buildEventTime(
     raw.eventHour,
     raw.eventPeriod,
   );
 
-  if (!eventDate) {
+  if (!citationTypeCode) {
+    return {
+      valid: false,
+      errorMessage: 'Debe seleccionar el tipo de citación.',
+    };
+  }
+
+  if (!citationDate) {
     return {
       valid: false,
       errorMessage:
@@ -66,7 +71,7 @@ export function buildCitationContext(
     };
   }
 
-  if (!eventTime) {
+  if (!citationTime) {
     return {
       valid: false,
       errorMessage:
@@ -92,16 +97,15 @@ export function buildCitationContext(
   return {
     valid: true,
     payload: {
-      eventTypeCode: 'CITACION',
-      eventDate,
-      eventTime,
       stageId: Number(stageId),
+      citationDate,
+      citationTime,
+      citationTypeCode,
       programId: Number(programId),
       programProfessionalId: raw.programProfessionalId
         ? Number(raw.programProfessionalId)
         : null,
       professionName: toStringOrNull(raw.professionName),
-      comment: toStringOrNull(raw.comment),
       citationComment: toStringOrNull(raw.citationComment),
     },
   };
@@ -115,12 +119,12 @@ export function handleCitationSuccess(
   return {
     successMessage: 'Citación registrada correctamente.',
     resetValue: {
+      citationTypeCode: null,
       eventDate: new Date(),
       eventHour: '',
       eventPeriod: 'AM',
       programProfessionalId: null,
       professionName: '',
-      comment: '',
       citationComment: '',
     },
   };

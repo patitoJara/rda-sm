@@ -1,4 +1,4 @@
-﻿import {
+import {
   DemandCatalogItem,
   DemandCatalogsDTO,
 } from '../../../core/services/demand.service';
@@ -11,6 +11,8 @@ export abstract class DemandNewCatalogState extends DemandNewLongitudinalState {
   episodeTypes: DemandCatalogItem[] = [];
   eventTypes: DemandCatalogItem[] = [];
   attendanceStatuses: DemandCatalogItem[] = [];
+  citationTypes: DemandCatalogItem[] = [];
+  biopsychosocialCommitmentLevels: DemandCatalogItem[] = [];
   closureReasons: DemandCatalogItem[] = [];
   programPopulations: DemandCatalogItem[] = [];
   programModalities: DemandCatalogItem[] = [];

@@ -1668,3 +1668,343 @@
     width: 100%;
   }
 }
+
+/* =========================================================
+   HITOS DEL EPISODIO
+   ========================================================= */
+
+.episode-milestones {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(15, 118, 135, 0.16);
+}
+
+.episode-milestones__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 4px;
+}
+
+.episode-milestones__header > mat-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: #087f8c;
+  background: #e8f6f7;
+  border-radius: 12px;
+}
+
+.episode-milestones__header h4 {
+  margin: 0;
+  color: #123f49;
+  font-size: 0.98rem;
+  font-weight: 800;
+}
+
+.episode-milestones__header p {
+  margin: 2px 0 0;
+  color: #607d84;
+  font-size: 0.78rem;
+}
+
+.episode-milestone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 11px 13px;
+  background: #f7fbfb;
+  border: 1px solid #d7e9eb;
+  border-radius: 12px;
+}
+
+.episode-milestone--stacked {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.episode-milestone__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #365e66;
+  font-weight: 700;
+}
+
+.episode-milestone__label mat-icon {
+  width: 20px;
+  height: 20px;
+  color: #0b8794;
+  font-size: 20px;
+}
+
+.episode-milestone > strong {
+  color: #123f49;
+  text-align: right;
+}
+
+.episode-milestone__list {
+  display: grid;
+  gap: 7px;
+  width: 100%;
+}
+
+.episode-milestone__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  background: #ffffff;
+  border: 1px solid #e0ecee;
+  border-radius: 9px;
+}
+
+.episode-milestone__item span {
+  color: #4f6970;
+}
+
+.episode-milestone__item strong {
+  color: #123f49;
+  white-space: nowrap;
+}
+
+.episode-milestone__item--feedback {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.episode-milestone__pending {
+  width: 100%;
+  color: #789096;
+  font-style: italic;
+  text-align: right;
+}
+
+@media (max-width: 700px) {
+  .episode-milestone {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .episode-milestone > strong,
+  .episode-milestone__pending {
+    text-align: left;
+  }
+
+  .episode-milestone__item {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+/* ESTRUCTURA HITOS OPERATIVOS */
+
+.operational-milestones {
+  margin-top: 13px;
+  padding: 13px;
+  border: 1px solid #d8e7ea;
+  border-radius: 16px;
+  background: #f8fbfc;
+}
+
+.operational-milestones__heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 11px;
+  color: #155e6b;
+}
+
+.operational-milestones__heading > mat-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 10px;
+  background: #ddf1f4;
+  font-size: 21px;
+}
+
+.operational-milestones__heading span,
+.operational-milestones__heading strong {
+  display: block;
+}
+
+.operational-milestones__heading span {
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.operational-milestones__heading strong {
+  color: #173f48;
+  font-size: 0.9rem;
+}
+
+.operational-milestones__grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.operational-milestone {
+  --milestone-color: #607d85;
+  --milestone-soft: #e8eff1;
+  --milestone-surface: #ffffff;
+
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  min-height: 78px;
+  padding: 11px;
+  box-sizing: border-box;
+  border: 1px solid #dbe7ea;
+  border-left: 4px solid var(--milestone-color);
+  border-radius: 13px;
+  background: var(--milestone-surface);
+}
+
+.operational-milestone > mat-icon {
+  flex: 0 0 auto;
+  width: 31px;
+  height: 31px;
+  padding: 6px;
+  box-sizing: border-box;
+  color: var(--milestone-color);
+  border-radius: 9px;
+  background: var(--milestone-soft);
+  font-size: 19px;
+}
+
+.operational-milestone > div {
+  min-width: 0;
+}
+
+.operational-milestone span,
+.operational-milestone strong,
+.operational-milestone small {
+  display: block;
+}
+
+.operational-milestone span {
+  color: #63787f;
+  font-size: 0.65rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.operational-milestone strong {
+  margin-top: 3px;
+  color: #173f48;
+  font-size: 0.9rem;
+  font-weight: 950;
+  line-height: 1.2;
+}
+
+.operational-milestone small {
+  margin-top: 3px;
+  color: #6c8087;
+  font-size: 0.68rem;
+}
+
+@media (max-width: 1180px) {
+  .operational-milestones__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 780px) {
+  .operational-milestones__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .operational-milestones__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* COLORES HITOS Y RESULTADO */
+
+.operational-milestone--citation {
+  --milestone-color: #1565c0;
+  --milestone-soft: #dfedff;
+  --milestone-surface: #f4f8ff;
+}
+
+.operational-milestone--interview {
+  --milestone-color: #00838f;
+  --milestone-soft: #daf2f3;
+  --milestone-surface: #f1fafb;
+}
+
+.operational-milestone--completed,
+.operational-milestone--commitment-leve {
+  --milestone-color: #2e7d32;
+  --milestone-soft: #e0f3e2;
+  --milestone-surface: #f2faf3;
+}
+
+.operational-milestone--pending,
+.operational-milestone--commitment-moderado {
+  --milestone-color: #a86500;
+  --milestone-soft: #fff0c8;
+  --milestone-surface: #fff9eb;
+}
+
+.operational-milestone--commitment-severo {
+  --milestone-color: #c62828;
+  --milestone-soft: #fde2e2;
+  --milestone-surface: #fff2f2;
+}
+
+/* Resultado actual destacado */
+
+.operational-result-strip {
+  border-width: 2px;
+  box-shadow: 0 7px 18px rgba(25, 73, 83, 0.08);
+}
+
+.operational-result-strip strong {
+  font-size: 1.12rem;
+}
+
+.operational-result-strip--pending,
+.operational-result-strip--waiting {
+  --result-border: #e7bd52;
+  --result-background: #fff8df;
+  --result-color: #745500;
+  --result-icon: #ffecb2;
+}
+
+.operational-result-strip--success {
+  --result-border: #63b47b;
+  --result-background: #eaf8ee;
+  --result-color: #1f6637;
+  --result-icon: #cfead7;
+}
+
+.operational-result-strip--reference {
+  --result-border: #65a4df;
+  --result-background: #edf6ff;
+  --result-color: #17588e;
+  --result-icon: #d7eaff;
+}
+
+.operational-result-strip--danger {
+  --result-border: #dc7777;
+  --result-background: #fff0f0;
+  --result-color: #982323;
+  --result-icon: #fbd7d7;
+}

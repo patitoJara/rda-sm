@@ -21,6 +21,20 @@ export interface PrioritizedEpisodeDTO {
   resultCode: string;
 
   lastManagement: string | null;
+  lastManagementDate: string | null;
+  lastManagementTime: string | null;
+
+  firstCitationFirstInterviewDate: string | null;
+  secondCitationFirstInterviewDate: string | null;
+  firstCitationSecondInterviewDate: string | null;
+  secondCitationSecondInterviewDate: string | null;
+  optionalInterviewDate: string | null;
+
+  feedbackDate: string | null;
+  closureDate: string | null;
+
+  biopsychosocialCommitmentCode: string | null;
+
   suggestedAction: string | null;
 }
 
@@ -77,4 +91,6 @@ export interface PrioritizedEpisodeQuery {
   programId?: number | null;
   stateCode?: string | null;
   resultCode?: string | null;
+
+  sort?: string | null;
 }
