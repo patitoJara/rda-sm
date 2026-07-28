@@ -1,0 +1,729 @@
+<div class="analysis-dialog">
+  <header class="analysis-header">
+    <div class="analysis-header__identity">
+      <span class="analysis-header__icon">
+        <mat-icon>monitoring</mat-icon>
+      </span>
+
+      <div>
+        <span class="analysis-header__eyebrow">
+          Control ejecutivo de demanda
+        </span>
+
+        <h2>Análisis por programa</h2>
+
+        <p>
+          Comparación operativa para orientar la supervisión y
+          priorizar decisiones.
+        </p>
+      </div>
+    </div>
+
+    <div class="analysis-header__actions">
+      <button
+        mat-icon-button
+        type="button"
+        matTooltip="Actualizar análisis"
+        aria-label="Actualizar análisis"
+        [disabled]="loading"
+        (click)="loadAnalysis()"
+      >
+        <mat-icon>refresh</mat-icon>
+      </button>
+
+      <button
+        mat-icon-button
+        type="button"
+        mat-dialog-close
+        aria-label="Cerrar análisis"
+        matTooltip="Cerrar"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </header>
+
+  <mat-dialog-content class="analysis-content">
+    <div
+      class="analysis-loading"
+      *ngIf="loading"
+      aria-live="polite"
+    >
+      <mat-spinner diameter="44"></mat-spinner>
+
+      <div>
+        <strong>Preparando análisis ejecutivo</strong>
+        <span>
+          Consultando los indicadores de los programas autorizados.
+        </span>
+      </div>
+    </div>
+
+    <div
+      class="analysis-error"
+      *ngIf="!loading && error"
+      role="alert"
+    >
+      <mat-icon>error_outline</mat-icon>
+
+      <div>
+        <strong>No fue posible mostrar el análisis</strong>
+        <span>{{ error }}</span>
+      </div>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="loadAnalysis()"
+      >
+        <mat-icon>refresh</mat-icon>
+        Reintentar
+      </button>
+    </div>
+
+    <div
+      class="analysis-empty"
+      *ngIf="
+        !loading &&
+        !error &&
+        programs.length === 0
+      "
+    >
+      <mat-icon>domain_disabled</mat-icon>
+
+      <div>
+        <strong>No existen programas para analizar</strong>
+        <span>
+          La consulta no devolvió indicadores disponibles.
+        </span>
+      </div>
+    </div>
+
+    <ng-container
+      *ngIf="
+        !loading &&
+        !error &&
+        programs.length > 0
+      "
+    >
+      <section
+        class="executive-metrics"
+        aria-label="Resumen ejecutivo"
+      >
+        <article class="executive-metric executive-metric--programs">
+          <span class="executive-metric__icon">
+            <mat-icon>domain</mat-icon>
+          </span>
+
+          <div>
+            <small>Programas con atención</small>
+            <strong>
+              {{ programsNeedingAttention }}
+              <span>de {{ programs.length }}</span>
+            </strong>
+            <p>Presentan al menos una condición pendiente.</p>
+          </div>
+        </article>
+
+        <article class="executive-metric executive-metric--active">
+          <span class="executive-metric__icon">
+            <mat-icon>folder_open</mat-icon>
+          </span>
+
+          <div>
+            <small>Demandas activas</small>
+            <strong>{{ totalActiveDemands }}</strong>
+            <p>Carga activa total entre los programas.</p>
+          </div>
+        </article>
+
+        <article class="executive-metric executive-metric--critical">
+          <span class="executive-metric__icon">
+            <mat-icon>crisis_alert</mat-icon>
+          </span>
+
+          <div>
+            <small>Indicadores críticos</small>
+            <strong>{{ totalCriticalIndicators }}</strong>
+            <p>Suma de casos en rojo y alertas abiertas.</p>
+          </div>
+        </article>
+
+        <article class="executive-metric executive-metric--pending">
+          <span class="executive-metric__icon">
+            <mat-icon>pending_actions</mat-icon>
+          </span>
+
+          <div>
+            <small>Hitos pendientes</small>
+            <strong>{{ totalPendingActions }}</strong>
+            <p>Citaciones, retroalimentaciones y gestiones pendientes.</p>
+          </div>
+        </article>
+      </section>
+
+      <section
+        class="supervision-focus"
+        *ngIf="focusProgram as focus"
+        [ngClass]="
+          'supervision-focus--' +
+          focus.supervisionLevel.toLowerCase()
+        "
+      >
+        <div class="supervision-focus__main">
+          <span class="supervision-focus__eyebrow">
+            <mat-icon>flag</mat-icon>
+            Foco recomendado de supervisión
+          </span>
+
+          <div class="supervision-focus__title">
+            <div>
+              <small>Programa prioritario</small>
+              <h3>{{ focus.programName }}</h3>
+            </div>
+
+            <span
+              class="supervision-level"
+              [ngClass]="
+                'supervision-level--' +
+                focus.supervisionLevel.toLowerCase()
+              "
+            >
+              <mat-icon>
+                {{ getLevelIcon(focus.supervisionLevel) }}
+              </mat-icon>
+
+              Prioridad {{ focus.supervisionLabel }}
+            </span>
+          </div>
+
+          <div class="supervision-focus__action">
+            <mat-icon>assistant_direction</mat-icon>
+
+            <div>
+              <small>Acción sugerida</small>
+              <strong>{{ focus.suggestedAction }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="supervision-focus__reasons">
+          <span>Factores considerados</span>
+
+          <ul>
+            <li
+              *ngFor="
+                let reason of focus.attentionReasons
+              "
+            >
+              <mat-icon>check_circle</mat-icon>
+              {{ reason }}
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="comparison-section">
+        <div class="comparison-section__heading">
+          <div>
+            <span>COMPARACIÓN OPERATIVA</span>
+            <h3>Prioridad de supervisión por programa</h3>
+          </div>
+
+          <p>
+            El orden considera condiciones críticas, complejidad y
+            gestiones pendientes. No constituye una evaluación de
+            desempeño.
+          </p>
+        </div>
+
+        <div class="comparison-table-wrapper">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Prioridad</th>
+                <th>Programa</th>
+                <th class="numeric">Activas</th>
+                <th class="numeric">Promedio</th>
+                <th class="numeric">Rojos</th>
+                <th class="numeric">Sin C1</th>
+                <th class="numeric">Sin retro.</th>
+                <th class="numeric">Severo</th>
+                <th class="numeric">Referencias</th>
+                <th class="numeric">Cierres</th>
+                <th class="numeric">Alertas</th>
+                <th>Acción prioritaria</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr
+                *ngFor="
+                  let program of programs;
+                  trackBy: trackByProgramId
+                "
+              >
+                <td>
+                  <span
+                    class="supervision-level supervision-level--table"
+                    [ngClass]="
+                      'supervision-level--' +
+                      program.supervisionLevel.toLowerCase()
+                    "
+                  >
+                    <mat-icon>
+                      {{
+                        getLevelIcon(
+                          program.supervisionLevel
+                        )
+                      }}
+                    </mat-icon>
+
+                    {{ program.supervisionLabel }}
+                  </span>
+                </td>
+
+                <td class="program-cell">
+                  <strong>{{ program.programName }}</strong>
+                  <small>
+                    {{ program.pendingActions }}
+                    {{
+                      program.pendingActions === 1
+                        ? "hito pendiente"
+                        : "hitos pendientes"
+                    }}
+                  </small>
+                </td>
+
+                <td class="numeric">
+                  {{ program.activeDemands }}
+                </td>
+
+                <td class="numeric">
+                  {{
+                    program.averageAccumulatedDays
+                      | number: "1.0-1"
+                  }}
+                  d
+                </td>
+
+                <td
+                  class="numeric"
+                  [class.value-alert]="program.redCases > 0"
+                >
+                  {{ program.redCases }}
+                </td>
+
+                <td
+                  class="numeric"
+                  [class.value-warning]="
+                    program.withoutFirstCitation > 0
+                  "
+                >
+                  {{ program.withoutFirstCitation }}
+                </td>
+
+                <td
+                  class="numeric"
+                  [class.value-warning]="
+                    program.withoutFeedback > 0
+                  "
+                >
+                  {{ program.withoutFeedback }}
+                </td>
+
+                <td
+                  class="numeric"
+                  [class.value-alert]="
+                    program.severeCommitmentCases > 0
+                  "
+                >
+                  {{ program.severeCommitmentCases }}
+                </td>
+
+                <td
+                  class="numeric"
+                  [class.value-warning]="
+                    program.pendingReferences > 0
+                  "
+                >
+                  {{ program.pendingReferences }}
+                </td>
+
+                <td
+                  class="numeric"
+                  [class.value-warning]="
+                    program.pendingClosures > 0
+                  "
+                >
+                  {{ program.pendingClosures }}
+                </td>
+
+                <td
+                  class="numeric"
+                  [class.value-alert]="
+                    program.openAlerts > 0
+                  "
+                >
+                  {{ program.openAlerts }}
+                </td>
+
+                <td class="action-cell">
+                  {{ program.suggestedAction }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="comparison-cards">
+          <article
+            class="program-mobile-card"
+            *ngFor="
+              let program of programs;
+              trackBy: trackByProgramId
+            "
+          >
+            <header>
+              <div>
+                <small>Programa</small>
+                <h4>{{ program.programName }}</h4>
+              </div>
+
+              <span
+                class="supervision-level"
+                [ngClass]="
+                  'supervision-level--' +
+                  program.supervisionLevel.toLowerCase()
+                "
+              >
+                <mat-icon>
+                  {{ getLevelIcon(program.supervisionLevel) }}
+                </mat-icon>
+
+                {{ program.supervisionLabel }}
+              </span>
+            </header>
+
+            <div class="program-mobile-card__metrics">
+              <span>
+                <small>Activas</small>
+                <strong>{{ program.activeDemands }}</strong>
+              </span>
+
+              <span>
+                <small>Promedio</small>
+                <strong>
+                  {{
+                    program.averageAccumulatedDays
+                      | number: "1.0-1"
+                  }}
+                  d
+                </strong>
+              </span>
+
+              <span>
+                <small>Rojos</small>
+                <strong>{{ program.redCases }}</strong>
+              </span>
+
+              <span>
+                <small>Pendientes</small>
+                <strong>{{ program.pendingActions }}</strong>
+              </span>
+            </div>
+
+            <div class="program-mobile-card__action">
+              <small>Acción prioritaria</small>
+              <strong>{{ program.suggestedAction }}</strong>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="comparison-section reference-section">
+        <div class="comparison-section__heading">
+          <div>
+            <span>REFERENCIAS DEL MES</span>
+            <h3>Movimiento y oportunidad entre programas</h3>
+          </div>
+
+          <p>
+            El promedio y los motivos corresponden al programa que
+            realizó la referencia.
+          </p>
+        </div>
+
+        <div
+          class="reference-summary-grid"
+          aria-label="Resumen de referencias del mes"
+        >
+          <article
+            class="reference-summary-card reference-summary-card--received"
+          >
+            <span class="reference-summary-card__icon">
+              <mat-icon>call_received</mat-icon>
+            </span>
+
+            <div>
+              <small>Recibidas</small>
+              <strong>{{ totalReceivedReferences }}</strong>
+              <p>Referencias recibidas durante el mes actual.</p>
+            </div>
+          </article>
+
+          <article
+            class="reference-summary-card reference-summary-card--sent"
+          >
+            <span class="reference-summary-card__icon">
+              <mat-icon>call_made</mat-icon>
+            </span>
+
+            <div>
+              <small>Enviadas</small>
+              <strong>{{ totalSentReferences }}</strong>
+              <p>Referencias realizadas durante el mes actual.</p>
+            </div>
+          </article>
+
+          <article
+            class="reference-summary-card reference-summary-card--pending"
+          >
+            <span class="reference-summary-card__icon">
+              <mat-icon>hourglass_top</mat-icon>
+            </span>
+
+            <div>
+              <small>Pendientes</small>
+              <strong>{{ totalPendingReferences }}</strong>
+              <p>Referencias que aún requieren continuidad.</p>
+            </div>
+          </article>
+        </div>
+
+        <div class="comparison-table-wrapper">
+          <table class="comparison-table reference-table">
+            <thead>
+              <tr>
+                <th>Programa</th>
+                <th class="numeric">Recibidas</th>
+                <th class="numeric">Enviadas</th>
+                <th class="numeric">Pendientes</th>
+                <th class="numeric">Balance</th>
+                <th class="numeric">Promedio previo</th>
+                <th>Motivos de referencia</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr
+                *ngFor="
+                  let program of programs;
+                  trackBy: trackByProgramId
+                "
+              >
+                <td class="program-cell">
+                  <strong>{{ program.programName }}</strong>
+                  <small>Indicadores del mes actual</small>
+                </td>
+
+                <td class="numeric">
+                  {{
+                    program.referenceSummary.receivedReferences
+                  }}
+                </td>
+
+                <td class="numeric">
+                  {{
+                    program.referenceSummary.sentReferences
+                  }}
+                </td>
+
+                <td
+                  class="numeric"
+                  [class.value-warning]="
+                    program.referenceSummary.pendingReferences > 0
+                  "
+                >
+                  {{
+                    program.referenceSummary.pendingReferences
+                  }}
+                </td>
+
+                <td
+                  class="numeric reference-balance"
+                  [class.reference-balance--positive]="
+                    program.referenceSummary.referenceBalance > 0
+                  "
+                  [class.reference-balance--negative]="
+                    program.referenceSummary.referenceBalance < 0
+                  "
+                >
+                  {{
+                    program.referenceSummary.referenceBalance
+                  }}
+                </td>
+
+                <td class="numeric">
+                  {{
+                    program.referenceSummary
+                      .averageDaysBeforeReference
+                      | number: "1.0-1"
+                  }}
+                  d
+                </td>
+
+                <td class="reference-reasons-cell">
+                  <span
+                    class="reference-reasons-empty"
+                    *ngIf="
+                      program.referenceSummary.referenceReasons
+                        .length === 0
+                    "
+                  >
+                    —
+                  </span>
+
+                  <div
+                    class="reference-reasons"
+                    *ngIf="
+                      program.referenceSummary.referenceReasons
+                        .length > 0
+                    "
+                  >
+                    <span
+                      class="reference-reason"
+                      *ngFor="
+                        let reason of
+                          program.referenceSummary.referenceReasons
+                      "
+                    >
+                      {{ reason.reason }}
+
+                      <strong>{{ reason.count }}</strong>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="comparison-cards reference-cards">
+          <article
+            class="program-mobile-card"
+            *ngFor="
+              let program of programs;
+              trackBy: trackByProgramId
+            "
+          >
+            <header>
+              <div>
+                <small>Programa</small>
+                <h4>{{ program.programName }}</h4>
+              </div>
+
+              <span
+                class="reference-mobile-balance"
+                [class.reference-balance--positive]="
+                  program.referenceSummary.referenceBalance > 0
+                "
+                [class.reference-balance--negative]="
+                  program.referenceSummary.referenceBalance < 0
+                "
+              >
+                Balance
+                {{ program.referenceSummary.referenceBalance }}
+              </span>
+            </header>
+
+            <div class="program-mobile-card__metrics">
+              <span>
+                <small>Recibidas</small>
+                <strong>
+                  {{
+                    program.referenceSummary.receivedReferences
+                  }}
+                </strong>
+              </span>
+
+              <span>
+                <small>Enviadas</small>
+                <strong>
+                  {{ program.referenceSummary.sentReferences }}
+                </strong>
+              </span>
+
+              <span>
+                <small>Pendientes</small>
+                <strong>
+                  {{
+                    program.referenceSummary.pendingReferences
+                  }}
+                </strong>
+              </span>
+
+              <span>
+                <small>Promedio previo</small>
+                <strong>
+                  {{
+                    program.referenceSummary
+                      .averageDaysBeforeReference
+                      | number: "1.0-1"
+                  }}
+                  d
+                </strong>
+              </span>
+            </div>
+
+            <div class="reference-mobile-reasons">
+              <small>Motivos de referencia</small>
+
+              <span
+                *ngIf="
+                  program.referenceSummary.referenceReasons
+                    .length === 0
+                "
+              >
+                Sin motivos registrados.
+              </span>
+
+              <ul
+                *ngIf="
+                  program.referenceSummary.referenceReasons
+                    .length > 0
+                "
+              >
+                <li
+                  *ngFor="
+                    let reason of
+                      program.referenceSummary.referenceReasons
+                  "
+                >
+                  {{ reason.reason }}
+                  <strong>{{ reason.count }}</strong>
+                </li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </section>
+    </ng-container>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="analysis-footer">
+    <span *ngIf="updatedAt">
+      <mat-icon>update</mat-icon>
+      Actualizado:
+      {{ updatedAt | date: "dd/MM/yyyy HH:mm" }}
+    </span>
+
+    <button
+      mat-flat-button
+      type="button"
+      mat-dialog-close
+    >
+      Cerrar
+    </button>
+  </mat-dialog-actions>
+</div>

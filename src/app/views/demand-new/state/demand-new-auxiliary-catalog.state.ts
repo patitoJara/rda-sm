@@ -9,6 +9,7 @@ export abstract class DemandNewAuxiliaryCatalogState extends DemandNewCatalogSta
 
   substances: any[] = [];
 
+  programs: any[] = [];
   professions: any[] = [];
   results: any[] = [];
   contactTypes: any[] = [];

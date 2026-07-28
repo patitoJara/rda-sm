@@ -38,7 +38,7 @@ export function formatDisplayTime(value: any): string {
 const RESULT_LABELS: Record<string, string> = {
   LISTA_ESPERA: 'Lista de espera',
   AUN_SIN_RESULTADO: 'Aún sin resultado',
-  REFERENCIA: 'Derivación',
+  REFERENCIA: 'Referencia',
   INGRESO_TRATAMIENTO: 'Ingreso a tratamiento',
   EGRESO: 'Egreso',
   NO_ES_PERFIL: 'No es perfil',

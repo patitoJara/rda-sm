@@ -105,6 +105,12 @@ import {
   filterPresentedCitations,
   getCommitmentLevelLabel,
 } from './utils/demand-new-milestone.utils';
+import {
+  resolveCurrentEpisodeStage,
+  resolveCurrentStageId,
+  resolveCurrentStageResultCode,
+  resolveCurrentStageResultValue,
+} from './utils/demand-new-current-stage.utils';
 import { filterObservationEvents } from './utils/demand-new-observation.utils';
 import { buildAttendancePayload } from './utils/demand-new-attendance.utils';
 import {
@@ -118,6 +124,13 @@ import {
   buildClosureContext,
   getClosureSuccessMessage,
 } from './actions/demand-new-closure.actions';
+import {
+  buildReferenceContext,
+  canRegisterReference,
+  getAvailableReferencePrograms,
+  getReferenceErrorMessage,
+  getReferenceSuccessMessage,
+} from './actions/demand-new-reference.actions';
 import {
   buildFeedbackContext,
   handleFeedbackSuccess,
@@ -255,6 +268,16 @@ export class DemandNewComponent
     resultCode: ['', Validators.required],
   });
 
+  referenceForm = this.fb.group({
+    targetProgramId: new FormControl<number | null>(
+      null,
+      Validators.required,
+    ),
+    referenceDate: [new Date(), Validators.required],
+    reason: ['', [Validators.required, Validators.maxLength(500)]],
+    observation: ['', Validators.maxLength(1000)],
+  });
+
   closureForm = this.fb.group({
     closureDate: [new Date(), Validators.required],
   });
@@ -372,7 +395,7 @@ export class DemandNewComponent
     'Episodio',
     'Etapa por programa',
     'Eventos',
-    'Derivaciones',
+    'Referencias',
   ];
 
   readonly personFields = [
@@ -445,20 +468,20 @@ export class DemandNewComponent
     },
     {
       icon: 'sync_alt',
-      title: 'Derivaciones entre programas',
+      title: 'Referencias entre programas',
       subtitle:
         'Cierre de etapa origen y creación de etapa receptora sin reiniciar días.',
       empty:
-        'No existen derivaciones registradas. Las referencias conservarán la fecha original y los días acumulados.',
+        'No existen referencias registradas. Las referencias conservarán la fecha original y los días acumulados.',
       fields: [
         'Programa origen',
         'Programa destino',
-        'Fecha derivación',
-        'Motivo derivación',
+        'Fecha referencia',
+        'Motivo referencia',
         'Observación',
         'Documento asociado',
         'Usuario que registra',
-        'Impacto de la derivación',
+        'Impacto de la referencia',
       ],
     },
     {
@@ -509,7 +532,7 @@ export class DemandNewComponent
       icon: 'verified_user',
       title: 'Auditoría / decisiones críticas',
       subtitle:
-        'Trazabilidad de cierres, derivaciones, ingresos, egresos, rectificaciones y reversión superior.',
+        'Trazabilidad de cierres, referencias, ingresos, egresos, rectificaciones y reversión superior.',
       empty:
         'Las decisiones críticas quedarán registradas con usuario, fecha y autorización.',
       fields: [
@@ -559,10 +582,10 @@ export class DemandNewComponent
     },
     {
       icon: 'sync_alt',
-      title: 'Derivar a otro programa',
+      title: 'Referir a otro programa',
       description:
         'Cerrar etapa origen y crear etapa receptora sin reiniciar días.',
-      enabled: false,
+      enabled: true,
       panel: 'reference' as const,
     },
     {
@@ -1046,6 +1069,7 @@ export class DemandNewComponent
         this.contactTypes = data.contactTypes ?? [];
         this.senders = data.senders ?? [];
         this.diverters = data.diverters ?? [];
+        this.programs = data.programs?.content ?? data.programs ?? [];
         this.professions = data.professions?.content ?? data.professions ?? [];
 
         const loadedResults = data.results?.content ?? data.results ?? [];
@@ -1066,6 +1090,7 @@ export class DemandNewComponent
         this.contactTypes = [];
         this.senders = [];
         this.diverters = [];
+        this.programs = [];
         this.professions = [];
       },
     });
@@ -2464,6 +2489,9 @@ export class DemandNewComponent
     this.interviewError = null;
     this.interviewSuccess = null;
 
+    this.referenceError = null;
+    this.referenceSuccess = null;
+
     this.demandEpisodeService
       .createEvent(episodeId, feedbackContext.payload)
       .pipe(
@@ -2522,6 +2550,139 @@ export class DemandNewComponent
       });
   }
 
+  get currentEpisodeStage(): any | null {
+    const episode =
+      this.longitudinal?.activeEpisode ??
+      this.episodeSummary ??
+      this.createdEpisode ??
+      null;
+
+    return resolveCurrentEpisodeStage(
+      this.longitudinal,
+      episode,
+    );
+  }
+
+  get currentStageResultCode(): string {
+    const episode =
+      this.longitudinal?.activeEpisode ??
+      this.episodeSummary ??
+      this.createdEpisode ??
+      null;
+
+    return resolveCurrentStageResultCode(
+      this.currentEpisodeStage,
+      episode,
+    );
+  }
+
+  get currentStageResultLabel(): string {
+    const episode =
+      this.longitudinal?.activeEpisode ??
+      this.episodeSummary ??
+      this.createdEpisode ??
+      null;
+
+    return formatResultLabelValue(
+      resolveCurrentStageResultValue(
+        this.currentEpisodeStage,
+        episode,
+      ),
+      'Aún sin resultado',
+    );
+  }
+
+  get canReferenceCurrentEpisode(): boolean {
+    const episode =
+      this.longitudinal?.activeEpisode ??
+      this.episodeSummary ??
+      this.createdEpisode ??
+      null;
+
+    return canRegisterReference(
+      this.currentEpisodeStage ?? episode,
+    );
+  }
+
+  get availableReferencePrograms(): any[] {
+    return getAvailableReferencePrograms(
+      this.programs,
+      this.activeProgramId,
+    );
+  }
+
+  saveReference(): void {
+    if (!this.ensureCanManageCurrentEpisode()) {
+      return;
+    }
+
+    if (!this.canReferenceCurrentEpisode) {
+      this.referenceSuccess = null;
+      this.referenceError =
+        'El resultado actual no permite registrar una referencia.';
+      return;
+    }
+    this.referenceForm.markAllAsTouched();
+
+    if (this.referenceForm.invalid || this.isSavingReference) {
+      return;
+    }
+
+    const episodeId = getCurrentEpisodeId(
+      this.createdEpisode,
+      this.episodeSummary,
+    );
+
+    if (!episodeId) {
+      this.referenceError =
+        'No fue posible identificar el episodio que se desea derivar.';
+      return;
+    }
+
+    const referenceContext = buildReferenceContext({
+      raw: this.referenceForm.getRawValue(),
+      currentProgramId: this.activeProgramId,
+      originalRequestDate: this.episodeOriginDate,
+      episodeEvents: this.episodeEvents ?? [],
+    });
+
+    if (!referenceContext.valid) {
+      this.referenceError = referenceContext.errorMessage;
+      return;
+    }
+
+    this.isSavingReference = true;
+    this.referenceError = null;
+    this.referenceSuccess = null;
+
+    this.demandService
+      .createReference(episodeId, referenceContext.payload)
+      .pipe(
+        finalize(() => {
+          this.isSavingReference = false;
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.referenceSuccess = getReferenceSuccessMessage();
+          this.loadEpisodeLongitudinal(episodeId);
+
+          setTimeout(() => {
+            if (this.activeActionPanel === 'reference') {
+              this.closeActionPanel();
+            }
+          }, 1800);
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error(
+            '[DemandNew] Error registrando referencia:',
+            error,
+          );
+
+          this.referenceError = getReferenceErrorMessage(error);
+        },
+      });
+  }
   saveClosure(): void {
     if (!this.ensureCanManageCurrentEpisode()) {
       return;
@@ -3307,6 +3468,9 @@ export class DemandNewComponent
     this.interviewError = null;
     this.interviewSuccess = null;
 
+    this.referenceError = null;
+    this.referenceSuccess = null;
+
     if (panel === 'citation') {
       this.citationForm.reset({
         citationTypeCode: null,
@@ -3339,6 +3503,14 @@ export class DemandNewComponent
       });
     }
 
+    if (panel === 'reference') {
+      this.referenceForm.reset({
+        targetProgramId: null,
+        referenceDate: new Date(),
+        reason: '',
+        observation: '',
+      });
+    }
     if (panel === 'egressClosure') {
       this.closureError = null;
       this.closureSuccess = null;
@@ -3766,8 +3938,13 @@ export class DemandNewComponent
     result: string;
     resultPending: boolean;
   } {
-    const episode = this.episodeSummary ?? this.createdEpisode ?? {};
+    const episode =
+      this.episodeSummary ??
+      this.createdEpisode ??
+      this.longitudinal?.activeEpisode ??
+      {};
 
+    const currentStage = this.currentEpisodeStage;
     const days = Math.max(0, Number(episode?.accumulatedDays ?? 0));
 
     const semaphoreCode = String(episode?.semaphoreColor ?? '')
@@ -3796,11 +3973,18 @@ export class DemandNewComponent
     const requestDate = formatDisplayDateValue(episode?.originalRequestDate);
 
     const stateValue =
-      episode?.state?.name ?? episode?.stateName ?? episode?.stateCode ?? null;
+      currentStage?.state?.name ??
+      currentStage?.stateName ??
+      currentStage?.stateCode ??
+      episode?.state?.name ??
+      episode?.stateName ??
+      episode?.stateCode ??
+      null;
 
     const state = this.formatStateLabel(stateValue);
 
     const program =
+      currentStage?.program?.name ??
       episode?.currentProgram?.name ??
       episode?.initialProgram?.name ??
       this.activeProgramName ??
@@ -3880,23 +4064,36 @@ export class DemandNewComponent
     }
 
     const resultValue =
-      episode?.result?.name ??
-      episode?.resultName ??
-      episode?.resultCode ??
-      null;
+      resolveCurrentStageResultValue(
+        currentStage,
+        episode,
+      );
 
-    const resultCode = String(
-      episode?.result?.code ?? episode?.resultCode ?? '',
-    )
-      .trim()
-      .toUpperCase();
+    const resultCode =
+      resolveCurrentStageResultCode(
+        currentStage,
+        episode,
+      );
 
     // Próxima acción definida por Retroalimentación.
     if (this.canManageCurrentEpisode) {
-      if (resultCode === 'REFERENCIA') {
-        nextActionTitle = 'Derivar a otro programa';
+      if (
+        (
+          !resultCode ||
+          resultCode === 'AUN_SIN_RESULTADO'
+        ) &&
+        !expiredCitation &&
+        !pendingCitation
+      ) {
+        nextActionTitle = 'Registrar retroalimentación';
         nextActionDetail =
-          'La Retroalimentación definió una derivación. Registre el programa de destino.';
+          'La etapa actual aún no registra una decisión de retroalimentación.';
+        nextActionTone = 'warning';
+        nextActionIcon = 'fact_check';
+      } else if (resultCode === 'REFERENCIA') {
+        nextActionTitle = 'Referir a otro programa';
+        nextActionDetail =
+          'La Retroalimentación definió una referencia. Registre el programa de destino.';
         nextActionTone = 'warning';
         nextActionIcon = 'sync_alt';
       } else if (resultCode === 'INGRESO_TRATAMIENTO') {
@@ -3955,18 +4152,7 @@ export class DemandNewComponent
     | 'success'
     | 'reference'
     | 'danger' {
-    const episode =
-      this.longitudinal?.activeEpisode ??
-      this.episodeSummary ??
-      this.createdEpisode ??
-      null;
-
-    const resultCode = String(
-      episode?.result?.code ?? episode?.resultCode ?? '',
-    )
-      .trim()
-      .toUpperCase();
-
+    const resultCode = this.currentStageResultCode;
     if (!resultCode || resultCode === 'AUN_SIN_RESULTADO') {
       return 'pending';
     }
@@ -4175,8 +4361,20 @@ export class DemandNewComponent
   }
 
   get feedbackEvents(): any[] {
+    const episode =
+      this.longitudinal?.activeEpisode ??
+      this.episodeSummary ??
+      this.createdEpisode ??
+      null;
+
+    const currentStageId = resolveCurrentStageId(
+      this.longitudinal,
+      episode,
+    );
+
     return filterFeedbackEvents(
       this.episodeEvents ?? [],
+      currentStageId,
     );
   }
 

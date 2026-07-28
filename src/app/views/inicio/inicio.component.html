@@ -33,6 +33,15 @@
     </div>
 
     <div class="priority-hero__actions">
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="openProgramAnalysis()"
+      >
+        <mat-icon>analytics</mat-icon>
+        Análisis por programa
+      </button>
+
       <a mat-flat-button routerLink="/demand-new">
         <mat-icon>person_search</mat-icon>
         Buscar o crear demanda
@@ -460,9 +469,39 @@
           </th>
 
           <td mat-cell *matCellDef="let row">
-            <span class="program-value">
-              {{ row.currentProgram?.name || "Sin programa" }}
-            </span>
+            <div class="program-cell">
+              <div class="program-cell__main">
+                <span class="program-value">
+                  {{ row.currentProgram?.name || "Sin programa" }}
+                </span>
+
+                <button
+                  *ngIf="(row.referenceCount ?? 0) > 0"
+                  mat-icon-button
+                  type="button"
+                  class="program-history-button"
+                  matTooltip="Ver trayectoria por programas"
+                  [attr.aria-label]="
+                    'Ver trayectoria por programas de ' +
+                    (row.personName || 'la demanda')
+                  "
+                  (click)="openProgramTrajectory(row, $event)"
+                >
+                  <mat-icon>account_tree</mat-icon>
+                </button>
+              </div>
+
+              <small
+                class="program-origin"
+                *ngIf="
+                  (row.referenceCount ?? 0) > 0 &&
+                  row.originProgramName
+                "
+              >
+                <mat-icon>subdirectory_arrow_right</mat-icon>
+                Desde: {{ row.originProgramName }}
+              </small>
+            </div>
           </td>
         </ng-container>
 

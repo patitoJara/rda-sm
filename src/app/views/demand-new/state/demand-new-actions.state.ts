@@ -20,6 +20,10 @@ export abstract class DemandNewActionsState extends DemandNewEpisodeState {
   interviewError: string | null = null;
   interviewSuccess: string | null = null;
 
+  isSavingReference = false;
+  referenceError: string | null = null;
+  referenceSuccess: string | null = null;
+
   isSavingClosure = false;
   closureError: string | null = null;
   closureSuccess: string | null = null;

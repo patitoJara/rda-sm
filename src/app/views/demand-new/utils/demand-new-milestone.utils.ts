@@ -59,7 +59,14 @@ export function filterPresentedCitations(
 
 export function filterFeedbackEvents(
   episodeEvents: any[],
+  stageId: number | null = null,
 ): any[] {
+  const numericStageId = Number(stageId);
+
+  const filterByStage =
+    Number.isFinite(numericStageId) &&
+    numericStageId > 0;
+
   return episodeEvents
     .filter((event: any) => {
       const code = normalizeCode(
@@ -67,7 +74,21 @@ export function filterFeedbackEvents(
           event?.eventTypeCode,
       );
 
-      return code === 'RETROALIMENTACION';
+      const eventStageId = Number(
+        event?.stageId ?? event?.stage?.id ?? null,
+      );
+
+      const belongsToCurrentStage =
+        !filterByStage ||
+        (
+          Number.isFinite(eventStageId) &&
+          eventStageId === numericStageId
+        );
+
+      return (
+        code === 'RETROALIMENTACION' &&
+        belongsToCurrentStage
+      );
     })
     .sort((left: any, right: any) => {
       const leftDate =

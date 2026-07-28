@@ -1470,3 +1470,63 @@ mat-paginator {
     font-size: 0.59rem;
   }
 }
+/* Trayectoria por programas en la bandeja */
+
+.program-cell {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.program-cell__main {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 3px;
+}
+
+.program-cell__main .program-value {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.program-history-button {
+  --mdc-icon-button-state-layer-size: 27px;
+
+  display: inline-grid !important;
+  flex: 0 0 27px;
+  width: 27px !important;
+  height: 27px !important;
+  padding: 0 !important;
+  place-items: center;
+  color: #08778a;
+  background: #e7f5f7;
+}
+
+.program-history-button mat-icon {
+  width: 17px;
+  height: 17px;
+  font-size: 17px;
+}
+
+.program-origin {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 2px;
+  color: #657a82;
+  font-size: 0.58rem;
+  font-weight: 650;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.program-origin mat-icon {
+  flex: 0 0 auto;
+  width: 13px;
+  height: 13px;
+  margin-top: 1px;
+  color: #08778a;
+  font-size: 13px;
+}
