@@ -33,7 +33,7 @@
       <ul>
         <li>Un solo episodio activo por persona.</li>
         <li>La fecha original de solicitud no se reinicia.</li>
-        <li>La derivación crea una nueva etapa, no un nuevo episodio.</li>
+        <li>La referencia crea una nueva etapa, no un nuevo episodio.</li>
         <li>
           El KPI de espera se detiene con el ingreso efectivo a tratamiento.
         </li>
@@ -1128,7 +1128,7 @@
                     ? formatDisplayDate(feedbackEvents[0].eventDate)
                     : episodeOperationalSummary.resultPending
                       ? "Pendiente"
-                      : "Resultado heredado"
+                      : "Resultado de la etapa"
                 }}
               </strong>
               <small>
@@ -1254,7 +1254,11 @@
           *ngFor="let action of operativeActions"
           type="button"
           class="dock-action-button"
-          [disabled]="!action.enabled || !canManageCurrentEpisode"
+          [disabled]="
+            !action.enabled ||
+            !canManageCurrentEpisode ||
+            (action.panel === 'reference' && !canReferenceCurrentEpisode)
+          "
           (click)="openActionPanel(action.panel)"
         >
           <mat-icon>{{ action.icon }}</mat-icon>
@@ -1316,7 +1320,7 @@
                     : activeActionPanel === "observation"
                       ? "Registrar observación"
                       : activeActionPanel === "reference"
-                        ? "Derivar a otro programa"
+                        ? "Referir a otro programa"
                         : activeActionPanel === "treatmentEntry"
                           ? "Ingreso a tratamiento"
                           : activeActionPanel === "egressClosure"
@@ -1936,20 +1940,123 @@
           <span>{{ observationError }}</span>
         </div>
       </form>
-
-      <div
-        class="operation-pending-state"
+      <form
         *ngIf="activeActionPanel === 'reference'"
+        [formGroup]="referenceForm"
+        class="operation-form operation-form--reference"
       >
-        <mat-icon>sync_alt</mat-icon>
-        <div>
-          <strong>Formulario en preparación</strong>
-          <span>
-            Esta acción conservará la fecha original de solicitud, cerrará la
-            etapa de origen y creará una nueva etapa en el programa receptor.
-          </span>
+        <div class="operation-pending-state span-full">
+          <mat-icon>sync_alt</mat-icon>
+
+          <div>
+            <strong>Referencia entre programas</strong>
+            <span>
+              La fecha original de solicitud y los días acumulados se
+              conservarán. La etapa actual finalizará y se creará una nueva
+              etapa en el programa receptor.
+            </span>
+          </div>
         </div>
-      </div>
+
+        <mat-form-field appearance="outline" class="span-2">
+          <mat-label>Programa de destino</mat-label>
+          <mat-icon matPrefix>business</mat-icon>
+
+          <mat-select formControlName="targetProgramId">
+            <mat-option
+              *ngFor="let program of availableReferencePrograms"
+              [value]="program.id"
+            >
+              {{ program.name }}
+            </mat-option>
+
+            <mat-option
+              *ngIf="!availableReferencePrograms.length"
+              disabled
+            >
+              No existen otros programas activos disponibles.
+            </mat-option>
+          </mat-select>
+
+          <mat-error
+            *ngIf="referenceForm.controls.targetProgramId.hasError('required')"
+          >
+            Debe seleccionar el programa de destino.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="span-2">
+          <mat-label>Fecha de referencia</mat-label>
+          <mat-icon matPrefix>event</mat-icon>
+
+          <input
+            matInput
+            [matDatepicker]="referenceDatePicker"
+            formControlName="referenceDate"
+            placeholder="dd/mm/aaaa"
+            readonly
+          />
+
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="referenceDatePicker"
+          ></mat-datepicker-toggle>
+
+          <mat-datepicker #referenceDatePicker></mat-datepicker>
+
+          <mat-error
+            *ngIf="referenceForm.controls.referenceDate.hasError('required')"
+          >
+            La fecha de referencia es obligatoria.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="span-full">
+          <mat-label>Motivo de la referencia</mat-label>
+          <mat-icon matPrefix>assignment</mat-icon>
+
+          <textarea
+            matInput
+            rows="3"
+            formControlName="reason"
+            placeholder="Indique el fundamento de la referencia."
+          ></textarea>
+
+          <mat-error
+            *ngIf="referenceForm.controls.reason.hasError('required')"
+          >
+            Debe registrar el motivo de la referencia.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="span-full">
+          <mat-label>Observación adicional</mat-label>
+          <mat-icon matPrefix>notes</mat-icon>
+
+          <textarea
+            matInput
+            rows="4"
+            formControlName="observation"
+            placeholder="Antecedentes relevantes para el programa receptor."
+          ></textarea>
+        </mat-form-field>
+
+        <div
+          class="empty-banner success span-full"
+          *ngIf="referenceSuccess"
+        >
+          <mat-icon>check_circle</mat-icon>
+          <span>{{ referenceSuccess }}</span>
+        </div>
+
+        <div
+          class="empty-banner error span-full"
+          *ngIf="referenceError"
+        >
+          <mat-icon>error</mat-icon>
+          <span>{{ referenceError }}</span>
+        </div>
+      </form>
 
       <div
         class="operation-pending-state"
@@ -2035,6 +2142,26 @@
         >
           <mat-icon>close</mat-icon>
           Cancelar
+        </button>
+        <button
+          *ngIf="activeActionPanel === 'reference'"
+          mat-flat-button
+          class="primary-btn"
+          type="button"
+          [disabled]="
+            referenceForm.invalid ||
+            isSavingReference ||
+            !!referenceSuccess ||
+            isLoadingLongitudinal
+          "
+          (click)="saveReference()"
+        >
+          <mat-icon>sync_alt</mat-icon>
+          {{
+            isSavingReference
+              ? "Registrando..."
+              : "Guardar referencia"
+          }}
         </button>
         <button
           *ngIf="activeActionPanel === 'egressClosure'"
@@ -2199,17 +2326,7 @@
         <span>Resultado</span>
 
         <strong>
-          {{
-            formatResultLabel(
-              episodeSummary?.result?.name ||
-                episodeSummary?.resultName ||
-                episodeSummary?.resultCode ||
-                createdEpisode?.result?.name ||
-                createdEpisode?.resultName ||
-                createdEpisode?.resultCode,
-              "Sin resultado"
-            )
-          }}
+          {{ currentStageResultLabel }}
         </strong>
       </div>
 
@@ -2395,7 +2512,7 @@
               {{
                 episodeOperationalSummary.resultPending
                   ? "Pendiente"
-                  : "Resultado heredado: " + episodeOperationalSummary.result
+                  : "Resultado de la etapa: " + episodeOperationalSummary.result
               }}
             </span>
           </ng-template>

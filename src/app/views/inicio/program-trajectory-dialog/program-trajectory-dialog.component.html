@@ -1,0 +1,236 @@
+﻿<div class="trajectory-dialog">
+  <header class="trajectory-header">
+    <div class="trajectory-header__identity">
+      <span class="trajectory-header__icon">
+        <mat-icon>account_tree</mat-icon>
+      </span>
+
+      <div>
+        <span class="trajectory-header__eyebrow">
+          Trayectoria de la demanda
+        </span>
+
+        <h2>Historia por programas</h2>
+
+        <p>
+          {{ data.personName }} · {{ data.episodeCode }}
+        </p>
+      </div>
+    </div>
+
+    <button
+      mat-icon-button
+      type="button"
+      mat-dialog-close
+      aria-label="Cerrar trayectoria"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <mat-dialog-content class="trajectory-content">
+    <div
+      class="trajectory-loading"
+      *ngIf="loading"
+      aria-live="polite"
+    >
+      <mat-spinner diameter="42"></mat-spinner>
+
+      <div>
+        <strong>Cargando trayectoria</strong>
+        <span>
+          Consultando las etapas y referencias del episodio.
+        </span>
+      </div>
+    </div>
+
+    <div
+      class="trajectory-error"
+      *ngIf="!loading && error"
+      role="alert"
+    >
+      <mat-icon>error_outline</mat-icon>
+
+      <div>
+        <strong>No fue posible mostrar la trayectoria</strong>
+        <span>{{ error }}</span>
+      </div>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="loadTrajectory()"
+      >
+        <mat-icon>refresh</mat-icon>
+        Reintentar
+      </button>
+    </div>
+
+    <div
+      class="trajectory-empty"
+      *ngIf="
+        !loading &&
+        !error &&
+        stages.length === 0
+      "
+    >
+      <mat-icon>route</mat-icon>
+
+      <div>
+        <strong>Sin trayectoria disponible</strong>
+        <span>
+          El episodio no contiene etapas registradas.
+        </span>
+      </div>
+    </div>
+
+    <section
+      class="trajectory-timeline"
+      *ngIf="
+        !loading &&
+        !error &&
+        stages.length > 0
+      "
+    >
+      <ng-container
+        *ngFor="
+          let stage of stages;
+          trackBy: trackByStageId
+        "
+      >
+        <article
+          class="stage-card"
+          [class.stage-card--current]="stage.current"
+        >
+          <div class="stage-card__marker">
+            {{ stage.stageOrder }}
+          </div>
+
+          <div class="stage-card__content">
+            <header>
+              <div>
+                <small>
+                  Etapa {{ stage.stageOrder }}
+                </small>
+
+                <h3>{{ stage.program.name }}</h3>
+              </div>
+
+              <span
+                class="stage-status"
+                [class.stage-status--current]="stage.current"
+              >
+                <mat-icon>
+                  {{
+                    stage.current
+                      ? "radio_button_checked"
+                      : "check_circle"
+                  }}
+                </mat-icon>
+
+                {{
+                  stage.current
+                    ? "Etapa activa"
+                    : "Etapa cerrada"
+                }}
+              </span>
+            </header>
+
+            <div class="stage-metrics">
+              <div>
+                <small>Recepción</small>
+                <strong>
+                  {{
+                    stage.receivedAt
+                      | date: "dd/MM/yyyy HH:mm"
+                  }}
+                </strong>
+              </div>
+
+              <div>
+                <small>Salida</small>
+                <strong>
+                  {{
+                    stage.closedAt
+                      ? (stage.closedAt
+                          | date: "dd/MM/yyyy HH:mm")
+                      : "Etapa vigente"
+                  }}
+                </strong>
+              </div>
+
+              <div>
+                <small>Permanencia</small>
+                <strong>
+                  {{ stage.daysInStage }} días
+                </strong>
+              </div>
+
+              <div>
+                <small>Resultado</small>
+                <strong>
+                  {{ getCodeLabel(stage.resultCode) }}
+                </strong>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <div
+          class="reference-transfer"
+          *ngIf="
+            getReferenceAfterStage(stage.id)
+              as reference
+          "
+        >
+          <span class="reference-transfer__line"></span>
+
+          <span class="reference-transfer__icon">
+            <mat-icon>south</mat-icon>
+          </span>
+
+          <div class="reference-transfer__content">
+            <span>Referencia entre programas</span>
+
+            <strong>
+              {{ reference.originProgram.name }}
+              <mat-icon>arrow_forward</mat-icon>
+              {{ reference.destinationProgram.name }}
+            </strong>
+
+            <small>
+              {{
+                reference.referenceDate
+                  | date: "dd/MM/yyyy HH:mm"
+              }}
+            </small>
+
+            <p *ngIf="reference.reason">
+              <b>Motivo:</b> {{ reference.reason }}
+            </p>
+
+            <p *ngIf="reference.observation">
+              <b>Observación:</b>
+              {{ reference.observation }}
+            </p>
+          </div>
+        </div>
+      </ng-container>
+    </section>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="trajectory-footer">
+    <span>
+      <mat-icon>info_outline</mat-icon>
+      Se muestran etapas y referencias del episodio.
+    </span>
+
+    <button
+      mat-flat-button
+      type="button"
+      mat-dialog-close
+    >
+      Cerrar
+    </button>
+  </mat-dialog-actions>
+</div>

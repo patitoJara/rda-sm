@@ -13,6 +13,16 @@ export interface PrioritizedEpisodeDTO {
 
   currentProgram: DemandProgramSummaryDTO | null;
 
+  currentStageId: number | null;
+  currentStageStateCode: string | null;
+  currentStageResultCode: string | null;
+  currentStageReceivedAt: string | null;
+  currentStageDays: number | null;
+
+  originProgramId: number | null;
+  originProgramName: string | null;
+  referenceCount: number;
+
   originalRequestDate: string;
   accumulatedDays: number;
   semaphoreColor: string;
@@ -69,6 +79,38 @@ export interface PageDTO<T> {
   empty: boolean;
 
   sort: PageSortDTO;
+}
+
+export interface SupervisorProgramDashboardDTO {
+  programId: number;
+  programName: string;
+  activeDemands: number;
+  averageAccumulatedDays: number;
+  redCases: number;
+  withoutFirstCitation: number;
+  withoutFeedback: number;
+  severeCommitmentCases: number;
+  pendingReferences: number;
+  pendingClosures: number;
+  openAlerts: number;
+}
+
+export interface ReferenceReasonDTO {
+  reason: string;
+  count: number;
+}
+
+export interface SupervisorProgramReferenceDTO {
+  programId: number;
+  programName: string;
+
+  receivedReferences: number;
+  sentReferences: number;
+  pendingReferences: number;
+  referenceBalance: number;
+
+  averageDaysBeforeReference: number;
+  referenceReasons: ReferenceReasonDTO[];
 }
 
 export interface SupervisorDashboardDTO {

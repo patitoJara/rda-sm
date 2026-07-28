@@ -9,6 +9,8 @@ import {
   PrioritizedEpisodeDTO,
   PrioritizedEpisodeQuery,
   SupervisorDashboardDTO,
+  SupervisorProgramDashboardDTO,
+  SupervisorProgramReferenceDTO,
 } from '../models/demand-priority.models';
 
 export interface DemandCatalogItem {
@@ -234,6 +236,33 @@ export class DemandService {
   getSupervisorDashboard(): Observable<SupervisorDashboardDTO> {
     return this.http.get<SupervisorDashboardDTO>(
       `${this.demandUrl}/dashboard/supervisor`,
+    );
+  }
+
+  getSupervisorProgramsDashboard(): Observable<
+    SupervisorProgramDashboardDTO[]
+  > {
+    return this.http.get<SupervisorProgramDashboardDTO[]>(
+      `${this.demandUrl}/dashboard/supervisor/programs`,
+    );
+  }
+  getSupervisorProgramsReferences(
+    from?: string,
+    to?: string,
+  ): Observable<SupervisorProgramReferenceDTO[]> {
+    let params = new HttpParams();
+
+    if (from) {
+      params = params.set('from', from);
+    }
+
+    if (to) {
+      params = params.set('to', to);
+    }
+
+    return this.http.get<SupervisorProgramReferenceDTO[]>(
+      `${this.demandUrl}/dashboard/supervisor/programs/references`,
+      { params },
     );
   }
 

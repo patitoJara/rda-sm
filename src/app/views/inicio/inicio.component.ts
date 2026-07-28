@@ -20,6 +20,10 @@ import {
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import {
+  MatDialog,
+  MatDialogModule,
+} from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -41,6 +45,12 @@ import {
 } from '../../core/models/demand-priority.models';
 import { DemandService } from '../../core/services/demand.service';
 import { TokenService } from '../../services/token.service';
+import {
+  ProgramAnalysisDialogComponent,
+} from './program-analysis-dialog/program-analysis-dialog.component';
+import {
+  ProgramTrajectoryDialogComponent,
+} from './program-trajectory-dialog/program-trajectory-dialog.component';
 
 interface ProgramOption {
   id: number;
@@ -63,6 +73,7 @@ interface ResultOption {
     RouterModule,
     MatButtonModule,
     MatCardModule,
+    MatDialogModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -78,6 +89,7 @@ export class InicioComponent implements OnInit, OnDestroy {
   private readonly tokenService = inject(TokenService);
   private readonly demandService = inject(DemandService);
   private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
 
   private clockInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -159,7 +171,7 @@ export class InicioComponent implements OnInit, OnDestroy {
     },
     {
       code: 'REFERENCIA',
-      name: 'Derivación',
+      name: 'Referencia',
     },
     {
       code: 'INGRESO_TRATAMIENTO',
@@ -207,6 +219,16 @@ export class InicioComponent implements OnInit, OnDestroy {
     }
   }
 
+  openProgramAnalysis(): void {
+    this.dialog.open(ProgramAnalysisDialogComponent, {
+      width: '1180px',
+      maxWidth: '96vw',
+      maxHeight: '92vh',
+      autoFocus: false,
+      restoreFocus: true,
+    });
+  }
+
   refresh(): void {
     this.loadDashboard();
     this.loadEpisodes();
@@ -247,6 +269,31 @@ export class InicioComponent implements OnInit, OnDestroy {
     this.pageIndex = event.pageIndex;
     this.pageSize = event.pageSize;
     this.loadEpisodes();
+  }
+
+  openProgramTrajectory(
+    episode: PrioritizedEpisodeDTO,
+    event: MouseEvent,
+  ): void {
+    event.stopPropagation();
+
+    if (Number(episode.referenceCount ?? 0) <= 0) {
+      return;
+    }
+
+    this.dialog.open(ProgramTrajectoryDialogComponent, {
+      width: '920px',
+      maxWidth: '96vw',
+      maxHeight: '92vh',
+      autoFocus: false,
+      restoreFocus: true,
+      panelClass: 'program-trajectory-modal',
+      data: {
+        rut: episode.rut,
+        episodeCode: episode.episodeCode,
+        personName: episode.personName,
+      },
+    });
   }
 
   openEpisode(

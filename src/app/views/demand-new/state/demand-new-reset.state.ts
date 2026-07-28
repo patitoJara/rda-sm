@@ -37,6 +37,9 @@ export interface DemandNewResetTarget {
   interviewError: string | null;
   interviewSuccess: string | null;
 
+  referenceError: string | null;
+  referenceSuccess: string | null;
+
   closureError: string | null;
   closureSuccess: string | null;
 
@@ -82,6 +85,9 @@ export function resetLoadedDemandView(target: DemandNewResetTarget): void {
 
   target.interviewError = null;
   target.interviewSuccess = null;
+
+  target.referenceError = null;
+  target.referenceSuccess = null;
 
   target.closureError = null;
   target.closureSuccess = null;

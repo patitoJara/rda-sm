@@ -638,7 +638,7 @@ export const routes: Routes = [
           icon: 'psychology',
           roles: ['ADMIN'],
           iconColor: '#455a64',
-          tag: 'Derivación',
+          tag: 'Referencia',
           order: 210,
         },
       },
