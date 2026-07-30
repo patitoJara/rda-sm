@@ -12,6 +12,8 @@ export type SummarySectionId =
   | 'demanda-actual'
   | 'demandante'
   | 'trayectoria'
+
+  | 'trazabilidad'
   | 'citaciones'
   | 'observaciones'
   | 'documentos'

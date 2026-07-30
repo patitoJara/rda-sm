@@ -30,6 +30,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatRadioModule } from '@angular/material/radio';
@@ -106,11 +107,27 @@ import {
   getCommitmentLevelLabel,
 } from './utils/demand-new-milestone.utils';
 import {
+  filterEventsByStage,
   resolveCurrentEpisodeStage,
+  resolveLatestEvent,
   resolveCurrentStageId,
   resolveCurrentStageResultCode,
   resolveCurrentStageResultValue,
 } from './utils/demand-new-current-stage.utils';
+import {
+  buildCompactProgramTrajectory,
+  CompactProgramTrajectoryItem,
+} from './utils/demand-new-trajectory.utils';
+import {
+  buildDemandNewCitationMilestones,
+  resolveDemandNewNextAction,
+} from './utils/demand-new-workflow.utils';
+import {
+  resolveEventProgramContext,
+} from './utils/demand-new-event-context.utils';
+import type {
+  EventProgramContext,
+} from './utils/demand-new-event-context.utils';
 import { filterObservationEvents } from './utils/demand-new-observation.utils';
 import { buildAttendancePayload } from './utils/demand-new-attendance.utils';
 import {
@@ -171,6 +188,7 @@ import {
     ReactiveFormsModule,
     MatCardModule,
     MatIconModule,
+    MatTooltipModule,
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
@@ -612,6 +630,11 @@ export class DemandNewComponent
       id: 'trayectoria',
       label: 'Trayectoria',
       icon: 'timeline',
+    },
+    {
+      id: 'trazabilidad',
+      label: 'Trazabilidad',
+      icon: 'history',
     },
     {
       id: 'citaciones',
@@ -2563,6 +2586,22 @@ export class DemandNewComponent
     );
   }
 
+  get resolvedCurrentStageId(): number | null {
+    const episode =
+      this.longitudinal?.activeEpisode ??
+      this.episodeSummary ??
+      this.createdEpisode ??
+      null;
+
+    return resolveCurrentStageId(this.longitudinal, episode);
+  }
+
+  get currentStageEvents(): any[] {
+    return filterEventsByStage(
+      this.episodeEvents ?? [],
+      this.resolvedCurrentStageId,
+    );
+  }
   get currentStageResultCode(): string {
     const episode =
       this.longitudinal?.activeEpisode ??
@@ -3269,6 +3308,7 @@ export class DemandNewComponent
            * 2. response.activeEpisode.postulant
            */
           const responsePostulant = (response?.postulant ??
+            response?.episode?.postulant ??
             response?.activeEpisode?.postulant ??
             null) as Partial<Postulant> | null;
 
@@ -3343,6 +3383,37 @@ export class DemandNewComponent
           }
 
           /*
+           * El endpoint por ID puede devolver un episodio cerrado
+           * en response.episode, mientras activeEpisode queda vacío.
+           */
+          const responseEpisodes = Array.isArray(response?.episodes)
+            ? response.episodes
+            : [];
+
+          const requestedEpisode = this.requestedEpisodeId
+            ? responseEpisodes.find(
+                (episode: any) =>
+                  Number(episode?.id ?? episode?.episodeId ?? 0) ===
+                  this.requestedEpisodeId,
+              )
+            : null;
+
+          const rawResponseEpisode =
+            response?.episode ??
+            requestedEpisode ??
+            response?.activeEpisode ??
+            null;
+
+          const responseEpisode = rawResponseEpisode
+            ? {
+                ...rawResponseEpisode,
+                id:
+                  rawResponseEpisode?.id ??
+                  rawResponseEpisode?.episodeId,
+              }
+            : null;
+
+          /*
            * Mantiene toda la respuesta longitudinal,
            * pero reemplaza sus postulantes resumidos por
            * el objeto consolidado.
@@ -3351,6 +3422,15 @@ export class DemandNewComponent
             ...response,
 
             postulant: mergedPostulant ?? response?.postulant,
+
+            episode: responseEpisode
+              ? {
+                  ...responseEpisode,
+
+                  postulant:
+                    mergedPostulant ?? responseEpisode.postulant,
+                }
+              : responseEpisode,
 
             activeEpisode: response?.activeEpisode
               ? {
@@ -3373,19 +3453,61 @@ export class DemandNewComponent
           this.episodeEvents = events;
 
           /*
-           * Mantiene actualizado el resumen del episodio.
+           * Mantiene actualizado el resumen del episodio mostrado.
+           * Puede corresponder a una demanda activa o cerrada.
            */
-          if (response?.activeEpisode?.id) {
+          if (responseEpisode?.id) {
             this.episodeSummary = {
               ...this.episodeSummary,
-              ...response.activeEpisode,
+              ...responseEpisode,
 
-              postulant: mergedPostulant ?? response.activeEpisode.postulant,
+              postulant:
+                mergedPostulant ?? responseEpisode.postulant,
             };
 
             this.episodeLoaded = true;
+            this.showCreateEpisodeForm = false;
 
-            this.stageLoaded = Boolean(response.activeEpisode.currentStageId);
+            const responseStages = Array.isArray(response?.stages)
+              ? response.stages
+              : [];
+
+            const currentStageId = Number(
+              responseEpisode?.currentStageId ?? 0,
+            );
+
+            const displayedStage =
+              responseStages.find(
+                (stage: any) =>
+                  Number(stage?.id) === currentStageId,
+              ) ??
+              responseStages.find(
+                (stage: any) =>
+                  stage?.current === true ||
+                  stage?.isCurrent === true ||
+                  stage?.active === true,
+              ) ??
+              responseStages[responseStages.length - 1] ??
+              null;
+
+            this.stageLoaded = Boolean(
+              displayedStage || currentStageId > 0,
+            );
+
+            this.stageVisualState = displayedStage
+              ? `${
+                  this.isHistoricalEpisode
+                    ? 'Etapa cerrada'
+                    : 'Etapa activa'
+                }: ${
+                  displayedStage?.program?.name ??
+                  'Sin programa'
+                } · ${
+                  displayedStage?.daysInStage ?? 0
+                } días`
+              : this.isHistoricalEpisode
+                ? 'Etapa cerrada'
+                : 'Sin etapa activa cargada';
           }
 
           /*
@@ -3577,7 +3699,7 @@ export class DemandNewComponent
     );
   }
   getCitationDisplayName(citation: any): string {
-    const events = this.citationEvents;
+    const events = this.allCitationEvents;
 
     const code = resolveCitationTypeCode(
       citation,
@@ -3699,6 +3821,7 @@ export class DemandNewComponent
       citationDate: payload.citationDate,
       citationTime: payload.citationTime,
       citationEvents: this.citationEvents,
+      episodeEvents: this.currentStageEvents,
       citationTypes: this.citationTypes,
     });
 
@@ -3922,6 +4045,9 @@ export class DemandNewComponent
     })[0];
   }
 
+  get lastCurrentStageEvent(): any | null {
+    return resolveLatestEvent(this.currentStageEvents);
+  }
   get episodeOperationalSummary(): {
     days: number;
     waitingLabel: string;
@@ -4004,7 +4130,7 @@ export class DemandNewComponent
       return text.charAt(0).toUpperCase() + text.slice(1);
     };
 
-    const lastEvent = this.lastEpisodeEvent;
+    const lastEvent = this.lastCurrentStageEvent;
 
     const lastManagementTitle = lastEvent
       ? (lastEvent?.eventType?.name ??
@@ -4027,42 +4153,6 @@ export class DemandNewComponent
         }`
       : 'El episodio todavía no registra actividades.';
 
-    let nextActionTitle = 'Definir próxima gestión';
-    let nextActionDetail =
-      'No existe una citación o actividad próxima programada.';
-    let nextActionTone: 'info' | 'warning' | 'danger' = 'warning';
-    let nextActionIcon = 'event_available';
-
-    const expiredCitation = this.expiredPendingCitationEvents[0] ?? null;
-
-    const pendingCitation = this.currentPendingCitationEvents[0] ?? null;
-
-    if (expiredCitation) {
-      nextActionTitle = 'Regularizar asistencia pendiente';
-      nextActionDetail = `La citación del ${this.formatCitationOptionDate(
-        expiredCitation,
-      )} se encuentra vencida.`;
-      nextActionTone = 'danger';
-      nextActionIcon = 'notification_important';
-    } else if (pendingCitation) {
-      const citationDate = this.formatCitationOptionDate(pendingCitation);
-
-      const citationTime = this.formatCitationOptionTime(pendingCitation);
-
-      nextActionTitle = 'Citación programada';
-      nextActionDetail = citationTime
-        ? `${citationDate} · ${citationTime}`
-        : citationDate;
-
-      nextActionTone = 'info';
-      nextActionIcon = 'event';
-    } else if (!this.canManageCurrentEpisode) {
-      nextActionTitle = 'Seguimiento por programa responsable';
-      nextActionDetail = `La continuidad de la demanda corresponde a ${program}.`;
-      nextActionTone = 'info';
-      nextActionIcon = 'visibility';
-    }
-
     const resultValue =
       resolveCurrentStageResultValue(
         currentStage,
@@ -4075,51 +4165,30 @@ export class DemandNewComponent
         episode,
       );
 
-    // Próxima acción definida por Retroalimentación.
-    if (this.canManageCurrentEpisode) {
-      if (
-        (
-          !resultCode ||
-          resultCode === 'AUN_SIN_RESULTADO'
-        ) &&
-        !expiredCitation &&
-        !pendingCitation
-      ) {
-        nextActionTitle = 'Registrar retroalimentación';
-        nextActionDetail =
-          'La etapa actual aún no registra una decisión de retroalimentación.';
-        nextActionTone = 'warning';
-        nextActionIcon = 'fact_check';
-      } else if (resultCode === 'REFERENCIA') {
-        nextActionTitle = 'Referir a otro programa';
-        nextActionDetail =
-          'La Retroalimentación definió una referencia. Registre el programa de destino.';
-        nextActionTone = 'warning';
-        nextActionIcon = 'sync_alt';
-      } else if (resultCode === 'INGRESO_TRATAMIENTO') {
-        nextActionTitle = 'Registrar cierre de la demanda';
-        nextActionDetail =
-          'El ingreso a tratamiento ya fue registrado. La demanda permanecerá abierta hasta registrar su fecha de cierre.';
-        nextActionTone = 'warning';
-        nextActionIcon = 'event_busy';
-      } else if (resultCode === 'ABANDONO') {
-        nextActionTitle = 'Registrar cierre por abandono';
-        nextActionDetail =
-          'La Retroalimentación registró abandono. Corresponde cerrar formalmente la demanda.';
-        nextActionTone = 'danger';
-        nextActionIcon = 'event_busy';
-      } else if (
-        resultCode === 'LISTA_ESPERA' &&
-        !expiredCitation &&
-        !pendingCitation
-      ) {
-        nextActionTitle = 'Programar próxima gestión';
-        nextActionDetail =
-          'La persona continúa en lista de espera y no registra una próxima actividad.';
-        nextActionTone = 'warning';
-        nextActionIcon = 'event_available';
-      }
-    }
+    const workflowNextAction =
+      resolveDemandNewNextAction({
+        citationEvents: this.citationEvents,
+        currentStageEvents: this.currentStageEvents,
+        citationTypes: this.citationTypes,
+        feedbackEvents: this.feedbackEvents,
+        closureDate: this.episodeClosureDate,
+        resultCode,
+        canManage: this.canManageCurrentEpisode,
+        programName: program,
+        currentDate: getTodayForDateInput(),
+      });
+
+    const nextActionTitle =
+      workflowNextAction.title;
+
+    const nextActionDetail =
+      workflowNextAction.detail;
+
+    const nextActionTone =
+      workflowNextAction.tone;
+
+    const nextActionIcon =
+      workflowNextAction.icon;
 
     const result = formatResultLabelValue(resultValue, 'Sin resultado');
 
@@ -4236,6 +4305,16 @@ export class DemandNewComponent
       .trim();
   }
 
+  getEventProgramContext(
+    event: any,
+  ): EventProgramContext {
+    return resolveEventProgramContext(
+      event,
+      this.longitudinal?.stages ?? [],
+      this.longitudinal?.references ?? [],
+    );
+  }
+
   getEventIcon(event: any): string {
     const code = this.getEventTypeCode(event);
 
@@ -4338,7 +4417,7 @@ export class DemandNewComponent
     }
 
     return (
-      this.citationEvents.find(
+      this.allCitationEvents.find(
         (citation: any) => Number(citation.id) === relatedEventId,
       ) ?? null
     );
@@ -4356,7 +4435,7 @@ export class DemandNewComponent
   get attendedInterviewCitations(): any[] {
     return filterPresentedCitations(
       this.citationEvents,
-      this.episodeEvents ?? [],
+      this.currentStageEvents,
     );
   }
 
@@ -4387,10 +4466,17 @@ export class DemandNewComponent
     );
   }
 
+  get demandCitationMilestones() {
+    return buildDemandNewCitationMilestones(
+      this.citationEvents,
+      this.currentStageEvents,
+      this.citationTypes,
+    );
+  }
   getFeedbackCommitmentLabel(event: any): string {
     return getCommitmentLevelLabel(event);
   }
-  get citationEvents(): any[] {
+  get allCitationEvents(): any[] {
     const events = (this.episodeEvents ?? []).filter(
       (event: any) => {
         const code = String(
@@ -4437,8 +4523,17 @@ export class DemandNewComponent
       return leftDate.localeCompare(rightDate);
     });
   }
+  get citationEvents(): any[] {
+    return filterEventsByStage(
+      this.allCitationEvents,
+      this.resolvedCurrentStageId,
+    );
+  }
   get pendingCitationEvents(): any[] {
-    return filterPendingCitationEvents(this.citationEvents, this.episodeEvents);
+    return filterPendingCitationEvents(
+      this.citationEvents,
+      this.currentStageEvents,
+    );
   }
 
   get selectedAttendanceCitation(): any | null {
@@ -4516,6 +4611,12 @@ export class DemandNewComponent
       : null;
   }
 
+  get compactProgramTrajectory(): CompactProgramTrajectoryItem[] {
+    return buildCompactProgramTrajectory(
+      this.longitudinal?.stages ?? [],
+      this.longitudinal?.references ?? [],
+    );
+  }
   formatDisplayDate(value: any): string {
     return formatDisplayDateValue(value);
   }
@@ -4566,19 +4667,48 @@ export class DemandNewComponent
   }
 
   get observationEvents(): any[] {
-    return filterObservationEvents(this.episodeEvents);
+    return filterObservationEvents(this.currentStageEvents);
   }
 
   get hasCurrentEpisode(): boolean {
     return (
       !!this.createdEpisode ||
       !!this.episodeSummary ||
-      !!this.longitudinal?.activeEpisode
+      !!this.longitudinal?.activeEpisode ||
+      !!this.longitudinal?.episode
+    );
+  }
+
+  get isHistoricalEpisode(): boolean {
+    const episode =
+      this.episodeSummary ??
+      this.longitudinal?.episode ??
+      this.createdEpisode ??
+      this.longitudinal?.activeEpisode ??
+      null;
+
+    const stateCode = String(
+      episode?.state?.code ??
+        episode?.stateCode ??
+        episode?.status ??
+        '',
+    )
+      .trim()
+      .toUpperCase();
+
+    return (
+      stateCode === 'CERRADO' ||
+      stateCode === 'CERRADA' ||
+      !!episode?.closedAt ||
+      !!episode?.closureDate
     );
   }
 
   get canManageCurrentEpisode(): boolean {
-    if (this.requestedMode === 'view') {
+    if (
+      this.requestedMode === 'view' ||
+      this.isHistoricalEpisode
+    ) {
       return false;
     }
     /*

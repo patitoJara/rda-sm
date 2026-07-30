@@ -115,6 +115,12 @@ export class InicioComponent implements OnInit, OnDestroy {
   pageSize = 20;
   totalElements = 0;
 
+  episodeListMode: 'active' | 'closed' = 'active';
+
+  get isHistoricalMode(): boolean {
+    return this.episodeListMode === 'closed';
+  }
+
   readonly pageSizeOptions = [10, 20, 50];
 
   readonly displayedColumns = [
@@ -231,6 +237,35 @@ export class InicioComponent implements OnInit, OnDestroy {
 
   refresh(): void {
     this.loadDashboard();
+    this.loadEpisodes();
+  }
+
+  setEpisodeListMode(
+    mode: 'active' | 'closed',
+  ): void {
+    if (
+      this.episodeListMode === mode ||
+      this.loadingEpisodes
+    ) {
+      return;
+    }
+
+    this.episodeListMode = mode;
+
+    this.filtersForm.reset(
+      {
+        programId: null,
+        resultCode: '',
+      },
+      {
+        emitEvent: false,
+      },
+    );
+
+    this.pageIndex = 0;
+    this.episodes = [];
+    this.totalElements = 0;
+
     this.loadEpisodes();
   }
 
@@ -528,6 +563,9 @@ export class InicioComponent implements OnInit, OnDestroy {
         page: this.pageIndex,
         size: this.pageSize,
         programId: filters.programId,
+        stateCode: this.isHistoricalMode
+          ? 'CERRADO'
+          : 'EN_TRAMITE',
         resultCode: filters.resultCode || null,
         sort: this.currentSort,
       })

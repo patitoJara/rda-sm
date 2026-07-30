@@ -711,6 +711,22 @@
   }
 }
 
+.trajectory-reference {
+  display: flex;
+  gap: 12px;
+  padding: 10px;
+  color: #5d747b;
+
+  strong,
+  span {
+    display: block;
+  }
+
+  strong {
+    color: #08798a;
+  }
+}
+
 .trajectory-dot {
   width: 15px;
   height: 15px;
