@@ -209,6 +209,29 @@ export const routes: Routes = [
       },
 
       {
+        path: 'episode-purge',
+        loadComponent: () =>
+          import('./views/episode-purge/episode-purge.component').then(
+            (m) => m.EpisodePurgeComponent,
+          ),
+        canActivate: [roleGuard],
+        data: {
+          module: 'administracion',
+          group: 'Mantenedores',
+          maintainerGroup: 'Gestión de demanda',
+          section: 'maintainer',
+          title: 'Eliminación de episodios',
+          description:
+            'Herramienta administrativa para eliminar definitivamente episodios y sus datos asociados.',
+          icon: 'delete_forever',
+          roles: ['ADMIN'],
+          iconColor: '#b71c1c',
+          tag: 'Solo ADMIN',
+          order: 5,
+        },
+      },
+
+      {
         path: 'program',
         loadComponent: () =>
           import('./views/program/program.component').then(

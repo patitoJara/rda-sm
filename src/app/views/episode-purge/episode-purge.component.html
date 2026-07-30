@@ -1,0 +1,246 @@
+<section class="purge-page">
+  <header class="purge-hero">
+    <div>
+      <span class="eyebrow">
+        <mat-icon>admin_panel_settings</mat-icon>
+        Herramienta exclusiva de administración
+      </span>
+
+      <h1>Eliminación de episodios</h1>
+
+      <p>
+        Permite eliminar definitivamente un episodio y todos sus datos
+        asociados, conservando el registro de la persona.
+      </p>
+    </div>
+
+    <div class="admin-badge">
+      <mat-icon>verified_user</mat-icon>
+      <div>
+        <strong>Solo ADMIN</strong>
+        <span>Operación restringida</span>
+      </div>
+    </div>
+  </header>
+
+  <mat-card class="search-card">
+    <div class="section-heading">
+      <div class="section-icon">
+        <mat-icon>manage_search</mat-icon>
+      </div>
+
+      <div>
+        <h2>Buscar episodio</h2>
+        <p>Ingrese el identificador numérico del episodio que desea revisar.</p>
+      </div>
+    </div>
+
+    <form class="search-form" (ngSubmit)="searchEpisode()">
+      <mat-form-field appearance="outline" floatLabel="always">
+        <mat-label>ID del episodio</mat-label>
+
+        <mat-icon matPrefix>tag</mat-icon>
+
+        <input
+          matInput
+          type="number"
+          min="1"
+          name="episodeId"
+          [(ngModel)]="episodeIdInput"
+          (ngModelChange)="onEpisodeIdChange()"
+          placeholder="Ejemplo: 25"
+          autocomplete="off"
+        />
+
+        <mat-hint>Consulte y revise el episodio antes de eliminarlo.</mat-hint>
+      </mat-form-field>
+
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="loading || purging || !episodeId"
+      >
+        <mat-progress-spinner
+          *ngIf="loading"
+          diameter="20"
+          mode="indeterminate"
+        ></mat-progress-spinner>
+
+        <mat-icon *ngIf="!loading">search</mat-icon>
+        <span>{{ loading ? "Consultando..." : "Consultar episodio" }}</span>
+      </button>
+    </form>
+  </mat-card>
+
+  <div class="error-banner" *ngIf="errorMessage">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <mat-card class="episode-card" *ngIf="episode">
+    <div class="section-heading">
+      <div class="section-icon section-icon--warning">
+        <mat-icon>warning</mat-icon>
+      </div>
+
+      <div>
+        <h2>Episodio localizado</h2>
+        <p>Revise cuidadosamente la información antes de continuar.</p>
+      </div>
+    </div>
+
+    <div class="episode-grid">
+      <div class="data-item">
+        <span>Código</span>
+        <strong>{{ episodeCode || "No informado" }}</strong>
+      </div>
+
+      <div class="data-item">
+        <span>ID</span>
+        <strong>{{ episodeId }}</strong>
+      </div>
+
+      <div class="data-item">
+        <span>Persona</span>
+        <strong>{{ personName }}</strong>
+      </div>
+
+      <div class="data-item">
+        <span>RUN</span>
+        <strong>{{ personRut }}</strong>
+      </div>
+
+      <div class="data-item">
+        <span>Programa responsable</span>
+        <strong>{{ programName }}</strong>
+      </div>
+
+      <div class="data-item">
+        <span>Estado</span>
+        <strong>{{ stateLabel }}</strong>
+      </div>
+    </div>
+
+    <div class="danger-notice">
+      <mat-icon>delete_forever</mat-icon>
+
+      <div>
+        <strong>Esta operación es permanente</strong>
+        <p>
+          Se eliminarán el episodio, etapas, eventos, referencias, alertas,
+          documentos, auditorías y demás datos asociados. La persona no será
+          eliminada.
+        </p>
+      </div>
+    </div>
+
+    <div class="confirmation-panel">
+      <div>
+        <h3>Confirmación obligatoria</h3>
+        <p>
+          Para habilitar la eliminación, escriba exactamente
+          <strong>{{ confirmationTarget }}</strong>.
+        </p>
+      </div>
+
+      <mat-form-field appearance="outline" floatLabel="always">
+        <mat-label>Código del episodio</mat-label>
+
+        <mat-icon matPrefix>password</mat-icon>
+
+        <input
+          matInput
+          type="text"
+          name="confirmationCode"
+          [(ngModel)]="confirmationCode"
+          [placeholder]="confirmationTarget"
+          autocomplete="off"
+        />
+      </mat-form-field>
+
+      <button
+        mat-flat-button
+        class="purge-button"
+        type="button"
+        [disabled]="!deletionConfirmed"
+        (click)="purgeEpisode()"
+      >
+        <mat-progress-spinner
+          *ngIf="purging"
+          diameter="20"
+          mode="indeterminate"
+        ></mat-progress-spinner>
+
+        <mat-icon *ngIf="!purging">delete_forever</mat-icon>
+        <span>{{ purging ? "Eliminando..." : "Eliminar definitivamente" }}</span>
+      </button>
+    </div>
+  </mat-card>
+
+  <mat-card class="result-card" *ngIf="purgeResult">
+    <div class="result-heading">
+      <mat-icon>check_circle</mat-icon>
+
+      <div>
+        <h2>Episodio eliminado correctamente</h2>
+        <p>
+          {{ purgeResult.episodeCode }} · ID {{ purgeResult.episodeId }}
+        </p>
+      </div>
+    </div>
+
+    <div class="result-summary">
+      <div>
+        <span>Persona conservada</span>
+        <strong>ID {{ purgeResult.postulantId }}</strong>
+      </div>
+
+      <div>
+        <span>Base de datos</span>
+        <strong>
+          {{ purgeResult.databasePurged ? "Depurada" : "No confirmada" }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Archivos eliminados</span>
+        <strong>{{ purgeResult.deletedFiles }}</strong>
+      </div>
+
+      <div>
+        <span>Archivos con error</span>
+        <strong>{{ purgeResult.failedFiles }}</strong>
+      </div>
+    </div>
+
+    <div class="deleted-rows">
+      <h3>Registros eliminados</h3>
+
+      <div class="deleted-row" *ngFor="let item of deletedRows">
+        <span>{{ item[0] }}</span>
+        <strong>{{ item[1] }}</strong>
+      </div>
+    </div>
+
+    <div
+      class="file-warning"
+      *ngIf="
+        purgeResult.failedFilePaths.length ||
+        purgeResult.skippedUnsafeFilePaths.length
+      "
+    >
+      <mat-icon>report_problem</mat-icon>
+
+      <div>
+        <strong>La eliminación requiere revisión</strong>
+        <p *ngFor="let path of purgeResult.failedFilePaths">
+          Archivo no eliminado: {{ path }}
+        </p>
+        <p *ngFor="let path of purgeResult.skippedUnsafeFilePaths">
+          Ruta omitida por seguridad: {{ path }}
+        </p>
+      </div>
+    </div>
+  </mat-card>
+</section>
