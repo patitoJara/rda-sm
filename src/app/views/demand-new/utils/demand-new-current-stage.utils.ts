@@ -53,6 +53,42 @@ export function resolveCurrentStageId(
   );
 }
 
+export function filterEventsByStage(
+  events: any[],
+  stageId: number | null,
+): any[] {
+  const safeEvents = Array.isArray(events) ? events : [];
+  const numericStageId = toPositiveId(stageId);
+
+  if (numericStageId === null) {
+    return [...safeEvents];
+  }
+
+  return safeEvents.filter(
+    (event: any) =>
+      toPositiveId(
+        event?.stageId ?? event?.stage?.id,
+      ) === numericStageId,
+  );
+}
+
+export function resolveLatestEvent(events: any[]): any | null {
+  const safeEvents = Array.isArray(events) ? events : [];
+
+  if (!safeEvents.length) {
+    return null;
+  }
+
+  return [...safeEvents].sort((left: any, right: any) => {
+    const leftTimestamp =
+      `${left?.eventDate ?? ''}T${left?.eventTime ?? '00:00:00'}`;
+    const rightTimestamp =
+      `${right?.eventDate ?? ''}T${right?.eventTime ?? '00:00:00'}`;
+
+    return rightTimestamp.localeCompare(leftTimestamp);
+  })[0];
+}
+
 export function resolveCurrentStageResultCode(
   currentStage: any,
   fallbackEpisode: any = null,

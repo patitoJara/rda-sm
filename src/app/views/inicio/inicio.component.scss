@@ -86,6 +86,24 @@
   background: #ffffff;
 }
 
+.priority-hero__actions .priority-history-toggle {
+  color: #365b66;
+  border-color: #9db3ba;
+  background: #eaf1f3;
+}
+
+.priority-hero__actions .priority-history-toggle:hover {
+  color: #254751;
+  border-color: #78939c;
+  background: #dce8eb;
+}
+
+.priority-hero__actions .priority-history-toggle--active {
+  color: #ffffff;
+  border-color: #526f79;
+  background: #526f79;
+}
+
 /* Mensajes generales */
 
 .dashboard-error,
@@ -255,6 +273,53 @@
   border-radius: 16px;
   background: #ffffff;
   box-shadow: 0 6px 22px rgba(34, 59, 70, 0.07);
+}
+
+.priority-table-card--historical {
+  border-color: #b7c8ce;
+
+  .table-heading {
+    background:
+      linear-gradient(
+        90deg,
+        rgba(82, 111, 121, 0.1),
+        rgba(255, 255, 255, 0)
+      );
+  }
+}
+
+.historical-mode-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 20px 0;
+  padding: 12px 14px;
+  color: #34535d;
+  border: 1px solid #bfd0d5;
+  border-radius: 12px;
+  background: #eef4f5;
+
+  mat-icon {
+    width: 30px;
+    height: 30px;
+    font-size: 30px;
+  }
+
+  strong,
+  span {
+    display: block;
+  }
+
+  strong {
+    color: #294851;
+    font-weight: 850;
+  }
+
+  span {
+    margin-top: 2px;
+    color: #5c737a;
+    font-size: 0.82rem;
+  }
 }
 
 .table-heading {

@@ -6,11 +6,8 @@ import { appConfig } from './app/app.config';
 import { registerLocaleData } from '@angular/common';
 import localeEsCL from '@angular/common/locales/es-CL';
 
-import moment from 'moment';
-
-// 🔑 Locale Angular + Moment
+// Locale Angular
 registerLocaleData(localeEsCL);
-moment.locale('es');
 
 bootstrapApplication(AppComponent, appConfig)
   .then(() => {

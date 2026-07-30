@@ -64,7 +64,11 @@
     *ngIf="selectedPerson?.id && !canManageCurrentEpisode"
     aria-hidden="true"
   >
-    SOLO LECTURA
+    {{
+      isHistoricalEpisode
+        ? "EPISODIO CERRADO · SOLO LECTURA"
+        : "SOLO LECTURA"
+    }}
   </div>
 
   <!-- BUSCADOR COMPACTO -->
@@ -143,11 +147,15 @@
 
         <span
           *ngIf="
-            createdEpisode || episodeSummary || longitudinal?.activeEpisode;
+            hasCurrentEpisode;
             else personWithoutEpisodeMessage
           "
         >
-          Persona encontrada. Ficha longitudinal cargada.
+          {{
+            isHistoricalEpisode
+              ? "Persona encontrada. Episodio cerrado cargado en modo de consulta."
+              : "Persona encontrada. Ficha longitudinal cargada."
+          }}
         </span>
 
         <ng-template #personWithoutEpisodeMessage>
@@ -572,9 +580,24 @@
       <mat-icon>lock</mat-icon>
 
       <div>
-        <strong>Ficha disponible en modo solo lectura</strong>
+        <strong>
+          {{
+            isHistoricalEpisode
+              ? "Episodio cerrado disponible en modo de consulta"
+              : "Ficha disponible en modo solo lectura"
+          }}
+        </strong>
 
-        <span>
+        <span *ngIf="isHistoricalEpisode">
+          La demanda finalizó en
+          {{
+            episodeSummary?.currentProgram?.name ||
+              longitudinal?.episode?.currentProgram?.name ||
+              "el programa responsable"
+          }}. Se conserva su información para revisión histórica.
+        </span>
+
+        <span *ngIf="!isHistoricalEpisode">
           La demanda es gestionada por
           {{
             episodeSummary?.currentProgram?.name ||
@@ -1045,9 +1068,9 @@
             </small>
 
             <p>
-              {{ episodeEvents.length }}
+              {{ currentStageEvents.length }}
               {{
-                episodeEvents.length === 1
+                currentStageEvents.length === 1
                   ? "gestión registrada"
                   : "gestiones registradas"
               }}
@@ -2294,8 +2317,21 @@
       <div class="card-header compact-card-header">
         <mat-icon>description</mat-icon>
         <div>
-          <h3>Estado actual del episodio</h3>
-          <p>Resumen operativo para continuidad de atención.</p>
+          <h3>
+            {{
+              isHistoricalEpisode
+                ? "Estado de cierre del episodio"
+                : "Estado actual del episodio"
+            }}
+          </h3>
+
+          <p>
+            {{
+              isHistoricalEpisode
+                ? "Resumen histórico de la demanda finalizada."
+                : "Resumen operativo para continuidad de atención."
+            }}
+          </p>
         </div>
       </div>
 
@@ -2334,12 +2370,12 @@
         <span>Última gestión</span>
         <strong>
           {{
-            lastEpisodeEvent
-              ? (lastEpisodeEvent.eventType?.name ||
-                  lastEpisodeEvent.eventType?.code ||
+            lastCurrentStageEvent
+              ? (lastCurrentStageEvent.eventType?.name ||
+                  lastCurrentStageEvent.eventType?.code ||
                   "Gestión registrada") +
                 " · " +
-                formatDisplayDate(lastEpisodeEvent.eventDate)
+                formatDisplayDate(lastCurrentStageEvent.eventDate)
               : "Sin gestión registrada"
           }}
         </strong>
@@ -2347,12 +2383,14 @@
       <div class="empty-banner" *ngIf="!hasCurrentEpisode">
         <mat-icon>info</mat-icon>
         <span>
-          No existe un episodio de demanda activo. Puede crear uno para iniciar
-          la gestión.
+          No existe un episodio de demanda asociado a esta consulta.
         </span>
       </div>
 
-      <div class="card-actions-preview">
+      <div
+        class="card-actions-preview"
+        *ngIf="!isHistoricalEpisode"
+      >
         <button
           mat-flat-button
           class="create-episode-trigger"
@@ -2390,19 +2428,82 @@
         </div>
       </div>
 
-      <div class="trajectory-line">
-        <div class="trajectory-dot"></div>
-        <div>
-          <strong>{{
-            episodeSummary?.currentProgram?.name ||
-              createdEpisode?.currentProgram?.name ||
-              activeProgramName ||
-              "Programa actual"
-          }}</strong>
-          <span>{{ stageVisualState || "Etapa pendiente" }}</span>
-        </div>
+      <div
+        class="trajectory-summary"
+        *ngIf="
+          compactProgramTrajectory.length > 0;
+          else currentProgramTrajectory
+        "
+      >
+        <ng-container *ngFor="let item of compactProgramTrajectory">
+          <div
+            *ngIf="item.kind === 'stage'"
+            class="trajectory-line"
+            [class.trajectory-line--current]="item.current"
+          >
+            <div class="trajectory-dot"></div>
+
+            <div>
+              <strong>{{ item.programName }}</strong>
+
+              <span>
+                {{ item.stageLabel }}
+
+                <ng-container
+                  *ngIf="
+                    item.daysInStage !== null &&
+                    item.daysInStage !== undefined
+                  "
+                >
+                  · {{ item.daysInStage }}
+                  {{ item.daysInStage === 1 ? "día" : "días" }}
+                </ng-container>
+              </span>
+            </div>
+          </div>
+
+          <div
+            *ngIf="item.kind === 'reference'"
+            class="trajectory-reference"
+          >
+            <mat-icon>south</mat-icon>
+
+            <div>
+              <strong>
+                Referencia ·
+                {{
+                  item.referenceDate
+                    ? formatDisplayDate(item.referenceDate)
+                    : "Fecha sin registro"
+                }}
+              </strong>
+
+              <span>
+                {{ item.originProgramName }}
+                →
+                {{ item.destinationProgramName }}
+              </span>
+            </div>
+          </div>
+        </ng-container>
       </div>
 
+      <ng-template #currentProgramTrajectory>
+        <div class="trajectory-line">
+          <div class="trajectory-dot"></div>
+
+          <div>
+            <strong>{{
+              episodeSummary?.currentProgram?.name ||
+                createdEpisode?.currentProgram?.name ||
+                activeProgramName ||
+                "Programa actual"
+            }}</strong>
+
+            <span>{{ stageVisualState || "Etapa pendiente" }}</span>
+          </div>
+        </div>
+      </ng-template>
       <div class="empty-line" *ngIf="!episodeLoaded && !createdEpisode">
         No existe episodio activo cargado. Prepare el episodio si corresponde.
       </div>
@@ -2414,14 +2515,23 @@
 
           <div>
             <h4>Hitos del episodio</h4>
-            <p>Fechas principales del proceso de atención.</p>
+            <p>
+              Solicitud original y secuencia operativa de la etapa actual.
+            </p>
           </div>
         </div>
 
+        <!-- SOLICITUD ORIGINAL -->
         <div class="episode-milestone">
           <div class="episode-milestone__label">
             <mat-icon>flag</mat-icon>
-            <span>Origen de la demanda</span>
+
+            <span
+              matTooltip="Fecha original de recepción de la demanda"
+              aria-label="Solicitud original de la demanda"
+            >
+              Solic. · Solicitud original
+            </span>
           </div>
 
           <strong>
@@ -2433,43 +2543,54 @@
           </strong>
         </div>
 
-        <div class="episode-milestone episode-milestone--stacked">
+        <!-- CINCO TIPOS DE CITACIÓN -->
+        <div
+          class="episode-milestone episode-milestone--stacked"
+          *ngFor="let milestone of demandCitationMilestones"
+        >
           <div class="episode-milestone__label">
-            <mat-icon>groups</mat-icon>
-            <span>Entrevistas realizadas</span>
+            <mat-icon>
+              {{ milestone.registered ? "event_available" : "event" }}
+            </mat-icon>
+
+            <span
+              [matTooltip]="milestone.description"
+              [attr.aria-label]="milestone.title"
+            >
+              {{ milestone.label }} · {{ milestone.title }}
+            </span>
           </div>
 
-          <div
-            class="episode-milestone__list"
-            *ngIf="attendedInterviewCitations.length; else noInterviews"
-          >
-            <div
-              class="episode-milestone__item"
-              *ngFor="let citation of attendedInterviewCitations"
-            >
-              <span>{{ getCitationDisplayName(citation) }}</span>
-
+          <div class="episode-milestone__list">
+            <div class="episode-milestone__item">
               <strong>
                 {{
-                  formatDisplayDate(
-                    citation.eventDate || citation.citationDate
-                  )
+                  milestone.date
+                    ? formatDisplayDate(milestone.date)
+                    : milestone.attendance
                 }}
               </strong>
+
+              <span *ngIf="milestone.date">
+                {{ milestone.attendance }}
+              </span>
+
+              <span>{{ milestone.description }}</span>
             </div>
           </div>
-
-          <ng-template #noInterviews>
-            <span class="episode-milestone__pending">
-              Sin entrevistas asistidas
-            </span>
-          </ng-template>
         </div>
 
+        <!-- RETROALIMENTACIÓN -->
         <div class="episode-milestone episode-milestone--stacked">
           <div class="episode-milestone__label">
             <mat-icon>assignment_turned_in</mat-icon>
-            <span>Retroalimentación</span>
+
+            <span
+              matTooltip="Retroalimentación y decisión sobre la demanda"
+              aria-label="Retroalimentación y decisión sobre la demanda"
+            >
+              Retro. · Retroalimentación
+            </span>
           </div>
 
           <div
@@ -2480,18 +2601,9 @@
               class="episode-milestone__item episode-milestone__item--feedback"
               *ngFor="let feedback of feedbackEvents"
             >
-              <strong>{{ formatDisplayDate(feedback.eventDate) }}</strong>
-
-              <strong>{{ getEventProfessionalName(feedback) }}</strong>
-
-              <span>
-                {{ getEventProfessionName(feedback) || "Profesión no informada" }}
-              </span>
-
-              <span>
-                Compromiso:
-                {{ getFeedbackCommitmentLabel(feedback) }}
-              </span>
+              <strong>
+                {{ formatDisplayDate(feedback.eventDate) }}
+              </strong>
 
               <span>
                 Resultado:
@@ -2504,24 +2616,32 @@
                   )
                 }}
               </span>
+
+              <span>
+                Compromiso:
+                {{ getFeedbackCommitmentLabel(feedback) }}
+              </span>
             </div>
           </div>
 
           <ng-template #noFeedback>
             <span class="episode-milestone__pending">
-              {{
-                episodeOperationalSummary.resultPending
-                  ? "Pendiente"
-                  : "Resultado de la etapa: " + episodeOperationalSummary.result
-              }}
+              Sin registro
             </span>
           </ng-template>
         </div>
 
+        <!-- CIERRE -->
         <div class="episode-milestone">
           <div class="episode-milestone__label">
             <mat-icon>event_busy</mat-icon>
-            <span>Cierre</span>
+
+            <span
+              matTooltip="Término formal del episodio de demanda"
+              aria-label="Cierre formal del episodio"
+            >
+              Cierre
+            </span>
           </div>
 
           <strong>
@@ -2532,6 +2652,59 @@
             }}
           </strong>
         </div>
+
+        <!-- AYUDA PARA USUARIOS -->
+        <details class="episode-milestone-help">
+          <summary>
+            ¿Qué significan estos hitos?
+          </summary>
+
+          <div class="episode-milestone__list">
+            <div class="episode-milestone__item">
+              <strong>Solic.</strong>
+              <span>Fecha original de recepción de la demanda.</span>
+            </div>
+
+            <div class="episode-milestone__item">
+              <strong>C1-E1</strong>
+              <span>Primera citación para la primera entrevista.</span>
+            </div>
+
+            <div class="episode-milestone__item">
+              <strong>C2-E1</strong>
+              <span>
+                Segunda citación para la primera entrevista, cuando fue necesaria.
+              </span>
+            </div>
+
+            <div class="episode-milestone__item">
+              <strong>C1-E2</strong>
+              <span>Primera citación para la segunda entrevista.</span>
+            </div>
+
+            <div class="episode-milestone__item">
+              <strong>C2-E2</strong>
+              <span>
+                Segunda citación para la segunda entrevista, cuando fue necesaria.
+              </span>
+            </div>
+
+            <div class="episode-milestone__item">
+              <strong>Opc.</strong>
+              <span>Citación para entrevista opcional.</span>
+            </div>
+
+            <div class="episode-milestone__item">
+              <strong>Retro.</strong>
+              <span>Retroalimentación y decisión sobre la demanda.</span>
+            </div>
+
+            <div class="episode-milestone__item">
+              <strong>Cierre</strong>
+              <span>Término formal del episodio de demanda.</span>
+            </div>
+          </div>
+        </details>
       </section>
     </mat-card>
 
@@ -2588,7 +2761,7 @@
 
         <div>
           <span>Eventos registrados</span>
-          <strong>{{ episodeEvents.length || 0 }}</strong>
+          <strong>{{ currentStageEvents.length || 0 }}</strong>
         </div>
 
         <div>
@@ -3021,7 +3194,7 @@
       <div class="card-header compact-card-header">
         <mat-icon>event</mat-icon>
         <div>
-          <h3>Citaciones del episodio actual</h3>
+          <h3>Citaciones de la etapa actual</h3>
           <p>Registro de citaciones y asistencia.</p>
         </div>
       </div>
@@ -3102,7 +3275,7 @@
 
       <ng-template #noCitationEvents>
         <div class="empty-line">
-          No existen citaciones registradas para este episodio.
+          No existen citaciones registradas en la etapa actual.
         </div>
       </ng-template>
     </mat-card>
@@ -3119,12 +3292,12 @@
         <mat-icon>notes</mat-icon>
 
         <div>
-          <h3>Observaciones recientes</h3>
+          <h3>Observaciones recientes de la etapa actual</h3>
           <p>Últimas observaciones registradas.</p>
         </div>
       </div>
 
-      <ng-container *ngIf="episodeEvents.length; else noRecentObservations">
+      <ng-container *ngIf="observationEvents.length; else noRecentObservations">
         <article class="recent-observation" *ngFor="let event of episodeEvents">
           <ng-container *ngIf="event.eventType?.code === 'OBSERVACION'">
             <strong>{{ formatDisplayDate(event.eventDate) }}</strong>
@@ -3138,7 +3311,7 @@
 
       <ng-template #noRecentObservations>
         <div class="empty-line">
-          No existen observaciones registradas para este episodio.
+          No existen observaciones registradas en la etapa actual.
         </div>
       </ng-template>
     </mat-card>
@@ -3196,7 +3369,12 @@
 
   <!-- HISTORIAL DEL EPISODIO -->
   <mat-card
-    class="episode-history-card episode-history-card--featured"
+    id="trazabilidad"
+    #summarySection
+    class="episode-history-card episode-history-card--featured longitudinal-anchor"
+    [class.longitudinal-anchor--highlighted]="
+      highlightedSummarySection === 'trazabilidad'
+    "
     *ngIf="
       hasActiveEpisode ||
       episodeEvents.length ||
@@ -3390,6 +3568,12 @@
                 <span class="event-type-code">
                   {{ getEventTypeCode(event) || "SIN_CODIGO" }}
                 </span>
+                <br />
+
+                <span class="event-type-code">
+                  Programa / etapa ·
+                  {{ getEventProgramContext(event).displayLabel }}
+                </span>
               </div>
             </div>
 
@@ -3553,10 +3737,10 @@
             <div>
               <mat-icon>business</mat-icon>
 
-              <span>Programa</span>
+              <span>Programa / etapa</span>
 
               <strong>
-                {{ event.program?.name || "No informado" }}
+                {{ getEventProgramContext(event).displayLabel }}
               </strong>
             </div>
 

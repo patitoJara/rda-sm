@@ -3,15 +3,31 @@
   <header class="priority-hero">
     <div class="priority-hero__content">
       <span class="priority-hero__eyebrow">
-        <mat-icon>format_list_numbered</mat-icon>
-        Gestión operativa
+        <mat-icon>
+          {{ isHistoricalMode ? "history" : "format_list_numbered" }}
+        </mat-icon>
+
+        {{
+          isHistoricalMode
+            ? "Consulta histórica"
+            : "Gestión operativa"
+        }}
       </span>
 
-      <h1>Bandeja priorizada de demanda</h1>
+      <h1>
+        {{
+          isHistoricalMode
+            ? "Historial de demandas cerradas"
+            : "Bandeja priorizada de demanda"
+        }}
+      </h1>
 
       <p>
-        Episodios activos ordenados por días acumulados, nivel de alerta,
-        antigüedad de la solicitud y necesidad de gestión.
+        {{
+          isHistoricalMode
+            ? "Episodios cerrados disponibles para consulta y revisión de su trayectoria."
+            : "Episodios activos ordenados por días acumulados, nivel de alerta, antigüedad de la solicitud y necesidad de gestión."
+        }}
       </p>
 
       <div class="priority-hero__meta">
@@ -46,6 +62,29 @@
         <mat-icon>person_search</mat-icon>
         Buscar o crear demanda
       </a>
+
+      <button
+        mat-stroked-button
+        type="button"
+        class="priority-history-toggle"
+        [class.priority-history-toggle--active]="isHistoricalMode"
+        [disabled]="loadingEpisodes"
+        (click)="
+          setEpisodeListMode(
+            isHistoricalMode ? 'active' : 'closed'
+          )
+        "
+      >
+        <mat-icon>
+          {{ isHistoricalMode ? "format_list_numbered" : "history" }}
+        </mat-icon>
+
+        {{
+          isHistoricalMode
+            ? "Volver a demandas activas"
+            : "Ver demandas cerradas"
+        }}
+      </button>
 
       <button
         mat-stroked-button
@@ -225,14 +264,34 @@
   </mat-card>
 
   <!-- BANDEJA -->
-  <mat-card class="priority-table-card">
+  <mat-card
+    class="priority-table-card"
+    [class.priority-table-card--historical]="isHistoricalMode"
+  >
     <div class="table-heading">
       <div>
-        <span>BANDEJA DE TRABAJO</span>
-        <h2>Demandas ordenadas por prioridad</h2>
+        <span>
+          {{
+            isHistoricalMode
+              ? "HISTORIAL DE DEMANDAS"
+              : "BANDEJA DE TRABAJO"
+          }}
+        </span>
+
+        <h2>
+          {{
+            isHistoricalMode
+              ? "Demandas cerradas"
+              : "Demandas ordenadas por prioridad"
+          }}
+        </h2>
 
         <p>
-          Los casos con mayor cantidad de días acumulados aparecen primero.
+          {{
+            isHistoricalMode
+              ? "Consulte episodios finalizados y su ficha longitudinal."
+              : "Los casos con mayor cantidad de días acumulados aparecen primero."
+          }}
         </p>
       </div>
 
@@ -240,6 +299,21 @@
         <strong>{{ totalElements }}</strong>
         <span>
           {{ totalElements === 1 ? "demanda" : "demandas" }}
+        </span>
+      </div>
+    </div>
+
+    <div
+      class="historical-mode-banner"
+      *ngIf="isHistoricalMode"
+    >
+      <mat-icon>lock</mat-icon>
+
+      <div>
+        <strong>Historial disponible en modo de consulta</strong>
+        <span>
+          Las demandas cerradas pueden revisarse, pero no admiten nuevas
+          gestiones.
         </span>
       </div>
     </div>
@@ -298,9 +372,20 @@
       <mat-icon>playlist_remove</mat-icon>
 
       <div>
-        <strong>Sin demandas para los filtros seleccionados</strong>
+        <strong>
+          {{
+            isHistoricalMode
+              ? "No existen demandas cerradas para los filtros seleccionados"
+              : "Sin demandas para los filtros seleccionados"
+          }}
+        </strong>
+
         <span>
-          Modifique los filtros o actualice la bandeja.
+          {{
+            isHistoricalMode
+              ? "Modifique los filtros o vuelva a la bandeja de demandas activas."
+              : "Modifique los filtros o actualice la bandeja."
+          }}
         </span>
       </div>
     </div>
@@ -599,7 +684,7 @@
               </button>
 
               <button
-                *ngIf="canManageEpisode(row)"
+                *ngIf="!isHistoricalMode && canManageEpisode(row)"
                 mat-flat-button
                 type="button"
                 matTooltip="Gestionar episodio"

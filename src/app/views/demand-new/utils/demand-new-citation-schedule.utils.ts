@@ -1,8 +1,13 @@
+import {
+  getAttendanceForCitation,
+} from './demand-new-citation.utils';
 export interface CitationScheduleValidationInput {
   citationTypeCode: string;
   citationDate: string;
   citationTime: string;
   citationEvents: any[];
+
+  episodeEvents: any[];
   citationTypes: any[];
 }
 
@@ -110,6 +115,51 @@ function getCitationName(item: any): string {
     .replace(/\.$/, '');
 }
 
+function normalizeAttendanceStatus(
+  citation: any,
+  episodeEvents: any[],
+): string {
+  const attendance = getAttendanceForCitation(
+    citation,
+    episodeEvents,
+  );
+
+  return String(
+    attendance?.attendanceStatus?.code ??
+      attendance?.attendanceStatusCode ??
+      attendance?.attendanceStatus?.name ??
+      attendance?.attendanceStatusName ??
+      citation?.attendanceStatus?.code ??
+      citation?.attendanceStatusCode ??
+      citation?.attendanceStatus?.name ??
+      citation?.attendanceStatusName ??
+      '',
+  )
+    .trim()
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '_');
+}
+
+function allowsCitationTypeRetry(
+  citation: any,
+  episodeEvents: any[],
+): boolean {
+  const status = normalizeAttendanceStatus(
+    citation,
+    episodeEvents,
+  );
+
+  return (
+    status.includes('REPROGRAM') ||
+    (
+      status.includes('CANCELAD') &&
+      status.includes('PROGRAMA')
+    )
+  );
+}
+
 export function validateCitationSchedule(
   input: CitationScheduleValidationInput,
 ): CitationScheduleValidationResult {
@@ -118,6 +168,7 @@ export function validateCitationSchedule(
     citationDate,
     citationTime,
     citationEvents,
+    episodeEvents,
     citationTypes,
   } = input;
 
@@ -152,11 +203,20 @@ export function validateCitationSchedule(
     }
 
     if (existingCode === citationTypeCode) {
-      return {
-        valid: false,
-        errorMessage:
-          'Este tipo de citación ya fue registrado.',
-      };
+      if (
+        !allowsCitationTypeRetry(
+          event,
+          episodeEvents,
+        )
+      ) {
+        return {
+          valid: false,
+          errorMessage:
+            'Este tipo de citación ya fue registrado y continúa vigente.',
+        };
+      }
+
+      continue;
     }
 
     const existingDateTime = getCitationDateTime(event);
