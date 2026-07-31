@@ -1,0 +1,902 @@
+/* ============================================================
+   PANEL OPERATIVO
+   Inspirado en Historia por programas
+============================================================ */
+
+.action-forms-card {
+  overflow: visible;
+  scroll-margin-top: 110px;
+  outline: none;
+
+  margin: 10px 0 16px;
+  padding: 0 !important;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.operation-panel-shell {
+  --panel-accent: #087f91;
+  --panel-soft: #e9f7f8;
+  --panel-border: #acdce2;
+
+  overflow: hidden;
+
+  display: grid;
+  gap: 0;
+
+  border: 1px solid #d6e3e7;
+  border-radius: 20px;
+
+  background: #f3f7f8;
+
+  box-shadow:
+    0 14px 34px rgba(34, 59, 70, 0.1),
+    0 4px 12px rgba(34, 59, 70, 0.05);
+
+  animation: operation-panel-enter 220ms ease-out;
+}
+
+/* ============================================================
+   IDENTIDAD DE CADA OPERACIÓN
+============================================================ */
+
+.operation-panel-shell--citation {
+  --panel-accent: #1976d2;
+  --panel-soft: #edf5ff;
+  --panel-border: #b9d5f2;
+}
+
+.operation-panel-shell--attendance {
+  --panel-accent: #7656b8;
+  --panel-soft: #f3effc;
+  --panel-border: #d5c8ed;
+}
+
+.operation-panel-shell--interview {
+  --panel-accent: #b87500;
+  --panel-soft: #fff6e5;
+  --panel-border: #edd29f;
+}
+
+.operation-panel-shell--observation {
+  --panel-accent: #b95743;
+  --panel-soft: #fff2ee;
+  --panel-border: #ecc3ba;
+}
+
+.operation-panel-shell--reference {
+  --panel-accent: #4f63bd;
+  --panel-soft: #eef0fb;
+  --panel-border: #c8ceec;
+}
+
+.operation-panel-shell--treatmentEntry {
+  --panel-accent: #27865a;
+  --panel-soft: #ebf7f0;
+  --panel-border: #bfdfcc;
+}
+
+.operation-panel-shell--egressClosure {
+  --panel-accent: #b24b4b;
+  --panel-soft: #fff0f0;
+  --panel-border: #ecc6c6;
+}
+
+/* ============================================================
+   CABECERA INSTITUCIONAL
+============================================================ */
+
+.operation-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  min-height: 82px;
+  padding: 16px 22px;
+
+  box-sizing: border-box;
+
+  color: #ffffff;
+
+  background:
+    radial-gradient(
+      circle at 88% 15%,
+      rgba(85, 211, 218, 0.34),
+      transparent 30%
+    ),
+    linear-gradient(
+      125deg,
+      #075b68 0%,
+      #087f91 58%,
+      #16a2ae 100%
+    );
+}
+
+.operation-panel-header > div:last-child {
+  min-width: 0;
+}
+
+.operation-panel-header span {
+  display: block;
+
+  margin-bottom: 2px;
+
+  color: #ffffff;
+
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  line-height: 1.2;
+  text-transform: uppercase;
+
+  opacity: 0.84;
+}
+
+.operation-panel-header h3 {
+  margin: 0;
+
+  color: #ffffff;
+
+  font-size: 1.35rem;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+  line-height: 1.18;
+}
+
+.operation-panel-header p {
+  margin: 4px 0 0;
+
+  color: #ffffff;
+
+  font-size: 0.8rem;
+  font-weight: 450;
+  line-height: 1.35;
+
+  opacity: 0.87;
+}
+
+.operation-icon {
+  display: grid;
+  flex: 0 0 50px;
+
+  width: 50px;
+  height: 50px;
+
+  place-items: center;
+
+  color: #ffffff;
+
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.operation-icon mat-icon {
+  width: 28px;
+  height: 28px;
+
+  font-size: 28px;
+  line-height: 28px;
+}
+
+/* ============================================================
+   TARJETA DEL FORMULARIO
+============================================================ */
+
+.operation-panel-shell .operation-form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  column-gap: 14px;
+  row-gap: 12px;
+
+  min-width: 0;
+
+  margin: 18px 20px 0;
+  padding: 16px;
+
+  border: 1px solid #d9e4e8;
+  border-left: 5px solid var(--panel-accent);
+  border-radius: 15px;
+
+  background: #ffffff;
+
+  box-shadow: 0 4px 15px rgba(34, 59, 70, 0.05);
+}
+
+.operation-panel-shell .operation-form .span-2 {
+  grid-column: span 2;
+}
+
+.operation-panel-shell .operation-form .span-full,
+.operation-panel-shell .operation-form > .empty-banner {
+  grid-column: 1 / -1;
+}
+
+.operation-panel-shell .operation-form mat-form-field {
+  width: 100%;
+  margin: 0;
+
+  --mdc-outlined-text-field-outline-color: #cbd9dd;
+  --mdc-outlined-text-field-hover-outline-color: var(--panel-accent);
+  --mdc-outlined-text-field-focus-outline-color: var(--panel-accent);
+  --mdc-outlined-text-field-label-text-color: #566f77;
+  --mdc-outlined-text-field-focus-label-text-color: var(--panel-accent);
+}
+
+/* ============================================================
+   CAMPOS ANGULAR MATERIAL
+============================================================ */
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  .mat-mdc-text-field-wrapper {
+  min-height: 48px;
+  height: 48px;
+
+  border-radius: 11px;
+
+  background: #ffffff;
+
+  transition:
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  mat-form-field:hover
+  .mat-mdc-text-field-wrapper {
+  background: #fcfefe;
+}
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  .mat-mdc-form-field.mat-focused
+  .mat-mdc-text-field-wrapper {
+  box-shadow: 0 0 0 3px var(--panel-soft);
+}
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  .mat-mdc-form-field-flex {
+  min-height: 48px;
+  height: 48px;
+
+  align-items: center;
+}
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  .mat-mdc-form-field-infix {
+  min-width: 0;
+  min-height: 48px;
+
+  padding: 12px 4px 7px 5px !important;
+}
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  .mat-mdc-floating-label {
+  color: #566f77;
+
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  input.mat-mdc-input-element,
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  textarea.mat-mdc-input-element,
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  .mat-mdc-select-value,
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  .mat-mdc-select-value-text {
+  color: #263f47;
+
+  font-size: 0.84rem;
+  font-weight: 650;
+}
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  .mat-mdc-form-field-icon-prefix {
+  display: flex;
+  flex: 0 0 42px;
+
+  width: 42px;
+  min-width: 42px;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 7px 0 9px !important;
+  margin: 0 10px 0 0 !important;
+}
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  .mat-mdc-form-field-icon-prefix
+  mat-icon {
+  width: 20px;
+  height: 20px;
+
+  margin: 0 !important;
+
+  color: var(--panel-accent);
+
+  font-size: 20px;
+  line-height: 20px;
+}
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  .mat-mdc-form-field-subscript-wrapper {
+  min-height: 18px;
+  height: auto;
+
+  margin: 0;
+}
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  .mat-mdc-form-field-bottom-align::before {
+  height: 18px;
+}
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  .mat-mdc-form-field-hint-wrapper,
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  .mat-mdc-form-field-error-wrapper {
+  padding: 0 8px;
+}
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  .mat-mdc-form-field-hint,
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  .mat-mdc-form-field-error {
+  font-size: 0.66rem;
+  line-height: 1.25;
+  white-space: normal;
+}
+
+/* Selector principal de Citación */
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form--citation
+  > mat-form-field:first-child
+  .mat-mdc-text-field-wrapper {
+  background: var(--panel-soft);
+}
+
+/* ============================================================
+   FECHA Y HORA
+============================================================ */
+
+.operation-panel-shell .time-period-grid {
+  display: grid;
+  grid-template-columns: minmax(145px, 1fr) 132px;
+  gap: 8px;
+
+  min-width: 0;
+}
+
+/* AJUSTE ESPECÍFICO AM / PM */
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .time-period-grid
+  mat-form-field:last-child
+  .mat-mdc-form-field-icon-prefix {
+  flex: 0 0 34px;
+
+  width: 34px;
+  min-width: 34px;
+
+  padding: 0 4px 0 5px !important;
+  margin-right: 1px !important;
+}
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .time-period-grid
+  mat-form-field:last-child
+  .mat-mdc-form-field-infix {
+  padding-left: 4px !important;
+}
+/* ============================================================
+   CAMPOS MULTILÍNEA
+============================================================ */
+
+.operation-panel-shell .operation-form textarea {
+  resize: vertical;
+}
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  mat-form-field.span-full:has(textarea)
+  .mat-mdc-text-field-wrapper,
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  mat-form-field.span-full:has(textarea)
+  .mat-mdc-form-field-flex {
+  height: auto;
+  min-height: 76px;
+}
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  mat-form-field.span-full:has(textarea)
+  .mat-mdc-form-field-flex {
+  align-items: flex-start;
+}
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  mat-form-field.span-full:has(textarea)
+  .mat-mdc-form-field-infix {
+  height: auto;
+  min-height: 76px;
+
+  padding-top: 19px !important;
+  padding-bottom: 8px !important;
+}
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  mat-form-field.span-full:has(textarea)
+  .mat-mdc-form-field-icon-prefix {
+  align-self: flex-start;
+
+  padding-top: 18px !important;
+}
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-form
+  mat-form-field.span-full:has(textarea)
+  textarea.mat-mdc-input-element {
+  display: block;
+
+  min-height: 44px;
+  max-height: 130px;
+
+  margin: 0;
+  padding: 0;
+
+  line-height: 1.4;
+}
+
+/* ============================================================
+   SECCIONES ESTRUCTURALES DEL FORMULARIO
+============================================================ */
+
+.operation-panel-shell
+  .operation-form.operation-form--citation {
+  grid-template-columns: 1fr;
+  gap: 12px;
+
+  margin: 16px 18px 0;
+  padding: 0;
+
+  border: 0;
+  border-radius: 0;
+
+  background: transparent;
+
+  box-shadow: none;
+}
+
+.operation-panel-shell .operation-section {
+  overflow: hidden;
+
+  min-width: 0;
+
+  border: 1px solid #d9e4e8;
+  border-left: 5px solid var(--panel-accent);
+  border-radius: 15px;
+
+  background: #ffffff;
+
+  box-shadow: 0 4px 15px rgba(34, 59, 70, 0.05);
+}
+
+.operation-panel-shell .operation-section__header {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+
+  min-height: 56px;
+  padding: 10px 13px;
+
+  box-sizing: border-box;
+
+  border-bottom: 1px solid #e1eaed;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--panel-soft),
+      #ffffff 72%
+    );
+}
+
+.operation-panel-shell .operation-section__icon {
+  display: grid;
+  flex: 0 0 38px;
+
+  width: 38px;
+  height: 38px;
+
+  place-items: center;
+
+  color: var(--panel-accent);
+
+  border-radius: 11px;
+
+  background: #ffffff;
+
+  box-shadow: 0 2px 8px rgba(34, 59, 70, 0.08);
+}
+
+.operation-panel-shell .operation-section__icon mat-icon {
+  width: 21px;
+  height: 21px;
+
+  font-size: 21px;
+  line-height: 21px;
+}
+
+.operation-panel-shell .operation-section__header > div {
+  min-width: 0;
+}
+
+.operation-panel-shell .operation-section__header small,
+.operation-panel-shell .operation-section__header strong,
+.operation-panel-shell .operation-section__header p {
+  display: block;
+}
+
+.operation-panel-shell .operation-section__header small {
+  color: var(--panel-accent);
+
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.075em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.operation-panel-shell .operation-section__header strong {
+  margin-top: 1px;
+
+  color: #29464f;
+
+  font-size: 0.84rem;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.operation-panel-shell .operation-section__header p {
+  margin: 2px 0 0;
+
+  color: #6b7f87;
+
+  font-size: 0.7rem;
+  line-height: 1.3;
+}
+
+.operation-panel-shell .operation-section__content {
+  min-width: 0;
+  padding: 12px 13px 4px;
+}
+
+.operation-panel-shell .operation-section__content--single {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.operation-panel-shell .operation-section__grid {
+  display: grid;
+  gap: 12px;
+}
+
+.operation-panel-shell .operation-section__grid--four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-section
+  .mat-mdc-text-field-wrapper {
+  background: #f7fafb;
+}
+
+:host
+  ::ng-deep
+  .operation-panel-shell
+  .operation-section--primary
+  .mat-mdc-text-field-wrapper {
+  background: var(--panel-soft);
+}
+
+@media (max-width: 1180px) {
+  .operation-panel-shell .operation-section__grid--four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .operation-panel-shell
+    .operation-form.operation-form--citation {
+    margin: 12px 12px 0;
+  }
+
+  .operation-panel-shell .operation-section__grid--four {
+    grid-template-columns: 1fr;
+  }
+
+  .operation-panel-shell .operation-section__header {
+    align-items: flex-start;
+  }
+}
+/* ============================================================
+   MENSAJES OPERATIVOS
+============================================================ */
+
+.operation-panel-shell .operation-form > .empty-banner {
+  margin: 0 0 4px;
+}
+
+.operation-panel-shell .operation-pending-state {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+
+  min-height: 58px;
+  padding: 11px 13px;
+
+  border: 1px dashed var(--panel-border);
+  border-radius: 12px;
+
+  background: var(--panel-soft);
+}
+
+.operation-panel-shell .operation-pending-state > mat-icon {
+  flex: 0 0 auto;
+
+  color: var(--panel-accent);
+}
+
+.operation-panel-shell .operation-pending-state > div {
+  display: grid;
+  gap: 3px;
+}
+
+.operation-panel-shell .operation-pending-state strong {
+  color: #29464f;
+
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.operation-panel-shell .operation-pending-state span {
+  color: #60757d;
+
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+/* ============================================================
+   PIE Y BOTONES
+============================================================ */
+
+.operation-panel-shell .operation-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+
+  min-height: 62px;
+  margin-top: 18px;
+  padding: 9px 20px;
+
+  box-sizing: border-box;
+
+  border-top: 1px solid #d7e2e6;
+
+  background: #ffffff;
+}
+
+.operation-panel-shell .operation-actions button {
+  min-width: 118px;
+  height: 42px;
+
+  padding-inline: 18px;
+
+  border-radius: 999px !important;
+
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.operation-panel-shell .operation-actions .secondary-btn {
+  color: #315a63 !important;
+  border-color: #bcd3d8 !important;
+
+  background: #ffffff !important;
+}
+
+.operation-panel-shell
+  .operation-actions
+  .primary-btn:not(:disabled):not(.mat-mdc-button-disabled) {
+  color: #ffffff !important;
+
+  background: var(--panel-accent) !important;
+
+  box-shadow: 0 6px 14px rgba(34, 59, 70, 0.14) !important;
+}
+
+.operation-panel-shell .operation-actions button mat-icon {
+  width: 18px;
+  height: 18px;
+
+  font-size: 18px;
+  line-height: 18px;
+}
+
+.operation-panel-shell .operation-actions .primary-btn:disabled,
+.operation-panel-shell
+  .operation-actions
+  .primary-btn.mat-mdc-button-disabled {
+  color: #6f858a !important;
+
+  background: #c7d7da !important;
+
+  box-shadow: none !important;
+
+  opacity: 0.72;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+.operation-panel-shell .operation-actions .primary-btn:disabled mat-icon,
+.operation-panel-shell
+  .operation-actions
+  .primary-btn.mat-mdc-button-disabled
+  mat-icon {
+  color: #6f858a !important;
+}
+
+/* ============================================================
+   ANIMACIÓN Y RESPONSIVE
+============================================================ */
+
+@keyframes operation-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1180px) {
+  .operation-panel-shell .operation-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .operation-panel-shell .operation-form .span-2 {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 700px) {
+  .operation-panel-header {
+    align-items: flex-start;
+
+    min-height: auto;
+    padding: 16px;
+  }
+
+  .operation-icon {
+    display: none;
+  }
+
+  .operation-panel-shell .operation-form {
+    grid-template-columns: 1fr;
+
+    margin: 12px 12px 0;
+    padding: 13px;
+  }
+
+  .operation-panel-shell .operation-form .span-2,
+  .operation-panel-shell .operation-form .span-full {
+    grid-column: auto;
+  }
+
+  .operation-panel-shell .operation-actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+
+    margin-top: 12px;
+    padding: 12px;
+  }
+
+  .operation-panel-shell .operation-actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .operation-panel-shell .time-period-grid {
+    grid-template-columns: minmax(0, 1fr) 104px;
+  }
+}

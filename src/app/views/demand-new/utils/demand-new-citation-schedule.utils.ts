@@ -184,8 +184,7 @@ export function validateCitationSchedule(
     };
   }
 
-  const selectedDateTime =
-    `${citationDate}T${normalizeTime(citationTime)}`;
+  const selectedTime = normalizeTime(citationTime);
 
   for (const event of citationEvents) {
     const existingCode = resolveCitationTypeCode(
@@ -229,26 +228,61 @@ export function validateCitationSchedule(
       citationTypes[existingOrder],
     );
 
-    if (
-      existingOrder < selectedOrder &&
-      selectedDateTime < existingDateTime
-    ) {
-      return {
-        valid: false,
-        errorMessage:
-          `La fecha y hora deben ser iguales o posteriores a ${existingName}.`,
-      };
+    const existingDate = existingDateTime.slice(0, 10);
+    const existingTime = existingDateTime.slice(11, 19);
+
+    const selectedDateLabel =
+      citationDate.split('-').reverse().join('/');
+
+    const existingDateLabel =
+      existingDate.split('-').reverse().join('/');
+
+    if (existingOrder < selectedOrder) {
+      if (citationDate < existingDate) {
+        return {
+          valid: false,
+          errorMessage:
+            `La fecha seleccionada (${selectedDateLabel}) no puede ser anterior ` +
+            `a ${existingName} (${existingDateLabel}).`,
+        };
+      }
+
+      if (
+        citationDate === existingDate &&
+        selectedTime <= existingTime
+      ) {
+        return {
+          valid: false,
+          errorMessage:
+            `Para el ${selectedDateLabel}, la hora seleccionada ` +
+            `(${selectedTime.slice(0, 5)}) debe ser posterior a ` +
+            `${existingName} (${existingTime.slice(0, 5)}).`,
+        };
+      }
     }
 
-    if (
-      existingOrder > selectedOrder &&
-      selectedDateTime > existingDateTime
-    ) {
-      return {
-        valid: false,
-        errorMessage:
-          `La fecha y hora deben ser iguales o anteriores a ${existingName}.`,
-      };
+    if (existingOrder > selectedOrder) {
+      if (citationDate > existingDate) {
+        return {
+          valid: false,
+          errorMessage:
+            `La fecha seleccionada (${selectedDateLabel}) no puede ser posterior ` +
+            `a ${existingName} (${existingDateLabel}).`,
+        };
+      }
+
+      if (
+        citationDate === existingDate &&
+        selectedTime >= existingTime
+      ) {
+        return {
+          valid: false,
+          errorMessage:
+            `Para el ${selectedDateLabel}, la hora seleccionada ` +
+            `(${selectedTime.slice(0, 5)}) debe ser anterior a ` +
+            `${existingName} (${existingTime.slice(0, 5)}).`,
+        };
+      }
     }
   }
 

@@ -330,6 +330,8 @@
         <span><strong>C2-E1</strong> Segunda citación a primera entrevista.</span>
         <span><strong>C1-E2</strong> Primera citación a segunda entrevista.</span>
         <span><strong>C2-E2</strong> Segunda citación a segunda entrevista.</span>
+        <span><strong>C1-E3</strong> Primera citación a tercera entrevista.</span>
+        <span><strong>C2-E3</strong> Segunda citación a tercera entrevista.</span>
         <span><strong>Opc.</strong> Entrevista opcional.</span>
         <span><strong>Retro.</strong> Fecha de Retroalimentación.</span>
         <span><strong>Comp. BPS</strong> Compromiso biopsicosocial.</span>
@@ -515,6 +517,26 @@
           </th>
           <td mat-cell *matCellDef="let row" class="compact-date-cell">
             {{ formatCompactDate(row.secondCitationSecondInterviewDate) }}
+          </td>
+        </ng-container>
+
+        <!-- PRIMERA CITACIÓN / TERCERA ENTREVISTA -->
+        <ng-container matColumnDef="citationFirstThird">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <span matTooltip="Primera citación a tercera entrevista">C1-E3</span>
+          </th>
+          <td mat-cell *matCellDef="let row" class="compact-date-cell">
+            {{ formatCompactDate(row.firstCitationThirdInterviewDate) }}
+          </td>
+        </ng-container>
+
+        <!-- SEGUNDA CITACIÓN / TERCERA ENTREVISTA -->
+        <ng-container matColumnDef="citationSecondThird">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <span matTooltip="Segunda citación a tercera entrevista">C2-E3</span>
+          </th>
+          <td mat-cell *matCellDef="let row" class="compact-date-cell">
+            {{ formatCompactDate(row.secondCitationThirdInterviewDate) }}
           </td>
         </ng-container>
 

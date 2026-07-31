@@ -223,6 +223,16 @@ export function buildDemandNewCitationMilestones(
     DEMAND_CITATION_CODES.secondCitationSecondInterview,
   );
 
+  const c1e3 = getLatestWorkflowCitation(
+    workflowCitations,
+    DEMAND_CITATION_CODES.firstCitationThirdInterview,
+  );
+
+  const c2e3 = getLatestWorkflowCitation(
+    workflowCitations,
+    DEMAND_CITATION_CODES.secondCitationThirdInterview,
+  );
+
   const optional = getLatestWorkflowCitation(
     workflowCitations,
     DEMAND_CITATION_CODES.optionalInterview,
@@ -235,6 +245,10 @@ export function buildDemandNewCitationMilestones(
   const secondInterviewCompleted =
     resolveAttendanceKind(c1e2) === 'present' ||
     resolveAttendanceKind(c2e2) === 'present';
+
+  const thirdInterviewCompleted =
+    resolveAttendanceKind(c1e3) === 'present' ||
+    resolveAttendanceKind(c2e3) === 'present';
 
   const definitions = [
     {
@@ -279,6 +293,30 @@ export function buildDemandNewCitationMilestones(
         resolveAttendanceKind(c1e2) === 'absent'
           ? 'Pendiente'
           : secondInterviewCompleted
+            ? 'No requerida'
+            : 'No corresponde todavía',
+    },
+    {
+      code: DEMAND_CITATION_CODES.firstCitationThirdInterview,
+      label: 'C1-E3',
+      title: 'Primera citación a tercera entrevista',
+      description: 'Continuidad habitual después de la segunda entrevista.',
+      citation: c1e3,
+      missingStatus:
+        secondInterviewCompleted
+          ? 'Pendiente'
+          : 'No corresponde todavía',
+    },
+    {
+      code: DEMAND_CITATION_CODES.secondCitationThirdInterview,
+      label: 'C2-E3',
+      title: 'Segunda citación a tercera entrevista',
+      description: 'Se utiliza cuando fue necesaria una segunda citación.',
+      citation: c2e3,
+      missingStatus:
+        resolveAttendanceKind(c1e3) === 'absent'
+          ? 'Pendiente'
+          : thirdInterviewCompleted
             ? 'No requerida'
             : 'No corresponde todavía',
     },

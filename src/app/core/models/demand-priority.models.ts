@@ -38,6 +38,8 @@ export interface PrioritizedEpisodeDTO {
   secondCitationFirstInterviewDate: string | null;
   firstCitationSecondInterviewDate: string | null;
   secondCitationSecondInterviewDate: string | null;
+  firstCitationThirdInterviewDate: string | null;
+  secondCitationThirdInterviewDate: string | null;
   optionalInterviewDate: string | null;
 
   feedbackDate: string | null;

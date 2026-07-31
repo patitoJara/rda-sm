@@ -1,9 +1,11 @@
 export const DEMAND_CITATION_CODES = {
-  firstCitationFirstInterview: 'FIRST_CITATION_FIRST_INTERVIEW',
-  secondCitationFirstInterview: 'SECOND_CITATION_FIRST_INTERVIEW',
-  firstCitationSecondInterview: 'FIRST_CITATION_SECOND_INTERVIEW',
-  secondCitationSecondInterview: 'SECOND_CITATION_SECOND_INTERVIEW',
-  optionalInterview: 'OPTIONAL_INTERVIEW',
+  firstCitationFirstInterview: 'PRIMERA_CITACION_PRIMERA_ENTREVISTA',
+  secondCitationFirstInterview: 'SEGUNDA_CITACION_PRIMERA_ENTREVISTA',
+  firstCitationSecondInterview: 'PRIMERA_CITACION_SEGUNDA_ENTREVISTA',
+  secondCitationSecondInterview: 'SEGUNDA_CITACION_SEGUNDA_ENTREVISTA',
+  firstCitationThirdInterview: 'PRIMERA_CITACION_TERCERA_ENTREVISTA',
+  secondCitationThirdInterview: 'SEGUNDA_CITACION_TERCERA_ENTREVISTA',
+  optionalInterview: 'ENTREVISTA_OPCIONAL',
 } as const;
 
 export type DemandWorkflowTone =
@@ -412,6 +414,16 @@ export function resolveDemandWorkflowNextAction(
     DEMAND_CITATION_CODES.secondCitationSecondInterview,
   );
 
+  const c1e3 = getLatestCitationByType(
+    citations,
+    DEMAND_CITATION_CODES.firstCitationThirdInterview,
+  );
+
+  const c2e3 = getLatestCitationByType(
+    citations,
+    DEMAND_CITATION_CODES.secondCitationThirdInterview,
+  );
+
   const optional = getLatestCitationByType(
     citations,
     DEMAND_CITATION_CODES.optionalInterview,
@@ -484,15 +496,51 @@ export function resolveDemandWorkflowNextAction(
     c1e2Status === 'present' ||
     c2e2Status === 'present';
 
-  if (
-    !secondInterviewCompleted &&
-    !optional
-  ) {
+  if (!secondInterviewCompleted) {
     return {
       code: 'REVIEW_SECOND_INTERVIEW',
       title: 'Revisar continuidad de la segunda entrevista',
       detail:
         'No existe una segunda entrevista presentada que permita avanzar automáticamente.',
+      tone: 'warning',
+      icon: 'fact_check',
+    };
+  }
+
+  if (!c1e3) {
+    return buildScheduleAction(
+      'SCHEDULE_C1_E3',
+      null,
+      'Primera citación a tercera entrevista',
+      'Es la continuidad habitual después de completar la segunda entrevista.',
+    );
+  }
+
+  const c1e3Status = resolveAttendanceKind(c1e3);
+  const c2e3Status = resolveAttendanceKind(c2e3);
+
+  if (
+    c1e3Status === 'absent' &&
+    !c2e3
+  ) {
+    return buildScheduleAction(
+      'SCHEDULE_C2_E3',
+      null,
+      'Segunda citación a tercera entrevista',
+      'La primera citación a tercera entrevista registra inasistencia.',
+    );
+  }
+
+  const thirdInterviewCompleted =
+    c1e3Status === 'present' ||
+    c2e3Status === 'present';
+
+  if (!thirdInterviewCompleted) {
+    return {
+      code: 'REVIEW_THIRD_INTERVIEW',
+      title: 'Revisar continuidad de la tercera entrevista',
+      detail:
+        'No existe una tercera entrevista presentada que permita avanzar automáticamente.',
       tone: 'warning',
       icon: 'fact_check',
     };
@@ -504,7 +552,7 @@ export function resolveDemandWorkflowNextAction(
     detail:
       optional
         ? 'La entrevista opcional ya fue gestionada. Corresponde registrar la decisión.'
-        : 'Las entrevistas necesarias fueron gestionadas. Puede registrar la retroalimentación o programar la entrevista opcional.',
+        : 'Las tres entrevistas fueron gestionadas. Puede registrar la retroalimentación o programar la entrevista opcional.',
     tone: 'warning',
     icon: 'fact_check',
   };

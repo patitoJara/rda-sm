@@ -715,7 +715,10 @@
     <!-- =====================================================
      BOTÓN EXPANDIR DATOS COMPLETOS
     ====================================================== -->
-    <div class="demandant-detail-actions">
+    <div
+      class="demandant-detail-actions"
+      *ngIf="!showDemandantDetails"
+    >
       <button
         mat-stroked-button
         type="button"
@@ -757,7 +760,19 @@
           </p>
         </div>
 
-        <button
+        <div class="demandant-full-details__toolbar-actions">
+          <button
+            mat-stroked-button
+            type="button"
+            class="secondary-btn demandant-details-toggle demandant-details-toggle--inline"
+            (click)="toggleDemandantDetails()"
+            aria-label="Ocultar datos completos del demandante"
+          >
+            <mat-icon>expand_less</mat-icon>
+            <span>Ocultar datos completos</span>
+          </button>
+
+          <button
           *ngIf="canManageCurrentEpisode"
           mat-flat-button
           type="button"
@@ -767,6 +782,7 @@
           <mat-icon>edit</mat-icon>
           <span>Editar datos</span>
         </button>
+        </div>
       </div>
 
       <!-- IDENTIFICACIÓN -->
@@ -1139,8 +1155,8 @@
 
           <article
             class="operational-milestone"
-            [class.operational-milestone--completed]="feedbackEvents.length || !episodeOperationalSummary.resultPending"
-            [class.operational-milestone--pending]="!feedbackEvents.length && episodeOperationalSummary.resultPending"
+            [class.operational-milestone--completed]="feedbackEvents.length > 0"
+            [class.operational-milestone--pending]="feedbackEvents.length === 0"
           >
             <mat-icon>assignment_turned_in</mat-icon>
             <div>
@@ -1149,18 +1165,14 @@
                 {{
                   feedbackEvents.length
                     ? formatDisplayDate(feedbackEvents[0].eventDate)
-                    : episodeOperationalSummary.resultPending
-                      ? "Pendiente"
-                      : "Resultado de la etapa"
+                    : "Pendiente"
                 }}
               </strong>
               <small>
                 {{
                   feedbackEvents.length
                     ? "Decisión registrada"
-                    : episodeOperationalSummary.resultPending
-                      ? "Sin decisión registrada"
-                      : episodeOperationalSummary.result
+                    : "Sin decisión registrada"
                 }}
               </small>
             </div>
@@ -1379,18 +1391,25 @@
         [formGroup]="citationForm"
         class="operation-form operation-form--citation"
       >
-        <div class="citation-type-intro span-full">
-          <mat-icon>format_list_numbered</mat-icon>
-
-          <div>
-            <strong>Tipo de citación</strong>
-            <span>
-              Puede registrar los tipos disponibles sin depender de una asistencia previa.
+        <section
+          class="operation-section operation-section--primary operation-section--citation-type span-full"
+        >
+          <header class="operation-section__header">
+            <span class="operation-section__icon">
+              <mat-icon>event_note</mat-icon>
             </span>
-          </div>
-        </div>
 
-        <mat-form-field appearance="outline" class="span-full">
+            <div>
+              <small>Tipo de gesti&oacute;n</small>
+              <strong>Hito de la secuencia de entrevistas</strong>
+              <p>Seleccione la citaci&oacute;n que corresponde registrar.</p>
+            </div>
+          </header>
+
+          <div
+            class="operation-section__content operation-section__content--single"
+          >
+        <mat-form-field appearance="outline" floatLabel="always" class="span-full">
           <mat-label>Tipo de citación</mat-label>
           <mat-icon matPrefix>event_note</mat-icon>
 
@@ -1414,11 +1433,33 @@
             Debe seleccionar el tipo de citación.
           </mat-error>
         </mat-form-field>
-        <mat-form-field appearance="outline">
+          </div>
+        </section>
+                <section
+          class="operation-section operation-section--citation-schedule span-full"
+        >
+          <header class="operation-section__header">
+            <span class="operation-section__icon">
+              <mat-icon>calendar_month</mat-icon>
+            </span>
+
+            <div>
+              <small>Programaci&oacute;n</small>
+              <strong>Datos de la cita</strong>
+              <p>Profesional, fecha y horario acordados.</p>
+            </div>
+          </header>
+
+          <div
+            class="operation-section__content operation-section__grid operation-section__grid--four"
+          ><mat-form-field appearance="outline" floatLabel="always">
           <mat-label>Facultativo</mat-label>
           <mat-icon matPrefix>person</mat-icon>
 
           <mat-select formControlName="programProfessionalId">
+            <mat-select-trigger>
+              {{ selectedCitationProfessional?.name || "Seleccione un facultativo" }}
+            </mat-select-trigger>
             <mat-option
               *ngFor="let item of professionals"
               [value]="item.id"
@@ -1465,7 +1506,7 @@
           </mat-hint>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" floatLabel="always">
           <mat-label>Fecha citación</mat-label>
           <mat-icon matPrefix>event</mat-icon>
 
@@ -1492,7 +1533,7 @@
         </mat-form-field>
 
         <div class="time-period-grid">
-          <mat-form-field appearance="outline" class="time-hour-field">
+          <mat-form-field appearance="outline" floatLabel="always" class="time-hour-field">
             <mat-label>Hora citación</mat-label>
             <mat-icon matPrefix>schedule</mat-icon>
 
@@ -1518,7 +1559,7 @@
             </mat-error>
           </mat-form-field>
 
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" floatLabel="always">
             <mat-label>AM / PM</mat-label>
             <mat-icon matPrefix>more_time</mat-icon>
 
@@ -1535,7 +1576,7 @@
           </mat-form-field>
         </div>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" floatLabel="always">
           <mat-label>Profesión</mat-label>
           <mat-icon matPrefix>medical_services</mat-icon>
 
@@ -1552,10 +1593,29 @@
             La profesión es obligatoria.
           </mat-error>
         </mat-form-field>
+          </div>
+        </section>
 
 
 
-        <mat-form-field appearance="outline" class="span-full">
+                <section
+          class="operation-section operation-section--citation-comment span-full"
+        >
+          <header class="operation-section__header">
+            <span class="operation-section__icon">
+              <mat-icon>notes</mat-icon>
+            </span>
+
+            <div>
+              <small>Antecedentes adicionales</small>
+              <strong>Comentario de la citaci&oacute;n</strong>
+              <p>Registre informaci&oacute;n complementaria si corresponde.</p>
+            </div>
+          </header>
+
+          <div
+            class="operation-section__content operation-section__content--single"
+          ><mat-form-field appearance="outline" floatLabel="always" class="span-full">
           <mat-label>Comentario de citación</mat-label>
           <mat-icon matPrefix>notes</mat-icon>
 
@@ -1565,6 +1625,8 @@
             formControlName="citationComment"
           ></textarea>
         </mat-form-field>
+          </div>
+        </section>
 
         <div class="empty-banner success span-2" *ngIf="citationSuccess">
           <mat-icon>check_circle</mat-icon>
@@ -1583,7 +1645,7 @@
         [formGroup]="attendanceForm"
         class="operation-form operation-form--attendance"
       >
-        <mat-form-field appearance="outline" class="span-2">
+        <mat-form-field appearance="outline" floatLabel="always" class="span-2">
           <mat-label>Citación a actualizar</mat-label>
           <mat-icon matPrefix>event_available</mat-icon>
 
@@ -1684,7 +1746,7 @@
           </span>
         </div>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" floatLabel="always">
           <mat-label>Estado de asistencia</mat-label>
           <mat-icon matPrefix>how_to_reg</mat-icon>
 
@@ -1710,7 +1772,7 @@
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" floatLabel="always">
           <mat-label>Comentario</mat-label>
           <mat-icon matPrefix>comment</mat-icon>
 
@@ -1760,7 +1822,7 @@
           </div>
         </div>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" floatLabel="always">
           <mat-label>Fecha de retroalimentación</mat-label>
           <mat-icon matPrefix>event</mat-icon>
 
@@ -1787,7 +1849,7 @@
         </mat-form-field>
 
         <div class="time-period-grid">
-          <mat-form-field appearance="outline" class="time-hour-field">
+          <mat-form-field appearance="outline" floatLabel="always" class="time-hour-field">
             <mat-label>Hora</mat-label>
             <mat-icon matPrefix>schedule</mat-icon>
 
@@ -1813,7 +1875,7 @@
             </mat-error>
           </mat-form-field>
 
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" floatLabel="always">
             <mat-label>AM / PM</mat-label>
             <mat-icon matPrefix>more_time</mat-icon>
 
@@ -1830,7 +1892,7 @@
           </mat-form-field>
         </div>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" floatLabel="always">
           <mat-label>Profesional que la realizó</mat-label>
           <mat-icon matPrefix>person</mat-icon>
 
@@ -1858,7 +1920,7 @@
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" floatLabel="always">
           <mat-label>Compromiso biopsicosocial</mat-label>
           <mat-icon matPrefix>psychology</mat-icon>
 
@@ -1882,7 +1944,7 @@
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" floatLabel="always">
           <mat-label>Resultado</mat-label>
           <mat-icon matPrefix>fact_check</mat-icon>
 
@@ -1922,7 +1984,7 @@
         [formGroup]="observationForm"
         class="operation-form operation-form--observation"
       >
-        <mat-form-field appearance="outline" class="span-2">
+        <mat-form-field appearance="outline" floatLabel="always" class="span-2">
           <mat-label>Comentario breve</mat-label>
 
           <mat-icon matPrefix>subject</mat-icon>
@@ -1940,7 +2002,7 @@
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="span-full">
+        <mat-form-field appearance="outline" floatLabel="always" class="span-full">
           <mat-label>Detalle de la observación</mat-label>
 
           <mat-icon matPrefix>notes</mat-icon>
@@ -1981,7 +2043,7 @@
           </div>
         </div>
 
-        <mat-form-field appearance="outline" class="span-2">
+        <mat-form-field appearance="outline" floatLabel="always" class="span-2">
           <mat-label>Programa de destino</mat-label>
           <mat-icon matPrefix>business</mat-icon>
 
@@ -2008,7 +2070,7 @@
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="span-2">
+        <mat-form-field appearance="outline" floatLabel="always" class="span-2">
           <mat-label>Fecha de referencia</mat-label>
           <mat-icon matPrefix>event</mat-icon>
 
@@ -2034,7 +2096,7 @@
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="span-full">
+        <mat-form-field appearance="outline" floatLabel="always" class="span-full">
           <mat-label>Motivo de la referencia</mat-label>
           <mat-icon matPrefix>assignment</mat-icon>
 
@@ -2052,7 +2114,7 @@
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="span-full">
+        <mat-form-field appearance="outline" floatLabel="always" class="span-full">
           <mat-label>Observación adicional</mat-label>
           <mat-icon matPrefix>notes</mat-icon>
 
@@ -2117,7 +2179,7 @@
           </div>
         </div>
 
-        <mat-form-field appearance="outline" class="span-full">
+        <mat-form-field appearance="outline" floatLabel="always" class="span-full">
           <mat-label>Fecha de cierre</mat-label>
 
           <input
@@ -2690,6 +2752,18 @@
             </div>
 
             <div class="episode-milestone__item">
+              <strong>C1-E3</strong>
+              <span>Primera citación para la tercera entrevista.</span>
+            </div>
+
+            <div class="episode-milestone__item">
+              <strong>C2-E3</strong>
+              <span>
+                Segunda citación para la tercera entrevista, cuando fue necesaria.
+              </span>
+            </div>
+
+            <div class="episode-milestone__item">
               <strong>Opc.</strong>
               <span>Citación para entrevista opcional.</span>
             </div>
@@ -3238,6 +3312,17 @@
                   }}
                 </span>
               </div>
+
+              <button
+                mat-icon-button
+                type="button"
+                color="primary"
+                matTooltip="Imprimir comprobante de citación"
+                aria-label="Imprimir comprobante de citación"
+                (click)="printCitation(citation)"
+              >
+                <mat-icon>print</mat-icon>
+              </button>
             </div>
 
             <div class="citation-comment">
@@ -3268,6 +3353,8 @@
                 <span>Estado asistencia</span>
                 <strong>{{ getCitationAttendanceLabel(citation) }}</strong>
               </span>
+
+
             </div>
           </article>
         </div>

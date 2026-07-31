@@ -357,7 +357,7 @@
 
 .table-wrapper table {
   width: 100%;
-  min-width: 1520px;
+  min-width: 1700px;
 }
 
 .mat-mdc-header-row {
@@ -382,6 +382,24 @@
   font-size: 0.82rem;
   line-height: 1.4;
   vertical-align: middle;
+}
+
+.mat-column-requestDate,
+.mat-column-citationFirstFirst,
+.mat-column-citationSecondFirst,
+.mat-column-citationFirstSecond,
+.mat-column-citationSecondSecond,
+.mat-column-citationFirstThird,
+.mat-column-citationSecondThird,
+.mat-column-optionalInterview,
+.mat-column-feedback,
+.mat-column-closure {
+  width: 68px;
+  min-width: 68px;
+  padding-right: 8px;
+  padding-left: 8px;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .mat-mdc-row {

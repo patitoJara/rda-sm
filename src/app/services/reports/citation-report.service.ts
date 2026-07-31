@@ -6,11 +6,221 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogOkComponent } from '@app/shared/confirm-dialog/confirm-dialog-ok.component';
 import { capitalizeWords } from '@app/core/utils/text.utils';
 
+export interface CitationPrintPayload {
+  citationTypeName: string;
+  citationDate: string;
+  citationTime: string;
+  demandante: string;
+  rut: string;
+  professionalName: string;
+  professionName: string;
+  programName: string;
+  programAddress?: string | null;
+  programPhone?: string | null;
+  programEmail?: string | null;
+  episodeCode?: string | null;
+  usuario: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class CitationReportService {
   private dialog = inject(MatDialog);
+
+  generateFromCitation(payload: CitationPrintPayload): string {
+    const {
+      citationTypeName,
+      citationDate,
+      citationTime,
+      demandante,
+      rut,
+      professionalName,
+      professionName,
+      programName,
+      programAddress,
+      programPhone,
+      programEmail,
+      episodeCode,
+      usuario,
+    } = payload;
+
+    if (!citationDate || !citationTime || !demandante) {
+      this.dialog.open(ConfirmDialogOkComponent, {
+        width: '420px',
+        disableClose: true,
+        data: {
+          title: 'Imprimir citación',
+          message:
+            'La citación no posee todos los datos necesarios para imprimirla.',
+          icon: 'print',
+          confirmText: 'Aceptar',
+        },
+      });
+
+      return '';
+    }
+
+    const escapeHtml = (value: unknown): string =>
+      String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+
+    const normalizedDate = /^\d{4}-\d{2}-\d{2}$/.test(citationDate)
+      ? `${citationDate}T12:00:00`
+      : citationDate;
+
+    const formattedDate = formatDate(
+      normalizedDate,
+      "EEEE d 'de' MMMM 'de' y",
+      'es-CL',
+    );
+
+    const finalDate =
+      formattedDate.charAt(0).toUpperCase() +
+      formattedDate.slice(1);
+
+    const programContact = [
+      programAddress,
+      programPhone,
+      programEmail,
+    ]
+      .filter(Boolean)
+      .map((value) => escapeHtml(value))
+      .join(' · ');
+
+    return `
+      <div id="print-citation">
+        <style>
+          @page {
+            size: Letter;
+            margin: 18mm;
+          }
+
+          #print-citation {
+            color: #173f49;
+            font-family: Roboto, Arial, sans-serif;
+          }
+
+          .citation-title {
+            margin: 0 0 20px;
+            padding: 14px 16px;
+            text-align: center;
+            border-top: 2px solid #1565c0;
+            border-bottom: 2px solid #1565c0;
+          }
+
+          .citation-title h2 {
+            margin: 0;
+            color: #1565c0;
+            font-size: 22px;
+          }
+
+          .citation-title p {
+            margin: 5px 0 0;
+            font-size: 15px;
+            font-weight: 700;
+          }
+
+          .citation-data {
+            width: 100%;
+            margin-top: 16px;
+            border-collapse: collapse;
+          }
+
+          .citation-data td {
+            padding: 9px 8px;
+            border-bottom: 1px solid #d9e6e9;
+            vertical-align: top;
+          }
+
+          .citation-data .label {
+            width: 30%;
+            color: #48666e;
+            font-weight: 700;
+          }
+
+          .citation-notice {
+            margin-top: 24px;
+            padding: 12px 14px;
+            border-left: 4px solid #1565c0;
+            background: #eef6ff;
+            line-height: 1.5;
+          }
+
+          .citation-signature {
+            margin-top: 90px;
+            text-align: center;
+          }
+        </style>
+
+        <div class="citation-title">
+          <h2>Comprobante de citación</h2>
+          <p>${escapeHtml(citationTypeName || 'Citación')}</p>
+        </div>
+
+        <table class="citation-data">
+          <tr>
+            <td class="label">Programa responsable</td>
+            <td>${escapeHtml(programName || '-')}</td>
+          </tr>
+          ${
+            programContact
+              ? `
+          <tr>
+            <td class="label">Contacto del programa</td>
+            <td>${programContact}</td>
+          </tr>`
+              : ''
+          }
+          <tr>
+            <td class="label">Persona citada</td>
+            <td>${escapeHtml(capitalizeWords(demandante))}</td>
+          </tr>
+          <tr>
+            <td class="label">RUN</td>
+            <td>${escapeHtml(rut || '-')}</td>
+          </tr>
+          <tr>
+            <td class="label">Episodio</td>
+            <td>${escapeHtml(episodeCode || '-')}</td>
+          </tr>
+          <tr>
+            <td class="label">Profesional</td>
+            <td>
+              ${escapeHtml(professionalName || 'No informado')}
+              ${
+                professionName
+                  ? ` · ${escapeHtml(professionName)}`
+                  : ''
+              }
+            </td>
+          </tr>
+          <tr>
+            <td class="label">Fecha</td>
+            <td>${escapeHtml(finalDate)}</td>
+          </tr>
+          <tr>
+            <td class="label">Hora</td>
+            <td>${escapeHtml(citationTime.slice(0, 5))}</td>
+          </tr>
+        </table>
+
+        <div class="citation-notice">
+          Se recomienda presentarse con anticipación. Si no puede asistir,
+          comuníquese oportunamente con el programa responsable.
+        </div>
+
+        <div class="citation-signature">
+          ______________________________________<br>
+          ${escapeHtml(capitalizeWords(usuario || 'Usuario responsable'))}
+        </div>
+      </div>
+    `;
+  }
 
   generateFromMovement(payload: {
     numero: number;
@@ -76,7 +286,7 @@ export class CitationReportService {
     return `
     <div id="print-citation">
       <style>
-        @page { size: A4; margin: 20mm; }
+        @page { size: Letter; margin: 20mm; }
         body { font-family: Roboto, Arial, sans-serif; font-size: 13px; }
         .header { 
             text-align: center; 
@@ -162,7 +372,7 @@ export class CitationReportService {
       <head>
         <title>Citación</title>
         <style>
-          @page { size: A4; margin: 20mm; }
+          @page { size: Letter; margin: 20mm; }
 
           body {
             font-family: Roboto, Arial, sans-serif;
