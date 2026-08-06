@@ -349,8 +349,6 @@ export class DemandService {
     );
   }
 
-
-
   purgeEpisode(episodeId: number): Observable<PurgeEpisodeResponse> {
     return this.http.delete<PurgeEpisodeResponse>(
       `${this.demandUrl}/episodes/${episodeId}/purge`
