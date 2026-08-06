@@ -514,7 +514,7 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
       )
       .subscribe({
         next: (documents) => {
-          this.documents = [...(documents ?? [])].sort(
+this.documents = [...(documents ?? [])].sort(
             (a, b) =>
               new Date(b.uploadedAt).getTime() -
               new Date(a.uploadedAt).getTime(),

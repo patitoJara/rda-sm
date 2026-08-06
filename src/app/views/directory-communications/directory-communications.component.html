@@ -1,0 +1,571 @@
+<section class="directory-page">
+  <header class="directory-hero">
+    <div>
+      <span class="directory-hero__eyebrow">
+        <mat-icon>contact_mail</mat-icon>
+        Gestión institucional
+      </span>
+
+      <h1>Directorio y comunicaciones</h1>
+
+      <p>
+        Programas, correos institucionales, facultativos, supervisores y
+        administradores disponibles para consulta, selección e impresión.
+      </p>
+    </div>
+
+    <div class="directory-hero__actions">
+      <a mat-stroked-button routerLink="/inicio">
+        <mat-icon>arrow_back</mat-icon>
+        Volver a la bandeja
+      </a>
+
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="loading"
+        (click)="loadDirectory()"
+      >
+        <mat-icon>refresh</mat-icon>
+        Actualizar
+      </button>
+
+      <button
+        mat-flat-button
+        type="button"
+        (click)="printDirectory()"
+      >
+        <mat-icon>print</mat-icon>
+        Imprimir
+      </button>
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="loading || !visiblePrograms.length"
+        (click)="exportDirectoryExcel()"
+      >
+        <mat-icon>table_view</mat-icon>
+        Exportar Excel
+      </button>
+    </div>
+  </header>
+
+  <mat-progress-bar
+    *ngIf="loading"
+    mode="indeterminate"
+  ></mat-progress-bar>
+
+  <div class="directory-error" *ngIf="errorMessage">
+    <mat-icon>error</mat-icon>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <section class="directory-metrics" aria-label="Resumen del directorio">
+    <mat-card>
+      <mat-icon>business</mat-icon>
+      <div>
+        <span>Programas visibles</span>
+        <strong>{{ visiblePrograms.length }}</strong>
+      </div>
+    </mat-card>
+
+    <mat-card>
+      <mat-icon>groups</mat-icon>
+      <div>
+        <span>Contactos asociados</span>
+        <strong>{{ contactCount }}</strong>
+      </div>
+    </mat-card>
+
+    <mat-card>
+      <mat-icon>alternate_email</mat-icon>
+      <div>
+        <span>Correos disponibles</span>
+        <strong>{{ emailCount }}</strong>
+      </div>
+    </mat-card>
+
+    <mat-card>
+      <mat-icon>checklist</mat-icon>
+      <div>
+        <span>Correos seleccionados</span>
+        <strong>{{ selectedEmails.size }}</strong>
+      </div>
+    </mat-card>
+  </section>
+
+  <mat-card class="directory-filters">
+    <div class="directory-filters__heading">
+      <div>
+        <span>FILTROS DEL DIRECTORIO</span>
+        <h2>Buscar contactos institucionales</h2>
+      </div>
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="clearFilters()"
+      >
+        <mat-icon>filter_alt_off</mat-icon>
+        Limpiar
+      </button>
+    </div>
+
+    <form [formGroup]="filtersForm">
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre, correo, cargo o programa</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput formControlName="q" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Programa</mat-label>
+        <mat-icon matPrefix>business</mat-icon>
+
+        <mat-select formControlName="programId">
+          <mat-option [value]="null">Todos los programas</mat-option>
+
+          <mat-option
+            *ngFor="let program of programs"
+            [value]="program.id"
+          >
+            {{ program.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Rol o tipo de contacto</mat-label>
+        <mat-icon matPrefix>badge</mat-icon>
+
+        <mat-select formControlName="role">
+          <mat-option value="">Todos</mat-option>
+
+          <mat-option
+            *ngFor="let role of availableRoles"
+            [value]="role"
+          >
+            {{ role }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div class="directory-filters__checks">
+        <mat-checkbox formControlName="onlyActive">
+          Solo contactos activos
+        </mat-checkbox>
+
+        <mat-checkbox formControlName="missingEmail">
+          Solo registros sin correo
+        </mat-checkbox>
+      </div>
+    </form>
+  </mat-card>
+
+  <mat-card class="selection-panel">
+    <div>
+      <span>SELECCIÓN DE DESTINATARIOS</span>
+      <strong>
+        {{ selectedEmails.size }}
+        correo{{ selectedEmails.size === 1 ? "" : "s" }}
+      </strong>
+      <small>
+        La copia se entrega separada por punto y coma para Outlook.
+      </small>
+    </div>
+
+    <div class="selection-panel__actions">
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="selectAllVisibleEmails()"
+      >
+        <mat-icon>playlist_add_check</mat-icon>
+        Seleccionar visibles
+      </button>
+
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="!selectedEmails.size"
+        (click)="copySelectedEmails()"
+      >
+        <mat-icon>content_copy</mat-icon>
+        Copiar selección
+      </button>
+
+      <button
+        mat-flat-button
+        type="button"
+        [disabled]="!selectedEmails.size"
+        (click)="openMailClient()"
+      >
+        <mat-icon>mail</mat-icon>
+        Preparar correo
+      </button>
+
+      <button
+        mat-button
+        type="button"
+        [disabled]="!selectedEmails.size"
+        (click)="clearSelection()"
+      >
+        Limpiar
+      </button>
+    </div>
+  </mat-card>
+
+  <section
+    class="institutional-section"
+    *ngIf="institutionalContacts.length"
+  >
+    <div class="section-heading">
+      <div>
+        <span>CONTACTOS TRANSVERSALES</span>
+        <h2>Administración y supervisión</h2>
+      </div>
+
+      <small>
+        Usuarios con rol ADMIN o SUPERVISOR, independientemente del programa.
+      </small>
+    </div>
+
+    <div class="institutional-grid">
+      <article
+        class="contact-card contact-card--institutional"
+        *ngFor="
+          let contact of institutionalContacts;
+          trackBy: trackByContact
+        "
+      >
+        <span class="contact-card__avatar">
+          <mat-icon>supervisor_account</mat-icon>
+        </span>
+
+        <div class="contact-card__body">
+          <strong>{{ contact.name }}</strong>
+          <span>{{ contact.detail }}</span>
+
+          <button
+            *ngIf="contact.email; else institutionalMissingEmail"
+            mat-button
+            type="button"
+            (click)="copyEmail(contact.email)"
+          >
+            <mat-icon>alternate_email</mat-icon>
+            {{ contact.email }}
+          </button>
+
+          <ng-template #institutionalMissingEmail>
+            <small class="missing-email">
+              <mat-icon>mail_off</mat-icon>
+              Sin correo registrado
+            </small>
+          </ng-template>
+        </div>
+
+        <mat-checkbox
+          *ngIf="contact.email"
+          [checked]="isEmailSelected(contact.email)"
+          (change)="toggleEmail(contact.email)"
+          aria-label="Seleccionar correo"
+        ></mat-checkbox>
+      </article>
+    </div>
+  </section>
+
+  <section class="programs-section">
+    <div class="section-heading">
+      <div>
+        <span>DIRECTORIO POR PROGRAMA</span>
+        <h2>Programas y personas asociadas</h2>
+      </div>
+
+      <small>
+        Se muestra el correo institucional del programa y los contactos
+        relacionados mediante usuario-programa o profesional-programa.
+      </small>
+    </div>
+
+    <mat-accordion
+      class="program-directory"
+      multi
+      *ngIf="visiblePrograms.length; else emptyDirectory"
+    >
+      <mat-expansion-panel
+        *ngFor="
+          let item of visiblePrograms;
+          trackBy: trackByProgram
+        "
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <span class="program-icon">
+              <mat-icon>business</mat-icon>
+            </span>
+
+            <span>
+              <strong>{{ item.program.name }}</strong>
+              <small>
+                {{ item.contacts.length }} contacto(s) ·
+                {{ item.emails.length }} correo(s)
+              </small>
+            </span>
+          </mat-panel-title>
+
+          <mat-panel-description>
+            <span
+              class="program-email"
+              *ngIf="item.program.email; else programWithoutEmail"
+            >
+              <mat-icon>mail</mat-icon>
+              {{ item.program.email }}
+            </span>
+
+            <ng-template #programWithoutEmail>
+              <span class="missing-email">
+                <mat-icon>mail_off</mat-icon>
+                Programa sin correo
+              </span>
+            </ng-template>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div class="program-summary">
+          <div>
+            <span>Correo institucional</span>
+            <strong>{{ item.program.email || "No registrado" }}</strong>
+          </div>
+
+          <div>
+            <span>Teléfono</span>
+            <strong>{{ item.program.phone || "No registrado" }}</strong>
+          </div>
+
+          <div>
+            <span>Dirección</span>
+            <strong>{{ item.program.address || "No registrada" }}</strong>
+          </div>
+
+          <div>
+            <span>Asociaciones</span>
+            <strong>
+              {{ item.userCount }} usuario(s) ·
+              {{ item.professionalCount }} facultativo(s)
+            </strong>
+          </div>
+        </div>
+
+        <div class="program-actions">
+          <button
+            mat-stroked-button
+            type="button"
+            [disabled]="!item.emails.length"
+            (click)="copyProgramEmails(item)"
+          >
+            <mat-icon>content_copy</mat-icon>
+            Copiar correos
+          </button>
+
+          <button
+            mat-stroked-button
+            type="button"
+            [disabled]="!item.emails.length"
+            (click)="selectProgramEmails(item)"
+          >
+            <mat-icon>library_add_check</mat-icon>
+            Agregar a selección
+          </button>
+        </div>        <ng-container *ngIf="item.contacts.length; else noProgramContacts">
+          <section
+            class="directory-contact-group"
+            *ngIf="getProgramUsers(item).length"
+          >
+            <div class="directory-contact-group__heading">
+              <span class="directory-contact-group__icon">
+                <mat-icon>badge</mat-icon>
+              </span>
+
+              <div>
+                <strong>Usuarios con acceso al sistema</strong>
+                <small>
+                  {{ getProgramUsers(item).length }} usuario(s) asociado(s)
+                </small>
+              </div>
+            </div>
+
+            <div class="contacts-grid">
+<article
+            class="contact-card"
+            *ngFor="
+              let contact of getProgramUsers(item);
+              trackBy: trackByContact
+            "
+          >
+            <span class="contact-card__avatar">
+              <mat-icon>
+                {{
+                  contact.source === "PROFESSIONAL"
+                    ? "medical_services"
+                    : "person"
+                }}
+              </mat-icon>
+            </span>
+
+            <div class="contact-card__body">
+              <div class="contact-card__heading">
+                <strong>{{ contact.name }}</strong>
+
+                <mat-chip>
+                  {{
+                    contact.source === "PROFESSIONAL"
+                      ? "Facultativo"
+                      : "Usuario"
+                  }}
+                </mat-chip>
+              </div>
+
+              <span>{{ contact.detail }}</span>
+
+              <div class="contact-card__meta">
+                <button
+                  *ngIf="contact.email; else missingContactEmail"
+                  mat-button
+                  type="button"
+                  (click)="copyEmail(contact.email)"
+                >
+                  <mat-icon>alternate_email</mat-icon>
+                  {{ contact.email }}
+                </button>
+
+                <ng-template #missingContactEmail>
+                  <small class="missing-email">
+                    <mat-icon>mail_off</mat-icon>
+                    Sin correo registrado
+                  </small>
+                </ng-template>
+
+                <span *ngIf="contact.phone">
+                  <mat-icon>phone</mat-icon>
+                  {{ contact.phone }}
+                </span>
+              </div>
+            </div>
+
+            <mat-checkbox
+              *ngIf="contact.email"
+              [checked]="isEmailSelected(contact.email)"
+              (change)="toggleEmail(contact.email)"
+              aria-label="Seleccionar correo"
+            ></mat-checkbox>
+          </article>
+            </div>
+          </section>
+
+          <section
+            class="directory-contact-group"
+            *ngIf="getProgramProfessionals(item).length"
+          >
+            <div class="directory-contact-group__heading">
+              <span class="directory-contact-group__icon">
+                <mat-icon>medical_services</mat-icon>
+              </span>
+
+              <div>
+                <strong>Facultativos del programa</strong>
+                <small>
+                  {{ getProgramProfessionals(item).length }}
+                  facultativo(s) asociado(s)
+                </small>
+              </div>
+            </div>
+
+            <div class="contacts-grid">
+<article
+            class="contact-card"
+            *ngFor="
+              let contact of getProgramProfessionals(item);
+              trackBy: trackByContact
+            "
+          >
+            <span class="contact-card__avatar">
+              <mat-icon>
+                {{
+                  contact.source === "PROFESSIONAL"
+                    ? "medical_services"
+                    : "person"
+                }}
+              </mat-icon>
+            </span>
+
+            <div class="contact-card__body">
+              <div class="contact-card__heading">
+                <strong>{{ contact.name }}</strong>
+
+                <mat-chip>
+                  {{
+                    contact.source === "PROFESSIONAL"
+                      ? "Facultativo"
+                      : "Usuario"
+                  }}
+                </mat-chip>
+              </div>
+
+              <span>{{ contact.detail }}</span>
+
+              <div class="contact-card__meta">
+                <button
+                  *ngIf="contact.email; else missingContactEmail"
+                  mat-button
+                  type="button"
+                  (click)="copyEmail(contact.email)"
+                >
+                  <mat-icon>alternate_email</mat-icon>
+                  {{ contact.email }}
+                </button>
+
+                <ng-template #missingContactEmail>
+                  <small class="missing-email">
+                    <mat-icon>mail_off</mat-icon>
+                    Sin correo registrado
+                  </small>
+                </ng-template>
+
+                <span *ngIf="contact.phone">
+                  <mat-icon>phone</mat-icon>
+                  {{ contact.phone }}
+                </span>
+              </div>
+            </div>
+
+            <mat-checkbox
+              *ngIf="contact.email"
+              [checked]="isEmailSelected(contact.email)"
+              (change)="toggleEmail(contact.email)"
+              aria-label="Seleccionar correo"
+            ></mat-checkbox>
+          </article>
+            </div>
+          </section>
+        </ng-container>
+
+        <ng-template #noProgramContacts>
+          <div class="empty-program">
+            <mat-icon>person_off</mat-icon>
+            <span>
+              No existen personas asociadas que cumplan los filtros actuales.
+            </span>
+          </div>
+        </ng-template>
+      </mat-expansion-panel>
+    </mat-accordion>
+
+    <ng-template #emptyDirectory>
+      <mat-card class="empty-directory">
+        <mat-icon>search_off</mat-icon>
+        <strong>No se encontraron programas o contactos.</strong>
+        <span>Modifique los filtros o actualice el directorio.</span>
+      </mat-card>
+    </ng-template>
+  </section>
+</section>

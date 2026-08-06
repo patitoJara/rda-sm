@@ -18,12 +18,11 @@ export class DashboardCriticalTableComponent {
   @Input() data: DashboardDemand[] = []
 
   getColor(days: number): string {
+    if (days <= 45) return 'green'
 
-    if (days <= 15) return 'green'
-    if (days <= 30) return 'orange'
+    if (days <= 90) return 'orange'
 
     return 'red'
-
   }
 
   viewDetail(row: DashboardDemand): void {

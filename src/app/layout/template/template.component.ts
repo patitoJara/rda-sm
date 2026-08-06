@@ -86,6 +86,8 @@ export class TemplateComponent implements OnInit {
   private sessionService = inject(SessionService);
   private timeService = inject(TimeService);
 
+  private readonly PROGRAM_REQUIRED_ROLES = ['ADMINISTRATIVO'];
+
   userRoles: string[] = [];
   userPrograms: string[] = [];
 
@@ -149,8 +151,12 @@ export class TemplateComponent implements OnInit {
       rolesFromToken.length > 0 ? rolesFromToken : (profile.roles ?? []);
 
     this.userRoles = rawRoles
-      .map((role: any) => role?.code ?? role?.name ?? role)
-      .filter((role: any) => !!role);
+      .map((role: any) =>
+        String(role?.code ?? role?.name ?? role)
+          .trim()
+          .toUpperCase(),
+      )
+      .filter((role: string) => !!role);
 
     // =============================================
     // 🟦 AUTHORITIES / ADMIN
@@ -173,13 +179,11 @@ export class TemplateComponent implements OnInit {
         : this.tokenService.getUserPrograms();
 
     this.userPrograms = rawPrograms
-      .map((p: any) => p?.name ?? p)
-      .filter((p: any) => !!p);
+      .map((program: any) => program?.name ?? program)
+      .filter((program: any) => !!program);
 
     // =============================================
     // 👑 ADMIN ESTRUCTURAL
-    // Solo entra directo si es admin@demo.com o ADMIN sin programas.
-    // Un usuario real con ADMIN + programas debe elegir contexto.
     // =============================================
     this.isStructuralAdmin =
       profile?.email === 'admin@demo.com' ||
@@ -207,13 +211,17 @@ export class TemplateComponent implements OnInit {
       console.log(
         '[TemplateComponent] 👑 ADMIN estructural entra sin programa.',
       );
+
       return;
     }
 
     // =============================================
     // 🟦 USUARIO NORMAL
     // =============================================
-    const storedActiveRole = this.tokenService.getActiveRole();
+    const storedActiveRole = String(this.tokenService.getActiveRole() ?? '')
+      .trim()
+      .toUpperCase();
+
     const storedActiveProgram = this.tokenService.getActiveProgram();
 
     this.activeRole =
@@ -223,37 +231,52 @@ export class TemplateComponent implements OnInit {
           ? this.userRoles[0]
           : null;
 
-    this.activeProgram =
-      storedActiveProgram && this.userPrograms.includes(storedActiveProgram)
-        ? storedActiveProgram
-        : this.userPrograms.length === 1
-          ? this.userPrograms[0]
-          : null;
-
     if (this.activeRole) {
       this.tokenService.setActiveRole(this.activeRole);
     }
 
-    if (this.activeProgram) {
-      this.tokenService.setActiveProgram(this.activeProgram);
+    // Solo conservar o seleccionar programa cuando el rol lo requiere.
+    if (this.activeRoleRequiresProgram) {
+      this.activeProgram =
+        storedActiveProgram && this.userPrograms.includes(storedActiveProgram)
+          ? storedActiveProgram
+          : this.userPrograms.length === 1
+            ? this.userPrograms[0]
+            : null;
 
-      const selectedProgram = rawPrograms.find(
-        (p: any) => p?.name === this.activeProgram || p === this.activeProgram,
-      );
+      if (this.activeProgram) {
+        this.tokenService.setActiveProgram(this.activeProgram);
 
-      if (selectedProgram?.id) {
-        this.tokenService.setActiveProgramId(selectedProgram.id);
+        const selectedProgram = rawPrograms.find(
+          (program: any) =>
+            program?.name === this.activeProgram ||
+            program === this.activeProgram,
+        );
+
+        this.tokenService.setActiveProgramId(selectedProgram?.id ?? null);
+      } else {
+        this.tokenService.setActiveProgram('');
+        this.tokenService.setActiveProgramId(null);
       }
+    } else {
+      // ADMIN, SUPERVISOR, PROFESIONAL y EJECUTIVO.
+      this.activeProgram = null;
+      this.tokenService.setActiveProgram('');
+      this.tokenService.setActiveProgramId(null);
     }
 
     // =============================================
-    // 🧭 SOLO MOSTRAR SELECTOR SI HAY MÁS DE UNA OPCIÓN
+    // 🧭 SELECCIÓN DE CONTEXTO
     // =============================================
     this.needsContextSelection =
-      !this.isStructuralAdmin &&
-      (this.userRoles.length > 1 || this.userPrograms.length > 1);
+      this.userRoles.length > 1 ||
+      (this.activeRoleRequiresProgram && this.userPrograms.length > 1);
 
-    if (!this.needsContextSelection && this.activeRole && this.activeProgram) {
+    const contextReady =
+      !!this.activeRole &&
+      (!this.activeRoleRequiresProgram || !!this.activeProgram);
+
+    if (!this.needsContextSelection && contextReady) {
       this.menuVisible = true;
       this.buildMenu();
     } else {
@@ -266,15 +289,15 @@ export class TemplateComponent implements OnInit {
 
     this.cdr.detectChanges();
 
-    console.log('[TemplateComponent] userRoles:', this.userRoles);
-    console.log('[TemplateComponent] userPrograms:', this.userPrograms);
-    console.log('[TemplateComponent] activeRole:', this.activeRole);
-    console.log('[TemplateComponent] activeProgram:', this.activeProgram);
-    console.log('[TemplateComponent] isAdminUser:', this.isAdminUser);
-    console.log(
-      '[TemplateComponent] needsContextSelection:',
-      this.needsContextSelection,
-    );
+    console.log('[TemplateComponent] Contexto cargado:', {
+      userRoles: this.userRoles,
+      userPrograms: this.userPrograms,
+      activeRole: this.activeRole,
+      activeProgram: this.activeProgram,
+      requiresProgram: this.activeRoleRequiresProgram,
+      needsContextSelection: this.needsContextSelection,
+      menuVisible: this.menuVisible,
+    });
   }
 
   startTimer(minutes: number): void {
@@ -391,28 +414,41 @@ export class TemplateComponent implements OnInit {
       return;
     }
 
-    if (!this.activeProgram) {
-      this.showContextWarning('Debes seleccionar un programa para continuar.');
+    if (this.activeRoleRequiresProgram && !this.activeProgram) {
+      this.showContextWarning(
+        'El rol ADMINISTRATIVO requiere seleccionar un programa.',
+      );
       this.isLoading = false;
       return;
     }
+
     this.tokenService.setActiveRole(this.activeRole);
-    this.tokenService.setActiveProgram(this.activeProgram);
 
-    const profile = this.tokenService.getUserProfile();
+    if (this.activeRoleRequiresProgram && this.activeProgram) {
+      this.tokenService.setActiveProgram(this.activeProgram);
 
-    const programs =
-      profile?.programs?.length > 0
-        ? profile.programs
-        : this.tokenService.getUserPrograms();
+      const profile = this.tokenService.getUserProfile();
 
-    const selectedProgram = programs.find(
-      (p: any) => p?.name === this.activeProgram || p === this.activeProgram,
-    );
+      const programs =
+        profile?.programs?.length > 0
+          ? profile.programs
+          : this.tokenService.getUserPrograms();
 
-    if (selectedProgram?.id) {
-      this.tokenService.setActiveProgramId(selectedProgram.id);
+      const selectedProgram = programs.find(
+        (program: any) =>
+          program?.name === this.activeProgram ||
+          program === this.activeProgram,
+      );
+
+      if (selectedProgram?.id) {
+        this.tokenService.setActiveProgramId(selectedProgram.id);
+      } else {
+        this.tokenService.setActiveProgramId(null);
+      }
     } else {
+      // SUPERVISOR, PROFESIONAL, EJECUTIVO y ADMIN sin programa.
+      this.activeProgram = null;
+      this.tokenService.setActiveProgram('');
       this.tokenService.setActiveProgramId(null);
     }
 
@@ -423,7 +459,11 @@ export class TemplateComponent implements OnInit {
 
     this.cdr.detectChanges();
 
-    console.log('🎉 Contexto listo.');
+    console.log('🎉 Contexto listo.', {
+      activeRole: this.activeRole,
+      activeProgram: this.activeProgram,
+      requiresProgram: this.activeRoleRequiresProgram,
+    });
   }
 
   buildMenu(): void {
@@ -461,6 +501,7 @@ export class TemplateComponent implements OnInit {
         group: data['group'] || 'General',
         section: data['section'] || 'main',
         iconColor: data['iconColor'] || '#0f6b75',
+        order: Number(data['order'] ?? 999),
       };
 
       if (item.section === 'maintainer') {
@@ -469,6 +510,8 @@ export class TemplateComponent implements OnInit {
         baseMenu.push(item);
       }
     }
+    baseMenu.sort((a, b) => a.order - b.order);
+    mantenedores.sort((a, b) => a.order - b.order);
 
     this.menuItems = baseMenu;
     this.mantenedorItems = mantenedores;
@@ -597,6 +640,30 @@ export class TemplateComponent implements OnInit {
     this.router.navigateByUrl(last);
   }
 
+  onRoleChange(role: string): void {
+    this.activeRole = String(role ?? '')
+      .trim()
+      .toUpperCase();
+
+    this.tokenService.setActiveRole(this.activeRole);
+
+    if (!this.activeRoleRequiresProgram) {
+      this.activeProgram = null;
+      this.tokenService.setActiveProgram('');
+      this.tokenService.setActiveProgramId(null);
+      return;
+    }
+
+    if (this.userPrograms.length === 1) {
+      this.activeProgram = this.userPrograms[0];
+      this.onProgramChange(this.activeProgram);
+    } else {
+      this.activeProgram = null;
+      this.tokenService.setActiveProgram('');
+      this.tokenService.setActiveProgramId(null);
+    }
+  }
+
   onProgramChange(programName: string): void {
     console.log('🔄 Programa cambiado a:', programName);
 
@@ -628,15 +695,23 @@ export class TemplateComponent implements OnInit {
     if (this.isLoading) {
       return false;
     }
-
     if (this.isStructuralAdmin) {
       return true;
     }
-
-    if (!this.userRoles.length || !this.userPrograms.length) {
+    if (!this.activeRole || this.userRoles.length === 0) {
       return false;
     }
+    if (this.activeRoleRequiresProgram) {
+      return this.userPrograms.length > 0 && !!this.activeProgram;
+    }
+    return true;
+  }
 
-    return !!this.activeRole && !!this.activeProgram;
+  get activeRoleRequiresProgram(): boolean {
+    const role = String(this.activeRole ?? '')
+      .trim()
+      .toUpperCase();
+
+    return this.PROGRAM_REQUIRED_ROLES.includes(role);
   }
 }

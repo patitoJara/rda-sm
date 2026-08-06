@@ -297,7 +297,7 @@
   .mat-mdc-floating-label {
   color: #566f77;
 
-  font-size: 0.76rem;
+  font-size: 0.82rem;
   font-weight: 750;
 }
 
@@ -720,7 +720,7 @@
   min-height: 58px;
   padding: 11px 13px;
 
-  border: 1px dashed var(--panel-border);
+  border: 1px solid var(--panel-accent);
   border-radius: 12px;
 
   background: var(--panel-soft);
@@ -740,14 +740,14 @@
 .operation-panel-shell .operation-pending-state strong {
   color: #29464f;
 
-  font-size: 0.86rem;
+  font-size: 0.92rem;
   font-weight: 800;
 }
 
 .operation-panel-shell .operation-pending-state span {
   color: #60757d;
 
-  font-size: 0.76rem;
+  font-size: 0.82rem;
   line-height: 1.35;
 }
 

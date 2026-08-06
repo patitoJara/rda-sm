@@ -154,10 +154,199 @@ function allowsCitationTypeRetry(
   return (
     status.includes('REPROGRAM') ||
     (
-      status.includes('CANCELAD') &&
+      (
+        status.includes('CANCELAD') ||
+        status.includes('CANCELA')
+      ) &&
       status.includes('PROGRAMA')
     )
   );
+}
+
+const CITATION_CODES = {
+  c1e1: 'PRIMERA_CITACION_PRIMERA_ENTREVISTA',
+  c2e1: 'SEGUNDA_CITACION_PRIMERA_ENTREVISTA',
+  c1e2: 'PRIMERA_CITACION_SEGUNDA_ENTREVISTA',
+  c2e2: 'SEGUNDA_CITACION_SEGUNDA_ENTREVISTA',
+  c1e3: 'PRIMERA_CITACION_TERCERA_ENTREVISTA',
+  c2e3: 'SEGUNDA_CITACION_TERCERA_ENTREVISTA',
+} as const;
+
+export interface CitationTypeAvailabilityInput {
+  citationTypeCode: string;
+  citationEvents: any[];
+  episodeEvents: any[];
+  citationTypes: any[];
+}
+
+export interface CitationTypeAvailabilityResult {
+  available: boolean;
+  reason: string | null;
+  kind: 'available' | 'registered' | 'not-applicable' | 'previous-required';
+}
+
+function attendanceIsPresent(status: string): boolean {
+  return (
+    status === 'SE_PRESENTO' ||
+    (
+      !status.includes('NO_SE_PRESENT') &&
+      status.includes('SE_PRESENT')
+    )
+  );
+}
+
+function attendanceIsAbsent(status: string): boolean {
+  return (
+    status === 'NO_SE_PRESENTO' ||
+    status.includes('NO_SE_PRESENT')
+  );
+}
+
+export function getCitationTypeAvailability(
+  input: CitationTypeAvailabilityInput,
+): CitationTypeAvailabilityResult {
+  const {
+    citationTypeCode,
+    citationEvents,
+    episodeEvents,
+    citationTypes,
+  } = input;
+
+  const findCitation = (code: string): any | null =>
+    [...citationEvents]
+      .reverse()
+      .find(
+        (event: any) =>
+          resolveCitationTypeCode(
+            event,
+            citationEvents,
+            citationTypes,
+          ) === code,
+      ) ?? null;
+
+  const existingCitation = findCitation(citationTypeCode);
+
+  if (
+    existingCitation &&
+    !allowsCitationTypeRetry(existingCitation, episodeEvents)
+  ) {
+    return {
+      available: false,
+      reason: 'registrada',
+      kind: 'registered',
+    };
+  }
+
+  const statusOf = (code: string): string => {
+    const citation = findCitation(code);
+
+    return citation
+      ? normalizeAttendanceStatus(citation, episodeEvents)
+      : '';
+  };
+
+  const interviewCompleted = (
+    firstCode: string,
+    secondCode: string,
+  ): boolean =>
+    attendanceIsPresent(statusOf(firstCode)) ||
+    attendanceIsPresent(statusOf(secondCode));
+
+  if (citationTypeCode === CITATION_CODES.c2e1) {
+    const firstStatus = statusOf(CITATION_CODES.c1e1);
+
+    if (attendanceIsPresent(firstStatus)) {
+      return {
+        available: false,
+        reason: 'no corresponde: primera entrevista completada',
+        kind: 'not-applicable',
+      };
+    }
+
+    if (!attendanceIsAbsent(firstStatus)) {
+      return {
+        available: false,
+        reason: 'requiere inasistencia en C1-E1',
+        kind: 'previous-required',
+      };
+    }
+  }
+
+  if (citationTypeCode === CITATION_CODES.c1e2) {
+    if (
+      !interviewCompleted(
+        CITATION_CODES.c1e1,
+        CITATION_CODES.c2e1,
+      )
+    ) {
+      return {
+        available: false,
+        reason: 'complete primero la primera entrevista',
+        kind: 'previous-required',
+      };
+    }
+  }
+
+  if (citationTypeCode === CITATION_CODES.c2e2) {
+    const firstStatus = statusOf(CITATION_CODES.c1e2);
+
+    if (attendanceIsPresent(firstStatus)) {
+      return {
+        available: false,
+        reason: 'no corresponde: segunda entrevista completada',
+        kind: 'not-applicable',
+      };
+    }
+
+    if (!attendanceIsAbsent(firstStatus)) {
+      return {
+        available: false,
+        reason: 'requiere inasistencia en C1-E2',
+        kind: 'previous-required',
+      };
+    }
+  }
+
+  if (citationTypeCode === CITATION_CODES.c1e3) {
+    if (
+      !interviewCompleted(
+        CITATION_CODES.c1e2,
+        CITATION_CODES.c2e2,
+      )
+    ) {
+      return {
+        available: false,
+        reason: 'complete primero la segunda entrevista',
+        kind: 'previous-required',
+      };
+    }
+  }
+
+  if (citationTypeCode === CITATION_CODES.c2e3) {
+    const firstStatus = statusOf(CITATION_CODES.c1e3);
+
+    if (attendanceIsPresent(firstStatus)) {
+      return {
+        available: false,
+        reason: 'no corresponde: tercera entrevista completada',
+        kind: 'not-applicable',
+      };
+    }
+
+    if (!attendanceIsAbsent(firstStatus)) {
+      return {
+        available: false,
+        reason: 'requiere inasistencia en C1-E3',
+        kind: 'previous-required',
+      };
+    }
+  }
+
+  return {
+    available: true,
+    reason: null,
+    kind: 'available',
+  };
 }
 
 export function validateCitationSchedule(
@@ -181,6 +370,23 @@ export function validateCitationSchedule(
       valid: false,
       errorMessage:
         'El tipo de citación no pertenece al catálogo vigente.',
+    };
+  }
+
+  const availability = getCitationTypeAvailability({
+    citationTypeCode,
+    citationEvents,
+    episodeEvents,
+    citationTypes,
+  });
+
+  if (!availability.available) {
+    return {
+      valid: false,
+      errorMessage:
+        availability.kind === 'registered'
+          ? 'Este tipo de citación ya fue registrado y continúa vigente.'
+          : `No es posible registrar esta citación: ${availability.reason}.`,
     };
   }
 

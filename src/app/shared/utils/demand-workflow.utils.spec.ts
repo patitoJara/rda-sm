@@ -46,7 +46,7 @@ describe('resolveDemandWorkflowNextAction', () => {
 
     expect(action.code).toBe('SCHEDULE_C1_E1');
     expect(action.title).toBe(
-      'Primera citación a primera entrevista',
+      'Programar primera citación a primera entrevista',
     );
   });
 
@@ -72,7 +72,7 @@ describe('resolveDemandWorkflowNextAction', () => {
 
     expect(action.code).toBe('SCHEDULE_C2_E1');
     expect(action.title).toBe(
-      'Segunda citación a primera entrevista',
+      'Programar segunda citación a primera entrevista',
     );
   });
 
@@ -86,7 +86,7 @@ describe('resolveDemandWorkflowNextAction', () => {
 
     expect(action.code).toBe('SCHEDULE_C1_E2');
     expect(action.title).toBe(
-      'Primera citación a segunda entrevista',
+      'Programar primera citación a segunda entrevista',
     );
   });
 
@@ -108,11 +108,11 @@ describe('resolveDemandWorkflowNextAction', () => {
 
     expect(action.code).toBe('SCHEDULE_C2_E2');
     expect(action.title).toBe(
-      'Segunda citación a segunda entrevista',
+      'Programar segunda citación a segunda entrevista',
     );
   });
 
-  it('propone retroalimentación cuando las entrevistas necesarias fueron realizadas', () => {
+  it('propone C1-E3 cuando la segunda entrevista fue realizada', () => {
     const action = resolve([
       buildCitation(
         DEMAND_CITATION_CODES.firstCitationFirstInterview,
@@ -124,6 +124,66 @@ describe('resolveDemandWorkflowNextAction', () => {
         {
           id: 2,
           time: '11:00:00',
+        },
+      ),
+    ]);
+
+    expect(action.code).toBe('SCHEDULE_C1_E3');
+    expect(action.title).toBe(
+      'Programar primera citación a tercera entrevista',
+    );
+  });
+
+  it('propone C2-E3 cuando C1-E3 registra inasistencia', () => {
+    const action = resolve([
+      buildCitation(
+        DEMAND_CITATION_CODES.firstCitationFirstInterview,
+        'SE_PRESENTO',
+      ),
+      buildCitation(
+        DEMAND_CITATION_CODES.firstCitationSecondInterview,
+        'SE_PRESENTO',
+        {
+          id: 2,
+          time: '11:00:00',
+        },
+      ),
+      buildCitation(
+        DEMAND_CITATION_CODES.firstCitationThirdInterview,
+        'NO_SE_PRESENTO',
+        {
+          id: 3,
+          time: '12:00:00',
+        },
+      ),
+    ]);
+
+    expect(action.code).toBe('SCHEDULE_C2_E3');
+    expect(action.title).toBe(
+      'Programar segunda citación a tercera entrevista',
+    );
+  });
+
+  it('propone retroalimentación cuando la tercera entrevista fue realizada', () => {
+    const action = resolve([
+      buildCitation(
+        DEMAND_CITATION_CODES.firstCitationFirstInterview,
+        'SE_PRESENTO',
+      ),
+      buildCitation(
+        DEMAND_CITATION_CODES.firstCitationSecondInterview,
+        'SE_PRESENTO',
+        {
+          id: 2,
+          time: '11:00:00',
+        },
+      ),
+      buildCitation(
+        DEMAND_CITATION_CODES.firstCitationThirdInterview,
+        'SE_PRESENTO',
+        {
+          id: 3,
+          time: '12:00:00',
         },
       ),
     ]);

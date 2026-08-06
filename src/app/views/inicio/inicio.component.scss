@@ -1613,3 +1613,18 @@ mat-paginator {
   color: #08778a;
   font-size: 13px;
 }
+
+.directory-communications-btn {
+  background: #ffffff !important;
+  color: #0f6b75 !important;
+  border: 1px solid #ffffff !important;
+
+  mat-icon {
+    color: #0f6b75 !important;
+  }
+
+  &:hover {
+    background: #eaf8fa !important;
+    border-color: #d1eaee !important;
+  }
+}

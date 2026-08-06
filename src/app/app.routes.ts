@@ -53,10 +53,30 @@ export const routes: Routes = [
           icon: 'home',
           roles: [],
           iconColor: '#0f6b75',
+          order: 10,
         },
       },
 
       // 📊 PANEL ESTRATÉGICO
+      {
+        path: 'directory-communications',
+        loadComponent: () =>
+          import(
+            './views/directory-communications/directory-communications.component'
+          ).then(
+            (m) => m.DirectoryCommunicationsComponent,
+          ),
+        data: {
+          module: 'demanda',
+          group: 'Principal',
+          section: 'main',
+          title: 'Directorio y comunicaciones',
+          icon: 'contact_mail',
+          roles: ['ADMIN'],
+          iconColor: '#0f6b75',
+          //hidden: true,
+        },
+      },
       {
         path: 'analytics',
         loadComponent: () =>
@@ -110,6 +130,7 @@ export const routes: Routes = [
           icon: 'menu_book',
           roles: [],
           iconColor: '#6a1b9a',
+          order: 30,
         },
       },
 
@@ -129,6 +150,7 @@ export const routes: Routes = [
           icon: 'settings_suggest',
           roles: ['ADMIN'],
           iconColor: '#455a64',
+          order: 40,
         },
       },
 
@@ -147,6 +169,7 @@ export const routes: Routes = [
           icon: 'account_tree',
           roles: ['ADMIN', 'ADMINISTRATIVO'],
           iconColor: '#0f6b75',
+          order: 20,
         },
       },
 
@@ -205,6 +228,28 @@ export const routes: Routes = [
           roles: ['ADMIN', 'SUPERVISOR'],
           iconColor: '#1565c0',
           hidden: true,
+        },
+      },
+      {
+        path: 'episode-purge',
+        loadComponent: () =>
+          import('./views/episode-purge/episode-purge.component').then(
+            (m) => m.EpisodePurgeComponent,
+          ),
+        canActivate: [roleGuard],
+        data: {
+          module: 'administracion',
+          group: 'Mantenedores',
+          maintainerGroup: 'Gestión de demanda',
+          section: 'maintainer',
+          title: 'Eliminación de episodios',
+          description:
+            'Herramienta administrativa para eliminar definitivamente episodios y sus datos asociados.',
+          icon: 'delete_forever',
+          roles: ['ADMIN'],
+          iconColor: '#b71c1c',
+          tag: 'Solo ADMIN',
+          order: 5,
         },
       },
 

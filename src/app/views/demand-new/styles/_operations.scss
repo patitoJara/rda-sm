@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    CITACION CARD
    ============================================================ */
 
@@ -248,69 +248,6 @@
   }
 }
 
-/* =========================================================
-   FORMULARIO DE RETROALIMENTACIÓN
-   ========================================================= */
-
-.feedback-intro,
-.feedback-kpi-note {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  border-radius: 14px;
-}
-
-.feedback-intro {
-  color: #244d64;
-  background: #f1f7ff;
-  border: 1px solid #bdd9ff;
-}
-
-.feedback-intro > mat-icon {
-  display: grid;
-  flex: 0 0 auto;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  color: #126dcc;
-  background: #dcecff;
-  border-radius: 11px;
-}
-
-.feedback-intro div {
-  display: grid;
-  gap: 3px;
-}
-
-.feedback-intro strong {
-  color: #163f5a;
-  font-size: 0.95rem;
-}
-
-.feedback-intro span {
-  color: #587184;
-  font-size: 0.8rem;
-}
-
-.feedback-kpi-note {
-  color: #72530a;
-  background: #fff9e8;
-  border: 1px solid #efd992;
-  font-size: 0.82rem;
-}
-
-.feedback-kpi-note mat-icon {
-  flex: 0 0 auto;
-  color: #b27b00;
-}
-
-@media (max-width: 700px) {
-  .feedback-intro,
-  .feedback-kpi-note {
-    align-items: flex-start;
-  }
-}
 /* =========================================================
    ESTADO DESTACADO DE ASISTENCIA
    ========================================================= */

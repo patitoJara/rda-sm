@@ -1,4 +1,4 @@
-<div
+﻿<div
   class="demand-new-page"
   [class.has-selected-person]="selectedPerson"
   (scroll)="onDemandPageScroll($event)"
@@ -8,10 +8,10 @@
     <div class="hero-main">
       <span class="eyebrow">
         <mat-icon>account_tree</mat-icon>
-        Gestión de demanda asistencial
+        GestiÃ³n de demanda asistencial
       </span>
 
-      <h1>Ficha longitudinal de atención en la red</h1>
+      <h1>Ficha longitudinal de atenciÃ³n en la red</h1>
 
       <p>
         Busque una persona por RUN para consultar su historia longitudinal,
@@ -37,19 +37,19 @@
         <li>
           El KPI de espera se detiene con el ingreso efectivo a tratamiento.
         </li>
-        <li>El cierre formal debe usar el término <strong>egreso</strong>.</li>
+        <li>El cierre formal debe usar el tÃ©rmino <strong>egreso</strong>.</li>
       </ul>
     </aside>
   </section>
 
-  <!-- ESTADO CATÁLOGOS DEMANDA -->
+  <!-- ESTADO CATÃLOGOS DEMANDA -->
   <div
     class="system-status-strip"
     *ngIf="isLoadingDemandCatalogs || demandCatalogsError"
   >
     <div class="catalog-status" *ngIf="isLoadingDemandCatalogs">
       <mat-icon>hourglass_top</mat-icon>
-      <span>Cargando catálogos de demanda...</span>
+      <span>Cargando catÃ¡logos de demanda...</span>
     </div>
 
     <div class="catalog-error" *ngIf="demandCatalogsError">
@@ -66,7 +66,7 @@
   >
     {{
       isHistoricalEpisode
-        ? "EPISODIO CERRADO · SOLO LECTURA"
+        ? "EPISODIO CERRADO Â· SOLO LECTURA"
         : "SOLO LECTURA"
     }}
   </div>
@@ -78,7 +78,7 @@
       <div>
         <h2>
           {{
-            selectedPerson ? "Buscar otra persona" : "Buscar o iniciar atención"
+            selectedPerson ? "Buscar otra persona" : "Buscar o iniciar atenciÃ³n"
           }}
         </h2>
         <p>Ingrese RUN para cargar la ficha longitudinal de demanda.</p>
@@ -108,7 +108,7 @@
         <mat-hint> Puede ingresar el RUN con o sin puntos y guion. </mat-hint>
 
         <mat-error *ngIf="searchForm.controls.rut.hasError('required')">
-          El RUN es obligatorio para iniciar la búsqueda.
+          El RUN es obligatorio para iniciar la bÃºsqueda.
         </mat-error>
 
         <mat-error
@@ -117,7 +117,7 @@
             searchForm.controls.rut.hasError('rutInvalido')
           "
         >
-          El RUN ingresado no es válido. Revise el número y el dígito
+          El RUN ingresado no es vÃ¡lido. Revise el nÃºmero y el dÃ­gito
           verificador.
         </mat-error>
       </mat-form-field>
@@ -197,7 +197,7 @@
           {{
             selectedPerson?.id
               ? "Revise y actualice los datos personales, territoriales y previsionales."
-              : "Complete los datos de identificación, contacto y previsión antes de crear el episodio."
+              : "Complete los datos de identificaciÃ³n, contacto y previsiÃ³n antes de crear el episodio."
           }}
         </p>
       </div>
@@ -205,7 +205,7 @@
 
     <form [formGroup]="personForm" class="person-editor-form">
       <!-- =====================================================
-       IDENTIFICACIÓN
+       IDENTIFICACIÃ“N
       ====================================================== -->
       <section class="person-editor-section">
         <div class="person-editor-section__header">
@@ -214,8 +214,8 @@
           </div>
 
           <div>
-            <h3>Identificación personal</h3>
-            <p>Datos de individualización de la persona.</p>
+            <h3>IdentificaciÃ³n personal</h3>
+            <p>Datos de individualizaciÃ³n de la persona.</p>
           </div>
         </div>
 
@@ -251,10 +251,10 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Género</mat-label>
+            <mat-label>GÃ©nero</mat-label>
             <mat-icon matPrefix>wc</mat-icon>
 
-            <mat-select formControlName="sex">
+            <mat-select formControlName="sex" panelClass="person-editor-select-panel">
               <mat-option *ngFor="let item of sexes" [value]="item.id">
                 {{ item.name }}
               </mat-option>
@@ -319,14 +319,14 @@
           <div>
             <h3>Contacto y territorio</h3>
             <p>
-              Información para ubicar y contactar directamente a la persona.
+              InformaciÃ³n para ubicar y contactar directamente a la persona.
             </p>
           </div>
         </div>
 
         <div class="person-editor-grid">
           <mat-form-field appearance="outline">
-            <mat-label>Teléfono</mat-label>
+            <mat-label>TelÃ©fono</mat-label>
             <mat-icon matPrefix>phone</mat-icon>
 
             <input
@@ -337,7 +337,7 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Correo electrónico</mat-label>
+            <mat-label>Correo electrÃ³nico</mat-label>
             <mat-icon matPrefix>mail</mat-icon>
 
             <input
@@ -352,7 +352,7 @@
             <mat-label>Comuna</mat-label>
             <mat-icon matPrefix>location_on</mat-icon>
 
-            <mat-select formControlName="commune">
+            <mat-select formControlName="commune" panelClass="person-editor-select-panel">
               <mat-option *ngFor="let item of communes" [value]="item.id">
                 {{ item.name }}
               </mat-option>
@@ -360,20 +360,20 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="span-2">
-            <mat-label>Dirección</mat-label>
+            <mat-label>DirecciÃ³n</mat-label>
             <mat-icon matPrefix>home</mat-icon>
 
             <input
               matInput
               formControlName="address"
-              placeholder="Calle, número y referencia"
+              placeholder="Calle, nÃºmero y referencia"
             />
           </mat-form-field>
         </div>
       </section>
 
       <!-- =====================================================
-       PREVISIÓN DE SALUD
+       PREVISIÃ“N DE SALUD
       ====================================================== -->
       <section class="person-editor-section">
         <div class="person-editor-section__header">
@@ -382,34 +382,34 @@
           </div>
 
           <div>
-            <h3>Previsión de salud</h3>
+            <h3>PrevisiÃ³n de salud</h3>
             <p>
-              Seleccione el sistema previsional y la previsión correspondiente.
+              Seleccione el sistema previsional y la previsiÃ³n correspondiente.
             </p>
           </div>
         </div>
 
         <div class="person-editor-grid person-editor-grid--prevision">
           <mat-form-field appearance="outline">
-            <mat-label>Tipo de previsión</mat-label>
+            <mat-label>Tipo de previsiÃ³n</mat-label>
             <mat-icon matPrefix>medical_information</mat-icon>
 
-            <mat-select formControlName="intPrev">
+            <mat-select formControlName="intPrev" panelClass="person-editor-select-panel">
               <mat-option *ngFor="let item of intPrev" [value]="item.id">
                 {{ item.name }}
               </mat-option>
             </mat-select>
 
             <mat-error *ngIf="personForm.controls.intPrev.hasError('required')">
-              Debe seleccionar el tipo de previsión.
+              Debe seleccionar el tipo de previsiÃ³n.
             </mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Previsión</mat-label>
+            <mat-label>PrevisiÃ³n</mat-label>
             <mat-icon matPrefix>local_hospital</mat-icon>
 
-            <mat-select formControlName="convPrev">
+            <mat-select formControlName="convPrev" panelClass="person-editor-select-panel">
               <mat-option
                 *ngFor="let item of filteredConvPrev"
                 [value]="item.id"
@@ -419,15 +419,38 @@
             </mat-select>
 
             <mat-hint *ngIf="!personForm.get('intPrev')?.value">
-              Primero seleccione el tipo de previsión
+              Primero seleccione el tipo de previsiÃ³n
             </mat-hint>
 
             <mat-error
               *ngIf="personForm.controls.convPrev.hasError('required')"
             >
-              Debe seleccionar una previsión.
+              Debe seleccionar una previsiÃ³n.
             </mat-error>
           </mat-form-field>
+        </div>
+
+        <div
+          *ngIf="selectedIntPrevIsNotFonasa"
+          class="person-editor-prevision-warning"
+          role="alert"
+        >
+          <mat-icon>warning</mat-icon>
+
+          <div>
+            <strong>Advertencia previsional</strong>
+
+            <p>
+              La persona no pertenece a FONASA y, segÃºn los criterios actuales
+              de ingreso, no podrÃ­a incorporarse al programa.
+            </p>
+
+            <p>
+              El registro puede continuar. Posteriormente, la DirecciÃ³n deberÃ¡
+              revisar el caso y determinar si corresponde cerrar la demanda por
+              incumplimiento del requisito previsional.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -462,7 +485,7 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Parentesco o relación</mat-label>
+            <mat-label>Parentesco o relaciÃ³n</mat-label>
             <mat-icon matPrefix>family_restroom</mat-icon>
 
             <input
@@ -473,7 +496,7 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Teléfono del contacto</mat-label>
+            <mat-label>TelÃ©fono del contacto</mat-label>
             <mat-icon matPrefix>phone_in_talk</mat-icon>
 
             <input
@@ -512,8 +535,8 @@
         <span>
           {{
             selectedPerson?.id
-              ? "Los cambios actualizarán los datos existentes de la persona y su referente de contacto."
-              : "Al guardar, la persona y su referente serán registrados en el backend."
+              ? "Los cambios actualizarÃ¡n los datos existentes de la persona y su referente de contacto."
+              : "Al guardar, la persona y su referente serÃ¡n registrados en el backend."
           }}
         </span>
       </div>
@@ -589,12 +612,12 @@
         </strong>
 
         <span *ngIf="isHistoricalEpisode">
-          La demanda finalizó en
+          La demanda finalizÃ³ en
           {{
             episodeSummary?.currentProgram?.name ||
               longitudinal?.episode?.currentProgram?.name ||
               "el programa responsable"
-          }}. Se conserva su información para revisión histórica.
+          }}. Se conserva su informaciÃ³n para revisiÃ³n histÃ³rica.
         </span>
 
         <span *ngIf="!isHistoricalEpisode">
@@ -619,7 +642,7 @@
       <div class="person-main-data">
         <span class="eyebrow-light">
           <mat-icon>badge</mat-icon>
-          Ficha longitudinal de atención en la red
+          Ficha longitudinal de atenciÃ³n en la red
         </span>
 
         <h2>
@@ -630,7 +653,7 @@
         </h2>
 
         <div class="person-meta-line">
-          <span> RUN {{ selectedPerson.rut || "Sin información" }} </span>
+          <span> RUN {{ selectedPerson.rut || "Sin informaciÃ³n" }} </span>
 
           <span>
             {{ selectedPerson.sex?.name || "Sexo no informado" }}
@@ -658,7 +681,7 @@
     </div>
 
     <!-- =====================================================
-       RESUMEN RÁPIDO DEL DEMANDANTE
+       RESUMEN RÃPIDO DEL DEMANDANTE
   ====================================================== -->
     <div class="demandant-data-grid">
       <div class="demandant-data-item">
@@ -671,7 +694,7 @@
             {{
               selectedPerson.birthdate
                 ? formatDisplayDate(selectedPerson.birthdate)
-                : "Sin información"
+                : "Sin informaciÃ³n"
             }}
           </strong>
         </div>
@@ -681,8 +704,8 @@
         <mat-icon>call</mat-icon>
 
         <div>
-          <span>Teléfono</span>
-          <strong>{{ selectedPerson.phone || "Sin información" }}</strong>
+          <span>TelÃ©fono</span>
+          <strong>{{ selectedPerson.phone || "Sin informaciÃ³n" }}</strong>
         </div>
       </div>
 
@@ -699,13 +722,13 @@
         <mat-icon>home_pin</mat-icon>
 
         <div>
-          <span>Dirección / territorio</span>
+          <span>DirecciÃ³n / territorio</span>
 
           <strong>
-            {{ selectedPerson.address || "Sin dirección" }}
+            {{ selectedPerson.address || "Sin direcciÃ³n" }}
 
             <ng-container *ngIf="selectedPerson.commune?.name">
-              · {{ selectedPerson.commune?.name }}
+              Â· {{ selectedPerson.commune?.name }}
             </ng-container>
           </strong>
         </div>
@@ -713,7 +736,7 @@
     </div>
 
     <!-- =====================================================
-     BOTÓN EXPANDIR DATOS COMPLETOS
+     BOTÃ“N EXPANDIR DATOS COMPLETOS
     ====================================================== -->
     <div
       class="demandant-detail-actions"
@@ -754,8 +777,8 @@
           <p>
             {{
               canManageCurrentEpisode
-                ? "Revise la información antes de decidir si necesita modificarla."
-                : "Toda la información se encuentra disponible exclusivamente para consulta."
+                ? "Revise la informaciÃ³n antes de decidir si necesita modificarla."
+                : "Toda la informaciÃ³n se encuentra disponible exclusivamente para consulta."
             }}
           </p>
         </div>
@@ -785,14 +808,14 @@
         </div>
       </div>
 
-      <!-- IDENTIFICACIÓN -->
+      <!-- IDENTIFICACIÃ“N -->
       <section class="demandant-detail-group">
         <div class="demandant-detail-group__header">
           <mat-icon>badge</mat-icon>
 
           <div>
-            <h3>Identificación</h3>
-            <p>Datos básicos de identificación de la persona.</p>
+            <h3>IdentificaciÃ³n</h3>
+            <p>Datos bÃ¡sicos de identificaciÃ³n de la persona.</p>
           </div>
         </div>
 
@@ -859,13 +882,13 @@
 
           <div>
             <h3>Contacto y territorio</h3>
-            <p>Información de contacto y ubicación territorial.</p>
+            <p>InformaciÃ³n de contacto y ubicaciÃ³n territorial.</p>
           </div>
         </div>
 
         <div class="demandant-detail-grid">
           <div class="demandant-detail-item">
-            <span>Teléfono</span>
+            <span>TelÃ©fono</span>
 
             <strong>
               {{ selectedPerson.phone || "No informado" }}
@@ -873,7 +896,7 @@
           </div>
 
           <div class="demandant-detail-item">
-            <span>Correo electrónico</span>
+            <span>Correo electrÃ³nico</span>
 
             <strong>
               {{ selectedPerson.email || "No informado" }}
@@ -881,7 +904,7 @@
           </div>
 
           <div class="demandant-detail-item demandant-detail-item--wide">
-            <span>Dirección</span>
+            <span>DirecciÃ³n</span>
 
             <strong>
               {{ selectedPerson.address || "No informada" }}
@@ -922,7 +945,7 @@
           </div>
 
           <div class="demandant-detail-item">
-            <span>Parentesco o relación</span>
+            <span>Parentesco o relaciÃ³n</span>
 
             <strong>
               {{ selectedContact?.description || "No informado" }}
@@ -930,7 +953,7 @@
           </div>
 
           <div class="demandant-detail-item">
-            <span>Teléfono del contacto</span>
+            <span>TelÃ©fono del contacto</span>
 
             <strong>
               {{ selectedContact?.cellphone || "No informado" }}
@@ -947,20 +970,20 @@
         </div>
       </section>
 
-      <!-- PREVISIÓN -->
+      <!-- PREVISIÃ“N -->
       <section class="demandant-detail-group">
         <div class="demandant-detail-group__header">
           <mat-icon>health_and_safety</mat-icon>
 
           <div>
-            <h3>Previsión</h3>
+            <h3>PrevisiÃ³n</h3>
             <p>Antecedentes previsionales registrados.</p>
           </div>
         </div>
 
         <div class="demandant-detail-grid">
           <div class="demandant-detail-item">
-            <span>Tipo de previsión</span>
+            <span>Tipo de previsiÃ³n</span>
 
             <strong>
               {{ selectedPerson.convPrev?.intPrev?.name || "No informado" }}
@@ -968,7 +991,7 @@
           </div>
 
           <div class="demandant-detail-item">
-            <span>Previsión</span>
+            <span>PrevisiÃ³n</span>
 
             <strong>
               {{ selectedPerson.convPrev?.name || "No informada" }}
@@ -978,334 +1001,83 @@
       </section>
     </div>
 
-        <!-- =====================================================
-       SITUACIÓN OPERATIVA DE LA DEMANDA
+  </mat-card>
+
+    <!-- =====================================================
+
+       ACCIONES OPERATIVAS
     ====================================================== -->
     <section
-      class="episode-operational-summary"
-      *ngIf="hasCurrentEpisode"
-      aria-labelledby="episodeOperationalTitle"
+      id="operativeDock"
+      class="operative-dock"
+      *ngIf="hasCurrentEpisode && canManageCurrentEpisode"
+      tabindex="-1"`r`n      aria-labelledby="operativeDockTitle"
     >
-      <div class="operational-summary-header">
-        <div class="operational-summary-header__icon">
-          <mat-icon>monitor_heart</mat-icon>
-        </div>
+      <header class="operative-dock__title">
+        <span class="operative-dock__title-icon">
+          <mat-icon>bolt</mat-icon>
+        </span>
 
         <div>
-          <span>SITUACIÓN ACTUAL</span>
+          <span class="operative-dock__eyebrow">
+            GESTIÃ“N DEL EPISODIO
+          </span>
 
-          <h2 id="episodeOperationalTitle">
-            Resumen operativo de la demanda
-          </h2>
-
-          <p>
-            Información prioritaria para conocer el estado del episodio y
-            orientar la siguiente gestión.
-          </p>
-        </div>
-      </div>
-
-      <div class="operational-summary-grid">
-        <!-- TIEMPO DE ESPERA -->
-        <article
-          class="operational-summary-card"
-          [ngClass]="
-            'operational-summary-card--' +
-            episodeOperationalSummary.waitingTone
-          "
-        >
-          <div class="operational-summary-card__icon">
-            <mat-icon>schedule</mat-icon>
-          </div>
-
-          <div class="operational-summary-card__content">
-            <span>TIEMPO DE ESPERA</span>
-
-            <strong class="operational-summary-card__number">
-              {{ episodeOperationalSummary.days }}
-              {{
-                episodeOperationalSummary.days === 1
-                  ? "día"
-                  : "días"
-              }}
-            </strong>
-
-            <small>
-              {{ episodeOperationalSummary.waitingLabel }}
-            </small>
-
-            <p>
-              Solicitud recibida:
-              {{ episodeOperationalSummary.requestDate }}
-            </p>
-          </div>
-        </article>
-
-        <!-- ESTADO Y PROGRAMA RESPONSABLE -->
-        <article
-          class="operational-summary-card operational-summary-card--state"
-        >
-          <div class="operational-summary-card__icon">
-            <mat-icon>assignment_turned_in</mat-icon>
-          </div>
-
-          <div class="operational-summary-card__content">
-            <span>ESTADO ACTUAL</span>
-
-            <strong>
-              {{ episodeOperationalSummary.state }}
-            </strong>
-
-            <small>Programa responsable</small>
-
-            <p>
-              {{ episodeOperationalSummary.program }}
-            </p>
-          </div>
-        </article>
-
-        <!-- ÚLTIMA GESTIÓN -->
-        <article
-          class="operational-summary-card operational-summary-card--management"
-        >
-          <div class="operational-summary-card__icon">
-            <mat-icon>history</mat-icon>
-          </div>
-
-          <div class="operational-summary-card__content">
-            <span>ÚLTIMA GESTIÓN</span>
-
-            <strong>
-              {{ episodeOperationalSummary.lastManagementTitle }}
-            </strong>
-
-            <small>
-              {{ episodeOperationalSummary.lastManagementDetail }}
-            </small>
-
-            <p>
-              {{ currentStageEvents.length }}
-              {{
-                currentStageEvents.length === 1
-                  ? "gestión registrada"
-                  : "gestiones registradas"
-              }}
-            </p>
-          </div>
-        </article>
-
-        <!-- PRÓXIMA ACCIÓN -->
-        <article
-          class="operational-summary-card"
-          [ngClass]="
-            'operational-summary-card--action-' +
-            episodeOperationalSummary.nextActionTone
-          "
-        >
-          <div class="operational-summary-card__icon">
-            <mat-icon>
-              {{ episodeOperationalSummary.nextActionIcon }}
-            </mat-icon>
-          </div>
-
-          <div class="operational-summary-card__content">
-            <span>PRÓXIMA ACCIÓN</span>
-
-            <strong>
-              {{ episodeOperationalSummary.nextActionTitle }}
-            </strong>
-
-            <p>
-              {{ episodeOperationalSummary.nextActionDetail }}
-            </p>
-          </div>
-        </article>
-      </div>
-
-      <!-- HITOS OPERATIVOS DEL RESUMEN -->
-      <section class="operational-milestones">
-        <div class="operational-milestones__heading">
-          <mat-icon>account_tree</mat-icon>
-          <div>
-            <span>RUTA DEL EPISODIO</span>
-            <strong>Hitos principales de la demanda</strong>
-          </div>
-        </div>
-
-        <div class="operational-milestones__grid">
-          <article class="operational-milestone operational-milestone--citation">
-            <mat-icon>event</mat-icon>
-            <div>
-              <span>Citaciones</span>
-              <strong>{{ citationEvents.length }}</strong>
-              <small>
-                {{ pendingCitationEvents.length }} sin asistencia · {{ currentPendingCitationEvents.length }} próximas
-              </small>
-            </div>
-          </article>
-
-          <article class="operational-milestone operational-milestone--interview">
-            <mat-icon>groups</mat-icon>
-            <div>
-              <span>Entrevistas asistidas</span>
-              <strong>{{ attendedInterviewCitations.length }}</strong>
-              <small>Asistencias confirmadas</small>
-            </div>
-          </article>
-
-          <article
-            class="operational-milestone"
-            [class.operational-milestone--completed]="feedbackEvents.length > 0"
-            [class.operational-milestone--pending]="feedbackEvents.length === 0"
-          >
-            <mat-icon>assignment_turned_in</mat-icon>
-            <div>
-              <span>Retroalimentación</span>
-              <strong>
-                {{
-                  feedbackEvents.length
-                    ? formatDisplayDate(feedbackEvents[0].eventDate)
-                    : "Pendiente"
-                }}
-              </strong>
-              <small>
-                {{
-                  feedbackEvents.length
-                    ? "Decisión registrada"
-                    : "Sin decisión registrada"
-                }}
-              </small>
-            </div>
-          </article>
-
-          <article
-            class="operational-milestone operational-milestone--commitment"
-            [class.operational-milestone--commitment-leve]="
-              feedbackEvents.length &&
-              getFeedbackCommitmentLabel(feedbackEvents[0]) === 'Leve'
-            "
-            [class.operational-milestone--commitment-moderado]="
-              feedbackEvents.length &&
-              getFeedbackCommitmentLabel(feedbackEvents[0]) === 'Moderado'
-            "
-            [class.operational-milestone--commitment-severo]="
-              feedbackEvents.length &&
-              getFeedbackCommitmentLabel(feedbackEvents[0]) === 'Severo'
-            "
-          >
-            <mat-icon>psychology</mat-icon>
-            <div>
-              <span>Compromiso biopsicosocial</span>
-              <strong>
-                {{
-                  feedbackEvents.length
-                    ? getFeedbackCommitmentLabel(feedbackEvents[0])
-                    : "Sin evaluación"
-                }}
-              </strong>
-              <small>Nivel registrado</small>
-            </div>
-          </article>
-
-          <article
-            class="operational-milestone"
-            [class.operational-milestone--completed]="episodeClosureDate"
-            [class.operational-milestone--pending]="!episodeClosureDate"
-          >
-            <mat-icon>event_busy</mat-icon>
-            <div>
-              <span>Cierre</span>
-              <strong>
-                {{
-                  episodeClosureDate
-                    ? formatDisplayDate(episodeClosureDate)
-                    : "Pendiente"
-                }}
-              </strong>
-              <small>
-                {{ episodeClosureDate ? "Demanda cerrada" : "Demanda abierta" }}
-              </small>
-            </div>
-          </article>
-        </div>
-      </section>
-      <!-- RESULTADO ACTUAL -->
-      <div
-        class="operational-result-strip"
-        [ngClass]="'operational-result-strip--' + operationalResultTone"
-        [class.operational-result-strip--pending]="
-          episodeOperationalSummary.resultPending
-        "
-        [class.operational-result-strip--defined]="
-          !episodeOperationalSummary.resultPending
-        "
-      >
-        <div class="operational-result-strip__icon">
-          <mat-icon>
-            {{
-              episodeOperationalSummary.resultPending
-                ? "pending_actions"
-                : "task_alt"
-            }}
-          </mat-icon>
-        </div>
-
-        <div>
-          <span>RESULTADO ACTUAL</span>
-
-          <strong>
-            {{ episodeOperationalSummary.result }}
+          <strong id="operativeDockTitle">
+            Acciones operativas
           </strong>
 
           <p>
-            {{
-              episodeOperationalSummary.resultPending
-                ? "Pendiente de evaluación y definición de resultado."
-                : "El episodio posee un resultado formal registrado."
-            }}
+            GestiÃ³n recomendada:
+            <b>{{ episodeOperationalSummary.nextActionTitle }}</b>
           </p>
         </div>
-      </div>
-    </section>
-
-    <!-- =====================================================
-       ACCIONES OPERATIVAS
-    ====================================================== -->
-    <div
-      class="operative-dock"
-      *ngIf="hasCurrentEpisode && canManageCurrentEpisode"
-    >
-      <div class="operative-dock__title">
-        <mat-icon>bolt</mat-icon>
-
-        <div>
-          <strong>Acciones operativas</strong>
-          <span>Acciones disponibles sobre el episodio activo.</span>
-        </div>
-      </div>
+      </header>
 
       <div class="operative-dock__actions">
         <button
           *ngFor="let action of operativeActions"
           type="button"
           class="dock-action-button"
-          [disabled]="
-            !action.enabled ||
-            !canManageCurrentEpisode ||
-            (action.panel === 'reference' && !canReferenceCurrentEpisode)
+          [class.dock-action-button--recommended]="
+            isOperativeActionRecommended(action.panel)
+          "
+          [class.dock-action-button--blocked]="
+            !!getOperativeActionDisabledReason(action)
+          "
+          [disabled]="!!getOperativeActionDisabledReason(action)"
+          [matTooltip]="
+            getOperativeActionDisabledReason(action) ||
+            action.description
           "
           (click)="openActionPanel(action.panel)"
         >
-          <mat-icon>{{ action.icon }}</mat-icon>
-          <span>{{ action.title }}</span>
+          <span class="dock-action-button__icon">
+            <mat-icon>
+              {{
+                getOperativeActionDisabledReason(action)
+                  ? "lock"
+                  : action.icon
+              }}
+            </mat-icon>
+          </span>
+
+          <span class="dock-action-button__content">
+            <small
+              *ngIf="isOperativeActionRecommended(action.panel)"
+            >
+              GestiÃ³n recomendada
+            </small>
+
+            <strong>{{ action.title }}</strong>
+            <span>{{ action.description }}</span>
+          </span>
         </button>
       </div>
-    </div>
-  </mat-card>
-
-  <!-- PANEL OPERATIVO CENTRALIZADO -->
-  <mat-card
-    #activeActionSection
+    </section>
+    <!-- PANEL OPERATIVO CENTRALIZADO -->
+    <mat-card
+      #activeActionSection
     tabindex="-1"
     class="actions-card action-forms-card"
     *ngIf="
@@ -1347,45 +1119,45 @@
           <h3>
             {{
               activeActionPanel === "citation"
-                ? "Registrar citación"
+                ? "Registrar citaciÃ³n"
                 : activeActionPanel === "attendance"
                   ? "Registrar asistencia"
                   : activeActionPanel === "interview"
-                    ? "Retroalimentación"
+                    ? "RetroalimentaciÃ³n"
                     : activeActionPanel === "observation"
-                      ? "Registrar observación"
+                      ? "Registrar observaciÃ³n"
                       : activeActionPanel === "reference"
                         ? "Referir a otro programa"
                         : activeActionPanel === "treatmentEntry"
                           ? "Ingreso a tratamiento"
                           : activeActionPanel === "egressClosure"
                             ? "Cierre"
-                            : "Acción en preparación"
+                            : "AcciÃ³n en preparaciÃ³n"
             }}
           </h3>
           <p>
             {{
               activeActionPanel === "citation"
-                ? "Agende una nueva citación para el episodio activo."
+                ? "Agende una nueva citaciÃ³n para el episodio activo."
                 : activeActionPanel === "attendance"
-                  ? "Marque si la persona se presentó, no se presentó o fue reprogramada."
+                  ? "Marque si la persona se presentÃ³, no se presentÃ³ o fue reprogramada."
                   : activeActionPanel === "interview"
-                    ? "Registre la decisión adoptada para la continuidad de la demanda."
+                    ? "Registre la decisiÃ³n adoptada para la continuidad de la demanda."
                     : activeActionPanel === "observation"
-                      ? "Registre una observación general del episodio."
+                      ? "Registre una observaciÃ³n general del episodio."
                       : activeActionPanel === "reference"
                         ? "Cierre la etapa de origen y prepare la continuidad en el programa receptor."
                         : activeActionPanel === "treatmentEntry"
-                          ? "Registre el ingreso efectivo a tratamiento y detenga el KPI de espera. La demanda permanecerá abierta hasta registrar el Cierre."
+                          ? "Registre el ingreso efectivo a tratamiento y detenga el KPI de espera. La demanda permanecerÃ¡ abierta hasta registrar el Cierre."
                           : activeActionPanel === "egressClosure"
                             ? "Registre la fecha de cierre de la demanda."
-                            : "Complete la información correspondiente a la acción seleccionada."
+                            : "Complete la informaciÃ³n correspondiente a la acciÃ³n seleccionada."
             }}
           </p>
         </div>
       </div>
 
-      <!-- FORMULARIO CITACIÓN -->
+      <!-- FORMULARIO CITACIÃ“N -->
       <form
         *ngIf="activeActionPanel === 'citation'"
         [formGroup]="citationForm"
@@ -1410,10 +1182,10 @@
             class="operation-section__content operation-section__content--single"
           >
         <mat-form-field appearance="outline" floatLabel="always" class="span-full">
-          <mat-label>Tipo de citación</mat-label>
+          <mat-label>Tipo de citaciÃ³n</mat-label>
           <mat-icon matPrefix>event_note</mat-icon>
 
-          <mat-select formControlName="citationTypeCode">
+          <mat-select formControlName="citationTypeCode" panelClass="person-editor-select-panel">
             <mat-option
               *ngFor="let item of citationTypes"
               [value]="item.code"
@@ -1421,18 +1193,70 @@
             >
               {{ item.name }}
 
-              <span *ngIf="isCitationTypeRegistered(item.code)">
-                — registrada
-              </span>
             </mat-option>
           </mat-select>
 
           <mat-error
             *ngIf="citationForm.controls.citationTypeCode.hasError('required')"
           >
-            Debe seleccionar el tipo de citación.
+            Debe seleccionar el tipo de citaciÃ³n.
           </mat-error>
         </mat-form-field>
+        <details class="episode-milestone-help span-full">
+          <summary>
+            Â¿CÃ³mo seleccionar el tipo de citaciÃ³n?
+          </summary>
+
+          <div class="episode-milestone__list">
+            <div class="episode-milestone__item">
+              <strong>Opciones habilitadas</strong>
+              <span>
+                Corresponden a los tipos de citaciÃ³n que todavÃ­a pueden
+                registrarse para el episodio.
+              </span>
+            </div>
+
+            <div class="episode-milestone__item">
+              <strong>Opciones deshabilitadas</strong>
+              <span>
+                Se muestran en color gris porque ese tipo de citaciÃ³n ya fue
+                registrado.
+              </span>
+            </div>
+
+            <div class="episode-milestone__item">
+              <strong>Primera citaciÃ³n</strong>
+              <span>
+                Permite iniciar la entrevista correspondiente o avanzar a la
+                entrevista siguiente.
+              </span>
+            </div>
+
+            <div class="episode-milestone__item">
+              <strong>Segunda citaciÃ³n</strong>
+              <span>
+                Solo corresponde cuando la primera citaciÃ³n de esa entrevista
+                registra NO SE PRESENTÃ“.
+              </span>
+            </div>
+
+            <div class="episode-milestone__item">
+              <strong>ReprogramaciÃ³n o cancelaciÃ³n</strong>
+              <span>
+                Debe volver a registrarse el mismo tipo de citaciÃ³n utilizado
+                anteriormente.
+              </span>
+            </div>
+
+            <div class="episode-milestone__item">
+              <strong>Entrevista opcional</strong>
+              <span>
+                Se utiliza Ãºnicamente cuando el equipo determina que necesita
+                una entrevista adicional.
+              </span>
+            </div>
+          </div>
+        </details>
           </div>
         </section>
                 <section
@@ -1456,7 +1280,7 @@
           <mat-label>Facultativo</mat-label>
           <mat-icon matPrefix>person</mat-icon>
 
-          <mat-select formControlName="programProfessionalId">
+          <mat-select formControlName="programProfessionalId" panelClass="person-editor-select-panel">
             <mat-select-trigger>
               {{ selectedCitationProfessional?.name || "Seleccione un facultativo" }}
             </mat-select-trigger>
@@ -1507,7 +1331,7 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" floatLabel="always">
-          <mat-label>Fecha citación</mat-label>
+          <mat-label>Fecha citaciÃ³n</mat-label>
           <mat-icon matPrefix>event</mat-icon>
 
           <input
@@ -1534,7 +1358,7 @@
 
         <div class="time-period-grid">
           <mat-form-field appearance="outline" floatLabel="always" class="time-hour-field">
-            <mat-label>Hora citación</mat-label>
+            <mat-label>Hora citaciÃ³n</mat-label>
             <mat-icon matPrefix>schedule</mat-icon>
 
             <input
@@ -1555,7 +1379,7 @@
             <mat-error
               *ngIf="citationForm.controls.eventHour.hasError('pattern')"
             >
-              Use formato válido. Ej: 01:30.
+              Use formato vÃ¡lido. Ej: 01:30.
             </mat-error>
           </mat-form-field>
 
@@ -1563,7 +1387,7 @@
             <mat-label>AM / PM</mat-label>
             <mat-icon matPrefix>more_time</mat-icon>
 
-            <mat-select formControlName="eventPeriod">
+            <mat-select formControlName="eventPeriod" panelClass="person-editor-select-panel">
               <mat-option value="AM">AM</mat-option>
               <mat-option value="PM">PM</mat-option>
             </mat-select>
@@ -1577,7 +1401,7 @@
         </div>
 
         <mat-form-field appearance="outline" floatLabel="always">
-          <mat-label>Profesión</mat-label>
+          <mat-label>ProfesiÃ³n</mat-label>
           <mat-icon matPrefix>medical_services</mat-icon>
 
           <input
@@ -1590,7 +1414,7 @@
           <mat-error
             *ngIf="citationForm.controls.professionName.hasError('required')"
           >
-            La profesión es obligatoria.
+            La profesiÃ³n es obligatoria.
           </mat-error>
         </mat-form-field>
           </div>
@@ -1616,7 +1440,7 @@
           <div
             class="operation-section__content operation-section__content--single"
           ><mat-form-field appearance="outline" floatLabel="always" class="span-full">
-          <mat-label>Comentario de citación</mat-label>
+          <mat-label>Comentario de citaciÃ³n</mat-label>
           <mat-icon matPrefix>notes</mat-icon>
 
           <textarea
@@ -1646,20 +1470,20 @@
         class="operation-form operation-form--attendance"
       >
         <mat-form-field appearance="outline" floatLabel="always" class="span-2">
-          <mat-label>Citación a actualizar</mat-label>
+          <mat-label>CitaciÃ³n a actualizar</mat-label>
           <mat-icon matPrefix>event_available</mat-icon>
 
-          <mat-select formControlName="citationEventId">
+          <mat-select formControlName="citationEventId" panelClass="person-editor-select-panel">
             <mat-select-trigger>
               <ng-container *ngIf="selectedAttendanceCitation as selected">
                 {{ getCitationDisplayName(selected) }}
-                ·
+                Â·
                 {{ formatCitationOptionDate(selected) }}
-                ·
+                Â·
                 {{ formatCitationOptionTime(selected) }}
-                ·
+                Â·
                 {{ getCitationTemporalLabel(selected) }}
-                ·
+                Â·
                 {{
                   selected.programProfessionalName ||
                     selected.professionalName ||
@@ -1679,9 +1503,9 @@
               <div class="citation-option__main">
                 <strong>
                   {{ getCitationDisplayName(item) }}
-                  ·
+                  Â·
                   {{ formatCitationOptionDate(item) }}
-                  ·
+                  Â·
                   {{ formatCitationOptionTime(item) }}
                 </strong>
 
@@ -1709,7 +1533,7 @@
                   <ng-container
                     *ngIf="item.professionName || item.profession?.name"
                   >
-                    · {{ item.professionName || item.profession?.name }}
+                    Â· {{ item.professionName || item.profession?.name }}
                   </ng-container>
                 </span>
 
@@ -1717,7 +1541,7 @@
                   {{
                     item.comment ||
                       item.citationComment ||
-                      "Sin comentario de citación"
+                      "Sin comentario de citaciÃ³n"
                   }}
                 </small>
               </div>
@@ -1727,7 +1551,7 @@
           <mat-error
             *ngIf="attendanceForm.controls.citationEventId.hasError('required')"
           >
-            Debe seleccionar una citación.
+            Debe seleccionar una citaciÃ³n.
           </mat-error>
 
           <mat-hint *ngIf="!pendingCitationEvents.length">
@@ -1741,7 +1565,7 @@
         >
           <mat-icon>warning</mat-icon>
           <span>
-            Esta citación está vencida y aún figura pendiente. Regularice su
+            Esta citaciÃ³n estÃ¡ vencida y aÃºn figura pendiente. Regularice su
             estado antes de continuar.
           </span>
         </div>
@@ -1750,17 +1574,17 @@
           <mat-label>Estado de asistencia</mat-label>
           <mat-icon matPrefix>how_to_reg</mat-icon>
 
-          <mat-select formControlName="attendanceStatusId">
+          <mat-select formControlName="attendanceStatusId" panelClass="person-editor-select-panel">
             <mat-option
-              *ngFor="let item of attendanceStatuses"
+              *ngFor="let item of operativeAttendanceStatuses"
               [value]="item.id"
             >
               {{ item.name }}
             </mat-option>
           </mat-select>
 
-          <mat-hint *ngIf="!attendanceStatuses.length">
-            Catálogo de asistencia no disponible desde backend.
+          <mat-hint *ngIf="!operativeAttendanceStatuses.length">
+            CatÃ¡logo de asistencia no disponible desde backend.
           </mat-hint>
 
           <mat-error
@@ -1779,7 +1603,7 @@
           <input
             matInput
             formControlName="comment"
-            placeholder="Ej: Persona asiste a citación / No se presenta"
+            placeholder="Ej: Persona asiste a citaciÃ³n / No se presenta"
           />
 
           <mat-error
@@ -1788,6 +1612,60 @@
             El comentario es obligatorio.
           </mat-error>
         </mat-form-field>
+
+
+        <details class="episode-milestone-help span-full">
+          <summary>
+            Â¿QuÃ© resultado de asistencia corresponde registrar?
+          </summary>
+
+          <div class="episode-milestone__list">
+            <div class="episode-milestone__item">
+              <strong>SE PRESENTÃ“</strong>
+              <span>
+                La entrevista quedÃ³ realizada. Corresponde avanzar a la
+                primera citaciÃ³n de la entrevista siguiente.
+              </span>
+            </div>
+
+            <div class="episode-milestone__item">
+              <strong>NO SE PRESENTÃ“</strong>
+              <span>
+                Corresponde utilizar la segunda citaciÃ³n de esa misma
+                entrevista.
+              </span>
+            </div>
+
+            <div class="episode-milestone__item">
+              <strong>REPROGRAMADA</strong>
+              <span>
+                Debe volver a programarse el mismo tipo de citaciÃ³n.
+              </span>
+            </div>
+
+            <div class="episode-milestone__item">
+              <strong>CANCELA PROGRAMA</strong>
+              <span>
+                Debe volver a programarse el mismo tipo de citaciÃ³n.
+              </span>
+            </div>
+
+            <div class="episode-milestone__item">
+              <strong>Sin asistencia</strong>
+              <span>
+                TodavÃ­a no corresponde utilizar la segunda citaciÃ³n.
+              </span>
+            </div>
+
+            <div class="episode-milestone__item">
+              <strong>Regla principal</strong>
+              <span>
+                La segunda citaciÃ³n solo corresponde cuando la primera
+                citaciÃ³n de esa entrevista tiene NO SE PRESENTÃ“.
+              </span>
+            </div>
+          </div>
+        </details>
 
         <div class="empty-banner success span-2" *ngIf="attendanceSuccess">
           <mat-icon>check_circle</mat-icon>
@@ -1799,186 +1677,20 @@
           <span>{{ attendanceError }}</span>
         </div>
       </form>
-
-      <!-- FORMULARIO RETROALIMENTACIÓN -->
-      <form
+      <!-- FORMULARIO RETROALIMENTACIÃ“N -->
+      <app-feedback-panel
         *ngIf="activeActionPanel === 'interview'"
-        [formGroup]="interviewForm"
-        class="operation-form operation-form--feedback"
-      >
-        <div class="empty-banner success span-full" *ngIf="interviewSuccess">
-          <mat-icon>check_circle</mat-icon>
-          <span>{{ interviewSuccess }}</span>
-        </div>
-        <div class="feedback-intro span-full">
-          <mat-icon>assignment_turned_in</mat-icon>
+        [form]="interviewForm"
+        [success]="interviewSuccess"
+        [error]="interviewError"
+        [professionals]="professionals"
+        [commitmentLevels]="biopsychosocialCommitmentLevels"
+        [results]="results"
+        (professionalChange)="onInterviewProfessionalChange($event)"
+        (hourBlur)="formatInterviewHourInput()"
+      ></app-feedback-panel>
 
-          <div>
-            <strong>Decisión de continuidad</strong>
-            <span>
-              Registre el compromiso biopsicosocial y el resultado definido
-              para la persona.
-            </span>
-          </div>
-        </div>
-
-        <mat-form-field appearance="outline" floatLabel="always">
-          <mat-label>Fecha de retroalimentación</mat-label>
-          <mat-icon matPrefix>event</mat-icon>
-
-          <input
-            matInput
-            [matDatepicker]="feedbackDatePicker"
-            formControlName="eventDate"
-            placeholder="dd/mm/aaaa"
-            readonly
-          />
-
-          <mat-datepicker-toggle
-            matSuffix
-            [for]="feedbackDatePicker"
-          ></mat-datepicker-toggle>
-
-          <mat-datepicker #feedbackDatePicker></mat-datepicker>
-
-          <mat-error
-            *ngIf="interviewForm.controls.eventDate.hasError('required')"
-          >
-            La fecha es obligatoria.
-          </mat-error>
-        </mat-form-field>
-
-        <div class="time-period-grid">
-          <mat-form-field appearance="outline" floatLabel="always" class="time-hour-field">
-            <mat-label>Hora</mat-label>
-            <mat-icon matPrefix>schedule</mat-icon>
-
-            <input
-              matInput
-              type="text"
-              formControlName="eventHour"
-              placeholder="Ej: 01:30"
-              maxlength="5"
-              (blur)="formatInterviewHourInput()"
-            />
-
-            <mat-error
-              *ngIf="interviewForm.controls.eventHour.hasError('required')"
-            >
-              La hora es obligatoria.
-            </mat-error>
-
-            <mat-error
-              *ngIf="interviewForm.controls.eventHour.hasError('pattern')"
-            >
-              Use formato válido. Ej: 01:30.
-            </mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" floatLabel="always">
-            <mat-label>AM / PM</mat-label>
-            <mat-icon matPrefix>more_time</mat-icon>
-
-            <mat-select formControlName="eventPeriod">
-              <mat-option value="AM">AM</mat-option>
-              <mat-option value="PM">PM</mat-option>
-            </mat-select>
-
-            <mat-error
-              *ngIf="interviewForm.controls.eventPeriod.hasError('required')"
-            >
-              Debe seleccionar AM o PM.
-            </mat-error>
-          </mat-form-field>
-        </div>
-
-        <mat-form-field appearance="outline" floatLabel="always">
-          <mat-label>Profesional que la realizó</mat-label>
-          <mat-icon matPrefix>person</mat-icon>
-
-          <mat-select
-            formControlName="programProfessionalId"
-            (selectionChange)="onInterviewProfessionalChange($event.value)"
-          >
-            <mat-option
-              *ngFor="let item of professionals"
-              [value]="item.id"
-            >
-              {{ item.name }}
-              <span *ngIf="item.professionName">
-                — {{ item.professionName }}
-              </span>
-            </mat-option>
-          </mat-select>
-
-          <mat-error
-            *ngIf="
-              interviewForm.controls.programProfessionalId.hasError('required')
-            "
-          >
-            Debe seleccionar el profesional.
-          </mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" floatLabel="always">
-          <mat-label>Compromiso biopsicosocial</mat-label>
-          <mat-icon matPrefix>psychology</mat-icon>
-
-          <mat-select formControlName="biopsychosocialCommitmentCode">
-            <mat-option
-              *ngFor="let item of biopsychosocialCommitmentLevels"
-              [value]="item.code"
-            >
-              {{ item.name }}
-            </mat-option>
-          </mat-select>
-
-          <mat-error
-            *ngIf="
-              interviewForm.controls.biopsychosocialCommitmentCode.hasError(
-                'required'
-              )
-            "
-          >
-            Debe seleccionar el nivel de compromiso.
-          </mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" floatLabel="always">
-          <mat-label>Resultado</mat-label>
-          <mat-icon matPrefix>fact_check</mat-icon>
-
-          <mat-select formControlName="resultCode">
-            <mat-option
-              *ngFor="let item of results"
-              [value]="item.code"
-            >
-              {{ item.name }}
-            </mat-option>
-          </mat-select>
-
-          <mat-error
-            *ngIf="interviewForm.controls.resultCode.hasError('required')"
-          >
-            Debe seleccionar el resultado.
-          </mat-error>
-        </mat-form-field>
-
-        <div class="feedback-kpi-note span-full">
-          <mat-icon>info</mat-icon>
-          <span>
-            Si el resultado es Ingreso a tratamiento, esta fecha registrará el ingreso y detendrá el
-            KPI de espera. La demanda permanecerá abierta hasta registrar el Cierre.
-          </span>
-        </div>
-
-        <div class="empty-banner error span-full" *ngIf="interviewError">
-          <mat-icon>error</mat-icon>
-          <span>{{ interviewError }}</span>
-        </div>
-      </form>
-
-      <!-- FORMULARIO OBSERVACIÓN -->
+      <!-- FORMULARIO OBSERVACIÃ“N -->
       <form
         *ngIf="activeActionPanel === 'observation'"
         [formGroup]="observationForm"
@@ -1992,7 +1704,7 @@
           <input
             matInput
             formControlName="comment"
-            placeholder="Ej.: Se realiza contacto telefónico con la persona"
+            placeholder="Ej.: Se realiza contacto telefÃ³nico con la persona"
           />
 
           <mat-error
@@ -2003,7 +1715,7 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" floatLabel="always" class="span-full">
-          <mat-label>Detalle de la observación</mat-label>
+          <mat-label>Detalle de la observaciÃ³n</mat-label>
 
           <mat-icon matPrefix>notes</mat-icon>
 
@@ -2011,7 +1723,7 @@
             matInput
             rows="5"
             formControlName="observation"
-            placeholder="Registre antecedentes, acuerdos, seguimiento o información relevante."
+            placeholder="Registre antecedentes, acuerdos, seguimiento o informaciÃ³n relevante."
           ></textarea>
         </mat-form-field>
 
@@ -2036,8 +1748,8 @@
           <div>
             <strong>Referencia entre programas</strong>
             <span>
-              La fecha original de solicitud y los días acumulados se
-              conservarán. La etapa actual finalizará y se creará una nueva
+              La fecha original de solicitud y los dÃ­as acumulados se
+              conservarÃ¡n. La etapa actual finalizarÃ¡ y se crearÃ¡ una nueva
               etapa en el programa receptor.
             </span>
           </div>
@@ -2047,7 +1759,7 @@
           <mat-label>Programa de destino</mat-label>
           <mat-icon matPrefix>business</mat-icon>
 
-          <mat-select formControlName="targetProgramId">
+          <mat-select formControlName="targetProgramId" panelClass="person-editor-select-panel">
             <mat-option
               *ngFor="let program of availableReferencePrograms"
               [value]="program.id"
@@ -2115,7 +1827,7 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" floatLabel="always" class="span-full">
-          <mat-label>Observación adicional</mat-label>
+          <mat-label>ObservaciÃ³n adicional</mat-label>
           <mat-icon matPrefix>notes</mat-icon>
 
           <textarea
@@ -2149,9 +1861,9 @@
       >
         <mat-icon>fact_check</mat-icon>
         <div>
-          <strong>Formulario en preparación</strong>
+          <strong>Formulario en preparaciÃ³n</strong>
           <span>
-            Esta acción registrará el ingreso efectivo a tratamiento y detendrá
+            Esta acciÃ³n registrarÃ¡ el ingreso efectivo a tratamiento y detendrÃ¡
             el KPI de espera del episodio.
           </span>
         </div>
@@ -2208,7 +1920,7 @@
           <mat-icon>warning</mat-icon>
 
           <span>
-            Al guardar, el episodio quedará cerrado con la fecha seleccionada.
+            Al guardar, el episodio quedarÃ¡ cerrado con la fecha seleccionada.
           </span>
         </div>
 
@@ -2276,7 +1988,7 @@
           (click)="saveCitation()"
         >
           <mat-icon>save</mat-icon>
-          {{ isSavingCitation ? "Guardando..." : "Guardar citación" }}
+          {{ isSavingCitation ? "Guardando..." : "Guardar citaciÃ³n" }}
         </button>
 
         <button
@@ -2306,7 +2018,7 @@
           (click)="saveInterview()"
         >
           <mat-icon>save</mat-icon>
-          {{ isSavingInterview ? "Guardando..." : "Guardar retroalimentación" }}
+          {{ isSavingInterview ? "Guardando..." : "Guardar retroalimentaciÃ³n" }}
         </button>
 
         <button
@@ -2322,15 +2034,308 @@
           (click)="saveObservation()"
         >
           <mat-icon>save</mat-icon>
-          {{ isSavingObservation ? "Guardando..." : "Guardar observación" }}
+          {{ isSavingObservation ? "Guardando..." : "Guardar observaciÃ³n" }}
         </button>
       </div>
     </div>
   </mat-card>
 
-  <!-- PESTAÑAS VISUALES -->
-  <!-- NAVEGACIÓN INTERNA DE LA FICHA -->
-  <!-- ANCLA PARA VOLVER AL ÍNDICE -->
+        <!-- =====================================================
+
+       SITUACIÃ“N OPERATIVA DE LA DEMANDA
+    ====================================================== -->
+    <section
+      class="episode-operational-summary"
+      *ngIf="hasCurrentEpisode"
+      aria-labelledby="episodeOperationalTitle"
+    >
+      <div class="operational-summary-header">
+        <div class="operational-summary-header__icon">
+          <mat-icon>monitor_heart</mat-icon>
+        </div>
+
+        <div>
+          <span>SITUACIÃ“N ACTUAL</span>
+
+          <h2 id="episodeOperationalTitle">
+            Resumen operativo de la demanda
+          </h2>
+
+          <p>
+            InformaciÃ³n prioritaria para conocer el estado del episodio y
+            orientar la siguiente gestiÃ³n.
+          </p>
+        </div>
+      </div>
+
+      <div class="operational-summary-grid">
+        <!-- TIEMPO DE ESPERA -->
+        <article
+          class="operational-summary-card"
+          [ngClass]="
+            'operational-summary-card--' +
+            episodeOperationalSummary.waitingTone
+          "
+        >
+          <div class="operational-summary-card__icon">
+            <mat-icon>schedule</mat-icon>
+          </div>
+
+          <div class="operational-summary-card__content">
+            <span>TIEMPO DE ESPERA</span>
+
+            <strong class="operational-summary-card__number">
+              {{ episodeOperationalSummary.days }}
+              {{
+                episodeOperationalSummary.days === 1
+                  ? "dÃ­a"
+                  : "dÃ­as"
+              }}
+            </strong>
+
+            <small>
+              {{ episodeOperationalSummary.waitingLabel }}
+            </small>
+
+            <p>
+              Solicitud recibida:
+              {{ episodeOperationalSummary.requestDate }}
+            </p>
+          </div>
+        </article>
+
+        <!-- ESTADO Y PROGRAMA RESPONSABLE -->
+        <article
+          class="operational-summary-card operational-summary-card--state"
+        >
+          <div class="operational-summary-card__icon">
+            <mat-icon>assignment_turned_in</mat-icon>
+          </div>
+
+          <div class="operational-summary-card__content">
+            <span>ESTADO ACTUAL</span>
+
+            <strong>
+              {{ episodeOperationalSummary.state }}
+            </strong>
+
+            <small>Programa responsable</small>
+
+            <p>
+              {{ episodeOperationalSummary.program }}
+            </p>
+          </div>
+        </article>
+
+        <!-- ÃšLTIMA GESTIÃ“N -->
+        <article
+          class="operational-summary-card operational-summary-card--management"
+        >
+          <div class="operational-summary-card__icon">
+            <mat-icon>history</mat-icon>
+          </div>
+
+          <div class="operational-summary-card__content">
+            <span>ÃšLTIMA GESTIÃ“N</span>
+
+            <strong>
+              {{ episodeOperationalSummary.lastManagementTitle }}
+            </strong>
+
+            <small>
+              {{ episodeOperationalSummary.lastManagementDetail }}
+            </small>
+
+            <p>
+              {{ currentStageEvents.length }}
+              {{
+                currentStageEvents.length === 1
+                  ? "gestiÃ³n registrada"
+                  : "gestiones registradas"
+              }}
+            </p>
+          </div>
+        </article>
+
+        <!-- PRÃ“XIMA ACCIÃ“N -->
+        <article
+          class="operational-summary-card"
+          [ngClass]="
+            'operational-summary-card--action-' +
+            episodeOperationalSummary.nextActionTone
+          "
+        >
+          <div class="operational-summary-card__icon">
+            <mat-icon>
+              {{ episodeOperationalSummary.nextActionIcon }}
+            </mat-icon>
+          </div>
+
+          <div class="operational-summary-card__content">
+            <span>PRÃ“XIMA ACCIÃ“N</span>
+
+            <strong>
+              {{ episodeOperationalSummary.nextActionTitle }}
+            </strong>
+
+            <p>
+              {{ episodeOperationalSummary.nextActionDetail }}
+            </p>
+          </div>
+        </article>
+      </div>
+
+      <!-- HITOS OPERATIVOS DEL RESUMEN -->
+      <section class="operational-milestones">
+        <div class="operational-milestones__heading">
+          <mat-icon>account_tree</mat-icon>
+          <div>
+            <span>RUTA DEL EPISODIO</span>
+            <strong>Hitos principales de la demanda</strong>
+          </div>
+        </div>
+
+        <div class="operational-milestones__grid">
+          <article class="operational-milestone operational-milestone--citation">
+            <mat-icon>event</mat-icon>
+            <div>
+              <span>Citaciones</span>
+              <strong>{{ citationEvents.length }}</strong>
+              <small>
+                {{ pendingCitationEvents.length }} sin asistencia Â· {{ currentPendingCitationEvents.length }} prÃ³ximas
+              </small>
+            </div>
+          </article>
+
+          <article class="operational-milestone operational-milestone--interview">
+            <mat-icon>groups</mat-icon>
+            <div>
+              <span>Entrevistas asistidas</span>
+              <strong>{{ attendedInterviewCitations.length }}</strong>
+              <small>Asistencias confirmadas</small>
+            </div>
+          </article>
+
+          <article
+            class="operational-milestone"
+            [class.operational-milestone--completed]="feedbackEvents.length > 0"
+            [class.operational-milestone--pending]="feedbackEvents.length === 0"
+          >
+            <mat-icon>assignment_turned_in</mat-icon>
+            <div>
+              <span>RetroalimentaciÃ³n</span>
+              <strong>
+                {{
+                  feedbackEvents.length
+                    ? formatDisplayDate(feedbackEvents[0].eventDate)
+                    : "Pendiente"
+                }}
+              </strong>
+              <small>
+                {{
+                  feedbackEvents.length
+                    ? "DecisiÃ³n registrada"
+                    : "Sin decisiÃ³n registrada"
+                }}
+              </small>
+            </div>
+          </article>
+
+          <article
+            class="operational-milestone operational-milestone--commitment"
+            [class.operational-milestone--commitment-leve]="
+              feedbackEvents.length &&
+              getFeedbackCommitmentLabel(feedbackEvents[0]) === 'Leve'
+            "
+            [class.operational-milestone--commitment-moderado]="
+              feedbackEvents.length &&
+              getFeedbackCommitmentLabel(feedbackEvents[0]) === 'Moderado'
+            "
+            [class.operational-milestone--commitment-severo]="
+              feedbackEvents.length &&
+              getFeedbackCommitmentLabel(feedbackEvents[0]) === 'Severo'
+            "
+          >
+            <mat-icon>psychology</mat-icon>
+            <div>
+              <span>Compromiso biopsicosocial</span>
+              <strong>
+                {{
+                  feedbackEvents.length
+                    ? getFeedbackCommitmentLabel(feedbackEvents[0])
+                    : "Sin evaluaciÃ³n"
+                }}
+              </strong>
+              <small>Nivel registrado</small>
+            </div>
+          </article>
+
+          <article
+            class="operational-milestone"
+            [class.operational-milestone--completed]="episodeClosureDate"
+            [class.operational-milestone--pending]="!episodeClosureDate"
+          >
+            <mat-icon>event_busy</mat-icon>
+            <div>
+              <span>Cierre</span>
+              <strong>
+                {{
+                  episodeClosureDate
+                    ? formatDisplayDate(episodeClosureDate)
+                    : "Pendiente"
+                }}
+              </strong>
+              <small>
+                {{ episodeClosureDate ? "Demanda cerrada" : "Demanda abierta" }}
+              </small>
+            </div>
+          </article>
+        </div>
+      </section>
+      <!-- RESULTADO ACTUAL -->
+      <div
+        class="operational-result-strip"
+        [ngClass]="'operational-result-strip--' + operationalResultTone"
+        [class.operational-result-strip--pending]="
+          episodeOperationalSummary.resultPending
+        "
+        [class.operational-result-strip--defined]="
+          !episodeOperationalSummary.resultPending
+        "
+      >
+        <div class="operational-result-strip__icon">
+          <mat-icon>
+            {{
+              episodeOperationalSummary.resultPending
+                ? "pending_actions"
+                : "task_alt"
+            }}
+          </mat-icon>
+        </div>
+
+        <div>
+          <span>RESULTADO ACTUAL</span>
+
+          <strong>
+            {{ episodeOperationalSummary.result }}
+          </strong>
+
+          <p>
+            {{
+              episodeOperationalSummary.resultPending
+                ? "Pendiente de evaluaciÃ³n y definiciÃ³n de resultado."
+                : "El episodio posee un resultado formal registrado."
+            }}
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+
+  <!-- PESTAÃ‘AS VISUALES -->
+  <!-- NAVEGACIÃ“N INTERNA DE LA FICHA -->
+  <!-- ANCLA PARA VOLVER AL ÃNDICE -->
   <div
     id="longitudinal-navigation-anchor"
     class="longitudinal-navigation-anchor"
@@ -2338,7 +2343,7 @@
     aria-hidden="true"
   ></div>
 
-  <!-- NAVEGACIÓN INTERNA -->
+  <!-- NAVEGACIÃ“N INTERNA -->
   <nav
     id="longitudinal-navigation"
     class="longitudinal-tabs"
@@ -2390,8 +2395,8 @@
           <p>
             {{
               isHistoricalEpisode
-                ? "Resumen histórico de la demanda finalizada."
-                : "Resumen operativo para continuidad de atención."
+                ? "Resumen histÃ³rico de la demanda finalizada."
+                : "Resumen operativo para continuidad de atenciÃ³n."
             }}
           </p>
         </div>
@@ -2429,16 +2434,16 @@
       </div>
 
       <div class="summary-row" *ngIf="hasCurrentEpisode">
-        <span>Última gestión</span>
+        <span>Ãšltima gestiÃ³n</span>
         <strong>
           {{
             lastCurrentStageEvent
               ? (lastCurrentStageEvent.eventType?.name ||
                   lastCurrentStageEvent.eventType?.code ||
-                  "Gestión registrada") +
-                " · " +
+                  "GestiÃ³n registrada") +
+                " Â· " +
                 formatDisplayDate(lastCurrentStageEvent.eventDate)
-              : "Sin gestión registrada"
+              : "Sin gestiÃ³n registrada"
           }}
         </strong>
       </div>
@@ -2517,8 +2522,8 @@
                     item.daysInStage !== undefined
                   "
                 >
-                  · {{ item.daysInStage }}
-                  {{ item.daysInStage === 1 ? "día" : "días" }}
+                  Â· {{ item.daysInStage }}
+                  {{ item.daysInStage === 1 ? "dÃ­a" : "dÃ­as" }}
                 </ng-container>
               </span>
             </div>
@@ -2532,7 +2537,7 @@
 
             <div>
               <strong>
-                Referencia ·
+                Referencia Â·
                 {{
                   item.referenceDate
                     ? formatDisplayDate(item.referenceDate)
@@ -2542,7 +2547,7 @@
 
               <span>
                 {{ item.originProgramName }}
-                →
+                â†’
                 {{ item.destinationProgramName }}
               </span>
             </div>
@@ -2571,7 +2576,13 @@
       </div>
 
 
-      <section class="episode-milestones" *ngIf="hasCurrentEpisode">
+      </mat-card>
+
+      <mat-card
+        class="current-demand-card episode-milestones-card"
+        *ngIf="hasCurrentEpisode"
+      >
+        <section class="episode-milestones">
         <div class="episode-milestones__header">
           <mat-icon>event_note</mat-icon>
 
@@ -2583,199 +2594,141 @@
           </div>
         </div>
 
-        <!-- SOLICITUD ORIGINAL -->
-        <div class="episode-milestone">
-          <div class="episode-milestone__label">
-            <mat-icon>flag</mat-icon>
-
-            <span
-              matTooltip="Fecha original de recepción de la demanda"
-              aria-label="Solicitud original de la demanda"
-            >
-              Solic. · Solicitud original
-            </span>
-          </div>
-
-          <strong>
-            {{
-              episodeOriginDate
-                ? formatDisplayDate(episodeOriginDate)
-                : "Sin fecha registrada"
-            }}
-          </strong>
-        </div>
-
-        <!-- CINCO TIPOS DE CITACIÓN -->
+        <!-- ACTIVIDADES EFECTIVAMENTE REGISTRADAS -->
         <div
-          class="episode-milestone episode-milestone--stacked"
-          *ngFor="let milestone of demandCitationMilestones"
+          class="episode-milestone episode-milestone--performed"
+          *ngFor="let milestone of performedEpisodeMilestones"
         >
-          <div class="episode-milestone__label">
-            <mat-icon>
-              {{ milestone.registered ? "event_available" : "event" }}
-            </mat-icon>
+          <div class="episode-milestone__content">
+            <div class="episode-milestone__label">
+              <mat-icon>{{ milestone.icon }}</mat-icon>
 
-            <span
-              [matTooltip]="milestone.description"
-              [attr.aria-label]="milestone.title"
-            >
-              {{ milestone.label }} · {{ milestone.title }}
-            </span>
-          </div>
+              <span
+                [matTooltip]="milestone.description || milestone.title"
+                [attr.aria-label]="milestone.title"
+              >
+                {{ milestone.code }} Â· {{ milestone.title }}
+              </span>
+            </div>
 
-          <div class="episode-milestone__list">
-            <div class="episode-milestone__item">
+            <div class="episode-milestone__performed-data">
               <strong>
-                {{
-                  milestone.date
-                    ? formatDisplayDate(milestone.date)
-                    : milestone.attendance
-                }}
+                {{ formatDisplayDate(milestone.date) }}
               </strong>
 
-              <span *ngIf="milestone.date">
-                {{ milestone.attendance }}
+              <span *ngIf="milestone.status">
+                {{ milestone.status }}
               </span>
 
-              <span>{{ milestone.description }}</span>
+              <span *ngIf="milestone.description">
+                {{ milestone.description }}
+              </span>
+
+              <span
+                *ngFor="let detail of milestone.details"
+                class="episode-milestone__detail"
+              >
+                {{ detail }}
+              </span>
+
+              <small *ngIf="milestone.createdAt">
+                Registrado por:
+                {{ milestone.registeredByName || "No informado" }}
+                Â·
+                {{ milestone.createdAt | date: "dd/MM/yyyy HH:mm" }}
+              </small>
             </div>
-          </div>
-        </div>
-
-        <!-- RETROALIMENTACIÓN -->
-        <div class="episode-milestone episode-milestone--stacked">
-          <div class="episode-milestone__label">
-            <mat-icon>assignment_turned_in</mat-icon>
-
-            <span
-              matTooltip="Retroalimentación y decisión sobre la demanda"
-              aria-label="Retroalimentación y decisión sobre la demanda"
-            >
-              Retro. · Retroalimentación
-            </span>
           </div>
 
           <div
-            class="episode-milestone__list"
-            *ngIf="feedbackEvents.length; else noFeedback"
+            class="episode-milestone__elapsed"
+            *ngIf="milestone.daysSincePrevious !== null"
+            aria-label="DÃ­as transcurridos desde la actividad anterior"
           >
-            <div
-              class="episode-milestone__item episode-milestone__item--feedback"
-              *ngFor="let feedback of feedbackEvents"
-            >
-              <strong>
-                {{ formatDisplayDate(feedback.eventDate) }}
-              </strong>
+            <strong>{{ milestone.daysSincePrevious }}</strong>
 
-              <span>
-                Resultado:
-                {{
-                  formatResultLabel(
-                    feedback.result?.name ||
-                      feedback.resultName ||
-                      feedback.resultCode,
-                    "Sin resultado"
-                  )
-                }}
-              </span>
-
-              <span>
-                Compromiso:
-                {{ getFeedbackCommitmentLabel(feedback) }}
-              </span>
-            </div>
-          </div>
-
-          <ng-template #noFeedback>
-            <span class="episode-milestone__pending">
-              Sin registro
+            <span>
+              dÃ­a{{ milestone.daysSincePrevious === 1 ? "" : "s" }}
             </span>
-          </ng-template>
+
+            <small>transcurridos</small>
+          </div>
         </div>
 
-        <!-- CIERRE -->
-        <div class="episode-milestone">
-          <div class="episode-milestone__label">
-            <mat-icon>event_busy</mat-icon>
+        <div
+          class="episode-milestones__note"
+          *ngIf="performedEpisodeMilestones.length > 1"
+        >
+          <mat-icon>info</mat-icon>
 
-            <span
-              matTooltip="Término formal del episodio de demanda"
-              aria-label="Cierre formal del episodio"
-            >
-              Cierre
-            </span>
-          </div>
-
-          <strong>
-            {{
-              episodeClosureDate
-                ? formatDisplayDate(episodeClosureDate)
-                : "Pendiente"
-            }}
-          </strong>
+          <span>
+            Los dÃ­as informados corresponden al tiempo transcurrido entre
+            actividades registradas. Cuando dos actividades se realizan en la
+            misma fecha, se contabiliza 1 dÃ­a. La suma de estos tramos no
+            necesariamente coincide con el total de dÃ­as de la demanda.
+          </span>
         </div>
-
         <!-- AYUDA PARA USUARIOS -->
         <details class="episode-milestone-help">
           <summary>
-            ¿Qué significan estos hitos?
+            Â¿QuÃ© significan estos hitos?
           </summary>
 
           <div class="episode-milestone__list">
             <div class="episode-milestone__item">
               <strong>Solic.</strong>
-              <span>Fecha original de recepción de la demanda.</span>
+              <span>Fecha original de recepciÃ³n de la demanda.</span>
             </div>
 
             <div class="episode-milestone__item">
               <strong>C1-E1</strong>
-              <span>Primera citación para la primera entrevista.</span>
+              <span>Primera citaciÃ³n para la primera entrevista.</span>
             </div>
 
             <div class="episode-milestone__item">
               <strong>C2-E1</strong>
               <span>
-                Segunda citación para la primera entrevista, cuando fue necesaria.
+                Segunda citaciÃ³n para la primera entrevista, cuando fue necesaria.
               </span>
             </div>
 
             <div class="episode-milestone__item">
               <strong>C1-E2</strong>
-              <span>Primera citación para la segunda entrevista.</span>
+              <span>Primera citaciÃ³n para la segunda entrevista.</span>
             </div>
 
             <div class="episode-milestone__item">
               <strong>C2-E2</strong>
               <span>
-                Segunda citación para la segunda entrevista, cuando fue necesaria.
+                Segunda citaciÃ³n para la segunda entrevista, cuando fue necesaria.
               </span>
             </div>
 
             <div class="episode-milestone__item">
               <strong>C1-E3</strong>
-              <span>Primera citación para la tercera entrevista.</span>
+              <span>Primera citaciÃ³n para la tercera entrevista.</span>
             </div>
 
             <div class="episode-milestone__item">
               <strong>C2-E3</strong>
               <span>
-                Segunda citación para la tercera entrevista, cuando fue necesaria.
+                Segunda citaciÃ³n para la tercera entrevista, cuando fue necesaria.
               </span>
             </div>
 
             <div class="episode-milestone__item">
               <strong>Opc.</strong>
-              <span>Citación para entrevista opcional.</span>
+              <span>CitaciÃ³n para entrevista opcional.</span>
             </div>
 
             <div class="episode-milestone__item">
               <strong>Retro.</strong>
-              <span>Retroalimentación y decisión sobre la demanda.</span>
+              <span>RetroalimentaciÃ³n y decisiÃ³n sobre la demanda.</span>
             </div>
 
             <div class="episode-milestone__item">
               <strong>Cierre</strong>
-              <span>Término formal del episodio de demanda.</span>
+              <span>TÃ©rmino formal del episodio de demanda.</span>
             </div>
           </div>
         </details>
@@ -2787,13 +2740,13 @@
         <mat-icon>monitoring</mat-icon>
         <div>
           <h3>Indicadores</h3>
-          <p>Datos rápidos para priorización.</p>
+          <p>Datos rÃ¡pidos para priorizaciÃ³n.</p>
         </div>
       </div>
 
       <div class="indicator-list">
         <div>
-          <span>Días de espera</span>
+          <span>DÃ­as de espera</span>
           <strong>{{
             episodeSummary?.accumulatedDays ??
               createdEpisode?.accumulatedDays ??
@@ -2812,7 +2765,7 @@
           <span class="semaphore-dot"></span>
 
           <div class="semaphore-inline-text">
-            <span>Semáforo</span>
+            <span>SemÃ¡foro</span>
 
             <strong>
               {{
@@ -2829,6 +2782,11 @@
                     createdEpisode?.semaphoreColor
                 )
               }}
+            </small>
+
+            <small>
+              Verde 0 a 45 dÃ­as Â· Amarillo 46 a 90 dÃ­as Â·
+              Rojo 91 dÃ­as o mÃ¡s
             </small>
           </div>
         </div>
@@ -2867,7 +2825,7 @@
     </mat-card>
   </section>
 
-  <!-- CONFIRMACIÓN DE CREACIÓN DEL EPISODIO -->
+  <!-- CONFIRMACIÃ“N DE CREACIÃ“N DEL EPISODIO -->
   <div
     class="episode-save-success"
     *ngIf="episodeSaveSuccess"
@@ -2884,8 +2842,8 @@
     <button
       mat-icon-button
       type="button"
-      matTooltip="Cerrar confirmación"
-      aria-label="Cerrar confirmación"
+      matTooltip="Cerrar confirmaciÃ³n"
+      aria-label="Cerrar confirmaciÃ³n"
       (click)="episodeSaveSuccess = null"
     >
       <mat-icon>close</mat-icon>
@@ -2906,47 +2864,69 @@
         </div>
 
         <div>
-          <span>GESTIÓN DEL EPISODIO</span>
+          <span>GESTIÃ“N DEL EPISODIO</span>
 
           <h2>Crear episodio de demanda</h2>
 
           <p>
-            Complete los datos iniciales del episodio. Al crear, se generará
-            automáticamente la etapa inicial del programa.
+            Complete los datos iniciales del episodio. Al crear, se generarÃ¡
+            automÃ¡ticamente la etapa inicial del programa.
           </p>
         </div>
       </div>
 
-      <button
-        mat-icon-button
-        type="button"
-        class="episode-creation-close"
-        aria-label="Cerrar creación de episodio"
-        [disabled]="isSavingEpisode"
-        (click)="closeCreateEpisodeForm()"
+      <div
+        class="create-episode-actions__buttons episode-creation-header__actions"
       >
-        <mat-icon>close</mat-icon>
-      </button>
+        <button
+          mat-stroked-button
+          class="secondary-btn"
+          type="button"
+          [disabled]="isSavingEpisode"
+          (click)="closeCreateEpisodeForm()"
+        >
+          <mat-icon>close</mat-icon>
+          Cancelar
+        </button>
+
+        <button
+          mat-flat-button
+          class="primary-btn"
+          type="button"
+          [disabled]="
+            isSavingEpisode || !selectedPerson || episodeForm.invalid
+          "
+          (click)="createEpisode()"
+        >
+          <mat-icon>
+            {{ isSavingEpisode ? "hourglass_empty" : "save" }}
+          </mat-icon>
+
+          {{ isSavingEpisode ? "Creando episodio..." : "Crear episodio" }}
+        </button>
+      </div>
+
+
     </div>
 
-    <form
-      [formGroup]="episodeForm"
-      class="episode-form-grid operation-form"
-      autocomplete="off"
-    >
+    <div class="episode-opening-layout">
+      <form
+        [formGroup]="episodeForm"
+        class="episode-form-grid operation-form episode-opening-panel episode-opening-panel--data"
+        autocomplete="off"
+      >
       <div class="episode-form-section-title span-full">
         <mat-icon>assignment</mat-icon>
 
         <div>
           <strong>Datos de apertura</strong>
-          <span>Información administrativa inicial del episodio.</span>
+          <span>InformaciÃ³n administrativa inicial del episodio.</span>
         </div>
       </div>
 
       <mat-form-field appearance="outline">
         <mat-label>Tipo episodio</mat-label>
-        <mat-icon matPrefix>category</mat-icon>
-        <mat-select formControlName="episodeTypeId">
+        <mat-select formControlName="episodeTypeId" panelClass="person-editor-select-panel">
           <mat-option *ngFor="let item of episodeTypes" [value]="item.id">
             {{ item.name }}
           </mat-option>
@@ -2955,7 +2935,6 @@
 
       <mat-form-field appearance="outline">
         <mat-label>Fecha solicitud original</mat-label>
-        <mat-icon matPrefix>event</mat-icon>
 
         <input
           matInput
@@ -2981,65 +2960,58 @@
 
       <mat-form-field appearance="outline">
         <mat-label>Programa inicial</mat-label>
-        <mat-icon matPrefix>domain_add</mat-icon>
         <input matInput formControlName="initialProgramName" readonly />
       </mat-form-field>
 
       <mat-form-field appearance="outline">
         <mat-label>Programa actual</mat-label>
-        <mat-icon matPrefix>business</mat-icon>
         <input matInput formControlName="currentProgramName" readonly />
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Vía de ingreso</mat-label>
-        <mat-icon matPrefix>login</mat-icon>
+        <mat-label>VÃ­a de ingreso</mat-label>
 
-        <mat-select formControlName="contactType">
+        <mat-select formControlName="contactType" panelClass="person-editor-select-panel">
           <mat-option *ngFor="let item of contactTypes" [value]="item.id">
             {{ item.name }}
           </mat-option>
         </mat-select>
 
         <mat-hint *ngIf="!contactTypes.length">
-          Catálogo no disponible desde backend.
+          CatÃ¡logo no disponible desde backend.
         </mat-hint>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
         <mat-label>Remitente</mat-label>
-        <mat-icon matPrefix>forward_to_inbox</mat-icon>
 
-        <mat-select formControlName="sender">
+        <mat-select formControlName="sender" panelClass="person-editor-select-panel">
           <mat-option *ngFor="let item of senders" [value]="item.id">
             {{ item.name }}
           </mat-option>
         </mat-select>
 
         <mat-hint *ngIf="!senders.length">
-          Catálogo no disponible desde backend.
+          CatÃ¡logo no disponible desde backend.
         </mat-hint>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
         <mat-label>Derivador</mat-label>
-        <mat-icon matPrefix>account_tree</mat-icon>
 
-        <mat-select formControlName="diverter">
+        <mat-select formControlName="diverter" panelClass="person-editor-select-panel">
           <mat-option *ngFor="let item of diverters" [value]="item.id">
             {{ item.name }}
           </mat-option>
         </mat-select>
 
         <mat-hint *ngIf="!diverters.length">
-          Catálogo no disponible desde backend.
+          CatÃ¡logo no disponible desde backend.
         </mat-hint>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Número de tratamientos previos</mat-label>
-
-        <mat-icon matPrefix>repeat</mat-icon>
+        <mat-label>NÃºmero de tratamientos previos</mat-label>
 
         <input
           matInput
@@ -3053,8 +3025,7 @@
         />
 
         <mat-hint class="previous-treatment-hint">
-          Valor propuesto según el historial. Puede corregirlo antes de crear el
-          episodio.
+          Valor sugerido segÃºn historial; puede corregirlo.
         </mat-hint>
 
         <mat-error
@@ -3062,7 +3033,7 @@
             episodeForm.controls.previousTreatmentNumber.hasError('required')
           "
         >
-          Debe indicar el número de tratamientos previos.
+          Debe indicar el nÃºmero de tratamientos previos.
         </mat-error>
 
         <mat-error
@@ -3071,7 +3042,7 @@
             episodeForm.controls.previousTreatmentNumber.hasError('pattern')
           "
         >
-          Ingrese un número entero igual o mayor que cero.
+          Ingrese un nÃºmero entero igual o mayor que cero.
         </mat-error>
       </mat-form-field>
 
@@ -3079,36 +3050,35 @@
         <mat-icon>track_changes</mat-icon>
 
         <div>
-          <strong>Condición inicial</strong>
+          <strong>CondiciÃ³n inicial</strong>
           <span>Estado y resultado con que comienza la demanda.</span>
         </div>
       </div>
 
       <mat-form-field appearance="outline">
         <mat-label>Estado actual</mat-label>
-        <mat-icon matPrefix>flag</mat-icon>
         <input matInput formControlName="currentState" readonly />
       </mat-form-field>
 
       <mat-form-field appearance="outline">
         <mat-label>Resultado actual</mat-label>
-        <mat-icon matPrefix>fact_check</mat-icon>
         <input matInput formControlName="currentResult" readonly />
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="span-full">
-        <mat-label>Observación inicial</mat-label>
-        <mat-icon matPrefix>notes</mat-icon>
+        <mat-label>ObservaciÃ³n inicial</mat-label>
 
         <textarea
           matInput
-          rows="3"
+          rows="2"
           formControlName="initialObservation"
         ></textarea>
       </mat-form-field>
     </form>
 
-    <div class="episode-substances-panel">
+      <div
+        class="episode-substances-panel episode-opening-panel episode-opening-panel--substances"
+      >
       <div class="substances-title">
         <mat-icon>science</mat-icon>
         <div>
@@ -3122,133 +3092,201 @@
 
       <div class="empty-banner" *ngIf="!substances.length">
         <mat-icon>info</mat-icon>
-        <span>Catálogo de sustancias no disponible desde backend.</span>
+        <span>CatÃ¡logo de sustancias no disponible desde backend.</span>
       </div>
 
-      <div class="substances-table" *ngIf="substances.length">
-        <div class="substances-header">
-          <div class="col-name"></div>
-          <div class="col-main">Principal</div>
-          <div class="col-secondary">Secundaria</div>
-        </div>
-
-        <div class="substances-help">
-          Click en la fila para asignar o quitar orden de consumo secundario.
-        </div>
-
-        <div
-          *ngFor="let item of substances"
-          class="substance-row"
-          (click)="toggleSecondarySubstance(item.id)"
-          [class.primary-selected]="
-            episodeForm.getRawValue().primarySubstanceId === item.id
-          "
-        >
-          <div class="substance-name">
-            {{ item.name }}
+      <div class="substances-columns" *ngIf="substances.length">
+        <div class="substances-table">
+          <div class="substances-header">
+            <div class="col-name"></div>
+            <div class="col-main">PPAL.</div>
+            <div class="col-secondary">SEC.</div>
           </div>
 
-          <mat-radio-button
-            (click)="$event.stopPropagation()"
-            [checked]="episodeForm.getRawValue().primarySubstanceId === item.id"
-            (change)="selectPrimarySubstance(item.id)"
-          ></mat-radio-button>
+          <div
+            *ngFor="let item of firstSubstanceColumn"
+            class="substance-row"
+            (click)="toggleSecondarySubstance(item.id)"
+            [class.primary-selected]="
+              episodeForm.getRawValue().primarySubstanceId === item.id
+            "
+          >
+            <div class="substance-name">
+              {{ item.name }}
+            </div>
 
-          <div class="secondary-order">
-            <span
-              class="order-badge"
-              [class.primary-badge]="
+            <mat-radio-button
+              (click)="$event.stopPropagation()"
+              [checked]="
                 episodeForm.getRawValue().primarySubstanceId === item.id
               "
-            >
-              {{
-                episodeForm.getRawValue().primarySubstanceId === item.id
-                  ? "Principal"
-                  : getSecondarySubstanceOrder(item.id) || "-"
-              }}
-            </span>
+              (change)="selectPrimarySubstance(item.id)"
+            ></mat-radio-button>
+
+            <div class="secondary-order">
+              <span
+                class="order-badge"
+                [class.primary-badge]="
+                  episodeForm.getRawValue().primarySubstanceId === item.id
+                "
+              >
+                {{
+                  episodeForm.getRawValue().primarySubstanceId === item.id
+                    ? "Principal"
+                    : getSecondarySubstanceOrder(item.id) || "-"
+                }}
+              </span>
+            </div>
           </div>
         </div>
+
+        <div class="substances-table">
+          <div class="substances-header">
+            <div class="col-name"></div>
+            <div class="col-main">PPAL.</div>
+            <div class="col-secondary">SEC.</div>
+          </div>
+
+          <div
+            *ngFor="let item of secondSubstanceColumn"
+            class="substance-row"
+            (click)="toggleSecondarySubstance(item.id)"
+            [class.primary-selected]="
+              episodeForm.getRawValue().primarySubstanceId === item.id
+            "
+          >
+            <div class="substance-name">
+              {{ item.name }}
+            </div>
+
+            <mat-radio-button
+              (click)="$event.stopPropagation()"
+              [checked]="
+                episodeForm.getRawValue().primarySubstanceId === item.id
+              "
+              (change)="selectPrimarySubstance(item.id)"
+            ></mat-radio-button>
+
+            <div class="secondary-order">
+              <span
+                class="order-badge"
+                [class.primary-badge]="
+                  episodeForm.getRawValue().primarySubstanceId === item.id
+                "
+              >
+                {{
+                  episodeForm.getRawValue().primarySubstanceId === item.id
+                    ? "Principal"
+                    : getSecondarySubstanceOrder(item.id) || "-"
+                }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="substances-table">
+          <div class="substances-header">
+            <div class="col-name"></div>
+            <div class="col-main">PPAL.</div>
+            <div class="col-secondary">SEC.</div>
+          </div>
+
+          <div
+            *ngFor="let item of thirdSubstanceColumn"
+            class="substance-row"
+            (click)="toggleSecondarySubstance(item.id)"
+            [class.primary-selected]="
+              episodeForm.getRawValue().primarySubstanceId === item.id
+            "
+          >
+            <div class="substance-name">
+              {{ item.name }}
+            </div>
+
+            <mat-radio-button
+              (click)="$event.stopPropagation()"
+              [checked]="
+                episodeForm.getRawValue().primarySubstanceId === item.id
+              "
+              (change)="selectPrimarySubstance(item.id)"
+            ></mat-radio-button>
+
+            <div class="secondary-order">
+              <span
+                class="order-badge"
+                [class.primary-badge]="
+                  episodeForm.getRawValue().primarySubstanceId === item.id
+                "
+              >
+                {{
+                  episodeForm.getRawValue().primarySubstanceId === item.id
+                    ? "P"
+                    : getSecondarySubstanceOrder(item.id) || "-"
+                }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="substances-help" *ngIf="substances.length">
+        Click en una fila para asignar o quitar el orden secundario.
       </div>
 
       <div class="empty-banner warning">
         <mat-icon>lock</mat-icon>
         <span>
-          La selección de sustancias quedará preparada para asociarse al
+          La selecciÃ³n de sustancias quedarÃ¡ preparada para asociarse al
           episodio creado.
         </span>
       </div>
+
+      <div class="create-episode-actions">
+        <div class="episode-traceability-notice">
+          <mat-icon>verified_user</mat-icon>
+
+          <div>
+            <strong>Registro sujeto a trazabilidad</strong>
+
+            <p>
+              Revise cuidadosamente toda la informaciÃ³n antes de crear el
+              episodio. Una vez registrado, sus datos no podrÃ¡n modificarse ni
+              eliminarse directamente. Cualquier correcciÃ³n posterior deberÃ¡
+              realizarse mediante el procedimiento de reversa autorizado.
+            </p>
+
+            <p class="episode-traceability-notice__secondary">
+              Al crear el episodio se generarÃ¡ automÃ¡ticamente la primera etapa
+              asociada al programa actual.
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="episode-required-summary"
+          *ngIf="missingEpisodeRequiredFields.length"
+        >
+          <mat-icon>info</mat-icon>
+
+          <div>
+            <strong>Para continuar, complete los datos obligatorios:</strong>
+
+            <ul>
+              <li *ngFor="let field of missingEpisodeRequiredFields">
+                {{ field }}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="empty-banner error" *ngIf="episodeSaveError">
+          <mat-icon>error</mat-icon>
+          <span>{{ episodeSaveError }}</span>
+        </div>
+
+
+      </div>
     </div>
-
-    <div class="create-episode-actions">
-      <div class="episode-traceability-notice">
-        <mat-icon>verified_user</mat-icon>
-
-        <div>
-          <strong>Registro sujeto a trazabilidad</strong>
-
-          <p>
-            Revise cuidadosamente toda la información antes de crear el
-            episodio. Una vez registrado, sus datos no podrán modificarse ni
-            eliminarse directamente. Cualquier corrección posterior deberá
-            realizarse mediante el procedimiento de reversa autorizado.
-          </p>
-
-          <p class="episode-traceability-notice__secondary">
-            Al crear el episodio se generará automáticamente la primera etapa
-            asociada al programa actual.
-          </p>
-        </div>
-      </div>
-
-      <div
-        class="episode-required-summary"
-        *ngIf="missingEpisodeRequiredFields.length"
-      >
-        <mat-icon>info</mat-icon>
-
-        <div>
-          <strong> Para continuar, complete los datos obligatorios: </strong>
-
-          <ul>
-            <li *ngFor="let field of missingEpisodeRequiredFields">
-              {{ field }}
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="empty-banner error" *ngIf="episodeSaveError">
-        <mat-icon>error</mat-icon>
-        <span>{{ episodeSaveError }}</span>
-      </div>
-
-      <div class="create-episode-actions__buttons">
-        <button
-          mat-stroked-button
-          class="secondary-btn"
-          type="button"
-          [disabled]="isSavingEpisode"
-          (click)="closeCreateEpisodeForm()"
-        >
-          <mat-icon>close</mat-icon>
-          Cancelar
-        </button>
-
-        <button
-          mat-flat-button
-          class="primary-btn"
-          type="button"
-          [disabled]="isSavingEpisode || !selectedPerson || episodeForm.invalid"
-          (click)="createEpisode()"
-        >
-          <mat-icon>
-            {{ isSavingEpisode ? "hourglass_empty" : "save" }}
-          </mat-icon>
-
-          {{ isSavingEpisode ? "Creando episodio..." : "Crear episodio" }}
-        </button>
-      </div>
     </div>
   </mat-card>
 
@@ -3308,7 +3346,7 @@
                   {{
                     citation.professionName ||
                       citation.profession?.name ||
-                      "Profesión no informada"
+                      "ProfesiÃ³n no informada"
                   }}
                 </span>
               </div>
@@ -3317,8 +3355,8 @@
                 mat-icon-button
                 type="button"
                 color="primary"
-                matTooltip="Imprimir comprobante de citación"
-                aria-label="Imprimir comprobante de citación"
+                matTooltip="Imprimir comprobante de citaciÃ³n"
+                aria-label="Imprimir comprobante de citaciÃ³n"
                 (click)="printCitation(citation)"
               >
                 <mat-icon>print</mat-icon>
@@ -3380,7 +3418,7 @@
 
         <div>
           <h3>Observaciones recientes de la etapa actual</h3>
-          <p>Últimas observaciones registradas.</p>
+          <p>Ãšltimas observaciones registradas.</p>
         </div>
       </div>
 
@@ -3483,9 +3521,9 @@
             Trazabilidad del episodio
           </span>
 
-          <h2>Últimas gestiones</h2>
+          <h2>Ãšltimas gestiones</h2>
 
-          <p>Eventos registrados desde el más reciente al más antiguo.</p>
+          <p>Eventos registrados desde el mÃ¡s reciente al mÃ¡s antiguo.</p>
         </div>
       </div>
 
@@ -3495,7 +3533,7 @@
       >
         <strong>{{ episodeEvents.length }}</strong>
         <span>
-          {{ episodeEvents.length === 1 ? "gestión" : "gestiones" }}
+          {{ episodeEvents.length === 1 ? "gestiÃ³n" : "gestiones" }}
         </span>
       </div>
     </div>
@@ -3556,7 +3594,7 @@
 
       <div class="history-order-indicator">
         <mat-icon>south</mat-icon>
-        <span>Más reciente primero</span>
+        <span>MÃ¡s reciente primero</span>
       </div>
     </div>
 
@@ -3597,7 +3635,7 @@
 
       <div>
         <strong>Sin gestiones registradas</strong>
-        <span> Este episodio todavía no posee eventos registrados. </span>
+        <span> Este episodio todavÃ­a no posee eventos registrados. </span>
       </div>
     </div>
 
@@ -3658,7 +3696,7 @@
                 <br />
 
                 <span class="event-type-code">
-                  Programa / etapa ·
+                  Programa / etapa Â·
                   {{ getEventProgramContext(event).displayLabel }}
                 </span>
               </div>
@@ -3724,7 +3762,7 @@
               <mat-icon>badge</mat-icon>
 
               <div>
-                <span>Profesión</span>
+                <span>ProfesiÃ³n</span>
                 <strong>{{ professionName }}</strong>
               </div>
             </div>
@@ -3736,13 +3774,13 @@
               <mat-icon>link</mat-icon>
 
               <div>
-                <span>Citación relacionada</span>
+                <span>CitaciÃ³n relacionada</span>
 
                 <strong>
                   {{ getCitationDisplayName(relatedCitation) }}
-                  ·
+                  Â·
                   {{ formatDisplayDate(relatedCitation.eventDate) }}
-                  ·
+                  Â·
                   {{ formatDisplayTime(relatedCitation.eventTime) }}
                 </strong>
               </div>
@@ -3772,7 +3810,7 @@
             <div class="event-content-block" *ngIf="event.citationComment">
               <span class="event-content-block__label">
                 <mat-icon>event_note</mat-icon>
-                Comentario de citación
+                Comentario de citaciÃ³n
               </span>
 
               <p>{{ event.citationComment }}</p>
@@ -3781,7 +3819,7 @@
             <div class="event-content-block" *ngIf="event.observation">
               <span class="event-content-block__label">
                 <mat-icon>visibility</mat-icon>
-                Observación
+                ObservaciÃ³n
               </span>
 
               <p>{{ event.observation }}</p>
@@ -3790,7 +3828,7 @@
             <div class="event-content-block" *ngIf="event.nextAction">
               <span class="event-content-block__label">
                 <mat-icon>next_plan</mat-icon>
-                Próxima acción
+                PrÃ³xima acciÃ³n
               </span>
 
               <p>{{ event.nextAction }}</p>
@@ -3802,7 +3840,7 @@
             >
               <span class="event-content-block__label">
                 <mat-icon>event</mat-icon>
-                Fecha próxima acción
+                Fecha prÃ³xima acciÃ³n
               </span>
 
               <p>{{ formatDisplayDate(event.nextActionDate) }}</p>
@@ -3845,7 +3883,7 @@
       </article>
     </div>
 
-    <!-- VER MÁS / VER MENOS -->
+    <!-- VER MÃS / VER MENOS -->
     <div
       class="history-load-actions"
       *ngIf="
@@ -3866,12 +3904,12 @@
 
         {{
           showAllHistory
-            ? "Mostrar solo las últimas gestiones"
+            ? "Mostrar solo las Ãºltimas gestiones"
             : "Ver historial completo"
         }}
 
         <span *ngIf="!showAllHistory && hiddenHistoryCount">
-          ({{ hiddenHistoryCount }} más)
+          ({{ hiddenHistoryCount }} mÃ¡s)
         </span>
       </button>
     </div>
@@ -3890,9 +3928,9 @@
     type="button"
     class="back-to-navigation-button"
     (click)="scrollToLongitudinalNavigation()"
-    aria-label="Volver al índice de secciones"
+    aria-label="Volver al Ã­ndice de secciones"
   >
     <mat-icon>keyboard_arrow_up</mat-icon>
-    <span>Volver al índice</span>
+    <span>Volver al Ã­ndice</span>
   </button>
 </div>

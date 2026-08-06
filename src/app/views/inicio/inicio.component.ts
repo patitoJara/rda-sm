@@ -457,6 +457,35 @@ export class InicioComponent implements OnInit, OnDestroy {
     return option?.name ?? this.formatCodeLabel(code, 'Sin resultado');
   }
 
+  getSemaphoreColorByDays(
+    accumulatedDays: number | null | undefined,
+  ): 'VERDE' | 'AMARILLO' | 'ROJO' {
+    const days = Math.max(0, Number(accumulatedDays ?? 0));
+
+    if (days >= 91) {
+      return 'ROJO';
+    }
+
+    if (days >= 46) {
+      return 'AMARILLO';
+    }
+
+    return 'VERDE';
+  }
+
+  getSemaphoreLabelByDays(
+    accumulatedDays: number | null | undefined,
+  ): string {
+    const color = this.getSemaphoreColorByDays(accumulatedDays);
+
+    const labels: Record<'VERDE' | 'AMARILLO' | 'ROJO', string> = {
+      VERDE: 'Dentro de plazo: hasta 45 días',
+      AMARILLO: 'Seguimiento: entre 46 y 90 días',
+      ROJO: 'Caso crítico: 91 días o más',
+    };
+
+    return labels[color];
+  }
   getSemaphoreLabel(value: string | null | undefined): string {
     const code = String(value ?? '')
       .trim()

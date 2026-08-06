@@ -223,21 +223,6 @@
   box-shadow:
     0 8px 20px rgba(21, 79, 91, 0.075),
     inset 0 1px 0 rgba(255, 255, 255, 0.95);
-
-  transition:
-    transform 180ms ease,
-    border-color 180ms ease,
-    box-shadow 180ms ease;
-}
-
-.person-editor-section:hover {
-  transform: translateY(-1px);
-
-  border-color: #a8ccd2;
-
-  box-shadow:
-    0 12px 26px rgba(21, 79, 91, 0.105),
-    inset 0 1px 0 #ffffff;
 }
 
 .person-editor-section__header {
@@ -313,14 +298,6 @@
 
   box-shadow:
     0 5px 14px rgba(21, 79, 91, 0.055),
-    inset 0 1px 0 #ffffff;
-}
-
-.person-editor-card--editing .person-editor-section:hover {
-  border-color: #a8ccd2;
-
-  box-shadow:
-    0 8px 18px rgba(21, 79, 91, 0.085),
     inset 0 1px 0 #ffffff;
 }
 
@@ -414,21 +391,19 @@
 }
 
 :host ::ng-deep .person-editor-form .mat-mdc-form-field-icon-prefix {
-  flex: 0 0 34px;
-
-  width: 34px;
-  min-width: 34px;
-
   display: flex;
   align-items: center;
   justify-content: center;
 
+  flex: 0 0 34px;
+  width: 34px;
+  min-width: 34px;
+  height: 42px;
+
   margin: 0 !important;
-  padding: 0 4px 0 7px !important;
+  padding: 0 !important;
 
   border: 0 !important;
-  border-radius: 0;
-
   background: transparent;
 
   box-shadow: none !important;
@@ -465,11 +440,29 @@
 :host ::ng-deep .person-editor-form input.mat-mdc-input-element,
 :host ::ng-deep .person-editor-form .mat-mdc-select-value,
 :host ::ng-deep .person-editor-form .mat-mdc-select-value-text {
+  min-width: 0;
+
   color: #173f49;
 
   font-size: 0.82rem;
   font-weight: 700;
   line-height: 1.15;
+}
+
+:host ::ng-deep .person-editor-form .mat-mdc-select-trigger {
+  min-width: 0;
+  gap: 6px;
+}
+
+:host ::ng-deep .person-editor-form .mat-mdc-select-value {
+  overflow: hidden;
+}
+
+:host ::ng-deep .person-editor-form .mat-mdc-select-value-text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Bordes normales */
@@ -876,6 +869,67 @@
   margin-top: 24px !important;
 }
 
+/* =========================================================
+   ADVERTENCIA PREVISIONAL
+========================================================= */
+
+.person-editor-prevision-warning {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+
+  margin-top: 14px;
+  padding: 14px 16px;
+
+  border: 1px solid rgba(183, 121, 8, 0.34);
+  border-left: 5px solid #b77908;
+  border-radius: 14px;
+
+  background: linear-gradient(
+    135deg,
+    rgba(255, 247, 225, 0.96) 0%,
+    rgba(255, 252, 244, 0.98) 100%
+  );
+
+  color: #6d4c0f;
+
+  box-shadow:
+    0 6px 16px rgba(130, 84, 8, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+}
+
+.person-editor-prevision-warning > mat-icon {
+  flex: 0 0 auto;
+
+  width: 24px;
+  height: 24px;
+  margin-top: 1px;
+
+  color: #a96805;
+  font-size: 24px;
+}
+
+.person-editor-prevision-warning strong {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #6a4508;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.person-editor-prevision-warning p {
+  margin: 0;
+
+  color: #75551d;
+  font-size: 0.9rem;
+  line-height: 1.48;
+}
+
+.person-editor-prevision-warning p + p {
+  margin-top: 6px;
+}
 /* =========================================================
    RESPONSIVE
 ========================================================= */

@@ -153,13 +153,27 @@
       <div class="bottom-section">
         <mat-card appearance="outlined" class="programs-card">
           <mat-card-header>
-            <mat-card-title
-              >Programas <span class="required">*</span></mat-card-title
+            <mat-card-title>
+              Programas
+              <span class="required" *ngIf="programIsRequired">*</span>
+            </mat-card-title>
+
+            <mat-card-subtitle>
+              {{ programIsRequired ? 'Obligatorio para el rol ADMINISTRATIVO' :
+              'No requerido para el rol seleccionado' }}
+            </mat-card-subtitle>
+
+            <mat-error
+              *ngIf="
+        programIsRequired &&
+        form.get('programs')?.touched &&
+        !form.get('programs')?.value?.length
+      "
             >
-            <mat-error *ngIf="form.get('programs')?.hasError('required')">
-              El programa es obligatoria
+              El rol ADMINISTRATIVO requiere al menos un programa
             </mat-error>
           </mat-card-header>
+
           <mat-card-content class="scrollable-content">
             <mat-selection-list
               formControlName="programs"
@@ -177,13 +191,20 @@
 
         <mat-card appearance="outlined" class="role-card">
           <mat-card-header>
-            <mat-card-title
-              >Roles <span class="required">*</span></mat-card-title
+            <mat-card-title>
+              Roles <span class="required">*</span>
+            </mat-card-title>
+
+            <mat-error
+              *ngIf="
+        form.get('roles')?.touched &&
+        !form.get('roles')?.value?.length
+      "
             >
-            <mat-error *ngIf="form.get('roles')?.hasError('required')">
-              El rol es obligatorio
+              Debe seleccionar al menos un rol
             </mat-error>
           </mat-card-header>
+
           <mat-card-content>
             <mat-selection-list formControlName="roles" class="scrollable-list">
               <mat-list-option *ngFor="let role of roles" [value]="role.id">
@@ -199,13 +220,18 @@
 </div>
 
 <div mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()">Cancelar</button>
+  <button mat-button type="button" (click)="cancel()" [disabled]="isSaving">
+    Cancelar
+  </button>
   <button
     mat-flat-button
     color="primary"
+    type="button"
     (click)="save()"
-    [disabled]="form.invalid"
+    [disabled]="form.invalid || isSaving"
   >
-    Guardar
+    <mat-icon>{{ isSaving ? 'hourglass_top' : 'save' }}</mat-icon>
+
+    {{ isSaving ? 'Guardando…' : 'Guardar' }}
   </button>
 </div>

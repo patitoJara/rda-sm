@@ -6,6 +6,7 @@
   <div class="login-wrapper role-select-wrapper">
     <mat-card class="login-card role-select-card" appearance="outlined">
       <div class="card-topline"></div>
+
       <div class="login-header">
         <img
           src="../../../assets/logoSSM.png"
@@ -18,8 +19,8 @@
         <h2>Bienvenido/a, {{ userFullName }}</h2>
 
         <p *ngIf="!isStructuralAdmin">
-          Selecciona el rol y programa con el cual deseas trabajar en esta
-          sesión.
+          Selecciona el rol con el cual deseas trabajar en esta sesión. El
+          programa solo es obligatorio para el rol ADMINISTRATIVO.
         </p>
 
         <p *ngIf="isStructuralAdmin">
@@ -29,10 +30,15 @@
       </div>
 
       <div class="role-program-row" *ngIf="!isStructuralAdmin">
+        <!-- Rol -->
         <div class="role-program-item" *ngIf="userRoles.length > 1">
           <mat-form-field appearance="fill">
             <mat-label>Rol</mat-label>
-            <mat-select [(ngModel)]="activeRole">
+
+            <mat-select
+              [(ngModel)]="activeRole"
+              (selectionChange)="onRoleChange($event.value)"
+            >
               <mat-option *ngFor="let r of userRoles" [value]="r">
                 {{ r }}
               </mat-option>
@@ -40,9 +46,14 @@
           </mat-form-field>
         </div>
 
-        <div class="role-program-item" *ngIf="userPrograms.length > 1">
+        <!-- Programa: solo para ADMINISTRATIVO -->
+        <div
+          class="role-program-item"
+          *ngIf="activeRoleRequiresProgram && userPrograms.length > 1"
+        >
           <mat-form-field appearance="fill">
             <mat-label>Programa</mat-label>
+
             <mat-select
               [(ngModel)]="activeProgram"
               (selectionChange)="onProgramChange($event.value)"
@@ -68,47 +79,37 @@
       </div>
 
       <div class="login-form">
-        <!-- Rol -->
-        <!--         
-        <mat-form-field appearance="fill" class="login-field">
-          <mat-label>Rol</mat-label>
-          <mat-select [(value)]="activeRole">
-            <mat-option *ngFor="let role of userRoles" [value]="role">
-              {{ role }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-
--->
-
-        <!-- Programa -->
-        <!--         
-        <mat-form-field appearance="fill" class="login-field">
-          <mat-label>Programa</mat-label>
-          <mat-select [(value)]="activeProgram">
-            <mat-option *ngFor="let program of userPrograms" [value]="program">
-              {{ program }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
--->
-        <!-- Sin roles o programas -->
-
+        <!-- Sin roles -->
         <div
-          *ngIf="
-            !isStructuralAdmin &&
-            (userRoles.length === 0 || userPrograms.length === 0)
-          "
+          *ngIf="!isStructuralAdmin && userRoles.length === 0"
           class="alert-msg"
         >
           <mat-icon>error_outline</mat-icon>
+
           <span>
-            No tienes roles o programas asociados.<br />
+            No tienes roles asociados.<br />
             Solicita al administrador que revise tu configuración.
           </span>
         </div>
 
-        <!-- BOTONES (click)="logout()"  -->
+        <!-- ADMINISTRATIVO sin programas -->
+        <div
+          *ngIf="
+            !isStructuralAdmin &&
+            userRoles.length > 0 &&
+            activeRoleRequiresProgram &&
+            userPrograms.length === 0
+          "
+          class="alert-msg"
+        >
+          <mat-icon>error_outline</mat-icon>
+
+          <span>
+            El rol ADMINISTRATIVO requiere un programa asociado.<br />
+            Solicita al administrador que revise tu configuración.
+          </span>
+        </div>
+
         <div class="login-actions">
           <button
             mat-stroked-button

@@ -59,7 +59,6 @@
   z-index: 25;
 
   display: flex;
-  align-items: center;
   gap: 12px;
 
   margin: -2px 0 18px;
@@ -118,7 +117,6 @@
   display: grid;
   grid-template-columns: 64px minmax(0, 1fr) auto;
   gap: 16px;
-  align-items: center;
 }
 
 .avatar-placeholder {
@@ -138,7 +136,6 @@
 }
 
 .person-main-data {
-  min-width: 0;
 
   h2 {
     margin: 8px 0 4px;
@@ -156,8 +153,7 @@
 
   span {
     display: inline-flex;
-    align-items: center;
-    min-height: 26px;
+      min-height: 26px;
     padding: 4px 10px;
     border-radius: 999px;
     background: #eef7f8;
@@ -181,7 +177,6 @@
     color: #55747b;
     font-size: 0.75rem;
     font-weight: 850;
-    text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
@@ -201,9 +196,7 @@
 
 .demandant-data-item {
   display: flex;
-  align-items: center;
   gap: 10px;
-  min-width: 0;
   padding: 11px 12px;
   border-radius: 16px;
   background: #ffffff;
@@ -221,7 +214,6 @@
   }
 
   div {
-    min-width: 0;
   }
 
   span {
@@ -229,7 +221,6 @@
     color: #6a8087;
     font-size: 0.74rem;
     font-weight: 850;
-    text-transform: uppercase;
     letter-spacing: 0.04em;
   }
 
@@ -319,8 +310,6 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-
-  min-width: 0;
   min-height: 142px;
   padding: 16px;
 
@@ -350,7 +339,6 @@
   }
 
   &__content {
-    min-width: 0;
   }
 
   span {
@@ -432,7 +420,6 @@
   --result-icon: #ffedbb;
 
   display: flex;
-  align-items: center;
   gap: 13px;
 
   margin-top: 13px;
@@ -467,7 +454,6 @@
 
   strong {
     display: block;
-    margin-top: 2px;
     font-size: 1rem;
     font-weight: 950;
   }
@@ -537,7 +523,6 @@
 
 .longitudinal-tabs__scroll {
   display: flex;
-  align-items: center;
   gap: 5px;
 
   width: 100%;
@@ -560,7 +545,6 @@
   min-height: 38px;
 
   display: inline-flex;
-  align-items: center;
   justify-content: center;
   gap: 6px;
 
@@ -577,7 +561,6 @@
   font-weight: 700;
   line-height: 1;
 
-  cursor: pointer;
 
   transition:
     color 180ms ease,
@@ -590,7 +573,6 @@
   width: 17px;
   height: 17px;
   font-size: 17px;
-  opacity: 0.78;
 }
 
 .longitudinal-tabs button:hover {
@@ -642,8 +624,10 @@
 }
 
 .current-demand-grid {
-  grid-template-columns: 0.8fr 1.4fr 0.8fr;
-  align-items: start;
+  grid-template-columns: 0.8fr 1.4fr;
+  #trayectoria { grid-area: 2 / 1; }
+  .episode-milestones-card { grid-area: 1 / 2 / span 3; }
+  > .current-demand-card:last-child { grid-area: 3 / 1; }
 }
 
 .current-demand-grid--without-episode {
@@ -803,7 +787,6 @@
 
 .indicator-semaphore {
   display: flex !important;
-  align-items: center;
   gap: 12px;
   min-height: 60px;
 }
@@ -822,7 +805,6 @@
   display: flex;
   align-items: baseline;
   gap: 8px;
-  min-width: 0;
   flex-wrap: wrap;
 }
 
@@ -924,7 +906,6 @@
 
 .episode-document-item {
   display: flex;
-  align-items: center;
   gap: 12px;
 
   padding: 12px 14px;
@@ -957,7 +938,6 @@
 }
 
 .episode-document-info {
-  min-width: 0;
 
   display: flex;
   flex-direction: column;
@@ -966,7 +946,6 @@
 
 .episode-document-info strong {
   color: #173f49;
-  font-size: 0.86rem;
   overflow-wrap: anywhere;
 }
 
@@ -1063,7 +1042,6 @@
   padding: 0 17px;
 
   display: inline-flex;
-  align-items: center;
   gap: 7px;
 
   border-radius: 999px;
@@ -1276,225 +1254,202 @@
 
 .operative-dock {
   display: grid;
-  grid-template-columns: 235px minmax(0, 1fr);
-  align-items: center;
-  gap: 14px;
-
-  margin-top: 12px;
-  padding: 12px 14px;
-
-  border-radius: 18px;
-
-  background: #105760;
-
-  box-shadow:
-    0 10px 24px rgba(9, 68, 78, 0.14),
-    0 2px 6px rgba(9, 68, 78, 0.08);
+  grid-template-columns: minmax(250px, 0.72fr) minmax(0, 2.28fr);
+  gap: 16px;
+  margin: 18px 0;
+  padding: 16px;
+  border: 1px solid rgba(15, 118, 135, 0.18);
+  border-radius: 20px;
+  background: linear-gradient(135deg, #f4fbfc 0%, #ffffff 68%);
 }
 
 .operative-dock__title {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 4px 8px 4px 2px;
 
-  min-width: 0;
-  color: #ffffff;
-
-  > mat-icon {
-    width: 22px;
-    height: 22px;
-    min-width: 22px;
-
-    color: #c8f5f8;
-
-    font-size: 22px;
-    line-height: 22px;
+  > div {
   }
 
   strong,
+  p,
   span {
     display: block;
   }
 
   strong {
-    color: #ffffff;
-
-    font-size: 0.88rem;
+    color: #123f48;
+    font-size: 1.18rem;
     font-weight: 950;
     line-height: 1.2;
-
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
   }
 
-  span {
-    margin-top: 3px;
-
-    color: rgba(255, 255, 255, 0.92);
-
-    font-size: 0.72rem;
+  p {
+    margin: 6px 0 0;
+    color: #52727a;
+    font-size: 0.88rem;
     font-weight: 650;
-    line-height: 1.25;
-  }
-}
+    line-height: 1.4;
 
-.operative-dock__actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex-wrap: nowrap;
-  gap: 7px;
-
-  min-width: 0;
-}
-
-.dock-action-button {
-  min-width: 0;
-  min-height: 38px;
-  height: 38px;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-
-  padding: 0 11px;
-
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 999px;
-
-  background: rgba(255, 255, 255, 0.14);
-  color: #ffffff;
-
-  font-family: inherit;
-  font-size: 0.73rem;
-  font-weight: 900;
-  letter-spacing: 0.005em;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.18);
-
-  cursor: pointer;
-
-  transition:
-    background-color 180ms ease,
-    border-color 180ms ease,
-    color 180ms ease,
-    box-shadow 180ms ease,
-    transform 180ms ease;
-
-  mat-icon {
-    width: 17px;
-    height: 17px;
-    min-width: 17px;
-
-    color: #a5e9f1;
-
-    font-size: 17px;
-    line-height: 17px;
-  }
-
-  &:hover:not(:disabled) {
-    border-color: rgba(255, 255, 255, 0.28);
-
-    background: rgba(255, 255, 255, 0.23);
-
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.13);
-
-    transform: translateY(-1px);
-  }
-
-  &:focus-visible {
-    outline: 3px solid rgba(151, 230, 239, 0.28);
-    outline-offset: 2px;
-  }
-
-  &:disabled {
-    border-color: rgba(255, 255, 255, 0.08);
-
-    background: rgba(255, 255, 255, 0.075);
-    color: rgba(255, 255, 255, 0.56);
-
-    cursor: not-allowed;
-    opacity: 1;
-    text-shadow: none;
-
-    mat-icon {
-      color: rgba(255, 255, 255, 0.48);
+    b {
+      color: #08798a;
+      font-weight: 900;
     }
   }
 }
 
-/* Colores propios, solo en el icono */
+.operative-dock__title-icon {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  display: inline-flex;
+  justify-content: center;
+  border-radius: 12px;
+  background: #08798a;
+  color: #ffffff;
 
-.dock-action-button:nth-child(1) mat-icon {
-  color: #9acbff;
-}
-
-.dock-action-button:nth-child(2) mat-icon {
-  color: #c9b8ff;
-}
-
-.dock-action-button:nth-child(3) mat-icon {
-  color: #ffd17d;
-}
-
-.dock-action-button:nth-child(4) mat-icon {
-  color: #8ee7f5;
-}
-
-.dock-action-button:nth-child(5) mat-icon {
-  color: #b7c2ff;
-}
-
-.dock-action-button:nth-child(6) mat-icon {
-  color: #91dfb4;
-}
-
-.dock-action-button:nth-child(7) mat-icon {
-  color: #ffabab;
-}
-
-/* ============================================================
-   RESPONSIVE
-============================================================ */
-
-@media (max-width: 1400px) {
-  .operative-dock {
-    grid-template-columns: 205px minmax(0, 1fr);
-    gap: 10px;
-  }
-
-  .dock-action-button {
-    padding-inline: 9px;
-
-    font-size: 0.65rem;
+  mat-icon {
+    width: 21px;
+    height: 21px;
+    font-size: 21px;
+    line-height: 21px;
   }
 }
 
-@media (max-width: 1180px) {
-  .operative-dock {
-    grid-template-columns: 1fr;
+.operative-dock__eyebrow {
+  color: #08798a;
+  font-size: 0.74rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+}
+
+.operative-dock__actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.dock-action-button {
+  min-height: 76px;
+  display: flex;
+  gap: 10px;
+  padding: 11px 12px;
+  border: 1px solid #d8e8eb;
+  border-radius: 15px;
+  background: #ffffff;
+  color: #234f57;
+  text-align: left;
+
+  &:hover:not(:disabled) {
+    border-color: #7fc8d1;
   }
 
+  &:disabled {
+    border-color: #e3e8e9;
+    background: #f5f7f7;
+    color: #7e9094;
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: 1;
+  }
+}
+
+.dock-action-button__icon {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  display: inline-flex;
+  justify-content: center;
+  border-radius: 11px;
+  background: #eaf7f8;
+  color: #08798a;
+
+  mat-icon {
+    width: 19px;
+    height: 19px;
+    font-size: 19px;
+    line-height: 19px;
+  }
+}
+
+.dock-action-button__content {
+
+  small,
+  strong,
+  span {
+    display: block;
+  }
+
+  small {
+    margin-bottom: 2px;
+    color: #08798a;
+    font-size: 0.70rem;
+    font-weight: 950;
+  }
+
+  strong {
+    color: inherit;
+    font-size: 0.96rem;
+    font-weight: 950;
+    line-height: 1.2;
+  }
+
+  span {
+    margin-top: 3px;
+    color: #678087;
+    font-size: 0.78rem;
+    font-weight: 750;
+    line-height: 1.35;
+  }
+}
+
+.dock-action-button--recommended {
+  grid-column: auto;
+  border-color: #08798a;
+  background: linear-gradient(135deg, #e7f8fa 0%, #ffffff 100%);
+
+  .dock-action-button__icon {
+    background: #08798a;
+    color: #ffffff;
+  }
+}
+
+.dock-action-button--blocked {
+  .dock-action-button__icon {
+    background: #eceff0;
+    color: #7c8b8e;
+  }
+
+  .dock-action-button__content span {
+    color: #879699;
+  }
+}
+
+
+@media (max-width: 820px) {
   .operative-dock__actions {
-    justify-content: flex-start;
-    flex-wrap: wrap;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dock-action-button--recommended {
+    grid-column: auto;
   }
 }
 
 @media (max-width: 600px) {
   .operative-dock {
-    padding: 11px;
+    padding: 13px;
   }
 
   .operative-dock__actions {
-    display: grid;
     grid-template-columns: 1fr;
   }
 
-  .dock-action-button {
-    width: 100%;
+  .dock-action-button--recommended {
+    grid-column: auto;
   }
 }
-
 /* =========================================================
    HITOS DEL EPISODIO
    ========================================================= */
@@ -1509,7 +1464,6 @@
 
 .episode-milestones__header {
   display: flex;
-  align-items: center;
   gap: 10px;
   padding-bottom: 4px;
 }
@@ -1538,40 +1492,52 @@
 }
 
 .episode-milestone {
+  --hito: #087f8c;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 11px 13px;
+  gap: 12px;
+  padding: 10px 12px;
   background: #f7fbfb;
   border: 1px solid #d7e9eb;
+  border-left: 4px solid var(--hito);
   border-radius: 12px;
 }
 
 .episode-milestone--stacked {
   align-items: flex-start;
   flex-direction: column;
-  gap: 9px;
+  gap: 7px;
 }
 
 .episode-milestone__label {
   display: flex;
-  align-items: center;
   gap: 8px;
   color: #365e66;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .episode-milestone__label mat-icon {
-  width: 20px;
-  height: 20px;
-  color: #0b8794;
-  font-size: 20px;
+  color: var(--hito);
 }
 
-.episode-milestone > strong {
-  color: #123f49;
-  text-align: right;
+.episode-milestone-help summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 11px;
+  color: #124f5d;
+  background: #e8f5f8;
+  border: 1px solid #8fcbd4;
+  border-radius: 11px;
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-weight: 850;
+}
+
+.episode-milestone-help summary::before {
+  content: "?";
+  color: #08798a;
+  font-weight: 950;
 }
 
 .episode-milestone__list {
@@ -1581,57 +1547,46 @@
 }
 
 .episode-milestone__item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(150px, 190px) minmax(0, 1fr);
+  align-items: start;
   gap: 12px;
-  padding: 8px 10px;
-  background: #ffffff;
-  border: 1px solid #e0ecee;
-  border-radius: 9px;
+  padding: 9px 11px;
+  border-left: 4px solid #1783a0;
+  border-radius: 10px;
+  background: #eef8fb;
 }
 
 .episode-milestone__item span {
-  color: #4f6970;
+  color: #405f68;
+  font-size: 0.8rem;
+  font-weight: 650;
+  line-height: 1.4;
 }
 
 .episode-milestone__item strong {
-  color: #123f49;
-  white-space: nowrap;
+  color: #0d5668;
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1.35;
 }
 
-.episode-milestone__item--feedback {
-  align-items: flex-start;
-  flex-direction: column;
-  gap: 3px;
+.episode-milestone--completed {
+  --hito: #2e7d32;
 }
 
-.episode-milestone__pending {
-  width: 100%;
-  color: #789096;
-  font-style: italic;
-  text-align: right;
+.episode-milestone--reschedule {
+  --hito: #b26a00;
 }
 
-@media (max-width: 700px) {
-  .episode-milestone {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .episode-milestone > strong,
-  .episode-milestone__pending {
-    text-align: left;
-  }
-
-  .episode-milestone__item {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 4px;
-  }
+.episode-milestone--absent {
+  --hito: #b83b3b;
 }
 
+.episode-milestone--not-required,
+.episode-milestone--future {
+  --hito: #8a9a9e;
+}
 /* ESTRUCTURA HITOS OPERATIVOS */
 
 .operational-milestones {
@@ -1644,7 +1599,6 @@
 
 .operational-milestones__heading {
   display: flex;
-  align-items: center;
   gap: 9px;
   margin-bottom: 11px;
   color: #155e6b;
@@ -1688,9 +1642,7 @@
   --milestone-surface: #ffffff;
 
   display: flex;
-  align-items: center;
   gap: 9px;
-  min-width: 0;
   min-height: 78px;
   padding: 11px;
   box-sizing: border-box;
@@ -1707,13 +1659,11 @@
   padding: 6px;
   box-sizing: border-box;
   color: var(--milestone-color);
-  border-radius: 9px;
   background: var(--milestone-soft);
   font-size: 19px;
 }
 
 .operational-milestone > div {
-  min-width: 0;
 }
 
 .operational-milestone span,
@@ -1726,7 +1676,6 @@
   color: #63787f;
   font-size: 0.65rem;
   font-weight: 900;
-  text-transform: uppercase;
 }
 
 .operational-milestone strong {
@@ -1828,4 +1777,231 @@
   --result-background: #fff0f0;
   --result-color: #982323;
   --result-icon: #fbd7d7;
+}
+
+/* =========================================================
+   HITOS REALIZADOS Y DIAS TRANSCURRIDOS
+   ========================================================= */
+
+.episode-milestone--performed {
+  align-items: stretch;
+  gap: 18px;
+  padding: 14px 16px;
+  background:
+    linear-gradient(135deg, #f7fbfb 0%, #ffffff 100%);
+  border-left-color: #198754;
+}
+
+.episode-milestone__content {
+  display: grid;
+  align-content: start;
+  flex: 1;
+  min-width: 0;
+  gap: 9px;
+}
+
+.episode-milestone__performed-data {
+  display: grid;
+  gap: 5px;
+  padding-left: 32px;
+}
+
+.episode-milestone__performed-data > strong {
+  color: #123f49;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.episode-milestone__performed-data > span {
+  color: #405f68;
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.episode-milestone__performed-data > small {
+  margin-top: 3px;
+  color: #71858a;
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
+.episode-milestone__detail {
+  color: #315b65 !important;
+  font-weight: 750 !important;
+}
+
+.episode-milestone__elapsed {
+  display: flex;
+  align-self: stretch;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  flex: 0 0 132px;
+  min-height: 92px;
+  padding: 12px 14px;
+  text-align: center;
+  background:
+    linear-gradient(145deg, #e8f5f2 0%, #f7fcfb 100%);
+  border: 1px solid #b9ddd4;
+  border-radius: 14px;
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    0 5px 12px rgba(20, 91, 77, 0.07);
+}
+
+.episode-milestone__elapsed > strong {
+  color: #146c55;
+  font-size: 2.35rem;
+  font-weight: 950;
+  line-height: 0.95;
+}
+
+.episode-milestone__elapsed > span {
+  margin-top: 6px;
+  color: #174f43;
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.episode-milestone__elapsed > small {
+  margin-top: 4px;
+  color: #5c7c75;
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.episode-milestones__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 4px;
+  padding: 11px 13px;
+  color: #4f686e;
+  background: #f4f8f9;
+  border: 1px solid #d4e2e5;
+  border-radius: 11px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.episode-milestones__note mat-icon {
+  flex: 0 0 auto;
+  width: 19px;
+  height: 19px;
+  color: #287886;
+  font-size: 19px;
+}
+
+@media (max-width: 720px) {
+  .episode-milestone--performed {
+    flex-direction: column;
+  }
+
+  .episode-milestone__elapsed {
+    align-self: auto;
+    flex-basis: auto;
+    min-height: 0;
+    flex-direction: row;
+    gap: 6px;
+  }
+
+  .episode-milestone__elapsed > strong {
+    font-size: 1.75rem;
+  }
+
+  .episode-milestone__elapsed > span,
+  .episode-milestone__elapsed > small {
+    margin-top: 0;
+  }
+}
+/* ============================================================
+   TIEMPO DE ESPERA SEGÚN SEMÁFORO
+============================================================ */
+
+.operational-summary-card--success {
+  background: #eaf7ee;
+  border-color: #86c99a;
+}
+
+.operational-summary-card--success .operational-summary-card__icon,
+.operational-summary-card--success .operational-summary-card__number,
+.operational-summary-card--success small {
+  color: #24733b;
+}
+
+.operational-summary-card--warning {
+  background: #fff8df;
+  border-color: #e6c45d;
+}
+
+.operational-summary-card--warning .operational-summary-card__icon,
+.operational-summary-card--warning .operational-summary-card__number,
+.operational-summary-card--warning small {
+  color: #9a6a00;
+}
+
+.operational-summary-card--danger {
+  background: #fdecec;
+  border-color: #db8585;
+}
+
+.operational-summary-card--danger .operational-summary-card__icon,
+.operational-summary-card--danger .operational-summary-card__number,
+.operational-summary-card--danger small {
+  color: #a82c2c;
+}
+
+.operational-summary-card--neutral {
+  background: #f3f5f6;
+  border-color: #c9d1d4;
+}
+
+.operational-summary-card--neutral .operational-summary-card__icon,
+.operational-summary-card--neutral .operational-summary-card__number,
+.operational-summary-card--neutral small {
+  color: #5f6b70;
+}
+
+
+/* Prioridad visual del card Tiempo de espera */
+.episode-operational-summary
+  .operational-summary-card.operational-summary-card--success {
+  background: #eaf7ee !important;
+  border-color: #86c99a !important;
+}
+
+.episode-operational-summary
+  .operational-summary-card.operational-summary-card--warning {
+  background: #fff3c4 !important;
+  border-color: #d6a900 !important;
+}
+
+.episode-operational-summary
+  .operational-summary-card.operational-summary-card--danger {
+  background: #fde3e3 !important;
+  border-color: #c94b4b !important;
+}
+
+.episode-operational-summary
+  .operational-summary-card.operational-summary-card--neutral {
+  background: #f3f5f6 !important;
+  border-color: #c9d1d4 !important;
+}
+
+.episode-operational-summary
+  .operational-summary-card--warning
+  .operational-summary-card__icon,
+.episode-operational-summary
+  .operational-summary-card--warning
+  .operational-summary-card__number,
+.episode-operational-summary
+  .operational-summary-card--warning
+  small {
+  color: #8a6200 !important;
 }

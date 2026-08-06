@@ -1,0 +1,220 @@
+﻿<form [formGroup]="form" class="operation-form operation-form--feedback">
+  <div class="empty-banner success span-full" *ngIf="success">
+    <mat-icon>check_circle</mat-icon>
+    <span>{{ success }}</span>
+  </div>
+
+  <div class="feedback-intro span-full">
+    <mat-icon>assignment_turned_in</mat-icon>
+
+    <div>
+      <strong>Decisión de continuidad</strong>
+      <span>
+        Registre el compromiso biopsicosocial y el resultado definido para la persona.
+      </span>
+    </div>
+  </div>
+
+  <div class="feedback-kpi-note span-full">
+    <mat-icon>warning</mat-icon>
+
+    <span>
+      Al guardar la retroalimentación se dará por finalizada la etapa de entrevistas.
+      Después de esta acción no podrán registrarse nuevas citaciones en la atención actual.
+    </span>
+  </div>
+
+  <section class="feedback-help span-full">
+    <header>
+      <mat-icon>help_outline</mat-icon>
+
+      <div>
+        <strong>¿Qué ocurre según el resultado seleccionado?</strong>
+        <span>Revise el efecto antes de guardar la retroalimentación.</span>
+      </div>
+    </header>
+
+    <div class="feedback-help__grid">
+      <article>
+        <strong>Lista de espera</strong>
+        <span>
+          La demanda permanece abierta en el programa actual y continúa el conteo de días.
+        </span>
+      </article>
+
+      <article>
+        <strong>Referencia</strong>
+        <span>
+          Se cierra la atención del programa actual. El episodio permanece abierto y continúa en el programa receptor.
+        </span>
+      </article>
+
+      <article>
+        <strong>Ingreso a tratamiento</strong>
+        <span>
+          Se cierra la atención del programa actual, se cierra el episodio y se detiene el conteo.
+        </span>
+      </article>
+
+      <article>
+        <strong>Abandono</strong>
+        <span>
+          Se cierra la atención del programa actual, se cierra el episodio y se detiene el conteo.
+        </span>
+      </article>
+    </div>
+  </section>
+
+  <mat-form-field appearance="outline" floatLabel="always" class="feedback-field feedback-field--date">
+    <mat-label>Fecha de retroalimentación</mat-label>
+    <mat-icon matPrefix>event</mat-icon>
+
+    <input
+      matInput
+      [matDatepicker]="feedbackDatePicker"
+      formControlName="eventDate"
+      placeholder="dd/mm/aaaa"
+      readonly
+    />
+
+    <mat-datepicker-toggle
+      matSuffix
+      [for]="feedbackDatePicker"
+    ></mat-datepicker-toggle>
+
+    <mat-datepicker #feedbackDatePicker></mat-datepicker>
+
+    <mat-error *ngIf="form.get('eventDate')?.hasError('required')">
+      La fecha es obligatoria.
+    </mat-error>
+  </mat-form-field>
+
+  <div class="time-period-grid feedback-field feedback-field--time">
+    <mat-form-field
+      appearance="outline"
+      floatLabel="always"
+      class="time-hour-field"
+    >
+      <mat-label>Hora</mat-label>
+      <mat-icon matPrefix>schedule</mat-icon>
+
+      <input
+        matInput
+        type="text"
+        formControlName="eventHour"
+        placeholder="Ej: 01:30"
+        maxlength="5"
+        (blur)="hourBlur.emit()"
+      />
+
+      <mat-error *ngIf="form.get('eventHour')?.hasError('required')">
+        La hora es obligatoria.
+      </mat-error>
+
+      <mat-error *ngIf="form.get('eventHour')?.hasError('pattern')">
+        Use formato válido. Ej: 01:30.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" floatLabel="always">
+      <mat-label>AM / PM</mat-label>
+      <mat-icon matPrefix>more_time</mat-icon>
+
+      <mat-select
+        formControlName="eventPeriod"
+        panelClass="person-editor-select-panel"
+      >
+        <mat-option value="AM">AM</mat-option>
+        <mat-option value="PM">PM</mat-option>
+      </mat-select>
+
+      <mat-error *ngIf="form.get('eventPeriod')?.hasError('required')">
+        Debe seleccionar AM o PM.
+      </mat-error>
+    </mat-form-field>
+  </div>
+
+  <mat-form-field appearance="outline" floatLabel="always" class="feedback-field feedback-field--professional">
+    <mat-label>Profesional que la realizó</mat-label>
+    <mat-icon matPrefix>person</mat-icon>
+
+    <mat-select
+      formControlName="programProfessionalId"
+      panelClass="person-editor-select-panel"
+      (selectionChange)="professionalChange.emit($event.value)"
+    >
+      <mat-option *ngFor="let item of professionals" [value]="item.id">
+        {{ item.name }}
+        <span *ngIf="item.professionName">
+          — {{ item.professionName }}
+        </span>
+      </mat-option>
+    </mat-select>
+
+    <mat-error
+      *ngIf="form.get('programProfessionalId')?.hasError('required')"
+    >
+      Debe seleccionar el profesional.
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" floatLabel="always" class="feedback-field feedback-field--commitment">
+    <mat-label>Compromiso biopsicosocial</mat-label>
+    <mat-icon matPrefix>psychology</mat-icon>
+
+    <mat-select
+      formControlName="biopsychosocialCommitmentCode"
+      panelClass="person-editor-select-panel"
+    >
+      <mat-option
+        *ngFor="let item of commitmentLevels"
+        [value]="item.code"
+      >
+        {{ item.name }}
+      </mat-option>
+    </mat-select>
+
+    <mat-error
+      *ngIf="form.get('biopsychosocialCommitmentCode')?.hasError('required')"
+    >
+      Debe seleccionar el nivel de compromiso.
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" floatLabel="always" class="feedback-field feedback-field--result">
+    <mat-label>Resultado</mat-label>
+    <mat-icon matPrefix>fact_check</mat-icon>
+
+    <mat-select
+      formControlName="resultCode"
+      panelClass="person-editor-select-panel"
+    >
+      <mat-option *ngFor="let item of results" [value]="item.code">
+        {{ item.name }}
+      </mat-option>
+    </mat-select>
+
+    <mat-error *ngIf="form.get('resultCode')?.hasError('required')">
+      Debe seleccionar el resultado.
+    </mat-error>
+  </mat-form-field>
+
+  <div
+    class="feedback-result-note span-full"
+    [class.feedback-result-note--warning]="selectedResultHelp.tone === 'warning'"
+    [class.feedback-result-note--success]="selectedResultHelp.tone === 'success'"
+    [class.feedback-result-note--danger]="selectedResultHelp.tone === 'danger'"
+  >
+    <mat-icon>{{ selectedResultHelp.icon }}</mat-icon>
+
+    <div>
+      <strong>{{ selectedResultHelp.title }}</strong>
+      <span>{{ selectedResultHelp.message }}</span>
+    </div>
+  </div>
+
+  <div class="empty-banner error span-full" *ngIf="error">
+    <mat-icon>error</mat-icon>
+    <span>{{ error }}</span>
+  </div>
+</form>

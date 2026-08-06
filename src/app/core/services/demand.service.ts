@@ -127,6 +127,18 @@ export interface ReferenceEpisodeRequest {
   [key: string]: any;
 }
 
+export interface PurgeEpisodeResponse {
+  episodeId: number;
+  episodeCode: string;
+  postulantId: number;
+  databasePurged: boolean;
+  deletedRows: Record<string, number>;
+  deletedFiles: number;
+  failedFiles: number;
+  failedFilePaths: string[];
+  skippedUnsafeFilePaths: string[];
+}
+
 export interface CreateCitationRequest {
   citationDate: string;
   professionalId?: number;
@@ -334,6 +346,14 @@ export class DemandService {
     return this.http.post<EpisodeDTO>(
       `${this.demandUrl}/episodes/${episodeId}/close`,
       payload
+    );
+  }
+
+
+
+  purgeEpisode(episodeId: number): Observable<PurgeEpisodeResponse> {
+    return this.http.delete<PurgeEpisodeResponse>(
+      `${this.demandUrl}/episodes/${episodeId}/purge`
     );
   }
 

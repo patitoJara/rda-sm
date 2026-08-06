@@ -41,9 +41,9 @@ export class DashboardCardsComponent {
   }
 
   getColor(dias: number): string {
-    if (dias > 30) return '#d32f2f'; // rojo
+    if (dias >= 91) return '#d32f2f'; // rojo
 
-    if (dias > 15) return '#f9a825'; // amarillo
+    if (dias >= 46) return '#f9a825'; // amarillo
 
     return '#2e7d32'; // verde
   }

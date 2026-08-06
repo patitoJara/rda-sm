@@ -1,77 +1,103 @@
-{
-  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
-  "version": 1,
-  "projects": {
-    "rda-sm": {
-      "projectType": "application",
-      "root": "",
-      "sourceRoot": "src",
-      "architect": {
-        "build": {
-          "builder": "@angular-devkit/build-angular:application",
-          "options": {
-            "outputPath": "dist/rda-sm",
-            "index": "src/index.html",
-            "browser": "src/main.ts",
-            "polyfills": ["zone.js"],
-            "allowedCommonJsDependencies": ["moment"],
-            "tsConfig": "tsconfig.app.json",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
-            "styles": [
-              "src/styles.scss"
-            ],
-            "scripts": []
-          },
-          "configurations": {
-            "production": {
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "1.5mb",
-                  "maximumError": "2mb"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "85kB",
-                  "maximumError": "90kB"
-                }
-              ],
-              "outputHashing": "all"
-            },
-            "development": {
-              "optimization": false,
-              "extractLicenses": false,
-              "sourceMap": true
+﻿{
+    "$schema":  "./node_modules/@angular/cli/lib/config/schema.json",
+    "version":  1,
+    "projects":  {
+                     "rda-sm":  {
+                                    "projectType":  "application",
+                                    "root":  "",
+                                    "sourceRoot":  "src",
+                                    "architect":  {
+                                                      "build":  {
+                                                                    "builder":  "@angular-devkit/build-angular:application",
+                                                                    "options":  {
+                                                                                    "outputPath":  "dist/rda-sm",
+                                                                                    "index":  "src/index.html",
+                                                                                    "browser":  "src/main.ts",
+                                                                                    "polyfills":  [
+                                                                                                      "zone.js"
+                                                                                                  ],
+                                                                                    "allowedCommonJsDependencies":  [
+                                                                                                                        "moment"
+                                                                                                                    ],
+                                                                                    "tsConfig":  "tsconfig.app.json",
+                                                                                    "assets":  [
+                                                                                                   "src/favicon.ico",
+                                                                                                   "src/assets"
+                                                                                               ],
+                                                                                    "styles":  [
+                                                                                                   "src/styles.scss"
+                                                                                               ],
+                                                                                    "scripts":  [
+
+                                                                                                ]
+                                                                                },
+                                                                    "configurations":  {
+                                                                                           "production":  {
+                                                                                                              "budgets":  [
+                                                                                                                              {
+                                                                                                                                  "type":  "initial",
+                                                                                                                                  "maximumWarning":  "1.5mb",
+                                                                                                                                  "maximumError":  "2mb"
+                                                                                                                              },
+                                                                                                                              {
+                                                                                                                                  "type":  "anyComponentStyle",
+                                                                                                                                  "maximumWarning":  "95kB",
+                                                                                                                                  "maximumError":  "100kB"
+                                                                                                                              }
+                                                                                                                          ],
+                                                                                                              "outputHashing":  "all"
+                                                                                                          },
+                                                                                           "development":  {
+                                                                                                               "optimization":  false,
+                                                                                                               "extractLicenses":  false,
+                                                                                                               "sourceMap":  true
+                                                                                                           }
+                                                                                       },
+                                                                    "defaultConfiguration":  "production"
+                                                                },
+                                                      "serve":  {
+                                                                    "builder":  "@angular-devkit/build-angular:dev-server",
+                                                                    "options":  {
+                                                                                    "port":  4200,
+                                                                                    "host":  "localhost",
+                                                                                    "buildTarget":  "rda-sm:build",
+                                                                                    "open":  true
+                                                                                },
+                                                                    "configurations":  {
+                                                                                           "production":  {
+                                                                                                              "buildTarget":  "rda-sm:build:production"
+                                                                                                          },
+                                                                                           "development":  {
+                                                                                                               "buildTarget":  "rda-sm:build:development"
+                                                                                                           }
+                                                                                       },
+                                                                    "defaultConfiguration":  "development"
+                                                                },
+                                                      "test":  {
+                                                                   "builder":  "@angular-devkit/build-angular:karma",
+                                                                   "options":  {
+                                                                                   "polyfills":  [
+                                                                                                     "zone.js",
+                                                                                                     "zone.js/testing"
+                                                                                                 ],
+                                                                                   "tsConfig":  "tsconfig.spec.json",
+                                                                                   "assets":  [
+                                                                                                  "src/favicon.ico",
+                                                                                                  "src/assets"
+                                                                                              ],
+                                                                                   "styles":  [
+                                                                                                  "src/styles.scss"
+                                                                                              ],
+                                                                                   "scripts":  [
+
+                                                                                               ]
+                                                                               }
+                                                               }
+                                                  }
+                                }
+                 },
+    "cli":  {
+                "defaultProject":  "rda-sm",
+                "analytics":  "ce4b5620-b20e-4b14-88b2-7df34b079240"
             }
-          },
-          "defaultConfiguration": "production"
-        },
-        "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
-          "options": {
-            "port": 4200,
-            "host": "localhost",
-            "buildTarget": "rda-sm:build",
-            "open": true
-          },
-          "configurations": {
-            "production": {
-              "buildTarget": "rda-sm:build:production"
-            },
-            "development": {
-              "buildTarget": "rda-sm:build:development"
-            }
-          },
-          "defaultConfiguration": "development"
-        }
-      }
-    }
-  },
-  "cli": {
-    "defaultProject": "rda-sm",
-    "analytics": "ce4b5620-b20e-4b14-88b2-7df34b079240"
-  }
 }

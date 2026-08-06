@@ -114,39 +114,85 @@
   line-height: 1.45;
 }
 
-.episode-creation-close {
-  flex: 0 0 auto;
 
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.13);
 
-  transition:
-    background 160ms ease,
-    transform 160ms ease;
-}
-
-.episode-creation-close:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.22);
-  transform: scale(1.04);
-}
-
-.episode-creation-close:disabled {
-  opacity: 0.5;
-}
 
 /* ============================================================
    FORMULARIO
 ============================================================ */
 
-.episode-form-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px 16px;
+/* ============================================================
+   DISTRIBUCIÓN COMPACTA DE APERTURA
+============================================================ */
 
-  min-width: 0;
-  padding: 22px 24px 8px;
+.episode-opening-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  align-items: start;
+  gap: 12px;
+
+  padding: 12px 16px 0;
 
   background: #f7fafd;
+}
+
+.episode-opening-panel {
+  min-width: 0;
+}
+
+.episode-opening-panel--data {
+  border: 1px solid #c5d9e9;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.episode-form-section-title,
+.substances-title {
+  min-width: 0;
+}
+
+.episode-form-section-title > mat-icon,
+.substances-title > mat-icon {
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+}
+
+.episode-form-section-title > div,
+.substances-title > div {
+  min-width: 0;
+}
+
+.episode-form-section-title strong,
+.episode-form-section-title span,
+.substances-title h3,
+.substances-title p {
+  overflow-wrap: anywhere;
+}
+
+.episode-opening-panel mat-form-field {
+  width: 100%;
+  min-width: 0;
+  font-size: 0.8rem;
+}
+
+:host ::ng-deep .episode-opening-panel .mat-mdc-form-field-infix {
+  min-width: 0;
+  min-height: 46px;
+  padding-top: 12px;
+  padding-bottom: 8px;
+}
+
+.episode-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 10px;
+
+  min-width: 0;
+  padding: 10px 10px 2px;
+
+  background: #ffffff;
 }
 
 .episode-form-grid > * {
@@ -161,20 +207,28 @@
   grid-column: 1 / -1;
 }
 
-/*
- * Los estilos internos de Angular Material para:
- * - íconos
- * - labels
- * - infix
- * - alturas
- * - hints
- * - errores
- *
- * se heredan desde .operation-form en operations.scss.
- */
+:host ::ng-deep .episode-form-grid .mat-mdc-floating-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+:host ::ng-deep .episode-form-grid input.mat-mdc-input-element,
+:host ::ng-deep .episode-form-grid .mat-mdc-select-value {
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+:host ::ng-deep
+  .episode-form-grid
+  .mat-mdc-form-field.mat-form-field-disabled
+  input.mat-mdc-input-element {
+  color: #60727c;
+  -webkit-text-fill-color: #60727c;
+}
 
 :host ::ng-deep .episode-form-grid textarea.mat-mdc-input-element {
-  min-height: 84px;
+  min-height: 54px;
   resize: vertical;
 }
 
@@ -185,10 +239,10 @@
 .episode-form-section-title {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 
-  margin: 4px 0 2px;
-  padding: 10px 12px;
+  margin: 2px 0 0;
+  padding: 7px 9px;
 
   border-left: 4px solid #2878ad;
   border-radius: 8px;
@@ -206,19 +260,19 @@
 
   color: #173f68;
 
-  font-size: 0.88rem;
-  font-weight: 800;
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 .episode-form-section-title span {
   display: block;
 
-  margin-top: 2px;
+  margin-top: 1px;
 
   color: #617486;
 
-  font-size: 0.74rem;
-  line-height: 1.35;
+  font-size: 0.68rem;
+  line-height: 1.2;
 }
 
 /* ============================================================
@@ -226,8 +280,8 @@
 ============================================================ */
 
 .episode-substances-panel {
-  margin: 12px 24px 0;
-  padding: 18px;
+  margin: 0;
+  padding: 8px;
 
   border: 1px solid #b7ddd6;
   border-radius: 14px;
@@ -242,7 +296,7 @@
   align-items: flex-start;
   gap: 12px;
 
-  margin-bottom: 14px;
+  margin-bottom: 6px;
 }
 
 .substances-title > mat-icon {
@@ -250,11 +304,11 @@
   align-items: center;
   justify-content: center;
 
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
 
-  padding: 7px;
+  padding: 4px;
 
   border-radius: 11px;
 
@@ -280,6 +334,19 @@
   line-height: 1.4;
 }
 
+.substances-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  min-width: 0;
+}
+
+.substances-columns .substances-header,
+.substances-columns .substance-row {
+  grid-template-columns: minmax(0, 1fr) 44px 48px;
+  padding-inline: 6px;
+}
+
 .substances-table {
   overflow: hidden;
 
@@ -297,9 +364,9 @@
 }
 
 .substances-header {
-  min-height: 38px;
+  min-height: 28px;
 
-  padding: 0 14px;
+  padding: 0 8px;
 
   color: #245e59;
   background: #eaf8f5;
@@ -316,7 +383,7 @@
 }
 
 .substances-help {
-  padding: 8px 14px;
+  padding: 4px 8px;
 
   border-top: 1px solid #dcefeb;
   border-bottom: 1px solid #dcefeb;
@@ -324,15 +391,13 @@
   color: #667f7b;
   background: #f8fcfb;
 
-  font-size: 0.72rem;
+  font-size: 0.66rem;
 }
 
 .substance-row {
-  min-height: 48px;
+  min-height: 30px;
 
-  padding: 0 14px;
-
-  border-bottom: 1px solid #e2efed;
+  padding: 0 8px;
 
   cursor: pointer;
 
@@ -341,10 +406,10 @@
     box-shadow 140ms ease;
 }
 
-.substance-row:last-child {
-  border-bottom: 0;
-}
 
+.substance-row:nth-child(even) {
+  background: #f2f8f7;
+}
 .substance-row:hover {
   background: #f1fbf8;
 }
@@ -361,7 +426,7 @@
 
   color: #244e4a;
 
-  font-size: 0.82rem;
+  font-size: 0.74rem;
   font-weight: 700;
 
   text-overflow: ellipsis;
@@ -383,16 +448,16 @@
   justify-content: center;
 
   min-width: 28px;
-  min-height: 24px;
+  min-height: 18px;
 
-  padding: 2px 8px;
+  padding: 1px 5px;
 
   border-radius: 999px;
 
   color: #607b77;
   background: #edf5f3;
 
-  font-size: 0.7rem;
+  font-size: 0.64rem;
   font-weight: 800;
 }
 
@@ -402,7 +467,7 @@
 }
 
 .episode-substances-panel > .empty-banner.warning {
-  margin-top: 12px;
+  margin-top: 5px;
 }
 
 /* ============================================================
@@ -415,8 +480,8 @@
   align-items: center;
   gap: 16px;
 
-  margin-top: 18px;
-  padding: 18px 24px 22px;
+  margin-top: 10px;
+  padding: 12px 16px 14px;
 
   border-top: 1px solid #cce8e3;
 
@@ -483,7 +548,7 @@
 
 @media (max-width: 1200px) {
   .episode-form-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .episode-form-grid .span-2 {
@@ -558,7 +623,7 @@
 
   .episode-substances-panel {
     margin: 10px 14px 0;
-    padding: 14px;
+    padding: 8px;
   }
 
   .substances-header,
@@ -713,23 +778,18 @@
 
 .previous-treatment-hint {
   display: block;
-  margin-top: 3px;
-  color: #455a64;
-  font-size: 0.86rem;
+  margin-top: 1px;
+  color: #60727c;
+  font-size: 0.68rem;
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 1.15;
   white-space: normal;
 }
 
 :host ::ng-deep .previous-treatment-hint {
-  display: block !important;
-  margin-top: 5px !important;
-  color: #37474f !important;
-  font-size: 15px !important;
-  font-weight: 500 !important;
-  line-height: 20px !important;
-  letter-spacing: 0 !important;
-  white-space: normal !important;
+  margin-top: 1px !important;
+  font-size: 11px !important;
+  line-height: 14px !important;
 }
 
 .episode-save-success {

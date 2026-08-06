@@ -17,6 +17,10 @@ import {
   resolveCitationTypeCode,
 } from './demand-new-citation-schedule.utils';
 
+interface DemandNewWorkflowCitation extends DemandWorkflowCitation {
+  registeredByName: string | null;
+}
+
 export interface DemandNewWorkflowInput {
   citationEvents: any[];
   currentStageEvents: any[];
@@ -52,7 +56,7 @@ function buildWorkflowCitation(
   citationEvents: any[],
   currentStageEvents: any[],
   citationTypes: any[],
-): DemandWorkflowCitation {
+): DemandNewWorkflowCitation {
   const typeCode = resolveCitationTypeCode(
     citation,
     citationEvents,
@@ -85,6 +89,10 @@ function buildWorkflowCitation(
       citation?.citationTime ??
       null,
     createdAt: citation?.createdAt ?? null,
+    registeredByName:
+      citation?.registeredByUser?.name ??
+      citation?.createdByUser?.name ??
+      null,
     attendanceCode:
       attendance?.attendanceStatus?.code ??
       attendance?.attendanceStatusCode ??
@@ -134,12 +142,15 @@ export interface DemandNewCitationMilestone {
   date: string | null;
   attendance: string;
   registered: boolean;
+  registeredByName: string | null;
+  createdAt: string | null;
+
 }
 
 function getLatestWorkflowCitation(
-  citations: DemandWorkflowCitation[],
+  citations: DemandNewWorkflowCitation[],
   code: string,
-): DemandWorkflowCitation | null {
+): DemandNewWorkflowCitation | null {
   return (
     [...citations]
       .filter(
@@ -326,7 +337,9 @@ export function buildDemandNewCitationMilestones(
       title: 'Entrevista opcional',
       description: 'Puede utilizarse antes de registrar la retroalimentación.',
       citation: optional,
-      missingStatus: 'Opcional · sin registro',
+      missingStatus: thirdInterviewCompleted
+        ? 'Opcional · sin registro'
+        : 'No corresponde todavía',
     },
   ];
 
@@ -340,5 +353,9 @@ export function buildDemandNewCitationMilestones(
       ? getAttendanceText(definition.citation)
       : definition.missingStatus,
     registered: !!definition.citation,
+    registeredByName:
+      definition.citation?.registeredByName ?? null,
+    createdAt:
+      definition.citation?.createdAt ?? null,
   }));
 }

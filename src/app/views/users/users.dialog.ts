@@ -15,6 +15,7 @@ import {
   MatDialogRef,
   MatDialog,
 } from '@angular/material/dialog';
+import { LoaderService } from '../../services/loader.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -65,6 +66,7 @@ export class UsersDialogComponent implements OnInit {
   private originalRut: string | null = null;
   private checkingRut = false;
   private usersCache: User[] = [];
+  isSaving = false;
 
   constructor(
     private fb: FormBuilder,
@@ -75,6 +77,7 @@ export class UsersDialogComponent implements OnInit {
     private dialog: MatDialog,
     private dialogOk: MatDialog,
     private authService: AuthLoginService,
+    private loaderService: LoaderService,
     private relationsService: UsersRelationsService,
     private router: Router,
     @Inject(MAT_DIALOG_DATA) public data: User | null,
@@ -118,11 +121,15 @@ export class UsersDialogComponent implements OnInit {
         '',
         this.isEditing ? [] : [Validators.required, Validators.minLength(6)],
       ],
-      rut: [userData.rut, [Validators.required, rutValidator()]],
+      rut: [userData.rut],
       // Programas se validan en save(): usuarios normales requieren programa,
       // pero ADMIN puede quedar sin programa activo.
       programs: [userData.programs?.map((p) => p.id) ?? []],
       roles: [userData.roles?.map((r) => r.id) ?? [], [Validators.required]],
+    });
+
+    this.form.get('roles')?.valueChanges.subscribe(() => {
+      this.updateRutValidators();
     });
 
     // ⭐ GUARDAR RUT ORIGINAL (IMPORTANTE)
@@ -138,7 +145,11 @@ export class UsersDialogComponent implements OnInit {
     if (this.isEditing) {
       this.usersService.getUserRoles(userData.id!).subscribe({
         next: (roles: Role[]) => {
-          this.form.patchValue({ roles: roles.map((r) => r.id) });
+          this.form.patchValue({
+            roles: roles.map((r) => r.id),
+          });
+
+          this.updateRutValidators();
         },
         error: (err) => this.handleError(err, 'roles'),
       });
@@ -220,7 +231,10 @@ export class UsersDialogComponent implements OnInit {
   /** Cargar Roles disponibles */
   loadRoles(): void {
     this.roleService.listAll().subscribe({
-      next: (res: Role[]) => (this.roles = res || []),
+      next: (res: Role[]) => {
+        this.roles = res || [];
+        this.updateRutValidators();
+      },
       error: (err: HttpErrorResponse) =>
         console.error('[UsersDialog] ❌ Error cargando roles:', err.message),
     });
@@ -311,17 +325,43 @@ export class UsersDialogComponent implements OnInit {
 
   /** Guardar usuario (crear o actualizar) */
   async save(): Promise<void> {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.isSaving) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
-    if (this.isEditing) {
-      await this.updateUser();
-    } else {
-      await this.createUser();
+    this.isSaving = true;
+    this.form.disable({ emitEvent: false });
+    this.loaderService.lock();
+
+    try {
+      const saved = this.isEditing
+        ? await this.updateUser()
+        : await this.createUser();
+
+      if (saved) {
+        this.ref.close(true);
+      } else {
+        this.form.enable({ emitEvent: false });
+      }
+    } catch (error) {
+      console.error('[UsersDialog] Error guardando usuario:', error);
+
+      this.form.enable({ emitEvent: false });
+
+      this.showWarning(
+        'No fue posible guardar completamente el usuario. Revise los datos e inténtelo nuevamente.',
+        'Error al guardar',
+      );
+    } finally {
+      this.loaderService.unlock();
+      this.isSaving = false;
     }
   }
 
   private buildUserPayload(includePassword = true): any {
     const formValue = this.form.getRawValue();
+    const rut = String(formValue.rut ?? '').trim();
 
     const payload: any = {
       firstName: String(formValue.firstName ?? '').trim(),
@@ -332,8 +372,11 @@ export class UsersDialogComponent implements OnInit {
         .trim()
         .toLowerCase(),
       username: String(formValue.username ?? '').trim(),
-      rut: String(formValue.rut ?? '').trim(),
     };
+
+    if (rut) {
+      payload.rut = rut;
+    }
 
     if (includePassword && formValue.password) {
       payload.password = formValue.password;
@@ -342,31 +385,32 @@ export class UsersDialogComponent implements OnInit {
     return payload;
   }
 
-  async createUser(): Promise<void> {
+  async createUser(): Promise<boolean> {
     const formValue = this.form.getRawValue();
 
     const selectedRoles = (formValue.roles || [])
       .map((id: number) => ({ id: Number(id) }))
-      .filter((item: any) => !!item.id);
+      .filter((item: { id: number }) => !!item.id);
 
     const selectedPrograms = (formValue.programs || [])
       .map((id: number) => ({ id: Number(id) }))
-      .filter((item: any) => !!item.id);
+      .filter((item: { id: number }) => !!item.id);
 
     if (!selectedRoles.length) {
       this.showWarning('Debe seleccionar al menos un rol.');
-      return;
+      return false;
     }
 
-    if (!this.isAdminSelected(selectedRoles) && !selectedPrograms.length) {
-      this.showWarning('Debe seleccionar al menos un programa.');
-      return;
+    const programRequired = this.requiresProgram(selectedRoles);
+
+    if (programRequired && !selectedPrograms.length) {
+      this.showWarning(
+        'El rol ADMINISTRATIVO requiere seleccionar al menos un programa.',
+      );
+      return false;
     }
 
-    // ✅ Crear usuario base SIN id, SIN roles, SIN programs
     const payload = this.buildUserPayload(true);
-
-    console.log('[UsersDialog] Payload crear usuario:', payload);
 
     const savedUser = await firstValueFrom(this.usersService.save(payload));
 
@@ -374,48 +418,51 @@ export class UsersDialogComponent implements OnInit {
 
     if (!userId) {
       this.showWarning('El backend no devolvió el ID del usuario creado.');
-      return;
+      return false;
     }
 
-    // ✅ Relaciones en endpoints separados
     await this.relationsService.updateRoles(userId, selectedRoles);
-    await this.relationsService.updatePrograms(userId, selectedPrograms);
 
-    console.log('✅ Usuario creado con roles y programas sincronizados');
+    await this.relationsService.updatePrograms(
+      userId,
+      programRequired ? selectedPrograms : [],
+    );
 
-    this.ref.close(true);
+    return true;
   }
 
-  async updateUser(): Promise<void> {
+  async updateUser(): Promise<boolean> {
     const formValue = this.form.getRawValue();
 
     const selectedRoles = (formValue.roles || [])
       .map((id: number) => ({ id: Number(id) }))
-      .filter((item: any) => !!item.id);
+      .filter((item: { id: number }) => !!item.id);
 
     const selectedPrograms = (formValue.programs || [])
       .map((id: number) => ({ id: Number(id) }))
-      .filter((item: any) => !!item.id);
+      .filter((item: { id: number }) => !!item.id);
 
     if (!selectedRoles.length) {
       this.showWarning('Debe seleccionar al menos un rol.');
-      return;
+      return false;
     }
 
-    if (!this.isAdminSelected(selectedRoles) && !selectedPrograms.length) {
-      this.showWarning('Debe seleccionar al menos un programa.');
-      return;
+    const programRequired = this.requiresProgram(selectedRoles);
+
+    if (programRequired && !selectedPrograms.length) {
+      this.showWarning(
+        'El rol ADMINISTRATIVO requiere seleccionar al menos un programa.',
+      );
+      return false;
     }
 
     const userId = this.data?.id;
 
     if (!userId) {
       this.showWarning('No se encontró el ID del usuario a actualizar.');
-      return;
+      return false;
     }
 
-    // ✅ Actualizar usuario base SIN id, SIN roles, SIN programs
-    // Solo manda password si viene escrita
     const payload = this.buildUserPayload(!!formValue.password);
 
     console.log('[UsersDialog] Payload actualizar usuario:', {
@@ -429,31 +476,91 @@ export class UsersDialogComponent implements OnInit {
 
     const finalUserId = savedUser?.id ?? userId;
 
-    // ✅ Relaciones separadas
     await this.relationsService.updateRoles(finalUserId, selectedRoles);
-    await this.relationsService.updatePrograms(finalUserId, selectedPrograms);
+
+    await this.relationsService.updatePrograms(
+      finalUserId,
+      programRequired ? selectedPrograms : [],
+    );
 
     console.log('✅ Usuario actualizado con roles y programas sincronizados');
 
-    this.ref.close(true);
+    return true;
   }
 
-  private isAdminSelected(selectedRoles: Array<{ id: number }>): boolean {
-    return selectedRoles.some((selectedRole) => {
+  private updateRutValidators(): void {
+    const rutControl = this.form?.get('rut');
+
+    if (!rutControl) return;
+
+    const selectedRoleIds = this.form.get('roles')?.value ?? [];
+
+    const selectedRoles: Array<{ id: number }> = selectedRoleIds
+      .map((id: number) => ({ id: Number(id) }))
+      .filter((item: { id: number }) => !!item.id);
+
+    const isAdmin = selectedRoles.some((selectedRole: { id: number }) => {
       const role = this.roles.find(
         (item) => Number(item.id) === Number(selectedRole.id),
       );
 
-      const roleName = String(role?.name ?? '').toUpperCase();
-      const roleCode = String((role as any)?.code ?? '').toUpperCase();
+      const roleName = String(role?.name ?? '')
+        .trim()
+        .toUpperCase();
 
-      return (
-        Number(selectedRole.id) === 1 ||
-        roleName === 'ADMIN' ||
-        roleName === 'ROLE_ADMIN' ||
-        roleCode === 'ADMIN' ||
-        roleCode === 'ROLE_ADMIN'
+      const roleCode = String((role as any)?.code ?? '')
+        .trim()
+        .toUpperCase();
+
+      return roleName === 'ADMIN' || roleCode === 'ADMIN';
+    });
+
+    const rutIsOptional = isAdmin || this.isSystemUser();
+
+    if (rutIsOptional) {
+      rutControl.setValidators([
+        (control) => {
+          const value = String(control.value ?? '').trim();
+
+          if (!value) {
+            return null;
+          }
+
+          return rutValidator()(control);
+        },
+      ]);
+    } else {
+      rutControl.setValidators([Validators.required, rutValidator()]);
+    }
+
+    rutControl.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private isSystemUser(): boolean {
+    const userId = Number(this.data?.id);
+
+    return userId === 1 || userId === 2;
+  }
+
+  private requiresProgram(selectedRoles: Array<{ id: number }>): boolean {
+    if (this.isSystemUser()) {
+      return false;
+    }
+
+    return selectedRoles.some((selectedRole: { id: number }) => {
+      const role = this.roles.find(
+        (item) => Number(item.id) === Number(selectedRole.id),
       );
+
+      const roleName = String(role?.name ?? '')
+        .trim()
+        .toUpperCase();
+
+      const roleCode = String((role as any)?.code ?? '')
+        .trim()
+        .toUpperCase();
+
+      return roleName === 'ADMINISTRATIVO' || roleCode === 'ADMINISTRATIVO';
     });
   }
 
@@ -537,5 +644,15 @@ export class UsersDialogComponent implements OnInit {
         confirmText: 'Aceptar',
       },
     });
+  }
+
+  get programIsRequired(): boolean {
+    const selectedRoleIds = this.form?.get('roles')?.value ?? [];
+
+    const selectedRoles = selectedRoleIds
+      .map((id: number) => ({ id: Number(id) }))
+      .filter((item: { id: number }) => !!item.id);
+
+    return this.requiresProgram(selectedRoles);
   }
 }

@@ -58,6 +58,14 @@
         Análisis por programa
       </button>
 
+      <a
+        mat-flat-button
+        routerLink="/directory-communications"
+        class="directory-communications-btn"
+      >
+        <mat-icon>contact_mail</mat-icon>
+        Directorio y comunicaciones
+      </a>
       <a mat-flat-button routerLink="/demand-new">
         <mat-icon>person_search</mat-icon>
         Buscar o crear demanda
@@ -336,6 +344,13 @@
         <span><strong>Retro.</strong> Fecha de Retroalimentación.</span>
         <span><strong>Comp. BPS</strong> Compromiso biopsicosocial.</span>
         <span><strong>Últ. gest.</strong> Última gestión registrada.</span>
+        <span>
+          <strong>Semáforo.</strong>
+          Días acumulados desde la solicitud original.
+        </span>
+        <span><strong>Verde:</strong> 0 a 45 días.</span>
+        <span><strong>Amarillo:</strong> 46 a 90 días.</span>
+        <span><strong>Rojo:</strong> 91 días o más.</span>
       </div>
     </details>
     <mat-progress-bar
@@ -412,8 +427,8 @@
           <td mat-cell *matCellDef="let row">
             <span
               class="semaphore"
-              [ngClass]="getSemaphoreClass(row.semaphoreColor)"
-              [matTooltip]="getSemaphoreLabel(row.semaphoreColor)"
+              [ngClass]="getSemaphoreClass(getSemaphoreColorByDays(row.accumulatedDays))"
+              [matTooltip]="getSemaphoreLabelByDays(row.accumulatedDays)"
             >
               <span class="semaphore__dot"></span>
             </span>
@@ -429,7 +444,7 @@
           <td mat-cell *matCellDef="let row">
             <div
               class="waiting-days"
-              [matTooltip]="getSemaphoreLabel(row.semaphoreColor)"
+              [matTooltip]="getSemaphoreLabelByDays(row.accumulatedDays)"
             >
               <strong>{{ row.accumulatedDays ?? 0 }} d</strong>
             </div>
@@ -728,7 +743,7 @@
           mat-row
           *matRowDef="let row; columns: displayedColumns"
           [class.priority-row--critical]="
-            row.semaphoreColor === 'ROJO'
+            getSemaphoreColorByDays(row.accumulatedDays) === 'ROJO'
           "
         ></tr>
       </table>

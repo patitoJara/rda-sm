@@ -473,7 +473,7 @@ export function resolveDemandWorkflowNextAction(
       'SCHEDULE_C1_E2',
       null,
       'Primera citación a segunda entrevista',
-      'Es la continuidad habitual. La retroalimentación permanece disponible si la evaluación ya es suficiente.',
+      'Corresponde continuar con la segunda entrevista antes de avanzar a las siguientes actividades de la etapa.',
     );
   }
 

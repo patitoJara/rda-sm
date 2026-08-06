@@ -19,8 +19,8 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 
-import { merge } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { forkJoin, merge, of } from 'rxjs';
+import { catchError, finalize, map } from 'rxjs/operators';
 
 import { User } from '../../models/user';
 import { UsersService } from '../../services/users.service';
@@ -53,20 +53,22 @@ import { Router } from '@angular/router';
 export class UsersComponent implements AfterViewInit {
   displayedColumns = [
     'id',
+    'rut',
     'firstName',
     'secondName',
     'firstLastName',
     'secondLastName',
     'email',
     'username',
-    //'password',
+    'roles',
+    'program',
     'estado',
     'acciones',
   ];
   dataSource = new MatTableDataSource<User>([]);
   loading = false;
   total = 0;
-  
+
   /** Filtro por texto */
   q = '';
 
@@ -91,34 +93,34 @@ export class UsersComponent implements AfterViewInit {
 
     this.sort.sortChange.subscribe(() => this.paginator.firstPage());
     merge(this.sort.sortChange, this.paginator.page).subscribe(() =>
-      this.load()
+      this.load(),
     );
 
     this.load();
     this.cdr.detectChanges();
   }
-  
+
   /** Mapeo de campos para ordenar */
   private mapSortField(active?: string): string {
     switch (active) {
       case 'id':
         return 'id';
       case 'rut':
-        return 'rut';        
+        return 'rut';
       case 'firstName':
         return 'firstName';
       case 'secondName':
-        return 'secondName'
+        return 'secondName';
       case 'firstLastName':
-        return 'firstLastName'
+        return 'firstLastName';
       case 'secondLastName':
-        return 'secondLastName'
+        return 'secondLastName';
       case 'email':
-        return 'email'
+        return 'email';
       case 'username':
-        return 'username'
+        return 'username';
       case 'password':
-        return 'password'                                     
+        return 'password';
       case 'createdAt':
         return 'createdAt';
       case 'updatedAt':
@@ -147,7 +149,7 @@ export class UsersComponent implements AfterViewInit {
         next: (res: any) => {
           const allRows: User[] = Array.isArray(res)
             ? res
-            : res?.content ?? [];
+            : (res?.content ?? []);
           // Filtro por estado
           let filtered = allRows;
           if (this.filterUsers === 'active') {
@@ -159,7 +161,7 @@ export class UsersComponent implements AfterViewInit {
           const term = (this.q || '').toLowerCase();
           if (term) {
             filtered = filtered.filter((r) =>
-              (r.firstName ?? '').toLowerCase().includes(term)          
+              (r.firstName ?? '').toLowerCase().includes(term),
             );
           }
 
@@ -167,14 +169,15 @@ export class UsersComponent implements AfterViewInit {
           filtered.sort((a, b) => {
             const va = this.getFieldValue(a, sortField);
             const vb = this.getFieldValue(b, sortField);
-            let cmp = 0;            
-            if (va == null && vb != null)cmp = -1;          
-            else if (va != null && vb == null)cmp = 1;
-            else if (typeof va === 'number' && typeof vb === 'number')cmp = va - vb;            
+            let cmp = 0;
+            if (va == null && vb != null) cmp = -1;
+            else if (va != null && vb == null) cmp = 1;
+            else if (typeof va === 'number' && typeof vb === 'number')
+              cmp = va - vb;
             else
               cmp = String(va ?? '').localeCompare(String(vb ?? ''), 'es', {
                 numeric: true,
-                sensitivity: 'base',              
+                sensitivity: 'base',
               });
             return direction === 'asc' ? cmp : -cmp;
           });
@@ -182,14 +185,91 @@ export class UsersComponent implements AfterViewInit {
           const start = page * size;
           const slice = filtered.slice(start, start + size);
 
-          this.dataSource.data = slice;
           this.total = filtered.length;
+          this.enrichUsers(slice);
         },
         error: (err) => console.error('Error cargando estado:', err),
       });
   }
 
+  private enrichUsers(users: User[]): void {
+    if (!users.length) {
+      this.dataSource.data = [];
+      return;
+    }
+
+    const requests = users.map((user) => {
+      const userId = Number(user.id);
+
+      if (!Number.isFinite(userId) || userId <= 0) {
+        return of({
+          ...user,
+          roles: [],
+          programs: [],
+        } as User);
+      }
+
+      return forkJoin({
+        roles: this.api.getUserRoles(userId).pipe(catchError(() => of([]))),
+        programs: this.api
+          .getUserPrograms(userId)
+          .pipe(catchError(() => of([]))),
+      }).pipe(
+        map(
+          ({ roles, programs }) =>
+            ({
+              ...user,
+              roles,
+              programs,
+            }) as User,
+        ),
+      );
+    });
+
+    forkJoin(requests).subscribe({
+      next: (enrichedUsers: User[]) => {
+        this.dataSource.data = enrichedUsers;
+      },
+      error: (err) => {
+        console.error('Error cargando roles y programas de los usuarios:', err);
+
+        this.dataSource.data = users;
+      },
+    });
+  }
+
+  getUserRolesLabel(user: User): string {
+    const roles = Array.isArray(user.roles) ? user.roles : [];
+
+    const names = roles
+      .map((role: any) => role?.name ?? role?.code ?? role)
+      .filter(Boolean);
+
+    return names.length ? names.join(', ') : 'Sin rol';
+  }
+
   /** Filtrado por texto */
+  getUserProgramsLabel(user: any): string {
+    const programs = Array.isArray(user?.programs) ? user.programs : [];
+
+    if (programs.length > 0) {
+      return programs
+        .map((program: any) => program?.name ?? program)
+        .filter(Boolean)
+        .join(', ');
+    }
+
+    if (user?.program?.name) {
+      return user.program.name;
+    }
+
+    if (typeof user?.program === 'string' && user.program.trim()) {
+      return user.program.trim();
+    }
+
+    return 'Sin programa';
+  }
+
   applyFilter(term: string): void {
     this.q = term.trim();
     this.paginator.firstPage();
@@ -202,7 +282,7 @@ export class UsersComponent implements AfterViewInit {
       case 'id':
         return row.id;
       case 'rut':
-        return row.rut;        
+        return row.rut;
       case 'firstName':
         return row.firstName;
       case 'secondName':
@@ -218,7 +298,7 @@ export class UsersComponent implements AfterViewInit {
       case 'password':
         return row.password;
       case 'createdAt':
-        return row.createdAt
+        return row.createdAt;
       case 'updatedAt':
         return row.updatedAt;
       case 'deletedAt':
