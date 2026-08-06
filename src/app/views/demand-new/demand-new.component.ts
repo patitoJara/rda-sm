@@ -1,4 +1,4 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import {
@@ -1841,7 +1841,7 @@ export class DemandNewComponent
       ),
 
       originalRequestDate:
-        toStringOrNull(raw.originalRequestDate) ?? getTodayForDateInput(),
+        formatDateForBackend(raw.originalRequestDate) ?? getTodayForDateInput(),
 
       responsibleUserId,
 

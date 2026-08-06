@@ -18,15 +18,28 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthLoginService } from '../../services/auth.login.service';
 import { TokenService } from '../../services/token.service';
 import { MatDialog } from '@angular/material/dialog';
-import { ConfirmDialogOkComponent } from '../../shared/confirm-dialog/confirm-dialog-ok.component';
 import { ErrorConfirmDialogComponent } from '../../shared/confirm-dialog/errorConfirmDialogComponent';
+
+interface RoleProfile {
+  id?: number;
+  code?: string;
+  name?: string;
+  description?: string;
+}
+
+interface ProgramProfile {
+  id?: number;
+  code?: string;
+  name?: string;
+  description?: string;
+}
 
 interface DecodedToken {
   fullName?: string;
   username?: string;
   email?: string;
-  roles?: string[];
-  programs?: string[];
+  roles?: Array<string | RoleProfile>;
+  programs?: Array<string | ProgramProfile>;
   exp?: number;
   iat?: number;
 }
@@ -57,6 +70,8 @@ export class ProfileComponent implements OnInit {
   private router = inject(Router);
 
   userData: DecodedToken | null = null;
+  roleNames = 'No asignado';
+  programNames = 'Ninguno asignado';
   loading = false;
 
   passwordForm = this.fb.group({
@@ -81,6 +96,19 @@ export class ProfileComponent implements OnInit {
     try {
       const payload = JSON.parse(atob(token.split('.')[1])) as DecodedToken;
       this.userData = payload;
+
+      const storedRoles = this.tokenService.getUserRoles();
+      const storedPrograms = this.tokenService.getUserPrograms();
+
+      this.roleNames = this.formatItemNames(
+        payload.roles?.length ? payload.roles : storedRoles,
+        'No asignado',
+      );
+
+      this.programNames = this.formatItemNames(
+        payload.programs?.length ? payload.programs : storedPrograms,
+        'Ninguno asignado',
+      );
     } catch (err) {
       this.dialog.open(ErrorConfirmDialogComponent, {
         width: '420px',
@@ -95,7 +123,34 @@ export class ProfileComponent implements OnInit {
     }
   }
 
-  /** 🔐 Simulación cambio de contraseña */
+  /** Formatea los nombres de roles y programas. */
+  private formatItemNames(
+    items: Array<string | RoleProfile | ProgramProfile> | null | undefined,
+    emptyLabel: string,
+  ): string {
+    if (!Array.isArray(items) || items.length === 0) {
+      return emptyLabel;
+    }
+
+    const names = items
+      .map((item) => {
+        if (typeof item === 'string') {
+          return item.trim();
+        }
+
+        return String(
+          item?.name ??
+            item?.description ??
+            item?.code ??
+            '',
+        ).trim();
+      })
+      .filter(Boolean);
+
+    return names.length ? names.join(', ') : emptyLabel;
+  }
+
+  /** Actualiza la contrasena del usuario. */
   changePassword(): void {
     if (this.loading) return;
 
@@ -120,23 +175,17 @@ export class ProfileComponent implements OnInit {
       return;
     }
 
-    this.loading = true;
-
-    setTimeout(() => {
-      this.loading = false;
-      this.passwordForm.reset();
-
-      this.dialog.open(ConfirmDialogOkComponent, {
-        width: '420px',
-        data: {
-          title: 'Contraseña actualizada',
-          message: 'Tu contraseña fue actualizada correctamente.',
-          icon: 'check_circle',
-          color: 'primary',
-          confirmText: 'Aceptar',
-        },
-      });
-    }, 1500);
+    this.dialog.open(ErrorConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Funcionalidad no disponible',
+        message:
+          'El cambio de contrase\u00f1a a\u00fan no est\u00e1 habilitado en el servidor.',
+        icon: 'info',
+        color: 'accent',
+        confirmText: 'Aceptar',
+      },
+    });
   }
 
   goBack(): void {
