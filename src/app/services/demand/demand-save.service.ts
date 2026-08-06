@@ -27,11 +27,11 @@ export class DemandSaveService {
 
   /**
    * ============================================================
-   * ðŸ”µ SAVE DEMAND (full pipeline)
+   * 🔵 SAVE DEMAND (full pipeline)
    * ============================================================
    */
   saveDemand(form: any): Observable<any> {
-    console.log('%cðŸš€ Iniciando SAVE DEMAND', 'color:#4caf50; font-size:16px');
+    console.log('%c🚀 Iniciando SAVE DEMAND', 'color:#4caf50; font-size:16px');
 
     //const userId = this.tokenService.getUserId();
     const userId = this.tokenService.getUserProfile()?.id ?? null;
@@ -40,25 +40,25 @@ export class DemandSaveService {
     const programObj = this.getActiveProgramObj();
 
     if (!userId || !programObj?.id) {
-      return of({ error: 'âŒ SesiÃ³n invÃ¡lida o programa no encontrado.' });
+      return of({ error: '❌ Sesión inválida o programa no encontrado.' });
     }
 
-    // TransformaciÃ³n de campos
+    // Transformación de campos
     const payloads = this.buildPayloads(form, userId, programObj.id);
 
     // ============================================================
-    // ðŸŸ¦ PASO 1 â†’ CREAR POSTULANTE
+    // 🟦 PASO 1 → CREAR POSTULANTE
     // ============================================================
     return this.postulantService.create(payloads.postulant).pipe(
       switchMap((postulant: any) => {
-        console.log('ðŸŸ¢ Postulante creado:', postulant);
+        console.log('🟢 Postulante creado:', postulant);
 
         // Reemplazar ID real
         payloads.contact.postulantId = postulant.id;
         payloads.register.postulant.id = postulant.id;
 
         // ============================================================
-        // PASO 2 â†’ CREAR CONTACTO (opcional)
+        // PASO 2 → CREAR CONTACTO (opcional)
         // ============================================================
         return this.contactService.createDto(payloads.contact).pipe(
           catchError(() => {
@@ -70,7 +70,7 @@ export class DemandSaveService {
       }),
 
       // ============================================================
-      // PASO 3 â†’ CREAR REGISTER
+      // PASO 3 → CREAR REGISTER
       // ============================================================
       switchMap(({ postulant }) => {
         return this.registerService.create(payloads.register).pipe(
@@ -79,10 +79,10 @@ export class DemandSaveService {
       }),
 
       switchMap(({ postulant, register }) => {
-        console.log('ðŸŸ¢ Register creado:', register);
+        console.log('🟢 Register creado:', register);
 
         // ============================================================
-        // PASO 4 â†’ MOVIMIENTOS (si existen)
+        // PASO 4 → MOVIMIENTOS (si existen)
         // ============================================================
         const movementsCalls = payloads.movements.map((mv) => {
           mv.register = this.packRegister(register);
@@ -90,7 +90,7 @@ export class DemandSaveService {
         });
 
         // ============================================================
-        // PASO 5 â†’ SUSTANCIAS
+        // PASO 5 → SUSTANCIAS
         // ============================================================
         const substancesCalls = payloads.substances.map((sb) => {
           sb.register = this.packRegister(register);
@@ -119,14 +119,14 @@ export class DemandSaveService {
       }),
 
       catchError((err) => {
-        console.error('âŒ Error en SAVE DEMAND:', err);
+        console.error('❌ Error en SAVE DEMAND:', err);
         return of({ error: err });
       })
     );
   }
 
   // ================================================================
-  // ðŸŸ© ConstrucciÃ³n de Payloads
+  // 🟩 Construcción de Payloads
   // ================================================================
   private buildPayloads(form: any, userId: number, programId: number) {
 
@@ -193,7 +193,7 @@ export class DemandSaveService {
     };
 
     // ----------------------------
-    // MOVEMENT PAYLOADS (1â€¦4)
+    // MOVEMENT PAYLOADS (1…4)
     // ----------------------------
     
     const movements: any[] = [];
@@ -241,7 +241,7 @@ export class DemandSaveService {
   }
 
   // ================================================================
-  // ðŸŸ§ Empaquetar Register completo
+  // 🟧 Empaquetar Register completo
   // ================================================================
   private packRegister(register: any) {
     return {
@@ -261,7 +261,7 @@ export class DemandSaveService {
   }
 
   // ================================================================
-  // ðŸŸ¦ Programa activo
+  // 🟦 Programa activo
   // ================================================================
   private getActiveProgramObj(): any {
     const active = this.tokenService.getActiveProgram();

@@ -11,7 +11,7 @@ export interface Page<T> {
   totalPages: number;
   size: number;
   number: number;
-  // empty?: boolean; // si tu backend lo envÃa
+  // empty?: boolean; // si tu backend lo envía
 }
 
 @Injectable({ providedIn: 'root' })
