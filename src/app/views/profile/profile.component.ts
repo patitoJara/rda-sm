@@ -15,10 +15,12 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { AuthLoginService } from '../../services/auth.login.service';
+import { UsersService } from '../../services/users.service';
 import { TokenService } from '../../services/token.service';
 import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogOkComponent } from '../../shared/confirm-dialog/confirm-dialog-ok.component';
 import { ErrorConfirmDialogComponent } from '../../shared/confirm-dialog/errorConfirmDialogComponent';
+import { finalize, switchMap } from 'rxjs';
 
 interface RoleProfile {
   id?: number;
@@ -64,7 +66,7 @@ interface DecodedToken {
 })
 export class ProfileComponent implements OnInit {
   private dialog = inject(MatDialog);
-  private auth = inject(AuthLoginService);
+  private usersService = inject(UsersService);
   private tokenService = inject(TokenService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
@@ -75,7 +77,6 @@ export class ProfileComponent implements OnInit {
   loading = false;
 
   passwordForm = this.fb.group({
-    currentPassword: ['', [Validators.required]],
     newPassword: ['', [Validators.required, Validators.minLength(8)]],
     confirmPassword: ['', [Validators.required]],
   });
@@ -152,21 +153,25 @@ export class ProfileComponent implements OnInit {
 
   /** Actualiza la contrasena del usuario. */
   changePassword(): void {
-    if (this.loading) return;
-
-    const { newPassword, confirmPassword } = this.passwordForm.value;
+    if (this.loading) {
+      return;
+    }
 
     if (this.passwordForm.invalid) {
       this.passwordForm.markAllAsTouched();
       return;
     }
 
-    if (newPassword !== confirmPassword) {
+    const { newPassword, confirmPassword } =
+      this.passwordForm.getRawValue();
+
+    if (!newPassword || newPassword !== confirmPassword) {
       this.dialog.open(ErrorConfirmDialogComponent, {
         width: '420px',
         data: {
           title: 'Datos incorrectos',
-          message: 'La nueva contraseña y su confirmación no coinciden.',
+          message:
+            'La nueva contraseña y su confirmación no coinciden.',
           icon: 'warning',
           color: 'accent',
           confirmText: 'Revisar',
@@ -175,19 +180,80 @@ export class ProfileComponent implements OnInit {
       return;
     }
 
-    this.dialog.open(ErrorConfirmDialogComponent, {
-      width: '420px',
-      data: {
-        title: 'Funcionalidad no disponible',
-        message:
-          'El cambio de contrase\u00f1a a\u00fan no est\u00e1 habilitado en el servidor.',
-        icon: 'info',
-        color: 'accent',
-        confirmText: 'Aceptar',
-      },
-    });
-  }
+    const userId = this.tokenService.getUserId();
 
+    if (!userId) {
+      this.dialog.open(ErrorConfirmDialogComponent, {
+        width: '420px',
+        data: {
+          title: 'Usuario no identificado',
+          message:
+            'No fue posible identificar al usuario autenticado.',
+          icon: 'warning',
+          color: 'accent',
+          confirmText: 'Aceptar',
+        },
+      });
+      return;
+    }
+
+    this.loading = true;
+
+    this.usersService
+      .findById(userId)
+      .pipe(
+        switchMap((user) =>
+          this.usersService.update(userId, {
+            id: user.id,
+            firstName: user.firstName,
+            secondName: user.secondName,
+            firstLastName: user.firstLastName,
+            secondLastName: user.secondLastName,
+            email: user.email,
+            username: user.username,
+            rut: user.rut,
+            password: newPassword,
+          }),
+        ),
+        finalize(() => {
+          this.loading = false;
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.passwordForm.reset();
+
+          this.dialog.open(ConfirmDialogOkComponent, {
+            width: '420px',
+            data: {
+              title: 'Contraseña actualizada',
+              message:
+                'Tu contraseña fue actualizada correctamente.',
+              icon: 'check_circle',
+              color: 'primary',
+              confirmText: 'Aceptar',
+            },
+          });
+        },
+        error: (error) => {
+          const backendMessage =
+            error?.error?.message ??
+            error?.error?.error ??
+            'No fue posible actualizar la contraseña.';
+
+          this.dialog.open(ErrorConfirmDialogComponent, {
+            width: '420px',
+            data: {
+              title: 'Error al actualizar',
+              message: String(backendMessage),
+              icon: 'warning',
+              color: 'accent',
+              confirmText: 'Revisar',
+            },
+          });
+        },
+      });
+  }
   goBack(): void {
     this.router.navigate(['/inicio']); // o history.back()
   }

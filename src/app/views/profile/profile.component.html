@@ -63,23 +63,6 @@
           <h3 class="section-title">Cambiar contraseña</h3>
         </div>
 
-        <mat-form-field appearance="fill" class="full">
-          <mat-label>Contraseña actual</mat-label>
-          <input
-            matInput
-            type="password"
-            formControlName="currentPassword"
-            autocomplete="current-password"
-          />
-          <mat-error
-            *ngIf="
-              passwordForm.controls.currentPassword.touched &&
-              passwordForm.controls.currentPassword.hasError('required')
-            "
-          >
-            La contraseña actual es obligatoria.
-          </mat-error>
-        </mat-form-field>
 
         <mat-form-field appearance="fill" class="full">
           <mat-label>Nueva contraseña</mat-label>
