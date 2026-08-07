@@ -169,6 +169,76 @@
         <mat-icon>error</mat-icon>
         <span>{{ searchError }}</span>
       </div>
+      <section
+        class="available-episodes"
+        *ngIf="hasMultipleAvailableEpisodes"
+      >
+        <div class="available-episodes__header">
+          <mat-icon>history</mat-icon>
+
+          <div>
+            <strong>Episodios disponibles</strong>
+            <span>
+              La persona posee más de un episodio. Seleccione el que desea revisar.
+            </span>
+          </div>
+        </div>
+
+        <div class="available-episodes__list">
+          <article
+            class="available-episode-card"
+            *ngFor="let episode of availableEpisodes"
+          >
+            <div class="available-episode-card__main">
+              <strong>
+                {{
+                  episode?.code ||
+                    episode?.episodeCode ||
+                    "Episodio de demanda"
+                }}
+              </strong>
+
+              <span>
+                {{
+                  episode?.currentProgram?.name ||
+                    episode?.initialProgram?.name ||
+                    "Programa no informado"
+                }}
+              </span>
+
+              <small>
+                Solicitud:
+                {{
+                  formatDisplayDate(
+                    episode?.originalRequestDate ||
+                      episode?.createdAt
+                  )
+                }}
+              </small>
+            </div>
+
+            <div class="available-episode-card__status">
+              <span>
+                {{
+                  episode?.state?.name ||
+                    episode?.stateCode ||
+                    episode?.status ||
+                    "Sin estado"
+                }}
+              </span>
+
+              <button
+                mat-stroked-button
+                type="button"
+                (click)="selectAvailableEpisode(episode)"
+              >
+                <mat-icon>visibility</mat-icon>
+                Ver episodio
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
     </div>
   </mat-card>
 
@@ -3572,14 +3642,31 @@
           <mat-icon>how_to_reg</mat-icon>
           <span>Asistencias</span>
         </button>
+        <button
+          type="button"
+          [class.active]="historyTypeFilter === 'RETROALIMENTACION'"
+          (click)="setHistoryTypeFilter('RETROALIMENTACION')"
+        >
+          <mat-icon>assignment_turned_in</mat-icon>
+          <span>Retroalimentación</span>
+        </button>
 
         <button
           type="button"
-          [class.active]="historyTypeFilter === 'ENTREVISTA'"
-          (click)="setHistoryTypeFilter('ENTREVISTA')"
+          [class.active]="historyTypeFilter === 'REFERENCIA'"
+          (click)="setHistoryTypeFilter('REFERENCIA')"
         >
-          <mat-icon>psychology</mat-icon>
-          <span>Entrevistas</span>
+          <mat-icon>sync_alt</mat-icon>
+          <span>Referencias</span>
+        </button>
+
+        <button
+          type="button"
+          [class.active]="historyTypeFilter === 'CIERRE'"
+          (click)="setHistoryTypeFilter('CIERRE')"
+        >
+          <mat-icon>logout</mat-icon>
+          <span>Cierre</span>
         </button>
 
         <button
@@ -3722,6 +3809,13 @@
               event.attendanceStatus ||
               getEventProfessionalName(event) ||
               getEventProfessionName(event) ||
+              event.result ||
+              event.resultName ||
+              event.resultCode ||
+              event.biopsychosocialCommitmentLevel ||
+              event.biopsychosocialCommitmentLevelName ||
+              event.commitmentLevel ||
+              event.commitmentLevelName ||
               event.relatedEventId
             "
           >
@@ -3766,7 +3860,38 @@
                 <strong>{{ professionName }}</strong>
               </div>
             </div>
+            <div
+              class="event-summary-item"
+              *ngIf="getEventTypeCode(event) === 'RETROALIMENTACION'"
+            >
+              <mat-icon>fact_check</mat-icon>
 
+              <div>
+                <span>Decisi&oacute;n</span>
+                <strong>
+                  {{
+                    formatResultLabel(
+                      event.result?.name ||
+                        event.resultName ||
+                        event.resultCode,
+                      "Sin resultado informado"
+                    )
+                  }}
+                </strong>
+              </div>
+            </div>
+
+            <div
+              class="event-summary-item"
+              *ngIf="getEventTypeCode(event) === 'RETROALIMENTACION'"
+            >
+              <mat-icon>psychology_alt</mat-icon>
+
+              <div>
+                <span>Compromiso biopsicosocial</span>
+                <strong>{{ getFeedbackCommitmentLabel(event) }}</strong>
+              </div>
+            </div>
             <div
               class="event-summary-item"
               *ngIf="getRelatedCitation(event) as relatedCitation"
