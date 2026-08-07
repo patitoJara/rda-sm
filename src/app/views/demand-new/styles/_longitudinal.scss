@@ -1,4 +1,4 @@
-/* ============================================================
+Ôªø/* ============================================================
    FICHA LONGITUDINAL MODERNA
    ============================================================ */
 
@@ -1253,6 +1253,7 @@
 ============================================================ */
 
 .operative-dock {
+  font-family: var(--ssm-font, "Roboto", "Helvetica Neue", sans-serif);
   display: grid;
   grid-template-columns: minmax(250px, 0.72fr) minmax(0, 2.28fr);
   gap: 16px;
@@ -1921,7 +1922,7 @@
   }
 }
 /* ============================================================
-   TIEMPO DE ESPERA SEG⁄N SEM¡FORO
+   TIEMPO DE ESPERA SEG√öN SEM√ÅFORO
 ============================================================ */
 
 .operational-summary-card--success {

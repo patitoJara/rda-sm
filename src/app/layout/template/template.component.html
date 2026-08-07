@@ -1,4 +1,4 @@
-<!-- =======================================================
+﻿<!-- =======================================================
      🧭 LAYOUT PRINCIPAL — SERVICIO DE SALUD MAGALLANES
      Selección de rol/programa antes de mostrar menú
      ======================================================= -->
@@ -16,7 +16,10 @@
 
         <span class="select-eyebrow">Sistema RDA-SM</span>
 
-        <h2>Bienvenido/a, {{ userFullName }}</h2>
+        <h2 class="welcome-title">
+  <span class="welcome-title__label">Bienvenido/a,</span>
+  <span class="welcome-title__name">{{ userFullName }}</span>
+</h2>
 
         <p *ngIf="!isStructuralAdmin">
           Selecciona el rol con el cual deseas trabajar en esta sesión. El

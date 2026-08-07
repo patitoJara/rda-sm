@@ -72,6 +72,7 @@
   </div>
 
   <!-- BUSCADOR COMPACTO -->
+  <div id="quick-search-person" class="navigation-quick-anchor"></div>
   <mat-card class="search-card" [class.search-card--compact]="selectedPerson">
     <div class="search-card__title">
       <mat-icon>person_search</mat-icon>
@@ -704,6 +705,7 @@
     <!-- =====================================================
     ENCABEZADO DEL DEMANDANTE
     ====================================================== -->
+    <div id="quick-longitudinal-card" class="navigation-quick-anchor"></div>
     <div class="summary-person-header">
       <div class="avatar-placeholder">
         <mat-icon>person</mat-icon>
@@ -1080,8 +1082,9 @@
     <section
       id="operativeDock"
       class="operative-dock"
-      *ngIf="hasCurrentEpisode && canManageCurrentEpisode"
-      tabindex="-1"`r`n      aria-labelledby="operativeDockTitle"
+      *ngIf="false"
+      tabindex="-1"
+      aria-labelledby="operativeDockTitle"
     >
       <header class="operative-dock__title">
         <span class="operative-dock__title-icon">
@@ -1158,6 +1161,7 @@
     "
   >
     <div
+      id="operationPanelShell"
       class="operation-panel-shell"
       [ngClass]="'operation-panel-shell--' + activeActionPanel"
     >
@@ -2125,6 +2129,7 @@
         </div>
 
         <div>
+          <div id="quick-current-situation" class="navigation-quick-anchor"></div>
           <span>SITUACIÓN ACTUAL</span>
 
           <h2 id="episodeOperationalTitle">
@@ -2417,7 +2422,7 @@
   <nav
     id="longitudinal-navigation"
     class="longitudinal-tabs"
-    *ngIf="selectedPerson && hasCurrentEpisode"
+    *ngIf="false"
     aria-label="Secciones de la ficha del episodio"
   >
     <div class="longitudinal-tabs__scroll">
@@ -2439,6 +2444,133 @@
     </div>
   </nav>
 
+  <!-- ASISTENCIA DE NAVEGACIÓN LATERAL -->
+  <aside
+    class="navigation-assist"
+    *ngIf="selectedPerson && hasCurrentEpisode"
+    aria-label="Accesos rápidos de la ficha"
+  >
+    <button
+      type="button"
+      class="navigation-assist__item navigation-assist__item--actions"
+      matTooltip="Acciones operativas"
+      aria-label="Acciones operativas"
+      (click)="toggleNavigationAssistActions()"
+    >
+      <mat-icon>bolt</mat-icon>
+      <span>Acciones</span>
+    </button>
+
+    <div
+      class="navigation-assist__actions-menu"
+      *ngIf="navigationAssistActionsOpen"
+    >
+      <div class="navigation-assist__actions-title">
+        <mat-icon>bolt</mat-icon>
+        <span>Acciones operativas</span>
+      </div>
+
+      <button
+        *ngFor="let action of operativeActions"
+        type="button"
+        class="navigation-assist__action-option"
+        [class.recommended]="isOperativeActionRecommended(action.panel)"
+        [disabled]="!!getOperativeActionDisabledReason(action)"
+        [matTooltip]="getOperativeActionDisabledReason(action) || action.description"
+        matTooltipPosition="left"
+        [matTooltipShowDelay]="250"
+        (click)="openOperativeActionFromAssist(action.panel)"
+      >
+        <mat-icon>{{ action.icon }}</mat-icon>
+
+        <span class="navigation-assist__action-text">
+          <strong>{{ action.title }}</strong>
+          <small *ngIf="isOperativeActionRecommended(action.panel)">
+            Recomendada
+          </small>
+        </span>
+      </button>
+    </div>
+
+    <button
+      type="button"
+      class="navigation-assist__item navigation-assist__item--quick"
+      matTooltip="Buscar otra persona"
+      (click)="scrollToQuickAccess('quick-search-person')"
+    >
+      <mat-icon>person_search</mat-icon>
+      <span>Buscar persona</span>
+    </button>
+
+    <button
+      type="button"
+      class="navigation-assist__item navigation-assist__item--quick"
+      matTooltip="Ficha longitudinal de atención en la red"
+      (click)="scrollToQuickAccess('quick-longitudinal-card')"
+    >
+      <mat-icon>account_box</mat-icon>
+      <span>Ficha longitudinal</span>
+    </button>
+
+    <button
+      type="button"
+      class="navigation-assist__item navigation-assist__item--quick"
+      matTooltip="Situación actual"
+      (click)="scrollToQuickAccess('quick-current-situation')"
+    >
+      <mat-icon>monitor_heart</mat-icon>
+      <span>Situación actual</span>
+    </button>
+
+    <button
+      type="button"
+      class="navigation-assist__item navigation-assist__item--quick"
+      matTooltip="Trazabilidad del episodio"
+      (click)="scrollToQuickAccess('quick-traceability')"
+    >
+      <mat-icon>history</mat-icon>
+      <span>Últimas gestiones</span>
+    </button>
+
+    <button
+      *ngFor="let item of navigationAssistItems"
+      type="button"
+      class="navigation-assist__item"
+      [class.active]="activeSummarySection === item.id"
+      [attr.aria-label]="'Ir a ' + item.label"
+      [matTooltip]="'Ir a ' + item.label"
+      (click)="scrollToSummarySection(item.id)"
+    >
+      <mat-icon>{{ item.icon }}</mat-icon>
+      <span>{{ item.label }}</span>
+    </button>
+
+    <button
+      *ngIf="recommendedOperativePanel && !isHistoricalEpisode"
+      type="button"
+      class="navigation-assist__item navigation-assist__item--context"
+      matTooltip="Ir a la gestión recomendada"
+      aria-label="Ir a la gestión recomendada"
+      (click)="openRecommendedActionFromAssist()"
+    >
+      <mat-icon>assistant_navigation</mat-icon>
+      <span>{{ episodeOperationalSummary.nextActionTitle }}</span>
+      <i class="navigation-assist__badge"></i>
+    </button>
+
+    <button
+      *ngIf="isHistoricalEpisode"
+      type="button"
+      class="navigation-assist__item navigation-assist__item--context"
+      matTooltip="Ir a crear un nuevo episodio"
+      aria-label="Ir a crear un nuevo episodio"
+      (click)="scrollToSummarySection('demanda-actual')"
+    >
+      <mat-icon>add_circle</mat-icon>
+      <span>Crear nuevo episodio</span>
+      <i class="navigation-assist__badge"></i>
+    </button>
+  </aside>
   <!-- DEMANDA ACTUAL -->
   <section
     id="demanda-actual"
@@ -2526,13 +2658,13 @@
 
       <div
         class="card-actions-preview"
-        *ngIf="!isHistoricalEpisode"
+        *ngIf="selectedPerson"
       >
         <button
           mat-flat-button
           class="create-episode-trigger"
           type="button"
-          [disabled]="!selectedPerson || episodeLoaded || !!createdEpisode"
+          [disabled]="!selectedPerson || (hasCurrentEpisode && !isHistoricalEpisode)"
           (click)="showCreateEpisode()"
         >
           <mat-icon>add_circle</mat-icon>
@@ -2540,7 +2672,7 @@
           {{
             !selectedPerson
               ? "Buscar persona primero"
-              : episodeLoaded || createdEpisode
+              : hasCurrentEpisode && !isHistoricalEpisode
                 ? "Episodio ya existente"
                 : "Crear episodio de demanda"
           }}
@@ -3563,6 +3695,7 @@
   </section>
 
   <!-- HISTORIAL DEL EPISODIO -->
+  <div id="quick-traceability" class="navigation-quick-anchor"></div>
   <mat-card
     id="trazabilidad"
     #summarySection
@@ -4052,10 +4185,10 @@
     mat-flat-button
     type="button"
     class="back-to-navigation-button"
-    (click)="scrollToLongitudinalNavigation()"
-    aria-label="Volver al índice de secciones"
+    (click)="scrollToTop()"
+    aria-label="Volver arriba"
   >
     <mat-icon>keyboard_arrow_up</mat-icon>
-    <span>Volver al índice</span>
+    <span>Volver arriba</span>
   </button>
 </div>

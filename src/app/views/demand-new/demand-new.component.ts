@@ -395,8 +395,8 @@ export class DemandNewComponent
       [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)],
     ],
 
-    currentState: [{ value: 'EN TRÃMITE', disabled: true }],
-    currentResult: [{ value: 'AÃšN SIN RESULTADO', disabled: true }],
+    currentState: [{ value: 'EN TRÁMITE', disabled: true }],
+    currentResult: [{ value: 'AÚN SIN RESULTADO', disabled: true }],
 
     initialObservation: [''],
 
@@ -425,42 +425,42 @@ export class DemandNewComponent
     'Segundo apellido',
     'Fecha nacimiento',
     'Sexo',
-    'TelÃ©fono',
+    'Teléfono',
     'Correo',
-    'DirecciÃ³n',
+    'Dirección',
     'Comuna',
-    'PrevisiÃ³n',
+    'Previsión',
   ];
 
   readonly episodeFields = [
-    'CÃ³digo episodio',
+    'Código episodio',
     'Tipo episodio',
     'Fecha solicitud original',
     'Programa inicial',
     'Programa actual',
-    'VÃ­a de ingreso',
+    'Vía de ingreso',
     'Remitente',
     'Derivador',
-    'NÃºmero de tratamiento previo',
+    'Número de tratamiento previo',
     'Estado actual',
     'Resultado actual',
-    'DÃ­as acumulados',
+    'Días acumulados',
     'Fecha ingreso a tratamiento',
     'Fecha egreso',
     'Motivo cierre',
-    'ObservaciÃ³n inicial',
+    'Observación inicial',
   ];
 
   readonly stageFields = [
     'Programa responsable',
     'Orden de etapa',
-    'Fecha recepciÃ³n',
+    'Fecha recepción',
     'Fecha cierre',
     'Estado de etapa',
     'Resultado de etapa',
     'Etapa actual',
     'Motivo cierre etapa',
-    'ObservaciÃ³n cierre etapa',
+    'Observación cierre etapa',
   ];
 
   readonly structuralSections = [
@@ -468,20 +468,20 @@ export class DemandNewComponent
       icon: 'timeline',
       title: 'Eventos del episodio',
       subtitle:
-        'Registro cronolÃ³gico de citaciones, entrevistas, observaciones, ingreso, egreso y cierre.',
+        'Registro cronológico de citaciones, entrevistas, observaciones, ingreso, egreso y cierre.',
       empty: 'No existen eventos registrados.',
       fields: [
         'Tipo evento',
         'Fecha evento',
         'Hora evento',
-        'ProfesiÃ³n',
+        'Profesión',
         'Profesional',
-        'Estado citaciÃ³n',
+        'Estado citación',
         'Resultado asociado',
-        'Comentario de citaciÃ³n',
-        'ObservaciÃ³n general',
-        'PrÃ³xima acciÃ³n',
-        'Fecha prÃ³xima acciÃ³n',
+        'Comentario de citación',
+        'Observación general',
+        'Próxima acción',
+        'Fecha próxima acción',
         'Usuario que registra',
       ],
     },
@@ -489,15 +489,15 @@ export class DemandNewComponent
       icon: 'sync_alt',
       title: 'Referencias entre programas',
       subtitle:
-        'Cierre de etapa origen y creaciÃ³n de etapa receptora sin reiniciar dÃ­as.',
+        'Cierre de etapa origen y creación de etapa receptora sin reiniciar días.',
       empty:
-        'No existen referencias registradas. Las referencias conservarÃ¡n la fecha original y los dÃ­as acumulados.',
+        'No existen referencias registradas. Las referencias conservarán la fecha original y los días acumulados.',
       fields: [
         'Programa origen',
         'Programa destino',
         'Fecha referencia',
         'Motivo referencia',
-        'ObservaciÃ³n',
+        'Observación',
         'Documento asociado',
         'Usuario que registra',
         'Impacto de la referencia',
@@ -507,13 +507,13 @@ export class DemandNewComponent
       icon: 'science',
       title: 'Sustancias',
       subtitle:
-        'Sustancia principal, sustancias secundarias, nivel u orden y observaciÃ³n.',
+        'Sustancia principal, sustancias secundarias, nivel u orden y observación.',
       empty: 'No existen sustancias asociadas al episodio.',
       fields: [
         'Sustancia principal',
         'Sustancias secundarias',
         'Nivel / orden',
-        'ObservaciÃ³n',
+        'Observación',
       ],
     },
     {
@@ -534,14 +534,14 @@ export class DemandNewComponent
       icon: 'notification_important',
       title: 'Alertas y seguimiento',
       subtitle:
-        'Alertas con prioridad, responsable, prÃ³xima acciÃ³n y estado de seguimiento.',
+        'Alertas con prioridad, responsable, próxima acción y estado de seguimiento.',
       empty: 'No existen alertas activas.',
       fields: [
         'Tipo alerta',
         'Nivel prioridad',
-        'DescripciÃ³n',
-        'AcciÃ³n realizada',
-        'PrÃ³xima acciÃ³n',
+        'Descripción',
+        'Acción realizada',
+        'Próxima acción',
         'Fecha comprometida',
         'Responsable',
         'Estado alerta',
@@ -549,20 +549,20 @@ export class DemandNewComponent
     },
     {
       icon: 'verified_user',
-      title: 'AuditorÃ­a / decisiones crÃ­ticas',
+      title: 'Auditoría / decisiones críticas',
       subtitle:
-        'Trazabilidad de cierres, referencias, ingresos, egresos, rectificaciones y reversiÃ³n superior.',
+        'Trazabilidad de cierres, referencias, ingresos, egresos, rectificaciones y reversión superior.',
       empty:
-        'Las decisiones crÃ­ticas quedarÃ¡n registradas con usuario, fecha y autorizaciÃ³n.',
+        'Las decisiones críticas quedarán registradas con usuario, fecha y autorización.',
       fields: [
-        'AcciÃ³n crÃ­tica',
+        'Acción crítica',
         'Valor anterior',
         'Valor nuevo',
         'Motivo',
         'Usuario que ejecuta',
         'Usuario que autoriza',
-        'Fecha acciÃ³n',
-        'ReversiÃ³n / rectificaciÃ³n',
+        'Fecha acción',
+        'Reversión / rectificación',
       ],
     },
   ];
@@ -570,9 +570,9 @@ export class DemandNewComponent
   readonly operativeActions = [
     {
       icon: 'event_available',
-      title: 'CitaciÃ³n',
+      title: 'Citación',
       description:
-        'Agendar uno de los tipos de citaciÃ³n definidos para el episodio.',
+        'Agendar uno de los tipos de citación definidos para el episodio.',
       enabled: true,
       panel: 'citation' as const,
     },
@@ -580,22 +580,22 @@ export class DemandNewComponent
       icon: 'how_to_reg',
       title: 'Registrar asistencia',
       description:
-        'Marcar si se presentÃ³, no se presentÃ³, reprogramÃ³ o cancelÃ³ la atenciÃ³n.',
+        'Marcar si se presentó, no se presentó, reprogramó o canceló la atención.',
       enabled: true,
       panel: 'attendance' as const,
     },
     {
       icon: 'psychology',
-      title: 'RetroalimentaciÃ³n',
+      title: 'Retroalimentación',
       description:
-        'Registrar la decisiÃ³n adoptada para la continuidad de la demanda.',
+        'Registrar la decisión adoptada para la continuidad de la demanda.',
       enabled: true,
       panel: 'interview' as const,
     },
     {
       icon: 'notes',
-      title: 'ObservaciÃ³n',
-      description: 'Agregar observaciÃ³n general del episodio o etapa.',
+      title: 'Observación',
+      description: 'Agregar observación general del episodio o etapa.',
       enabled: true,
       panel: 'observation' as const,
     },
@@ -603,7 +603,7 @@ export class DemandNewComponent
       icon: 'sync_alt',
       title: 'Referir a otro programa',
       description:
-        'Cerrar etapa origen y crear etapa receptora sin reiniciar dÃ­as.',
+        'Cerrar etapa origen y crear etapa receptora sin reiniciar días.',
       enabled: true,
       panel: 'reference' as const,
     },
@@ -677,7 +677,7 @@ export class DemandNewComponent
     }
 
     if (!action.enabled) {
-      return 'Esta acciÃ³n no se encuentra disponible.';
+      return 'Esta acción no se encuentra disponible.';
     }
 
 
@@ -685,7 +685,14 @@ export class DemandNewComponent
       action.panel === 'citation' &&
       this.feedbackEvents.length > 0
     ) {
-      return 'No disponible: la etapa de citaciones finalizÃ³ al registrar la retroalimentaciÃ³n.';
+      return 'No disponible: la etapa de citaciones finalizó al registrar la retroalimentación.';
+    }
+
+    if (
+      action.panel === 'interview' &&
+      this.feedbackEvents.length > 0
+    ) {
+      return 'No disponible: la retroalimentación ya fue registrada para esta etapa.';
     }
 
     return null;
@@ -732,6 +739,13 @@ export class DemandNewComponent
       icon: 'notifications',
     },
   ];
+  get navigationAssistItems() {
+    return this.summaryNavigationItems.filter(
+      (item) =>
+        item.id !== 'demandante' &&
+        item.id !== 'trazabilidad',
+    );
+  }
 
   activeSummarySection: SummarySectionId = 'demanda-actual';
 
@@ -795,11 +809,11 @@ export class DemandNewComponent
     });
 
     /*
-     * Cuando el usuario cambia manualmente el tipo de previsiÃ³n,
-     * se debe limpiar la previsiÃ³n seleccionada anteriormente.
+     * Cuando el usuario cambia manualmente el tipo de previsión,
+     * se debe limpiar la previsión seleccionada anteriormente.
      *
      * Cuando cargamos una persona desde patchPersonForm(),
-     * usamos emitEvent: false para no entrar aquÃ­.
+     * usamos emitEvent: false para no entrar aquí.
      */
     this.personForm.get('intPrev')?.valueChanges.subscribe((id) => {
       this.filterConvPrevByIntPrev(Number(id), true);
@@ -812,7 +826,7 @@ export class DemandNewComponent
       });
 
     /*
-     * Limpia mensajes de validaciÃ³n que dejaron de corresponder
+     * Limpia mensajes de validación que dejaron de corresponder
      * cuando el usuario modifica un formulario operativo.
      */
     this.citationForm.valueChanges.subscribe(() => {
@@ -878,21 +892,12 @@ export class DemandNewComponent
   private updateBackToNavigationVisibility(
     container: HTMLElement | null,
   ): void {
-    const anchor = document.getElementById('longitudinal-navigation-anchor');
-
-    if (!container || !anchor || !this.selectedPerson) {
+    if (!container || !this.selectedPerson) {
       this.showBackToNavigation = false;
       return;
     }
 
-    const containerRect = container.getBoundingClientRect();
-    const anchorRect = anchor.getBoundingClientRect();
-
-    /*
-     * El botÃ³n aparece solamente cuando el Ã­ndice longitudinal
-     * ya quedÃ³ por encima del Ã¡rea visible del contenedor.
-     */
-    this.showBackToNavigation = anchorRect.top < containerRect.top - 8;
+    this.showBackToNavigation = container.scrollTop > 40;
   }
   scrollToSummarySection(sectionId: SummarySectionId): void {
     const target = document.getElementById(sectionId);
@@ -903,7 +908,7 @@ export class DemandNewComponent
     ) as HTMLElement | null;
 
     if (!target) {
-      console.warn(`[DemandNew] No se encontrÃ³ la secciÃ³n: ${sectionId}`);
+      console.warn(`[DemandNew] No se encontró la sección: ${sectionId}`);
       return;
     }
 
@@ -914,7 +919,7 @@ export class DemandNewComponent
       sectionId === 'demandante' ? 16 : (navigation?.offsetHeight ?? 0) + 46;
 
     /*
-     * Caso 1: el scroll estÃ¡ dentro de .demand-new-page.
+     * Caso 1: el scroll está dentro de .demand-new-page.
      */
     if (
       scrollContainer &&
@@ -949,6 +954,28 @@ export class DemandNewComponent
     });
   }
 
+  scrollToTop(): void {
+    const scrollContainer = document.querySelector(
+      '.demand-new-page',
+    ) as HTMLElement | null;
+
+    if (
+      scrollContainer &&
+      scrollContainer.scrollHeight > scrollContainer.clientHeight
+    ) {
+      scrollContainer.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+
+      return;
+    }
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }
   scrollToLongitudinalNavigation(): void {
     const anchor = document.getElementById('longitudinal-navigation-anchor');
 
@@ -958,7 +985,7 @@ export class DemandNewComponent
 
     if (!anchor) {
       console.warn(
-        '[DemandNew] No se encontrÃ³ el ancla de navegaciÃ³n longitudinal.',
+        '[DemandNew] No se encontró el ancla de navegación longitudinal.',
       );
       return;
     }
@@ -1200,9 +1227,9 @@ export class DemandNewComponent
         this.isLoadingDemandCatalogs = false;
       },
       error: (error) => {
-        console.error('Error cargando catÃ¡logos de demanda', error);
+        console.error('Error cargando catálogos de demanda', error);
         this.demandCatalogsError =
-          'No fue posible cargar los catÃ¡logos de demanda desde el backend.';
+          'No fue posible cargar los catálogos de demanda desde el backend.';
 
         this.isLoadingDemandCatalogs = false;
       },
@@ -1369,7 +1396,7 @@ export class DemandNewComponent
 
     if (rutControl.invalid) {
       this.searchError =
-        'El RUN ingresado no es vÃ¡lido. Revise el nÃºmero y el dÃ­gito verificador.';
+        'El RUN ingresado no es válido. Revise el número y el dígito verificador.';
       this.showCreatePersonForm = false;
       return;
     }
@@ -1421,7 +1448,7 @@ export class DemandNewComponent
     /*
      * Se esperan dos ciclos de renderizado:
      * 1. Angular procesa el *ngIf.
-     * 2. El navegador calcula la posiciÃ³n real del card.
+     * 2. El navegador calcula la posición real del card.
      */
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -1429,7 +1456,7 @@ export class DemandNewComponent
 
         if (!section) {
           console.warn(
-            '[DemandNew] No se encontrÃ³ el card de ediciÃ³n de persona.',
+            '[DemandNew] No se encontró el card de edición de persona.',
           );
           return;
         }
@@ -1474,7 +1501,7 @@ export class DemandNewComponent
       const rutControl = this.searchForm.controls.rut;
 
       this.searchError = rutControl.hasError('required')
-        ? 'Debe ingresar un RUN antes de realizar la bÃºsqueda.'
+        ? 'Debe ingresar un RUN antes de realizar la búsqueda.'
         : null;
 
       return;
@@ -1504,7 +1531,7 @@ export class DemandNewComponent
     this.personLoaded = false;
     this.episodeLoaded = false;
     this.stageLoaded = false;
-    this.stageVisualState = 'Pendiente de creaciÃ³n';
+    this.stageVisualState = 'Pendiente de creación';
 
     this.filteredConvPrev = [];
     this.longitudinal = null;
@@ -1548,7 +1575,7 @@ export class DemandNewComponent
 
     this.secondarySubstanceMap = {};
 
-    console.log('[DemandNew] RUN bÃºsqueda longitudinal:', rut);
+    console.log('[DemandNew] RUN búsqueda longitudinal:', rut);
 
     this.demandEpisodeService.getLongitudinalByRut(rut).subscribe({
       next: (data) => {
@@ -1592,7 +1619,7 @@ export class DemandNewComponent
         );
 
         /*
-         * Si el longitudinal estÃ¡ bloqueado o no existe,
+         * Si el longitudinal está bloqueado o no existe,
          * buscamos directamente la persona por RUN.
          */
         if (error?.status === 403 || error?.status === 404) {
@@ -1707,7 +1734,7 @@ export class DemandNewComponent
 
           if (!personId) {
             return throwError(
-              () => new Error('La persona recuperada no posee un ID vÃ¡lido.'),
+              () => new Error('La persona recuperada no posee un ID válido.'),
             );
           }
 
@@ -1744,8 +1771,8 @@ export class DemandNewComponent
 
           this.searchError =
             longitudinalStatus === 403
-              ? 'Se recuperaron los datos de la persona, pero actualmente no tiene autorizaciÃ³n para consultar su ficha longitudinal.'
-              : 'La persona estÃ¡ registrada, pero no posee una ficha longitudinal disponible.';
+              ? 'Se recuperaron los datos de la persona, pero actualmente no tiene autorización para consultar su ficha longitudinal.'
+              : 'La persona está registrada, pero no posee una ficha longitudinal disponible.';
         },
 
         error: (personError) => {
@@ -1760,7 +1787,7 @@ export class DemandNewComponent
             this.personLoaded = false;
             this.personNotFound = true;
 
-            // Solo cuando no existe se abre automÃ¡ticamente.
+            // Solo cuando no existe se abre automáticamente.
             this.showCreatePersonForm = true;
             this.showCreateEpisodeForm = false;
             this.showDemandantDetails = false;
@@ -1771,7 +1798,7 @@ export class DemandNewComponent
             this.stageVisualState = 'Persona no registrada';
 
             this.searchError =
-              'No se encontrÃ³ una persona registrada con ese RUN. Complete los datos para crearla.';
+              'No se encontró una persona registrada con ese RUN. Complete los datos para crearla.';
 
             return;
           }
@@ -1796,7 +1823,7 @@ export class DemandNewComponent
     }
 
     if (this.episodeForm.controls.contactType.hasError('required')) {
-      missingFields.push('VÃ­a de ingreso');
+      missingFields.push('Vía de ingreso');
     }
 
     if (this.episodeForm.controls.primarySubstanceId.hasError('required')) {
@@ -1807,7 +1834,7 @@ export class DemandNewComponent
   }
 
   createEpisode(): void {
-    if (this.createdEpisode || this.episodeLoaded) {
+    if ((this.createdEpisode || this.episodeLoaded) && !this.isHistoricalEpisode) {
       this.episodeSaveError =
         'Ya existe un episodio asociado a esta persona. No se puede crear un nuevo episodio activo.';
       return;
@@ -1873,7 +1900,7 @@ export class DemandNewComponent
     this.episodeSaveError = null;
     this.episodeSaveSuccess = null;
 
-    console.log('[DemandNew] Payload creaciÃ³n episodio:', payload);
+    console.log('[DemandNew] Payload creación episodio:', payload);
 
     this.demandEpisodeService
       .createEpisode(payload)
@@ -1907,7 +1934,7 @@ export class DemandNewComponent
           const episodeReference = episode?.episodeCode
             ? ` ${episode.episodeCode}`
             : episode?.id
-              ? ` N.Âº ${episode.id}`
+              ? ` N.º ${episode.id}`
               : '';
 
           const savedPreviousTreatmentNumber = Math.max(
@@ -1929,8 +1956,8 @@ export class DemandNewComponent
 
           this.episodeSaveSuccess =
             `El episodio${episodeReference} fue creado correctamente. ` +
-            `Se generÃ³ la etapa inicial en ${savedProgramName}. ` +
-            `NÃºmero de tratamientos previos registrado: ` +
+            `Se generó la etapa inicial en ${savedProgramName}. ` +
+            `Número de tratamientos previos registrado: ` +
             `${savedPreviousTreatmentNumber}.`;
 
           this.stageLoaded = Boolean(
@@ -1977,13 +2004,13 @@ export class DemandNewComponent
               episode?.state?.name ??
               episode?.stateName ??
               episode?.stateCode ??
-              'EN TRÃMITE',
+              'EN TRÁMITE',
 
             currentResult: formatResultLabelValue(
               episode?.result?.name ??
                 episode?.resultName ??
                 episode?.resultCode,
-              'AÃºn sin resultado',
+              'Aún sin resultado',
             ),
 
             initialObservation:
@@ -1997,8 +2024,8 @@ export class DemandNewComponent
            * La respuesta del POST ya permite actualizar la
            * vista inmediata del episodio.
            *
-           * La ficha longitudinal podrÃ¡ recargarse cuando el
-           * endpoint estÃ© disponible para el programa activo.
+           * La ficha longitudinal podrá recargarse cuando el
+           * endpoint esté disponible para el programa activo.
            */
         },
 
@@ -2009,7 +2036,7 @@ export class DemandNewComponent
 
           if (error.status === 403) {
             this.episodeSaveError =
-              'El backend rechazÃ³ la creaciÃ³n del episodio por permisos.';
+              'El backend rechazó la creación del episodio por permisos.';
             return;
           }
 
@@ -2022,7 +2049,7 @@ export class DemandNewComponent
           if (error.status === 400) {
             this.episodeSaveError =
               error.error?.message ||
-              'Los datos enviados para crear el episodio no son vÃ¡lidos.';
+              'Los datos enviados para crear el episodio no son válidos.';
             return;
           }
 
@@ -2033,7 +2060,7 @@ export class DemandNewComponent
             error.status === 504
           ) {
             this.episodeSaveError =
-              'El servicio de GestiÃ³n de Demanda no se encuentra disponible.';
+              'El servicio de Gestión de Demanda no se encuentra disponible.';
             return;
           }
 
@@ -2051,7 +2078,7 @@ export class DemandNewComponent
       return;
     }
 
-    if (this.createdEpisode || this.episodeLoaded) {
+    if ((this.createdEpisode || this.episodeLoaded) && !this.isHistoricalEpisode) {
       this.episodeSaveError =
         'Ya existe un episodio asociado a esta persona. No se puede preparar uno nuevo hasta validar cierre o reversa.';
       return;
@@ -2130,8 +2157,8 @@ export class DemandNewComponent
         this.longitudinal,
       ),
 
-      currentState: 'EN TRÃMITE',
-      currentResult: 'AÃšN SIN RESULTADO',
+      currentState: 'EN TRÁMITE',
+      currentResult: 'AÚN SIN RESULTADO',
 
       initialObservation: '',
 
@@ -2207,7 +2234,7 @@ export class DemandNewComponent
   savePerson(): void {
     if (this.selectedPerson?.id && !this.canManageCurrentEpisode) {
       this.personSaveError =
-        'La ficha estÃ¡ disponible Ãºnicamente en modo consulta.';
+        'La ficha está disponible únicamente en modo consulta.';
       return;
     }
 
@@ -2219,12 +2246,12 @@ export class DemandNewComponent
     const raw = this.personForm.getRawValue();
 
     if (!raw.intPrev) {
-      this.personSaveError = 'Debe seleccionar el tipo de previsiÃ³n.';
+      this.personSaveError = 'Debe seleccionar el tipo de previsión.';
       return;
     }
 
     if (!raw.convPrev) {
-      this.personSaveError = 'Debe seleccionar una previsiÃ³n.';
+      this.personSaveError = 'Debe seleccionar una previsión.';
       return;
     }
 
@@ -2312,7 +2339,7 @@ export class DemandNewComponent
     };
 
     /*
-     * La instituciÃ³n previsional se encuentra
+     * La institución previsional se encuentra
      * dentro del convenio previsional.
      */
     if (raw.convPrev && raw.intPrev) {
@@ -2332,7 +2359,7 @@ export class DemandNewComponent
       email: toStringOrNull(raw.contactEmail) ?? undefined,
 
       /*
-       * Se asignarÃ¡ el ID definitivo despuÃ©s de guardar
+       * Se asignará el ID definitivo después de guardar
        * o actualizar el postulante.
        */
       postulantId: 0,
@@ -2352,7 +2379,7 @@ export class DemandNewComponent
       .pipe(
         /*
          * El PUT/POST puede devolver relaciones parciales.
-         * DespuÃ©s de guardar consultamos el postulante completo.
+         * Después de guardar consultamos el postulante completo.
          */
         switchMap((savedPerson: Postulant) => {
           const savedPersonId = Number(savedPerson?.id ?? existingPersonId);
@@ -2361,7 +2388,7 @@ export class DemandNewComponent
             return throwError(
               () =>
                 new Error(
-                  'El backend no devolviÃ³ un identificador vÃ¡lido del postulante.',
+                  'El backend no devolvió un identificador válido del postulante.',
                 ),
             );
           }
@@ -2424,7 +2451,7 @@ export class DemandNewComponent
       .subscribe({
         next: (fullPostulant: Postulant) => {
           console.log(
-            '[DemandNew] Persona completa despuÃ©s de guardar:',
+            '[DemandNew] Persona completa después de guardar:',
             fullPostulant,
           );
 
@@ -2586,7 +2613,7 @@ export class DemandNewComponent
           }
 
           /*
-           * Carga el formulario usando Ãºnicamente
+           * Carga el formulario usando únicamente
            * datos propios del Postulant.
            */
           this.patchPersonForm(updatedPerson);
@@ -2635,7 +2662,7 @@ export class DemandNewComponent
 
           if (error?.status === 400) {
             this.personSaveError =
-              error?.error?.message ?? 'Los datos enviados no son vÃ¡lidos.';
+              error?.error?.message ?? 'Los datos enviados no son válidos.';
             return;
           }
 
@@ -2646,7 +2673,7 @@ export class DemandNewComponent
             error?.status === 504
           ) {
             this.personSaveError =
-              'El servicio no respondiÃ³ correctamente. Intente nuevamente en unos minutos.';
+              'El servicio no respondió correctamente. Intente nuevamente en unos minutos.';
             return;
           }
 
@@ -2680,7 +2707,7 @@ export class DemandNewComponent
 
     if (!episodeId) {
       this.interviewError =
-        'No fue posible identificar el episodio para registrar la retroalimentaciÃ³n.';
+        'No fue posible identificar el episodio para registrar la retroalimentación.';
       return;
     }
 
@@ -2688,7 +2715,7 @@ export class DemandNewComponent
 
     if (!programId) {
       this.interviewError =
-        'No fue posible identificar el programa activo para registrar la retroalimentaciÃ³n.';
+        'No fue posible identificar el programa activo para registrar la retroalimentación.';
       return;
     }
 
@@ -2709,10 +2736,10 @@ export class DemandNewComponent
       data: {
         title: 'Finalizar etapa de citaciones',
         message:
-          'Al guardar la retroalimentaciÃ³n se darÃ¡ por finalizada la etapa de entrevistas. DespuÃ©s de esta acciÃ³n no podrÃ¡n registrarse nuevas citaciones para este episodio. Â¿Desea continuar?',
+          'Al guardar la retroalimentación se dará por finalizada la etapa de entrevistas. Después de esta acción no podrán registrarse nuevas citaciones para este episodio. ¿Desea continuar?',
         icon: 'warning',
         color: 'warn',
-        confirmText: 'Guardar retroalimentaciÃ³n',
+        confirmText: 'Guardar retroalimentación',
         cancelText: 'Cancelar',
       },
     });
@@ -2754,7 +2781,7 @@ export class DemandNewComponent
 
           this.loadEpisodeLongitudinal(episodeId);
 
-          // Cerrar el panel despuÃ©s de mostrar la confirmaciÃ³n.
+          // Cerrar el panel después de mostrar la confirmación.
           setTimeout(() => {
             if (this.activeActionPanel === 'interview') {
               this.closeActionPanel();
@@ -2764,25 +2791,25 @@ export class DemandNewComponent
 
         error: (error: HttpErrorResponse) => {
           console.error(
-            '[DemandNew] Error registrando retroalimentaciÃ³n:',
+            '[DemandNew] Error registrando retroalimentación:',
             error,
           );
 
           if (error.status === 403) {
             this.interviewError =
-              'No tiene permisos para registrar la retroalimentaciÃ³n.';
+              'No tiene permisos para registrar la retroalimentación.';
             return;
           }
 
           if (error.status === 400) {
             this.interviewError =
               error.error?.message ||
-              'Los datos de la retroalimentaciÃ³n no son vÃ¡lidos.';
+              'Los datos de la retroalimentación no son válidos.';
             return;
           }
 
           this.interviewError =
-            'No fue posible registrar la retroalimentaciÃ³n. Intente nuevamente.';
+            'No fue posible registrar la retroalimentación. Intente nuevamente.';
         },
       });
     });
@@ -2833,7 +2860,7 @@ export class DemandNewComponent
 
     return formatResultLabelValue(
       resolveCurrentStageResultValue(this.currentEpisodeStage, episode),
-      'AÃºn sin resultado',
+      'Aún sin resultado',
     );
   }
 
@@ -2981,7 +3008,7 @@ export class DemandNewComponent
 
           if (error.status === 400) {
             this.closureError =
-              error.error?.message || 'La fecha de cierre no es vÃ¡lida.';
+              error.error?.message || 'La fecha de cierre no es válida.';
             return;
           }
 
@@ -3011,7 +3038,7 @@ export class DemandNewComponent
       intPrev: person.convPrev?.intPrev?.id ?? null,
       convPrev: person.convPrev?.id ?? null,
 
-      // TodavÃ­a no estÃ¡n disponibles directamente en Postulant.
+      // Todavía no están disponibles directamente en Postulant.
       contactName: this.selectedContact?.name ?? '',
       contactDescription: this.selectedContact?.description ?? '',
       contactCellphone: this.selectedContact?.cellphone ?? '',
@@ -3044,7 +3071,7 @@ export class DemandNewComponent
 
     if (!episodeId) {
       this.observationError =
-        'No fue posible identificar el episodio para registrar la observaciÃ³n.';
+        'No fue posible identificar el episodio para registrar la observación.';
       return;
     }
 
@@ -3052,7 +3079,7 @@ export class DemandNewComponent
 
     if (!programId) {
       this.observationError =
-        'No fue posible identificar el programa activo para registrar la observaciÃ³n.';
+        'No fue posible identificar el programa activo para registrar la observación.';
       return;
     }
 
@@ -3083,7 +3110,7 @@ export class DemandNewComponent
           this.loadEpisodeLongitudinal(episodeId);
         },
         error: (error) => {
-          console.error('[DemandNew] Error registrando observaciÃ³n:', error);
+          console.error('[DemandNew] Error registrando observación:', error);
 
           if (error?.status === 403) {
             this.observationError =
@@ -3092,7 +3119,7 @@ export class DemandNewComponent
           }
 
           this.observationError =
-            'No fue posible registrar la observaciÃ³n. Revise los datos e intente nuevamente.';
+            'No fue posible registrar la observación. Revise los datos e intente nuevamente.';
         },
       });
   }
@@ -3108,7 +3135,7 @@ export class DemandNewComponent
 
     /*
      * Primero conserva la respuesta longitudinal completa.
-     * La persona resumida serÃ¡ reemplazada despuÃ©s por el GET completo.
+     * La persona resumida será reemplazada después por el GET completo.
      */
     this.longitudinal = data;
     this.episodeEvents = events;
@@ -3179,7 +3206,7 @@ export class DemandNewComponent
 
       this.stageVisualState = `Etapa activa: ${
         currentStage?.program?.name ?? 'Sin programa'
-      } Â· ${currentStage?.daysInStage ?? 0} dÃ­as`;
+      } · ${currentStage?.daysInStage ?? 0} días`;
     } else {
       this.stageLoaded = false;
       this.stageVisualState = 'Sin etapa activa cargada';
@@ -3190,7 +3217,7 @@ export class DemandNewComponent
      * PERSONA
      * =====================================================
      *
-     * El longitudinal entrega una versiÃ³n resumida del
+     * El longitudinal entrega una versión resumida del
      * postulante. Por eso usamos su ID para consultar:
      *
      * GET /api/v1/postulants/{id}
@@ -3200,13 +3227,13 @@ export class DemandNewComponent
      * - commune
      * - sex
      * - user completo o parcial
-     * - demÃ¡s datos propios del postulante
+     * - demás datos propios del postulante
      */
     const postulantId = Number(summarizedPostulant?.id);
 
     if (!Number.isFinite(postulantId) || postulantId <= 0) {
       console.warn(
-        '[DemandNew] El longitudinal no contiene un postulante vÃ¡lido:',
+        '[DemandNew] El longitudinal no contiene un postulante válido:',
         summarizedPostulant,
       );
 
@@ -3308,7 +3335,7 @@ export class DemandNewComponent
         };
 
         /*
-         * Actualiza tambiÃ©n el resumen del episodio.
+         * Actualiza también el resumen del episodio.
          */
         if (this.episodeSummary) {
           this.episodeSummary = {
@@ -3318,8 +3345,8 @@ export class DemandNewComponent
         }
 
         /*
-         * Usa el mÃ©todo Ãºnico de carga del formulario.
-         * AllÃ­ secondName se obtiene desde person.lastName.
+         * Usa el método único de carga del formulario.
+         * Allí secondName se obtiene desde person.lastName.
          */
         this.patchPersonForm(completePerson);
         this.loadContactByPostulant(postulantId);
@@ -3430,7 +3457,7 @@ export class DemandNewComponent
           const events = response?.events ?? [];
 
           /*
-           * DiagnÃ³stico de los eventos recibidos.
+           * Diagnóstico de los eventos recibidos.
            */
           console.table(
             events.map((event: any) => ({
@@ -3574,7 +3601,7 @@ export class DemandNewComponent
 
           /*
            * El endpoint por ID puede devolver un episodio cerrado
-           * en response.episode, mientras activeEpisode queda vacÃ­o.
+           * en response.episode, mientras activeEpisode queda vacío.
            */
           const responseEpisodes = Array.isArray(response?.episodes)
             ? response.episodes
@@ -3678,9 +3705,9 @@ export class DemandNewComponent
             this.stageVisualState = displayedStage
               ? `${
                   this.isHistoricalEpisode ? 'Etapa cerrada' : 'Etapa activa'
-                }: ${displayedStage?.program?.name ?? 'Sin programa'} Â· ${
+                }: ${displayedStage?.program?.name ?? 'Sin programa'} · ${
                   displayedStage?.daysInStage ?? 0
-                } dÃ­as`
+                } días`
               : this.isHistoricalEpisode
                 ? 'Etapa cerrada'
                 : 'Sin etapa activa cargada';
@@ -3690,8 +3717,8 @@ export class DemandNewComponent
            * Actualiza el formulario solamente cuando existe
            * una persona consolidada.
            *
-           * No se ejecuta mientras el usuario estÃ¡ editando,
-           * para evitar sobrescribir cambios todavÃ­a no guardados.
+           * No se ejecuta mientras el usuario está editando,
+           * para evitar sobrescribir cambios todavía no guardados.
            */
           if (mergedPostulant && !this.showCreatePersonForm) {
             this.patchPersonForm(mergedPostulant);
@@ -3722,7 +3749,7 @@ export class DemandNewComponent
 
           if (error?.status === 404) {
             this.longitudinalError =
-              'No se encontrÃ³ el historial longitudinal del episodio.';
+              'No se encontró el historial longitudinal del episodio.';
             return;
           }
 
@@ -3733,7 +3760,7 @@ export class DemandNewComponent
             error?.status === 504
           ) {
             this.longitudinalError =
-              'El servicio de GestiÃ³n de Demanda no respondiÃ³ correctamente.';
+              'El servicio de Gestión de Demanda no respondió correctamente.';
             return;
           }
 
@@ -3743,6 +3770,129 @@ export class DemandNewComponent
       });
   }
 
+  navigationAssistActionsOpen = false;
+
+  scrollToQuickAccess(targetId: string): void {
+    const target = document.getElementById(targetId);
+
+    if (!target) {
+      return;
+    }
+
+    const scrollContainer = document.querySelector(
+      '.demand-new-page',
+    ) as HTMLElement | null;
+
+    if (
+      scrollContainer &&
+      scrollContainer.scrollHeight > scrollContainer.clientHeight
+    ) {
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+
+      const targetTop =
+        scrollContainer.scrollTop +
+        targetRect.top -
+        containerRect.top -
+        80;
+
+      scrollContainer.scrollTo({
+        top: Math.max(0, targetTop),
+        behavior: 'smooth',
+      });
+
+      return;
+    }
+
+    target.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+      inline: 'nearest',
+    });
+  }
+  toggleNavigationAssistActions(): void {
+    this.navigationAssistActionsOpen = !this.navigationAssistActionsOpen;
+  }
+
+  openOperativeActionFromAssist(panel: ActiveActionPanel): void {
+    this.openActionPanel(panel);
+
+    if (this.activeActionPanel !== panel) {
+      return;
+    }
+
+    this.navigationAssistActionsOpen = false;
+
+    setTimeout(() => {
+      const target = document.getElementById('operationPanelShell');
+
+      if (!target) {
+        return;
+      }
+
+      target.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+        inline: 'nearest',
+      });
+
+      target.classList.add('navigation-assist-target-highlight');
+
+      setTimeout(() => {
+        target.classList.remove('navigation-assist-target-highlight');
+      }, 2200);
+    }, 120);
+  }
+  scrollToOperativeActions(): void {
+    const target = document.getElementById('operativeDock');
+
+    if (!target) {
+      return;
+    }
+
+    target.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+      inline: 'nearest',
+    });
+
+    target.focus({
+      preventScroll: true,
+    });
+  }
+  openRecommendedActionFromAssist(): void {
+    const panel = this.recommendedOperativePanel;
+
+    if (!panel) {
+      return;
+    }
+
+    this.openActionPanel(panel);
+
+    if (this.activeActionPanel !== panel) {
+      return;
+    }
+
+    setTimeout(() => {
+      const target = document.getElementById('operationPanelShell');
+
+      if (!target) {
+        return;
+      }
+
+      target.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+        inline: 'nearest',
+      });
+
+      target.classList.add('navigation-assist-target-highlight');
+
+      setTimeout(() => {
+        target.classList.remove('navigation-assist-target-highlight');
+      }, 2200);
+    }, 120);
+  }
   openActionPanel(panel: ActiveActionPanel): void {
     /*
      * Permite cerrar el panel aunque el episodio pertenezca
@@ -3754,7 +3904,7 @@ export class DemandNewComponent
 
     if (panel === 'citation' && this.feedbackEvents.length > 0) {
       this.citationError =
-        'No es posible registrar nuevas citaciones porque la etapa de citaciones finalizÃ³ al registrar la retroalimentaciÃ³n.';
+        'No es posible registrar nuevas citaciones porque la etapa de citaciones finalizó al registrar la retroalimentación.';
       return;
     }
 
@@ -3930,7 +4080,7 @@ export class DemandNewComponent
     const professionName =
       citation?.professionName ??
       citation?.profession?.name ??
-      'ProfesiÃ³n no informada';
+      'Profesión no informada';
 
     const html = this.citationReport.generateFromCitation({
       citationTypeName: this.getCitationDisplayName(citation),
@@ -3967,7 +4117,7 @@ export class DemandNewComponent
 
     return (
       this.citationTypes.find((item: any) => item?.code === code)?.name ??
-      'CitaciÃ³n histÃ³rica'
+      'Citación histórica'
     );
   }
 
@@ -4030,14 +4180,14 @@ export class DemandNewComponent
 
     /*
      * Angular debe retirar primero el panel operativo.
-     * DespuÃ©s se posiciona nuevamente la vista en el menÃº de acciones.
+     * Después se posiciona nuevamente la vista en el menú de acciones.
      */
     setTimeout(() => {
       const operativeDock = document.getElementById('operativeDock');
 
       if (!operativeDock) {
         console.warn(
-          '[DemandNew] No se encontrÃ³ el bloque GestiÃ³n del episodio.',
+          '[DemandNew] No se encontró el bloque Gestión del episodio.',
         );
         return;
       }
@@ -4061,7 +4211,7 @@ export class DemandNewComponent
 
     if (this.feedbackEvents.length > 0) {
       this.citationError =
-        'No es posible registrar nuevas citaciones porque el episodio ya cuenta con retroalimentaciÃ³n.';
+        'No es posible registrar nuevas citaciones porque el episodio ya cuenta con retroalimentación.';
       return;
     }
     this.citationForm.markAllAsTouched();
@@ -4077,7 +4227,7 @@ export class DemandNewComponent
 
     if (!episodeId) {
       this.citationError =
-        'No fue posible identificar el episodio para registrar la citaciÃ³n.';
+        'No fue posible identificar el episodio para registrar la citación.';
       return;
     }
 
@@ -4085,7 +4235,7 @@ export class DemandNewComponent
 
     if (!programId) {
       this.citationError =
-        'No fue posible identificar el programa activo para registrar la citaciÃ³n.';
+        'No fue posible identificar el programa activo para registrar la citación.';
       return;
     }
 
@@ -4144,7 +4294,7 @@ export class DemandNewComponent
         },
 
         error: (error: HttpErrorResponse) => {
-          console.error('[DemandNew] Error registrando citaciÃ³n:', error);
+          console.error('[DemandNew] Error registrando citación:', error);
 
           if (error.status === 403) {
             this.citationError =
@@ -4155,12 +4305,12 @@ export class DemandNewComponent
           if (error.status === 400) {
             this.citationError =
               error.error?.message ||
-              'Los datos de la citaciÃ³n no son vÃ¡lidos.';
+              'Los datos de la citación no son válidos.';
             return;
           }
 
           this.citationError =
-            'No fue posible registrar la citaciÃ³n. Revise los datos e intente nuevamente.';
+            'No fue posible registrar la citación. Revise los datos e intente nuevamente.';
         },
       });
   }
@@ -4213,7 +4363,7 @@ export class DemandNewComponent
     });
 
     console.log('[DemandNew] Payload asistencia:', payload);
-    console.log('[DemandNew] CitaciÃ³n seleccionada:', validSelectedCitation);
+    console.log('[DemandNew] Citación seleccionada:', validSelectedCitation);
     console.log('[DemandNew] Episodio:', validEpisodeId);
 
     this.isSavingAttendance = true;
@@ -4365,7 +4515,7 @@ export class DemandNewComponent
 
     const waitingStopped = episode?.waitingStopped === true;
 
-    let waitingLabel = 'Sin clasificaciÃ³n de plazo';
+    let waitingLabel = 'Sin clasificación de plazo';
     let waitingTone: 'success' | 'warning' | 'danger' | 'neutral' = 'neutral';
 
     if (waitingStopped) {
@@ -4378,7 +4528,7 @@ export class DemandNewComponent
       waitingLabel = 'Requiere seguimiento';
       waitingTone = 'warning';
     } else if (semaphoreCode === 'ROJO') {
-      waitingLabel = 'AtenciÃ³n prioritaria';
+      waitingLabel = 'Atención prioritaria';
       waitingTone = 'danger';
     }
 
@@ -4425,7 +4575,7 @@ export class DemandNewComponent
           lastEvent?.eventType?.code ??
             lastEvent?.eventTypeCode ??
             lastEvent?.event_type_code,
-          'GestiÃ³n registrada',
+          'Gestión registrada',
         ))
       : 'Sin gestiones registradas';
 
@@ -4434,10 +4584,10 @@ export class DemandNewComponent
           lastEvent?.eventDate ?? lastEvent?.createdAt,
         )}${
           lastEvent?.eventTime
-            ? ` Â· ${formatDisplayTimeValue(lastEvent.eventTime)}`
+            ? ` · ${formatDisplayTimeValue(lastEvent.eventTime)}`
             : ''
         }`
-      : 'El episodio todavÃ­a no registra actividades.';
+      : 'El episodio todavía no registra actividades.';
 
     const resultValue = resolveCurrentStageResultValue(currentStage, episode);
 
@@ -4796,7 +4946,7 @@ export class DemandNewComponent
     this.feedbackEvents.forEach((feedback: any, index: number) => {
       milestones.push({
         code: 'Retro.',
-        title: 'RetroalimentaciÃ³n',
+        title: 'Retroalimentación',
         icon: 'assignment_turned_in',
         date: feedback.eventDate,
         sortOrder: 500 + index,
@@ -4828,7 +4978,7 @@ export class DemandNewComponent
         date: this.episodeClosureDate,
         sortOrder: 900,
         status: null,
-        description: 'TÃ©rmino formal del episodio de demanda.',
+        description: 'Término formal del episodio de demanda.',
         registeredByName: null,
         createdAt: null,
         details: [],
@@ -5142,7 +5292,7 @@ export class DemandNewComponent
     const normalized = String(value).trim().toUpperCase();
 
     const labels: Record<string, string> = {
-      EN_TRAMITE: 'En trÃ¡mite',
+      EN_TRAMITE: 'En trámite',
       ACTIVO: 'Activo',
       CERRADO: 'Cerrado',
       FINALIZADO: 'Finalizado',
@@ -5237,8 +5387,8 @@ export class DemandNewComponent
       return false;
     }
     /*
-     * Si la persona todavÃ­a no posee episodio, no existe una
-     * responsabilidad programÃ¡tica que pueda bloquear la ficha.
+     * Si la persona todavía no posee episodio, no existe una
+     * responsabilidad programática que pueda bloquear la ficha.
      */
     if (!this.hasCurrentEpisode) {
       return true;
