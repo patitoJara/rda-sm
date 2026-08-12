@@ -1,7 +1,9 @@
-import { formatDateForBackend } from '../utils/demand-new-format.utils';
+﻿import { formatDateForBackend } from '../utils/demand-new-format.utils';
 
 export interface ClosurePayload {
+  closureReasonId: number;
   closureDate: string;
+  observation?: string;
 }
 
 export interface ClosureContextInput {
@@ -23,7 +25,16 @@ export type ClosureContextResult =
 export function buildClosureContext(
   input: ClosureContextInput,
 ): ClosureContextResult {
+  const closureReasonId = Number(input.raw?.closureReasonId);
   const closureDate = formatDateForBackend(input.raw?.closureDate);
+  const observation = String(input.raw?.observation ?? '').trim();
+
+  if (!Number.isFinite(closureReasonId) || closureReasonId <= 0) {
+    return {
+      valid: false,
+      errorMessage: 'Debe seleccionar un motivo de cierre.',
+    };
+  }
 
   if (!closureDate) {
     return {
@@ -60,7 +71,9 @@ export function buildClosureContext(
   return {
     valid: true,
     payload: {
+      closureReasonId,
       closureDate,
+      observation: observation || undefined,
     },
   };
 }

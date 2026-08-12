@@ -668,6 +668,28 @@
   }
 }
 
+.demand-background-row {
+  align-items: flex-start;
+  padding: 7px 0;
+  gap: 10px;
+
+  span,
+  strong {
+    font-size: 13px;
+    line-height: 1.35;
+    font-weight: 500;
+  }
+
+  span {
+    color: #667c83;
+  }
+
+  strong {
+    color: #123b44;
+    text-align: right;
+    max-width: 60%;
+  }
+}
 .card-actions-preview {
   margin-top: 14px;
 }

@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+﻿import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -111,7 +111,9 @@ export class DemandEpisodeService {
   closeEpisode(
     episodeId: number,
     payload: {
+      closureReasonId: number;
       closureDate: string;
+      observation?: string;
     },
   ): Observable<any> {
     return this.http.post<any>(

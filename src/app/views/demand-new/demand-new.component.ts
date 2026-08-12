@@ -1,10 +1,12 @@
-﻿import { CommonModule } from '@angular/common';
+﻿import { DEMAND_CITATION_CODES } from '../../shared/utils/demand-workflow.utils';
+import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import {
   AfterViewInit,
   Component,
   ElementRef,
+  HostListener,
   inject,
   OnDestroy,
   OnInit,
@@ -37,10 +39,11 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 
-import { throwError } from 'rxjs';
-import { finalize, switchMap } from 'rxjs/operators';
+import { forkJoin, throwError } from 'rxjs';
+import { finalize, map, switchMap } from 'rxjs/operators';
 
 import { ConfirmDialogYesNoComponent } from '@app/shared/confirm-dialog/confirm-dialog-yes-no.component';
+import { ConfirmDialogOkComponent } from '@app/shared/confirm-dialog/confirm-dialog-ok.component';
 import { Postulant } from '@app/models/postulant';
 import { DemandEpisodeService } from '@app/services/demand/demand-episode.service';
 import { PreloadCatalogsService } from '@app/services/demand/preload-catalogs.service';
@@ -52,7 +55,7 @@ import { Contact } from '@app/models/contact';
 import { ContactCreateDto } from '@app/models/contact-create.dto';
 import { CitationReportService } from '@app/services/reports/citation-report.service';
 
-import { DemandService } from '../../core/services/demand.service';
+import { DemandService, EpisodeSubstance } from '../../core/services/demand.service';
 import { EpisodeDocumentsComponent } from './documents/episode-documents.component';
 import { FeedbackPanelComponent } from './components/feedback-panel/feedback-panel.component';
 
@@ -61,6 +64,7 @@ import {
   SummaryNavigationItem,
   SummarySectionId,
 } from './models/demand-new-view.types';
+import { SistraReportData } from './models/sistra-report.types';
 
 import {
   formatDateForBackend,
@@ -167,6 +171,13 @@ import {
 } from './utils/demand-new-semaphore.utils';
 
 import {
+  resolveDemandActionMatrix,
+  DemandActionMatrix,
+  DemandClosureOption,
+  DemandFeedbackResult,
+} from './utils/demand-new-action-matrix.utils';
+
+import {
   formatDisplayDate as formatDisplayDateValue,
   formatDisplayTime as formatDisplayTimeValue,
   formatResultLabel as formatResultLabelValue,
@@ -231,6 +242,8 @@ export class DemandNewComponent
 
   activeProgramName: string | null = null;
   activeProgramId: number | null = null;
+  episodeSubstances: EpisodeSubstance[] = [];
+  episodeSubstancesLoaded = false;
   highlightedSummarySection: SummarySectionId | null = null;
 
   historyDisplayLimit = 8;
@@ -298,7 +311,12 @@ export class DemandNewComponent
   });
 
   closureForm = this.fb.group({
+    closureReasonId: new FormControl<number | null>(
+      null,
+      Validators.required,
+    ),
     closureDate: [new Date(), Validators.required],
+    observation: ['', Validators.maxLength(1000)],
   });
   observationForm = this.fb.group({
     comment: ['', Validators.required],
@@ -668,6 +686,71 @@ export class DemandNewComponent
     return this.recommendedOperativePanel === panel;
   }
 
+  get demandActionMatrix(): DemandActionMatrix {
+    const feedbackResults = this.feedbackEvents
+      .map((event: any) =>
+        normalizeText(
+          event?.resultCode ??
+          event?.result?.code ??
+          event?.result ??
+          '',
+        ),
+      )
+      .filter((code: string) =>
+        [
+          'LISTA_ESPERA',
+          'REFERENCIA',
+          'INGRESO_TRATAMIENTO',
+          'ABANDONO',
+        ].includes(code),
+      ) as DemandFeedbackResult[];
+
+    const pendingCitationCount = filterPendingCitationEvents(
+      this.citationEvents,
+      this.currentStageEvents,
+    ).length;
+
+    const firstInterviewCompleted = this.attendedInterviewCitations.some(
+      (citation: any) => {
+        const citationTypeCode = normalizeText(
+          resolveCitationTypeCode(
+            citation,
+            this.citationEvents,
+            this.citationTypes,
+          ),
+        );
+
+        return (
+          citationTypeCode === 'PRIMERA_CITACION_PRIMERA_ENTREVISTA' ||
+          citationTypeCode === 'SEGUNDA_CITACION_PRIMERA_ENTREVISTA'
+        );
+      },
+    );
+
+    return resolveDemandActionMatrix({
+      episodeClosed: !!this.isHistoricalEpisode,
+      stageClosed: false,
+      citationCount: this.citationEvents.length,
+      pendingCitationCount,
+      firstInterviewCompleted,
+      feedbackResults,
+      referenceExecuted: false,
+      closureResult: null,
+    });
+  }
+
+  get availableClosureReasons() {
+    const allowedCodes = new Set(
+      this.demandActionMatrix.allowedClosureOptions.map((code) =>
+        normalizeText(code),
+      ),
+    );
+
+    return this.closureReasons.filter((item) =>
+      allowedCodes.has(normalizeText(item.code)),
+    );
+  }
+
   getOperativeActionDisabledReason(action: {
     enabled: boolean;
     panel: ActiveActionPanel;
@@ -676,27 +759,30 @@ export class DemandNewComponent
       return 'No tiene permisos para gestionar este episodio.';
     }
 
-    if (!action.enabled) {
-      return 'Esta acción no se encuentra disponible.';
+    const matrix = this.demandActionMatrix;
+
+    const matrixAction =
+      action.panel === 'citation'
+        ? matrix.citation
+        : action.panel === 'attendance'
+          ? matrix.attendance
+          : action.panel === 'interview'
+            ? matrix.feedback
+            : action.panel === 'observation'
+              ? matrix.observation
+              : action.panel === 'reference'
+                ? matrix.reference
+                : action.panel === 'egressClosure'
+                  ? matrix.closure
+                  : null;
+
+    if (!matrixAction) {
+      return null;
     }
 
-
-    if (
-      action.panel === 'citation' &&
-      this.feedbackEvents.length > 0
-    ) {
-      return 'No disponible: la etapa de citaciones finalizó al registrar la retroalimentación.';
-    }
-
-    if (
-      action.panel === 'interview' &&
-      this.feedbackEvents.length > 0
-    ) {
-      return 'No disponible: la retroalimentación ya fue registrada para esta etapa.';
-    }
-
-    return null;
+    return matrixAction.enabled ? null : matrixAction.message;
   }
+
   readonly summaryNavigationItems: SummaryNavigationItem[] = [
     {
       id: 'demanda-actual',
@@ -732,6 +818,11 @@ export class DemandNewComponent
       id: 'documentos',
       label: 'Documentos',
       icon: 'description',
+    },
+    {
+      id: 'informe-sistra',
+      label: 'Formulario SISTRAT',
+      icon: 'print',
     },
     {
       id: 'alertas',
@@ -1579,13 +1670,42 @@ export class DemandNewComponent
 
     this.demandEpisodeService.getLongitudinalByRut(rut).subscribe({
       next: (data) => {
-        console.log('[DemandNew] Longitudinal recibido:', data);
-
         this.applyLongitudinalData(data);
 
         const loadedEpisodeId = Number(
           data?.activeEpisode?.id ?? data?.activeEpisode?.episodeId ?? 0,
         );
+
+        if (
+          loadedEpisodeId > 0 &&
+          (!this.requestedEpisodeId || this.requestedEpisodeId === loadedEpisodeId)
+        ) {
+          this.episodeSubstances = [];
+          this.episodeSubstancesLoaded = false;
+
+          this.demandService.getEpisodeSubstances(loadedEpisodeId).subscribe({
+            next: (substances) => {
+              this.episodeSubstances = Array.isArray(substances)
+                ? substances
+                : [];
+              this.episodeSubstancesLoaded = true;
+
+              console.log(
+                '[DemandNew] Sustancias episodio:',
+                this.episodeSubstances,
+              );
+            },
+            error: (error) => {
+              console.error(
+                '[DemandNew] Error cargando sustancias del episodio:',
+                error,
+              );
+
+              this.episodeSubstances = [];
+              this.episodeSubstancesLoaded = false;
+            },
+          });
+        }
 
         const availableEpisodes = Array.isArray(data?.episodes)
           ? data.episodes
@@ -1905,6 +2025,45 @@ export class DemandNewComponent
     this.demandEpisodeService
       .createEpisode(payload)
       .pipe(
+        switchMap((episode) => {
+          const createdEpisodeId = Number(
+            episode?.id ?? episode?.episodeId ?? 0,
+          );
+
+          if (!Number.isFinite(createdEpisodeId) || createdEpisodeId <= 0) {
+            return throwError(
+              () =>
+                new Error(
+                  'El backend no devolvió un identificador válido del episodio.',
+                ),
+            );
+          }
+
+          const substanceRequests = [
+            this.demandService.saveSubstance(createdEpisodeId, {
+              substanceId: Number(raw.primarySubstanceId),
+              level: 'Principal',
+              primarySubstance: true,
+              useOrder: 1,
+              observation: '',
+            }),
+
+            ...(raw.secondarySubstances ?? []).map((item) =>
+              this.demandService.saveSubstance(createdEpisodeId, {
+                substanceId: Number(item.substanceId),
+                level: 'Secundaria',
+                primarySubstance: false,
+                useOrder: Number(item.order),
+                observation: '',
+              }),
+            ),
+          ];
+
+          return forkJoin(substanceRequests).pipe(
+            map(() => episode),
+          );
+        }),
+
         finalize(() => {
           this.isSavingEpisode = false;
         }),
@@ -2688,9 +2847,10 @@ export class DemandNewComponent
       return;
     }
 
-    if (this.feedbackEvents.length > 0) {
-      this.interviewError =
-        'La retroalimentación ya fue registrada para esta etapa. No es posible registrar una segunda retroalimentación.';
+    const matrixFeedback = this.demandActionMatrix.feedback;
+
+    if (!matrixFeedback.enabled) {
+      this.interviewError = matrixFeedback.message;
       return;
     }
 
@@ -2883,6 +3043,13 @@ export class DemandNewComponent
       return;
     }
 
+    const matrixReference = this.demandActionMatrix.reference;
+
+    if (!matrixReference.enabled) {
+      this.referenceError = matrixReference.message;
+      return;
+    }
+
     this.referenceForm.markAllAsTouched();
 
     if (this.referenceForm.invalid || this.isSavingReference) {
@@ -2946,6 +3113,13 @@ export class DemandNewComponent
       return;
     }
 
+    const matrixClosure = this.demandActionMatrix.closure;
+
+    if (!matrixClosure.enabled) {
+      this.closureError = matrixClosure.message;
+      return;
+    }
+
     this.closureForm.markAllAsTouched();
 
     if (this.closureForm.invalid || this.isSavingClosure) {
@@ -2974,48 +3148,86 @@ export class DemandNewComponent
       return;
     }
 
-    this.isSavingClosure = true;
-    this.closureError = null;
-    this.closureSuccess = null;
+    const selectedClosureReason = this.closureReasons.find(
+      (item) => item.id === closureContext.payload.closureReasonId,
+    );
 
-    this.demandEpisodeService
-      .closeEpisode(episodeId, closureContext.payload)
-      .pipe(
-        finalize(() => {
-          this.isSavingClosure = false;
-        }),
-      )
-      .subscribe({
-        next: () => {
-          this.closureSuccess = getClosureSuccessMessage();
+    const closureReasonName =
+      selectedClosureReason?.name ?? 'Motivo no identificado';
 
-          setTimeout(() => {
-            if (this.activeActionPanel === 'egressClosure') {
-              this.closeActionPanel();
+    const closureOption = normalizeText(
+      selectedClosureReason?.code ?? '',
+    ) as DemandClosureOption;
+
+
+
+    const ref = this.dialog.open(ConfirmDialogYesNoComponent, {
+      width: '460px',
+      maxWidth: '95vw',
+      disableClose: true,
+      panelClass: 'rda-confirm-dialog',
+      backdropClass: 'app-backdrop',
+      data: {
+        title: 'Confirmar cierre',
+        message:
+          '¿Está seguro de que desea cerrar este episodio de demanda?\n\n' +
+          `Motivo de cierre: ${closureReasonName}\n\n` +
+          'Esta acción registrará el cierre formal del episodio.',
+        confirmText: 'Cerrar episodio',
+        cancelText: 'Cancelar',
+        color: 'warn',
+        icon: 'warning',
+      },
+    });
+    ref.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) {
+        return;
+      }
+
+      this.isSavingClosure = true;
+      this.closureError = null;
+      this.closureSuccess = null;
+
+      this.demandEpisodeService
+        .closeEpisode(episodeId, closureContext.payload)
+        .pipe(
+          finalize(() => {
+            this.isSavingClosure = false;
+          }),
+        )
+        .subscribe({
+          next: () => {
+            this.closureSuccess = getClosureSuccessMessage();
+
+            setTimeout(() => {
+              if (this.activeActionPanel === 'egressClosure') {
+                this.closeActionPanel();
+              }
+
+              this.loadEpisodeLongitudinal(episodeId);
+            }, 2200);
+          },
+
+          error: (error: HttpErrorResponse) => {
+            console.error('[DemandNew] Error cerrando demanda:', error);
+
+            if (error.status === 403) {
+              this.closureError =
+                'No tiene permisos para cerrar esta demanda.';
+              return;
             }
 
-            this.loadEpisodeLongitudinal(episodeId);
-          }, 2200);
-        },
+            if (error.status === 400) {
+              this.closureError =
+                error.error?.message || 'La fecha de cierre no es válida.';
+              return;
+            }
 
-        error: (error: HttpErrorResponse) => {
-          console.error('[DemandNew] Error cerrando demanda:', error);
-
-          if (error.status === 403) {
-            this.closureError = 'No tiene permisos para cerrar esta demanda.';
-            return;
-          }
-
-          if (error.status === 400) {
             this.closureError =
-              error.error?.message || 'La fecha de cierre no es válida.';
-            return;
-          }
-
-          this.closureError =
-            'No fue posible cerrar la demanda. Intente nuevamente.';
-        },
-      });
+              'No fue posible cerrar la demanda. Intente nuevamente.';
+          },
+        });
+    });
   }
   private patchPersonForm(person: Postulant): void {
     const birthDate = parseBackendDate(person.birthdate);
@@ -3060,6 +3272,14 @@ export class DemandNewComponent
     if (!this.ensureCanManageCurrentEpisode()) {
       return;
     }
+
+    const matrixObservation = this.demandActionMatrix.observation;
+
+    if (!matrixObservation.enabled) {
+      this.observationError = matrixObservation.message;
+      return;
+    }
+
     this.observationForm.markAllAsTouched();
 
     if (this.observationForm.invalid || this.isSavingObservation) return;
@@ -3146,7 +3366,7 @@ export class DemandNewComponent
      * =====================================================
      */
     if (activeEpisode) {
-      this.createdEpisode = activeEpisode;
+this.createdEpisode = activeEpisode;
       this.episodeSummary = activeEpisode;
       this.episodeLoaded = true;
       this.showCreateEpisodeForm = false;
@@ -3436,12 +3656,15 @@ export class DemandNewComponent
   }
 
   loadEpisodeLongitudinal(episodeId: number): void {
+    console.log('[DemandNew] loadEpisodeLongitudinal ID:', episodeId);
     if (!episodeId) {
       return;
     }
 
     this.isLoadingLongitudinal = true;
     this.longitudinalError = null;
+    this.episodeSubstances = [];
+    this.episodeSubstancesLoaded = false;
 
     this.demandEpisodeService
       .getLongitudinalByEpisodeId(episodeId)
@@ -3727,6 +3950,29 @@ export class DemandNewComponent
             this.personForm.markAsUntouched();
           }
 
+          this.demandService.getEpisodeSubstances(episodeId).subscribe({
+            next: (substances) => {
+              this.episodeSubstances = Array.isArray(substances)
+                ? substances
+                : [];
+              this.episodeSubstancesLoaded = true;
+
+              console.log(
+                '[DemandNew] Sustancias episodio:',
+                this.episodeSubstances,
+              );
+            },
+            error: (error) => {
+              console.error(
+                '[DemandNew] Error cargando sustancias del episodio:',
+                error,
+              );
+
+              this.episodeSubstances = [];
+              this.episodeSubstancesLoaded = false;
+            },
+          });
+
           /*
            * Reinicializa el observador una vez que Angular
            * haya renderizado las secciones longitudinales.
@@ -3772,6 +4018,195 @@ export class DemandNewComponent
 
   navigationAssistActionsOpen = false;
 
+  get sistraReportData(): SistraReportData {
+    const person: any = this.selectedPerson ?? {};
+    const personFormValue = this.personForm.getRawValue();
+    const firstCitation = this.firstCitationCurrentEpisode;
+    const demand = this.episodeDemandBackground;
+
+    const names = [
+      person?.name,
+      person?.middleName,
+    ]
+      .filter((value) => String(value ?? '').trim())
+      .join(' ')
+      .trim();
+
+    const surnames = [
+      person?.lastName,
+      person?.secondLastName,
+    ]
+      .filter((value) => String(value ?? '').trim())
+      .join(' ')
+      .trim();
+
+    const birthDate =
+      person?.birthdate ??
+      person?.birthDate ??
+      personFormValue?.birthDate ??
+      null;
+
+    let age: number | null = null;
+
+    if (birthDate) {
+      const parsedBirthDate = new Date(birthDate);
+
+      if (!Number.isNaN(parsedBirthDate.getTime())) {
+        const today = new Date();
+
+        age = today.getFullYear() - parsedBirthDate.getFullYear();
+
+        const monthDifference =
+          today.getMonth() - parsedBirthDate.getMonth();
+
+        if (
+          monthDifference < 0 ||
+          (monthDifference === 0 &&
+            today.getDate() < parsedBirthDate.getDate())
+        ) {
+          age--;
+        }
+      }
+    }
+
+    return {
+      person: {
+        names,
+        surnames,
+        rut: String(
+          person?.rut ??
+            personFormValue?.rut ??
+            '',
+        ),
+        birthDate,
+        age,
+        commune:
+          person?.commune?.name ??
+          person?.communeName ??
+          '',
+        phone: String(
+          person?.cellphone ??
+            person?.phone ??
+            personFormValue?.phone ??
+            '',
+        ),
+        sex:
+          person?.sex?.name ??
+          person?.sexName ??
+          '',
+        address: String(
+          person?.address ??
+            personFormValue?.address ??
+            '',
+        ),
+        cesfam: '',
+      },
+      demand: {
+        primarySubstance:
+          demand.primarySubstance ===
+          'Pendiente de recuperación desde API'
+            ? null
+            : demand.primarySubstance,
+        previousTreatmentNumber: Number(
+          demand.previousTreatments ?? 0,
+        ),
+        requestDate: this.episodeOriginDate,
+        contactType:
+          demand.contactType ===
+          'Pendiente de recuperación desde API'
+            ? null
+            : demand.contactType,
+        sender:
+          demand.sender ===
+          'Pendiente de recuperación desde API'
+            ? null
+            : demand.sender,
+        diverter:
+          demand.diverter ===
+          'Pendiente de recuperación desde API'
+            ? null
+            : demand.diverter,
+      },
+      firstCitation: {
+        date: firstCitation.date,
+        time: firstCitation.time,
+        professional: firstCitation.professional,
+      },
+    };
+  }
+  get sistraPendingFields(): string[] {
+    const pending: string[] = [];
+
+    if (
+      !this.episodeDemandBackground.primarySubstance ||
+      this.episodeDemandBackground.primarySubstance ===
+        'Pendiente de recuperación desde API'
+    ) {
+      pending.push('Sustancia principal');
+    }
+
+    if (
+      !this.episodeDemandBackground.contactType ||
+      this.episodeDemandBackground.contactType ===
+        'Pendiente de recuperación desde API'
+    ) {
+      pending.push('Tipo de contacto');
+    }
+
+    if (
+      !this.episodeDemandBackground.sender ||
+      this.episodeDemandBackground.sender ===
+        'Pendiente de recuperación desde API'
+    ) {
+      pending.push('Quién solicita');
+    }
+
+    if (
+      !this.episodeDemandBackground.diverter ||
+      this.episodeDemandBackground.diverter ===
+        'Pendiente de recuperación desde API'
+    ) {
+      pending.push('Quién deriva');
+    }
+
+    return pending;
+  }
+
+  get isSistraComplete(): boolean {
+    return this.sistraPendingFields.length === 0;
+  }
+
+  handleNavigationAssistItem(item: SummaryNavigationItem): void {
+    if (item.id === 'informe-sistra') {
+      const pending = this.sistraPendingFields;
+
+      if (pending.length > 0) {
+        this.dialog.open(ConfirmDialogOkComponent, {
+          width: '500px',
+          maxWidth: '95vw',
+          disableClose: true,
+          data: {
+            title: 'Informe SISTRA',
+            message:
+              'No es posible generar el Informe SISTRA.\n\n' +
+              'Existen antecedentes obligatorios pendientes de completar.\n\n' +
+              'Pendientes:\n• ' +
+              pending.join('\n• '),
+            icon: 'warning',
+            color: 'warn',
+            confirmText: 'Aceptar',
+          },
+        });
+
+        return;
+      }
+
+      console.log('[DemandNew] Informe SISTRA completo para generación');
+      return;
+    }
+
+    this.scrollToSummarySection(item.id);
+  }
   scrollToQuickAccess(targetId: string): void {
     const target = document.getElementById(targetId);
 
@@ -3809,6 +4244,25 @@ export class DemandNewComponent
       block: 'start',
       inline: 'nearest',
     });
+  }
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.navigationAssistActionsOpen) {
+      return;
+    }
+
+    const target = event.target as HTMLElement | null;
+
+    if (target?.closest('.navigation-assist')) {
+      return;
+    }
+
+    this.navigationAssistActionsOpen = false;
+  }
+
+  @HostListener('document:keydown.escape')
+  onDocumentEscape(): void {
+    this.navigationAssistActionsOpen = false;
   }
   toggleNavigationAssistActions(): void {
     this.navigationAssistActionsOpen = !this.navigationAssistActionsOpen;
@@ -3970,8 +4424,10 @@ export class DemandNewComponent
       this.closureSuccess = null;
 
       this.closureForm.reset({
-        closureDate: new Date(),
-      });
+    closureReasonId: null,
+    closureDate: new Date(),
+    observation: '',
+  });
     }
     if (panel === 'observation') {
       this.observationForm.reset({
@@ -4209,11 +4665,13 @@ export class DemandNewComponent
       return;
     }
 
-    if (this.feedbackEvents.length > 0) {
-      this.citationError =
-        'No es posible registrar nuevas citaciones porque el episodio ya cuenta con retroalimentación.';
+    const matrixCitation = this.demandActionMatrix.citation;
+
+    if (!matrixCitation.enabled) {
+      this.citationError = matrixCitation.message;
       return;
     }
+
     this.citationForm.markAllAsTouched();
 
     if (this.citationForm.invalid || this.isSavingCitation) {
@@ -4317,6 +4775,13 @@ export class DemandNewComponent
 
   saveAttendance(): void {
     if (!this.ensureCanManageCurrentEpisode()) {
+      return;
+    }
+
+    const matrixAttendance = this.demandActionMatrix.attendance;
+
+    if (!matrixAttendance.enabled) {
+      this.attendanceError = matrixAttendance.message;
       return;
     }
 
@@ -4638,6 +5103,88 @@ export class DemandNewComponent
     };
   }
 
+  get episodeDemandBackground(): {
+    primarySubstance: string;
+    secondarySubstances: string;
+    previousTreatments: string;
+    contactType: string;
+    sender: string;
+    diverter: string;
+    alternateContact: string;
+  } {
+    const episode =
+      this.episodeSummary ??
+      this.createdEpisode ??
+      this.longitudinal?.activeEpisode ??
+      {};
+
+    const raw = this.episodeForm.getRawValue();
+
+    const findCatalogName = (
+      items: any[] | null | undefined,
+      id: unknown,
+    ): string | null => {
+      const numericId = Number(id);
+
+      if (!Number.isFinite(numericId) || numericId <= 0) {
+        return null;
+      }
+
+      return (
+        items?.find((item: any) => Number(item?.id) === numericId)?.name ?? null
+      );
+    };
+
+    const primarySubstance =
+      findCatalogName(this.substances, raw.primarySubstanceId) ??
+      'Pendiente de recuperación desde API';
+
+    const secondaryNames = [...(raw.secondarySubstances ?? [])]
+      .sort((a, b) => Number(a.order) - Number(b.order))
+      .map((item) => findCatalogName(this.substances, item.substanceId))
+      .filter((name): name is string => Boolean(name));
+
+    const secondarySubstances =
+      secondaryNames.length > 0
+        ? secondaryNames.join(', ')
+        : 'Pendiente de recuperación desde API';
+
+    const previousTreatments = String(
+      episode?.previousTreatmentNumber ??
+        raw.previousTreatmentNumber ??
+        0,
+    );
+
+    const contactType =
+      findCatalogName(this.contactTypes, raw.contactType) ??
+      'Pendiente de recuperación desde API';
+
+    const sender =
+      findCatalogName(this.senders, raw.sender) ??
+      'Pendiente de recuperación desde API';
+
+    const diverter =
+      findCatalogName(this.diverters, raw.diverter) ??
+      'Pendiente de recuperación desde API';
+
+    const contact = this.selectedContact as any;
+
+    const alternateContact = contact
+      ? [contact?.name, contact?.cellphone]
+          .filter((value) => String(value ?? '').trim())
+          .join(' · ') || 'No registra'
+      : 'No registra';
+
+    return {
+      primarySubstance,
+      secondarySubstances,
+      previousTreatments,
+      contactType,
+      sender,
+      diverter,
+      alternateContact,
+    };
+  }
   get operationalResultTone():
     | 'pending'
     | 'waiting'
@@ -5098,6 +5645,73 @@ export class DemandNewComponent
     }
 
     return 'current';
+  }
+  get firstCitationCurrentEpisode(): {
+    registered: boolean;
+    date: string | null;
+    time: string | null;
+    professional: string | null;
+  } {
+    const citations = this.allCitationEvents.filter((citation: any) => {
+      const code = resolveCitationTypeCode(
+        citation,
+        this.allCitationEvents,
+        this.citationTypes,
+      );
+
+      return code === DEMAND_CITATION_CODES.firstCitationFirstInterview;
+    });
+
+    const citation = citations.length > 0 ? citations[0] : null;
+
+    if (!citation) {
+      return {
+        registered: false,
+        date: null,
+        time: null,
+        professional: null,
+      };
+    }
+
+    const professionalId =
+      Number(
+        citation?.programProfessionalId ??
+          citation?.programProfessional?.id ??
+          citation?.professionalId ??
+          citation?.professional?.id,
+      ) || null;
+
+    const professionalFromCatalog = professionalId
+      ? this.professionals?.find(
+          (item: any) =>
+            Number(item?.id) === professionalId ||
+            Number(item?.programProfessionalId) === professionalId,
+        )
+      : null;
+
+    const professional =
+      citation?.professionName ??
+      citation?.programProfessional?.professional?.name ??
+      citation?.programProfessional?.name ??
+      citation?.professional?.name ??
+      professionalFromCatalog?.professional?.name ??
+      professionalFromCatalog?.name ??
+      null;
+
+    const rawTime =
+      citation?.eventTime ??
+      citation?.citationTime ??
+      null;
+
+    return {
+      registered: true,
+      date:
+        citation?.eventDate ??
+        citation?.citationDate ??
+        null,
+      time: rawTime ? String(rawTime).slice(0, 5) : null,
+      professional,
+    };
   }
   get demandCitationMilestones() {
     return buildDemandNewCitationMilestones(

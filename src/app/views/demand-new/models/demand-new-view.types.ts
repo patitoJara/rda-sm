@@ -1,4 +1,4 @@
-export type ActiveActionPanel =
+﻿export type ActiveActionPanel =
   | 'citation'
   | 'attendance'
   | 'interview'
@@ -17,6 +17,7 @@ export type SummarySectionId =
   | 'citaciones'
   | 'observaciones'
   | 'documentos'
+  | 'informe-sistra'
   | 'alertas';
 
 export interface SummaryNavigationItem {

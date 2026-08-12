@@ -1945,66 +1945,111 @@
 
       <!-- FORMULARIO CIERRE -->
       <form
-        *ngIf="activeActionPanel === 'egressClosure'"
-        [formGroup]="closureForm"
-        class="operation-form operation-form--closure"
+  *ngIf="activeActionPanel === 'egressClosure'"
+  [formGroup]="closureForm"
+  class="operation-form operation-form--closure"
+>
+  <div class="empty-banner success span-full" *ngIf="closureSuccess">
+    <mat-icon>check_circle</mat-icon>
+    <span>{{ closureSuccess }}</span>
+  </div>
+
+  <div class="closure-intro span-full">
+    <mat-icon>event_busy</mat-icon>
+
+    <div>
+      <strong>Cierre de la demanda</strong>
+      <span>
+        Registre el motivo y la fecha en que finaliza formalmente la demanda.
+      </span>
+    </div>
+  </div>
+
+  <mat-form-field
+    appearance="outline"
+    floatLabel="always"
+    class="span-full"
+  >
+    <mat-label>Motivo de cierre</mat-label>
+
+    <mat-select formControlName="closureReasonId">
+      <mat-option
+        *ngFor="let item of availableClosureReasons"
+        [value]="item.id"
       >
-        <div class="empty-banner success span-full" *ngIf="closureSuccess">
-          <mat-icon>check_circle</mat-icon>
-          <span>{{ closureSuccess }}</span>
-        </div>
+        {{ item.name }}
+      </mat-option>
+    </mat-select>
 
-        <div class="closure-intro span-full">
-          <mat-icon>event_busy</mat-icon>
+    <mat-error
+      *ngIf="closureForm.controls.closureReasonId.hasError('required')"
+    >
+      El motivo de cierre es obligatorio.
+    </mat-error>
+  </mat-form-field>
 
-          <div>
-            <strong>Cierre de la demanda</strong>
-            <span>
-              Registre la fecha en que finaliza formalmente la demanda.
-            </span>
-          </div>
-        </div>
+  <mat-form-field
+    appearance="outline"
+    floatLabel="always"
+    class="span-full"
+  >
+    <mat-label>Fecha de cierre</mat-label>
 
-        <mat-form-field appearance="outline" floatLabel="always" class="span-full">
-          <mat-label>Fecha de cierre</mat-label>
+    <input
+      matInput
+      [matDatepicker]="closureDatePicker"
+      formControlName="closureDate"
+      placeholder="dd/mm/aaaa"
+      readonly
+    />
 
-          <input
-            matInput
-            [matDatepicker]="closureDatePicker"
-            formControlName="closureDate"
-            placeholder="dd/mm/aaaa"
-            readonly
-          />
+    <mat-datepicker-toggle
+      matSuffix
+      [for]="closureDatePicker"
+    ></mat-datepicker-toggle>
 
-          <mat-datepicker-toggle
-            matSuffix
-            [for]="closureDatePicker"
-          ></mat-datepicker-toggle>
+    <mat-datepicker #closureDatePicker></mat-datepicker>
 
-          <mat-datepicker #closureDatePicker></mat-datepicker>
+    <mat-error
+      *ngIf="closureForm.controls.closureDate.hasError('required')"
+    >
+      La fecha de cierre es obligatoria.
+    </mat-error>
+  </mat-form-field>
 
-          <mat-error
-            *ngIf="closureForm.controls.closureDate.hasError('required')"
-          >
-            La fecha de cierre es obligatoria.
-          </mat-error>
-        </mat-form-field>
+  <mat-form-field
+    appearance="outline"
+    floatLabel="always"
+    class="span-full"
+  >
+    <mat-label>Observación de cierre</mat-label>
 
-        <div class="closure-warning span-full">
-          <mat-icon>warning</mat-icon>
+    <textarea
+      matInput
+      formControlName="observation"
+      rows="3"
+      maxlength="1000"
+      placeholder="Ingrese una observación si corresponde"
+    ></textarea>
 
-          <span>
-            Al guardar, el episodio quedará cerrado con la fecha seleccionada.
-          </span>
-        </div>
+    <mat-hint align="end">
+      {{ closureForm.controls.observation.value?.length || 0 }}/1000
+    </mat-hint>
+  </mat-form-field>
 
-        <div class="empty-banner error span-full" *ngIf="closureError">
-          <mat-icon>error</mat-icon>
-          <span>{{ closureError }}</span>
-        </div>
-      </form>
+  <div class="closure-warning span-full">
+    <mat-icon>warning</mat-icon>
+    <span>
+      Al guardar, el episodio quedará cerrado con el motivo y la fecha seleccionados.
+    </span>
+  </div>
 
-      <div class="operation-actions">
+  <div class="empty-banner error span-full" *ngIf="closureError">
+    <mat-icon>error</mat-icon>
+    <span>{{ closureError }}</span>
+  </div>
+</form>
+<div class="operation-actions">
         <button
           mat-stroked-button
           class="secondary-btn"
@@ -2023,7 +2068,8 @@
             referenceForm.invalid ||
             isSavingReference ||
             !!referenceSuccess ||
-            isLoadingLongitudinal
+            isLoadingLongitudinal ||
+            !demandActionMatrix.reference.enabled
           "
           (click)="saveReference()"
         >
@@ -2043,7 +2089,8 @@
             closureForm.invalid ||
             isSavingClosure ||
             !!closureSuccess ||
-            isLoadingLongitudinal
+            isLoadingLongitudinal ||
+            !demandActionMatrix.closure.enabled
           "
           (click)="saveClosure()"
         >
@@ -2057,7 +2104,8 @@
           class="primary-btn"
           type="button"
           [disabled]="
-            citationForm.invalid || isSavingCitation || isLoadingLongitudinal
+            citationForm.invalid || isSavingCitation || isLoadingLongitudinal ||
+            !demandActionMatrix.citation.enabled
           "
           (click)="saveCitation()"
         >
@@ -2073,7 +2121,8 @@
           [disabled]="
             attendanceForm.invalid ||
             isSavingAttendance ||
-            isLoadingLongitudinal
+            isLoadingLongitudinal ||
+            !demandActionMatrix.attendance.enabled
           "
           (click)="saveAttendance()"
         >
@@ -2087,7 +2136,8 @@
           class="primary-btn"
           type="button"
           [disabled]="
-            interviewForm.invalid || isSavingInterview || isLoadingLongitudinal
+            interviewForm.invalid || isSavingInterview || isLoadingLongitudinal ||
+            !demandActionMatrix.feedback.enabled
           "
           (click)="saveInterview()"
         >
@@ -2103,7 +2153,8 @@
           [disabled]="
             observationForm.invalid ||
             isSavingObservation ||
-            isLoadingLongitudinal
+            isLoadingLongitudinal ||
+            !demandActionMatrix.observation.enabled
           "
           (click)="saveObservation()"
         >
@@ -2436,7 +2487,7 @@
         [attr.aria-current]="
           activeSummarySection === item.id ? 'location' : null
         "
-        (click)="scrollToSummarySection(item.id)"
+        (click)="handleNavigationAssistItem(item)"
       >
         <mat-icon>{{ item.icon }}</mat-icon>
         <span>{{ item.label }}</span>
@@ -2464,6 +2515,7 @@
     <div
       class="navigation-assist__actions-menu"
       *ngIf="navigationAssistActionsOpen"
+
     >
       <div class="navigation-assist__actions-title">
         <mat-icon>bolt</mat-icon>
@@ -2539,7 +2591,7 @@
       [class.active]="activeSummarySection === item.id"
       [attr.aria-label]="'Ir a ' + item.label"
       [matTooltip]="'Ir a ' + item.label"
-      (click)="scrollToSummarySection(item.id)"
+      (click)="handleNavigationAssistItem(item)"
     >
       <mat-icon>{{ item.icon }}</mat-icon>
       <span>{{ item.label }}</span>
@@ -2634,30 +2686,94 @@
           {{ currentStageResultLabel }}
         </strong>
       </div>
+  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
+    <span>Sustancia principal</span>
+    <strong>{{ episodeDemandBackground.primarySubstance }}</strong>
+  </div>
 
-      <div class="summary-row" *ngIf="hasCurrentEpisode">
-        <span>Última gestión</span>
-        <strong>
-          {{
-            lastCurrentStageEvent
-              ? (lastCurrentStageEvent.eventType?.name ||
-                  lastCurrentStageEvent.eventType?.code ||
-                  "Gestión registrada") +
-                " · " +
-                formatDisplayDate(lastCurrentStageEvent.eventDate)
-              : "Sin gestión registrada"
-          }}
-        </strong>
-      </div>
-      <div class="empty-banner" *ngIf="!hasCurrentEpisode">
-        <mat-icon>info</mat-icon>
-        <span>
-          No existe un episodio de demanda asociado a esta consulta.
-        </span>
-      </div>
+  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
+    <span>Sustancias secundarias</span>
+    <strong>{{ episodeDemandBackground.secondarySubstances }}</strong>
+  </div>
 
-      <div
-        class="card-actions-preview"
+  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
+    <span>N.º tratamientos previos</span>
+    <strong>{{ episodeDemandBackground.previousTreatments }}</strong>
+  </div>
+
+  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
+    <span>Tipo de contacto</span>
+    <strong>{{ episodeDemandBackground.contactType }}</strong>
+  </div>
+
+  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
+    <span>Quién solicita</span>
+    <strong>{{ episodeDemandBackground.sender }}</strong>
+  </div>
+
+  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
+    <span>Quién deriva</span>
+    <strong>{{ episodeDemandBackground.diverter }}</strong>
+  </div>
+
+  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
+    <span>Contacto alternativo</span>
+    <strong>{{ episodeDemandBackground.alternateContact }}</strong>
+  </div>
+
+  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
+    <span>Primera citación</span>
+    <strong>
+      {{
+        firstCitationCurrentEpisode.registered
+          ? formatDisplayDate(firstCitationCurrentEpisode.date) +
+            " · " +
+            (firstCitationCurrentEpisode.time || "Hora no informada") +
+            " · " +
+            (firstCitationCurrentEpisode.professional || "Profesional no informado")
+          : "Sin registrar"
+      }}
+    </strong>
+  </div>
+
+  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
+    <span>Informe SISTRA</span>
+
+    <strong>
+      {{
+        isSistraComplete
+          ? "Completo"
+          : "Pendiente · " +
+            sistraPendingFields.length +
+            " antecedente" +
+            (sistraPendingFields.length === 1 ? "" : "s") +
+            " faltante" +
+            (sistraPendingFields.length === 1 ? "" : "s")
+      }}
+
+      <small *ngIf="!isSistraComplete">
+        {{ sistraPendingFields.join(" · ") }}
+      </small>
+    </strong>
+  </div>
+
+  <div class="summary-row" *ngIf="hasCurrentEpisode">
+    <span>Última gestión</span>
+    <strong>
+      {{
+        lastCurrentStageEvent
+          ? (lastCurrentStageEvent.eventType?.name ||
+              lastCurrentStageEvent.eventType?.code ||
+              "Gestión registrada") +
+            " · " +
+            formatDisplayDate(lastCurrentStageEvent.eventDate)
+          : "Sin gestión registrada"
+      }}
+    </strong>
+  </div>
+
+  <div
+    class="card-actions-preview"
         *ngIf="selectedPerson"
       >
         <button

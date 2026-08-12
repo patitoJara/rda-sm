@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+﻿import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -93,9 +93,22 @@ export interface CreateEventRequest {
 
 export interface CreateSubstanceRequest {
   substanceId: number;
-  isPrimary?: boolean;
-  order?: number;
+  level: 'Principal' | 'Secundaria';
+  primarySubstance: boolean;
+  useOrder: number;
+  observation?: string;
   [key: string]: any;
+}
+
+export interface EpisodeSubstance {
+  id: number;
+  episodeId: number;
+  substanceId: number;
+  substanceName: string;
+  level: 'Principal' | 'Secundaria';
+  primarySubstance: boolean;
+  useOrder: number;
+  observation?: string | null;
 }
 
 export interface TreatmentEntryRequest {
@@ -292,13 +305,21 @@ export class DemandService {
     );
   }
 
-  saveSubstances(
+  getEpisodeSubstances(
     episodeId: number,
-    payload: CreateSubstanceRequest[]
-  ): Observable<any> {
-    return this.http.post<any>(
+  ): Observable<EpisodeSubstance[]> {
+    return this.http.get<EpisodeSubstance[]>(
       `${this.demandUrl}/episodes/${episodeId}/substances`,
-      payload
+    );
+  }
+
+  saveSubstance(
+    episodeId: number,
+    payload: CreateSubstanceRequest,
+  ): Observable<EpisodeSubstance> {
+    return this.http.post<EpisodeSubstance>(
+      `${this.demandUrl}/episodes/${episodeId}/substances`,
+      payload,
     );
   }
 
