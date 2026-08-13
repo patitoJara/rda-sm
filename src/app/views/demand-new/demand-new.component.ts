@@ -54,6 +54,7 @@ import { ContactService } from '@app/services/contact.service';
 import { Contact } from '@app/models/contact';
 import { ContactCreateDto } from '@app/models/contact-create.dto';
 import { CitationReportService } from '@app/services/reports/citation-report.service';
+import { SistraReportService } from '@app/services/reports/sistra-report.service';
 
 import { DemandService, EpisodeSubstance } from '../../core/services/demand.service';
 import { EpisodeDocumentsComponent } from './documents/episode-documents.component';
@@ -231,6 +232,7 @@ export class DemandNewComponent
   private readonly contactService = inject(ContactService);
   private readonly route = inject(ActivatedRoute);
   private readonly citationReport = inject(CitationReportService);
+  private readonly sistraReport = inject(SistraReportService);
   private readonly dialog = inject(MatDialog);
 
   private requestedEpisodeId: number | null = null;
@@ -4024,17 +4026,26 @@ this.createdEpisode = activeEpisode;
     const firstCitation = this.firstCitationCurrentEpisode;
     const demand = this.episodeDemandBackground;
 
+
+
     const names = [
-      person?.name,
-      person?.middleName,
+      person?.firstName ??
+        personFormValue?.firstName ??
+        person?.name,
+      person?.secondName ??
+        personFormValue?.secondName ??
+        person?.middleName,
     ]
       .filter((value) => String(value ?? '').trim())
       .join(' ')
       .trim();
 
     const surnames = [
-      person?.lastName,
-      person?.secondLastName,
+      person?.firstLastName ??
+        personFormValue?.firstLastName ??
+        person?.lastName,
+      person?.secondLastName ??
+        personFormValue?.secondLastName,
     ]
       .filter((value) => String(value ?? '').trim())
       .join(' ')
@@ -4078,7 +4089,7 @@ this.createdEpisode = activeEpisode;
             personFormValue?.rut ??
             '',
         ),
-        birthDate,
+        birthDate: formatDisplayDateValue(birthDate),
         age,
         commune:
           person?.commune?.name ??
@@ -4107,10 +4118,11 @@ this.createdEpisode = activeEpisode;
           'Pendiente de recuperación desde API'
             ? null
             : demand.primarySubstance,
+        secondarySubstances: demand.secondarySubstances ?? 'No informada',
         previousTreatmentNumber: Number(
           demand.previousTreatments ?? 0,
         ),
-        requestDate: this.episodeOriginDate,
+        requestDate: formatDisplayDateValue(this.episodeOriginDate),
         contactType:
           demand.contactType ===
           'Pendiente de recuperación desde API'
@@ -4128,7 +4140,7 @@ this.createdEpisode = activeEpisode;
             : demand.diverter,
       },
       firstCitation: {
-        date: firstCitation.date,
+        date: formatDisplayDateValue(firstCitation.date),
         time: firstCitation.time,
         professional: firstCitation.professional,
       },
@@ -4178,30 +4190,9 @@ this.createdEpisode = activeEpisode;
 
   handleNavigationAssistItem(item: SummaryNavigationItem): void {
     if (item.id === 'informe-sistra') {
-      const pending = this.sistraPendingFields;
+      const html = this.sistraReport.generate(this.sistraReportData);
+      this.sistraReport.printHtml(html);
 
-      if (pending.length > 0) {
-        this.dialog.open(ConfirmDialogOkComponent, {
-          width: '500px',
-          maxWidth: '95vw',
-          disableClose: true,
-          data: {
-            title: 'Informe SISTRA',
-            message:
-              'No es posible generar el Informe SISTRA.\n\n' +
-              'Existen antecedentes obligatorios pendientes de completar.\n\n' +
-              'Pendientes:\n• ' +
-              pending.join('\n• '),
-            icon: 'warning',
-            color: 'warn',
-            confirmText: 'Aceptar',
-          },
-        });
-
-        return;
-      }
-
-      console.log('[DemandNew] Informe SISTRA completo para generación');
       return;
     }
 
@@ -5135,19 +5126,42 @@ this.createdEpisode = activeEpisode;
       );
     };
 
+    const primarySubstanceFromApi =
+      this.episodeSubstances.find(
+        (item) =>
+          item.primarySubstance === true ||
+          normalizeText(item.level) === 'PRINCIPAL',
+      )?.substanceName ?? null;
+
     const primarySubstance =
+      primarySubstanceFromApi ??
       findCatalogName(this.substances, raw.primarySubstanceId) ??
       'Pendiente de recuperación desde API';
 
-    const secondaryNames = [...(raw.secondarySubstances ?? [])]
-      .sort((a, b) => Number(a.order) - Number(b.order))
-      .map((item) => findCatalogName(this.substances, item.substanceId))
-      .filter((name): name is string => Boolean(name));
+    const secondarySubstancesFromApi = this.episodeSubstances
+      .filter(
+        (item) =>
+          item.primarySubstance !== true &&
+          normalizeText(item.level) === 'SECUNDARIA',
+      )
+      .sort((a, b) => Number(a.useOrder ?? 0) - Number(b.useOrder ?? 0))
+      .map((item) => String(item.substanceName ?? '').trim())
+      .filter((name) => Boolean(name));
+
+    const secondaryNames =
+      secondarySubstancesFromApi.length > 0
+        ? secondarySubstancesFromApi
+        : [...(raw.secondarySubstances ?? [])]
+            .sort((a, b) => Number(a.order) - Number(b.order))
+            .map((item) =>
+              findCatalogName(this.substances, item.substanceId),
+            )
+            .filter((name): name is string => Boolean(name));
 
     const secondarySubstances =
       secondaryNames.length > 0
         ? secondaryNames.join(', ')
-        : 'Pendiente de recuperación desde API';
+        : 'No informada';
 
     const previousTreatments = String(
       episode?.previousTreatmentNumber ??
@@ -5156,15 +5170,33 @@ this.createdEpisode = activeEpisode;
     );
 
     const contactType =
-      findCatalogName(this.contactTypes, raw.contactType) ??
+      (String(episode?.contactType?.name ?? '').trim() ||
+        findCatalogName(
+        this.contactTypes,
+        episode?.contactType?.id ??
+          episode?.contactTypeId ??
+          raw.contactType,
+        )) ??
       'Pendiente de recuperación desde API';
 
     const sender =
-      findCatalogName(this.senders, raw.sender) ??
+      (String(episode?.sender?.name ?? '').trim() ||
+        findCatalogName(
+        this.senders,
+        episode?.sender?.id ??
+          episode?.senderId ??
+          raw.sender,
+        )) ??
       'Pendiente de recuperación desde API';
 
     const diverter =
-      findCatalogName(this.diverters, raw.diverter) ??
+      (String(episode?.diverter?.name ?? '').trim() ||
+        findCatalogName(
+        this.diverters,
+        episode?.diverter?.id ??
+          episode?.diverterId ??
+          raw.diverter,
+        )) ??
       'Pendiente de recuperación desde API';
 
     const contact = this.selectedContact as any;

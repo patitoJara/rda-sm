@@ -13,6 +13,7 @@
 
 export interface SistraReportDemandData {
   primarySubstance: string | null;
+  secondarySubstances: string | null;
   previousTreatmentNumber: number | null;
   requestDate: string | null;
   contactType: string | null;

@@ -100,6 +100,15 @@ export interface CreateSubstanceRequest {
   [key: string]: any;
 }
 
+export interface UpdateSubstanceRequest {
+  substanceId: number;
+  level: 'Principal' | 'Secundaria';
+  primarySubstance: boolean;
+  useOrder: number;
+  observation?: string;
+  [key: string]: any;
+}
+
 export interface EpisodeSubstance {
   id: number;
   episodeId: number;
@@ -320,6 +329,26 @@ export class DemandService {
     return this.http.post<EpisodeSubstance>(
       `${this.demandUrl}/episodes/${episodeId}/substances`,
       payload,
+    );
+  }
+
+  updateSubstance(
+    episodeId: number,
+    substanceAssociationId: number,
+    payload: UpdateSubstanceRequest,
+  ): Observable<EpisodeSubstance> {
+    return this.http.put<EpisodeSubstance>(
+      `${this.demandUrl}/episodes/${episodeId}/substances/${substanceAssociationId}`,
+      payload,
+    );
+  }
+
+  deleteSubstance(
+    episodeId: number,
+    substanceAssociationId: number,
+  ): Observable<void> {
+    return this.http.delete<void>(
+      `${this.demandUrl}/episodes/${episodeId}/substances/${substanceAssociationId}`,
     );
   }
 
