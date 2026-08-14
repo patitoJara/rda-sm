@@ -1677,7 +1677,7 @@
           <input
             matInput
             formControlName="comment"
-            placeholder="Ej: Persona asiste a citación / No se presenta"
+            placeholder="Ej.: antecedente relevante de la asistencia"
           />
 
           <mat-error
@@ -1778,7 +1778,7 @@
           <input
             matInput
             formControlName="comment"
-            placeholder="Ej.: Se realiza contacto telefónico con la persona"
+            placeholder="Ej.: contacto telefónico realizado"
           />
 
           <mat-error
@@ -1797,7 +1797,7 @@
             matInput
             rows="5"
             formControlName="observation"
-            placeholder="Registre antecedentes, acuerdos, seguimiento o información relevante."
+            placeholder="Ej.: acuerdos, seguimiento o antecedentes relevantes"
           ></textarea>
         </mat-form-field>
 
@@ -1890,7 +1890,7 @@
             matInput
             rows="3"
             formControlName="reason"
-            placeholder="Indique el fundamento de la referencia."
+            placeholder="Ej.: requiere continuidad de atención en otro programa"
           ></textarea>
 
           <mat-error
@@ -1908,7 +1908,7 @@
             matInput
             rows="4"
             formControlName="observation"
-            placeholder="Antecedentes relevantes para el programa receptor."
+            placeholder="Ej.: antecedentes útiles para el programa receptor"
           ></textarea>
         </mat-form-field>
 
@@ -2029,7 +2029,7 @@
       formControlName="observation"
       rows="3"
       maxlength="1000"
-      placeholder="Ingrese una observación si corresponde"
+      placeholder="Ej.: antecedente relevante para el cierre"
     ></textarea>
 
     <mat-hint align="end">
@@ -2039,11 +2039,18 @@
 
   <div class="closure-warning span-full">
     <mat-icon>warning</mat-icon>
-    <span>
-      Al guardar, el episodio quedará cerrado con el motivo y la fecha seleccionados.
-    </span>
-  </div>
 
+    <span *ngIf="isReferenceClosureSelected; else episodeClosureWarning">
+      Al guardar, se cerrará formalmente la atención de este programa.
+      El episodio continuará abierto en el programa responsable actual.
+    </span>
+
+    <ng-template #episodeClosureWarning>
+      <span>
+        Al guardar, el episodio quedará cerrado con el motivo y la fecha seleccionados.
+      </span>
+    </ng-template>
+  </div>
   <div class="empty-banner error span-full" *ngIf="closureError">
     <mat-icon>error</mat-icon>
     <span>{{ closureError }}</span>
@@ -2273,9 +2280,9 @@
             </small>
 
             <p>
-              {{ currentStageEvents.length }}
+              {{ workingStageEvents.length }}
               {{
-                currentStageEvents.length === 1
+                workingStageEvents.length === 1
                   ? "gestión registrada"
                   : "gestiones registradas"
               }}
@@ -2905,9 +2912,9 @@
           <mat-icon>event_note</mat-icon>
 
           <div>
-            <h4>Hitos del episodio</h4>
+            <h4>Hitos del Programa</h4>
             <p>
-              Solicitud original y secuencia operativa de la etapa actual.
+              Secuencia operativa registrada por el programa.
             </p>
           </div>
         </div>
@@ -3063,22 +3070,9 @@
       </div>
 
       <div class="indicator-list">
-        <div>
-          <span>Días de espera</span>
-          <strong>{{
-            episodeSummary?.accumulatedDays ??
-              createdEpisode?.accumulatedDays ??
-              0
-          }}</strong>
-        </div>
-
         <div
           class="indicator-semaphore"
-          [ngClass]="
-            getSemaphoreClass(
-              episodeSummary?.semaphoreColor || createdEpisode?.semaphoreColor
-            )
-          "
+          [ngClass]="getSemaphoreClass(currentSemaphoreColor)"
         >
           <span class="semaphore-dot"></span>
 
@@ -3086,32 +3080,22 @@
             <span>Semáforo</span>
 
             <strong>
-              {{
-                episodeSummary?.semaphoreColor ||
-                  createdEpisode?.semaphoreColor ||
-                  "Sin color"
-              }}
+              {{ currentSemaphoreColor || "Sin clasificación" }}
             </strong>
 
             <small>
-              {{
-                getSemaphoreDescription(
-                  episodeSummary?.semaphoreColor ||
-                    createdEpisode?.semaphoreColor
-                )
-              }}
+              {{ getSemaphoreDescription(currentSemaphoreColor) }}
             </small>
 
             <small>
-              Verde 0 a 45 días · Amarillo 46 a 90 días ·
-              Rojo 91 días o más
+              {{ semaphoreRangeText }}
             </small>
           </div>
         </div>
 
         <div>
           <span>Eventos registrados</span>
-          <strong>{{ currentStageEvents.length || 0 }}</strong>
+          <strong>{{ workingStageEvents.length || 0 }}</strong>
         </div>
 
         <div>
@@ -3119,10 +3103,8 @@
 
           <strong>
             {{
-              episodeSummary?.currentProgram?.name ||
-                createdEpisode?.currentProgram?.name ||
-                episodeSummary?.initialProgram?.name ||
-                createdEpisode?.initialProgram?.name ||
+              workingStage?.program?.name ||
+                activeProgramName ||
                 "Sin programa"
             }}
           </strong>
@@ -3624,7 +3606,7 @@
       <div class="card-header compact-card-header">
         <mat-icon>event</mat-icon>
         <div>
-          <h3>Citaciones de la etapa actual</h3>
+          <h3>Citaciones del Programa</h3>
           <p>Registro de citaciones y asistencia.</p>
         </div>
       </div>
@@ -3735,7 +3717,7 @@
         <mat-icon>notes</mat-icon>
 
         <div>
-          <h3>Observaciones recientes de la etapa actual</h3>
+          <h3>Observaciones del Programa</h3>
           <p>Últimas observaciones registradas.</p>
         </div>
       </div>
@@ -3754,7 +3736,7 @@
 
       <ng-template #noRecentObservations>
         <div class="empty-line">
-          No existen observaciones registradas en la etapa actual.
+          No existen observaciones registradas en el programa.
         </div>
       </ng-template>
     </mat-card>

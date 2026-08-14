@@ -12,3 +12,27 @@
 @use './styles/responsive';
 @use './styles/episode-creation';
 @use './styles/navigation-assist';
+
+/* =========================================================
+   AYUDAS VISUALES DE FORMULARIOS
+   Diferencia placeholder / hint / contenido ingresado
+   ========================================================= */
+
+:host ::ng-deep .mat-mdc-input-element::placeholder,
+:host ::ng-deep textarea.mat-mdc-input-element::placeholder {
+  color: rgba(71, 85, 105, 0.58) !important;
+  font-weight: 400 !important;
+  opacity: 1 !important;
+}
+
+:host ::ng-deep .mat-mdc-form-field-hint {
+  color: rgba(71, 85, 105, 0.68) !important;
+  font-size: 0.78rem !important;
+  font-weight: 400 !important;
+}
+
+:host ::ng-deep .mat-mdc-input-element:not(:placeholder-shown),
+:host ::ng-deep textarea.mat-mdc-input-element:not(:placeholder-shown) {
+  color: #263238;
+  font-weight: 500;
+}

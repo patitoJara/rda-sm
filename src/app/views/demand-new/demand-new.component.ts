@@ -1,4 +1,8 @@
-﻿import { DEMAND_CITATION_CODES } from '../../shared/utils/demand-workflow.utils';
+﻿import {
+  resolveWorkingStage,
+  resolveWorkingStageId,
+} from './utils/demand-new-stage.utils';
+import { DEMAND_CITATION_CODES } from '../../shared/utils/demand-workflow.utils';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -77,6 +81,9 @@ import {
 
 import {
   buildEventTime,
+  filterStageCitationEvents,
+  hasStageFormalClosure,
+  hasStageReference,
   normalizeEventTime,
   normalizeSemaphoreColor,
   normalizeText,
@@ -167,6 +174,8 @@ import { resetLoadedDemandView } from './state/demand-new-reset.state';
 import { rutValidator } from '../../core/validator/rut.validator';
 import { DemandNewAuxiliaryCatalogState } from './state/demand-new-auxiliary-catalog.state';
 import {
+  DEMAND_SEMAPHORE_RANGE_TEXT,
+  getSemaphoreColorFromDays,
   getSemaphoreCssClass,
   getSemaphoreDescriptionText,
 } from './utils/demand-new-semaphore.utils';
@@ -637,51 +646,71 @@ export class DemandNewComponent
   ];
 
   get recommendedOperativePanel(): ActiveActionPanel | null {
+    const matrix = this.demandActionMatrix;
+
+    /*
+     * Una etapa ya referida conserva gestión únicamente para
+     * observación y cierre formal por REFERENCIA.
+     *
+     * La recomendación del episodio actual puede pertenecer al
+     * programa receptor, por lo que no debe marcar como recomendada
+     * una acción bloqueada para el workingStage del programa activo.
+     */
+    if (
+      matrix.scenario === 'REFERENCE_EXECUTED' &&
+      matrix.closure.enabled
+    ) {
+      return 'egressClosure';
+    }
+
     const title = normalizeText(
       this.episodeOperationalSummary.nextActionTitle,
     );
+
+    let panel: ActiveActionPanel | null = null;
 
     if (
       title.includes('REGISTRAR ASISTENCIA') ||
       title.includes('REGULARIZAR ASISTENCIA')
     ) {
-      return 'attendance';
-    }
-
-    if (
+      panel = 'attendance';
+    } else if (
       title.includes('CITACION') ||
       title.includes('PROGRAMAR')
     ) {
-      return 'citation';
-    }
-
-    if (title.includes('RETROALIMENTACION')) {
-      return 'interview';
-    }
-
-    if (title.includes('OBSERVACION')) {
-      return 'observation';
-    }
-
-    if (
+      panel = 'citation';
+    } else if (title.includes('RETROALIMENTACION')) {
+      panel = 'interview';
+    } else if (title.includes('OBSERVACION')) {
+      panel = 'observation';
+    } else if (
       title.includes('REFERIR') ||
       title.includes('DERIVAR')
     ) {
-      return 'reference';
-    }
-
-    if (title.includes('INGRESO A TRATAMIENTO')) {
-      return 'treatmentEntry';
-    }
-
-    if (
+      panel = 'reference';
+    } else if (title.includes('INGRESO A TRATAMIENTO')) {
+      panel = 'treatmentEntry';
+    } else if (
       title.includes('CIERRE') ||
       title.includes('CERRAR')
     ) {
-      return 'egressClosure';
+      panel = 'egressClosure';
     }
 
-    return null;
+    if (!panel) {
+      return null;
+    }
+
+    const enabledByMatrix: Partial<Record<NonNullable<ActiveActionPanel>, boolean>> = {
+      citation: matrix.citation.enabled,
+      attendance: matrix.attendance.enabled,
+      interview: matrix.feedback.enabled,
+      observation: matrix.observation.enabled,
+      reference: matrix.reference.enabled,
+      egressClosure: matrix.closure.enabled,
+    };
+
+    return enabledByMatrix[panel] === true ? panel : null;
   }
 
   isOperativeActionRecommended(panel: ActiveActionPanel): boolean {
@@ -689,6 +718,11 @@ export class DemandNewComponent
   }
 
   get demandActionMatrix(): DemandActionMatrix {
+    const stageCitationEvents = filterStageCitationEvents(
+      this.episodeEvents ?? [],
+      this.workingStageId,
+    );
+
     const feedbackResults = this.feedbackEvents
       .map((event: any) =>
         normalizeText(
@@ -708,16 +742,21 @@ export class DemandNewComponent
       ) as DemandFeedbackResult[];
 
     const pendingCitationCount = filterPendingCitationEvents(
-      this.citationEvents,
-      this.currentStageEvents,
+      stageCitationEvents,
+      this.workingStageEvents,
     ).length;
 
-    const firstInterviewCompleted = this.attendedInterviewCitations.some(
+    const attendedStageCitations = filterPresentedCitations(
+      stageCitationEvents,
+      this.workingStageEvents,
+    );
+
+    const firstInterviewCompleted = attendedStageCitations.some(
       (citation: any) => {
         const citationTypeCode = normalizeText(
           resolveCitationTypeCode(
             citation,
-            this.citationEvents,
+            stageCitationEvents,
             this.citationTypes,
           ),
         );
@@ -729,18 +768,45 @@ export class DemandNewComponent
       },
     );
 
+    const referenceExecuted = hasStageReference(
+      this.episodeEvents ?? [],
+      this.workingStageId,
+    );
+
+    const stageClosed = hasStageFormalClosure(
+      this.episodeEvents ?? [],
+      this.workingStageId,
+    );
+
     return resolveDemandActionMatrix({
       episodeClosed: !!this.isHistoricalEpisode,
-      stageClosed: false,
-      citationCount: this.citationEvents.length,
+      stageClosed,
+      citationCount: stageCitationEvents.length,
       pendingCitationCount,
       firstInterviewCompleted,
       feedbackResults,
-      referenceExecuted: false,
+      referenceExecuted,
       closureResult: null,
     });
   }
 
+  get isReferenceClosureSelected(): boolean {
+    const selectedReasonId = Number(
+      this.closureForm.controls.closureReasonId.value,
+    );
+
+    if (!Number.isFinite(selectedReasonId) || selectedReasonId <= 0) {
+      return false;
+    }
+
+    const selectedReason = this.closureReasons.find(
+      (item: any) => Number(item?.id) === selectedReasonId,
+    );
+
+    return normalizeText(
+      selectedReason?.code ?? selectedReason?.name ?? '',
+    ) === 'REFERENCIA';
+  }
   get availableClosureReasons() {
     const allowedCodes = new Set(
       this.demandActionMatrix.allowedClosureOptions.map((code) =>
@@ -2987,6 +3053,26 @@ export class DemandNewComponent
     return resolveCurrentEpisodeStage(this.longitudinal, episode);
   }
 
+  get workingStage(): any | null {
+    return resolveWorkingStage(
+      this.longitudinal?.stages,
+      this.tokenService.getActiveProgramId(),
+    );
+  }
+
+  get workingStageId(): number | null {
+    return resolveWorkingStageId(
+      this.longitudinal?.stages,
+      this.tokenService.getActiveProgramId(),
+    );
+  }
+
+  get workingStageEvents(): any[] {
+    return filterEventsByStage(
+      this.episodeEvents ?? [],
+      this.workingStageId,
+    );
+  }
   get resolvedCurrentStageId(): number | null {
     const episode =
       this.longitudinal?.activeEpisode ??
@@ -3072,7 +3158,8 @@ export class DemandNewComponent
     const referenceContext = buildReferenceContext({
       raw: this.referenceForm.getRawValue(),
       currentProgramId: this.activeProgramId,
-      originalRequestDate: this.episodeOriginDate,
+    originStageId: this.workingStageId,
+    originalRequestDate: this.episodeOriginDate,
       episodeEvents: this.episodeEvents ?? [],
     });
 
@@ -3141,6 +3228,7 @@ export class DemandNewComponent
 
     const closureContext = buildClosureContext({
       raw: this.closureForm.getRawValue(),
+      stageId: this.workingStageId,
       originalRequestDate: this.episodeOriginDate,
       episodeEvents: this.episodeEvents ?? [],
     });
@@ -3163,6 +3251,25 @@ export class DemandNewComponent
 
 
 
+    const closureReasonCode = normalizeText(
+      selectedClosureReason?.code ?? closureReasonName,
+    );
+
+    const isReferenceClosure = closureReasonCode === 'REFERENCIA';
+
+    const closureConfirmationMessage = isReferenceClosure
+      ? (
+          '¿Está seguro de que desea cerrar la atención de este programa?\n\n' +
+          `Motivo de cierre: ${closureReasonName}\n\n` +
+          `Esta acción registrará el cierre formal de la atención de ${this.activeProgramName ?? 'este programa'}. ` +
+          'El episodio continuará abierto en el programa responsable actual.'
+        )
+      : (
+          '¿Está seguro de que desea cerrar este episodio de demanda?\n\n' +
+          `Motivo de cierre: ${closureReasonName}\n\n` +
+          'Esta acción registrará el cierre formal del episodio.'
+        );
+
     const ref = this.dialog.open(ConfirmDialogYesNoComponent, {
       width: '460px',
       maxWidth: '95vw',
@@ -3171,11 +3278,10 @@ export class DemandNewComponent
       backdropClass: 'app-backdrop',
       data: {
         title: 'Confirmar cierre',
-        message:
-          '¿Está seguro de que desea cerrar este episodio de demanda?\n\n' +
-          `Motivo de cierre: ${closureReasonName}\n\n` +
-          'Esta acción registrará el cierre formal del episodio.',
-        confirmText: 'Cerrar episodio',
+        message: closureConfirmationMessage,
+        confirmText: isReferenceClosure
+          ? 'Cerrar atención'
+          : 'Cerrar episodio',
         cancelText: 'Cancelar',
         color: 'warn',
         icon: 'warning',
@@ -3190,6 +3296,11 @@ export class DemandNewComponent
       this.closureError = null;
       this.closureSuccess = null;
 
+      console.log('[DemandNew][DEBUG cierre payload]', {
+        episodeId,
+        workingStageId: this.workingStageId,
+        payload: closureContext.payload,
+      });
       this.demandEpisodeService
         .closeEpisode(episodeId, closureContext.payload)
         .pipe(
@@ -3371,6 +3482,20 @@ export class DemandNewComponent
 this.createdEpisode = activeEpisode;
       this.episodeSummary = activeEpisode;
       this.episodeLoaded = true;
+      console.log('[DemandNew][DEBUG ACTIVO]', {
+        requestedMode: this.requestedMode,
+        activeProgramId: this.activeProgramId,
+        sessionProgramId: this.tokenService.getActiveProgramId(),
+        activeEpisode,
+        episodeState: activeEpisode?.state?.code ?? activeEpisode?.stateCode,
+        episodeClosedAt: activeEpisode?.closedAt,
+        episodeClosureDate: activeEpisode?.closureDate,
+        workingStage: this.workingStage,
+        workingStageId: this.workingStageId,
+        isHistoricalEpisode: this.isHistoricalEpisode,
+        canManageCurrentEpisode: this.canManageCurrentEpisode,
+        demandActionMatrix: this.demandActionMatrix,
+      });
       this.showCreateEpisodeForm = false;
 
       this.episodeForm.patchValue(
@@ -3895,6 +4020,15 @@ this.createdEpisode = activeEpisode;
            * Mantiene actualizado el resumen del episodio mostrado.
            * Puede corresponder a una demanda activa o cerrada.
            */
+          console.log('[DemandNew][DEBUG antes episodio]', {
+            rawResponseEpisode,
+            responseEpisode,
+            responseEpisodeId: responseEpisode?.id,
+            responseEpisodeEpisodeId: responseEpisode?.episodeId,
+            responseEpisodeFromLongitudinal: response?.episode,
+            activeEpisodeFromLongitudinal: response?.activeEpisode,
+            requestedEpisode,
+          });
           if (responseEpisode?.id) {
             this.episodeSummary = {
               ...this.episodeSummary,
@@ -3903,6 +4037,16 @@ this.createdEpisode = activeEpisode;
               postulant: mergedPostulant ?? responseEpisode.postulant,
             };
 
+            console.log('[DemandNew][DEBUG episodio]', {
+              requestedMode: this.requestedMode,
+              episodeSummary: this.episodeSummary,
+              activeEpisode: this.longitudinal?.activeEpisode,
+              workingStage: this.workingStage,
+              workingStageId: this.workingStageId,
+              isHistoricalEpisode: this.isHistoricalEpisode,
+              canManageCurrentEpisode: this.canManageCurrentEpisode,
+              demandActionMatrix: this.demandActionMatrix,
+            });
             this.episodeLoaded = true;
             this.showCreateEpisodeForm = false;
 
@@ -4481,7 +4625,7 @@ this.createdEpisode = activeEpisode;
     return resolveCitationTypeAvailability({
       citationTypeCode: code,
       citationEvents: this.citationEvents,
-      episodeEvents: this.currentStageEvents,
+      episodeEvents: this.workingStageEvents,
       citationTypes: this.citationTypes,
     });
   }
@@ -4708,7 +4852,7 @@ this.createdEpisode = activeEpisode;
       citationDate: payload.citationDate,
       citationTime: payload.citationTime,
       citationEvents: this.citationEvents,
-      episodeEvents: this.currentStageEvents,
+      episodeEvents: this.workingStageEvents,
       citationTypes: this.citationTypes,
     });
 
@@ -4938,7 +5082,7 @@ this.createdEpisode = activeEpisode;
   }
 
   get lastCurrentStageEvent(): any | null {
-    return resolveLatestEvent(this.currentStageEvents);
+    return resolveLatestEvent(this.workingStageEvents);
   }
   get episodeOperationalSummary(): {
     days: number;
@@ -4962,13 +5106,10 @@ this.createdEpisode = activeEpisode;
       this.longitudinal?.activeEpisode ??
       {};
 
-    const currentStage = this.currentEpisodeStage;
+    const operationalStage = this.workingStage ?? this.currentEpisodeStage;
     const days = Math.max(0, Number(episode?.accumulatedDays ?? 0));
 
-    const semaphoreCode = String(episode?.semaphoreColor ?? '')
-      .trim()
-      .toUpperCase();
-
+    const semaphoreCode = getSemaphoreColorFromDays(days);
     const waitingStopped = episode?.waitingStopped === true;
 
     let waitingLabel = 'Sin clasificación de plazo';
@@ -4980,7 +5121,7 @@ this.createdEpisode = activeEpisode;
     } else if (semaphoreCode === 'VERDE') {
       waitingLabel = 'Dentro de plazo';
       waitingTone = 'success';
-    } else if (semaphoreCode === 'AMARILLO' || semaphoreCode === 'NARANJO') {
+    } else if (semaphoreCode === 'AMARILLO') {
       waitingLabel = 'Requiere seguimiento';
       waitingTone = 'warning';
     } else if (semaphoreCode === 'ROJO') {
@@ -4991,9 +5132,9 @@ this.createdEpisode = activeEpisode;
     const requestDate = formatDisplayDateValue(episode?.originalRequestDate);
 
     const stateValue =
-      currentStage?.state?.name ??
-      currentStage?.stateName ??
-      currentStage?.stateCode ??
+      operationalStage?.state?.name ??
+      operationalStage?.stateName ??
+      operationalStage?.stateCode ??
       episode?.state?.name ??
       episode?.stateName ??
       episode?.stateCode ??
@@ -5002,7 +5143,7 @@ this.createdEpisode = activeEpisode;
     const state = this.formatStateLabel(stateValue);
 
     const program =
-      currentStage?.program?.name ??
+      operationalStage?.program?.name ??
       episode?.currentProgram?.name ??
       episode?.initialProgram?.name ??
       this.activeProgramName ??
@@ -5045,13 +5186,13 @@ this.createdEpisode = activeEpisode;
         }`
       : 'El episodio todavía no registra actividades.';
 
-    const resultValue = resolveCurrentStageResultValue(currentStage, episode);
+    const resultValue = resolveCurrentStageResultValue(operationalStage, episode);
 
-    const resultCode = resolveCurrentStageResultCode(currentStage, episode);
+    const resultCode = resolveCurrentStageResultCode(operationalStage, episode);
 
     const workflowNextAction = resolveDemandNewNextAction({
       citationEvents: this.citationEvents,
-      currentStageEvents: this.currentStageEvents,
+      currentStageEvents: this.workingStageEvents,
       citationTypes: this.citationTypes,
       feedbackEvents: this.feedbackEvents,
       closureDate: this.episodeClosureDate,
@@ -5061,13 +5202,42 @@ this.createdEpisode = activeEpisode;
       currentDate: getTodayForDateInput(),
     });
 
-    const nextActionTitle = workflowNextAction.title;
+    const stageHistorical = this.demandActionMatrix.historical === true;
 
-    const nextActionDetail = workflowNextAction.detail;
+    const referenceClosurePending =
+      !stageHistorical &&
+      this.demandActionMatrix.scenario === 'REFERENCE_EXECUTED' &&
+      this.demandActionMatrix.closure.enabled;
 
-    const nextActionTone = workflowNextAction.tone;
+    const nextActionTitle = stageHistorical
+      ? 'Atención finalizada en este programa'
+      : referenceClosurePending
+        ? 'Cerrar atención por referencia'
+        : workflowNextAction.title;
 
-    const nextActionIcon = workflowNextAction.icon;
+    const currentProgramName =
+      episode?.currentProgram?.name ?? 'el programa responsable actual';
+
+    const nextActionDetail = stageHistorical
+      ? (
+          `La etapa de ${program} se encuentra cerrada. ` +
+          `El episodio continúa actualmente en ${currentProgramName}.`
+        )
+      : referenceClosurePending
+        ? 'La referencia ya fue registrada. Falta cerrar formalmente esta etapa del programa de origen.'
+        : workflowNextAction.detail;
+
+    const nextActionTone = stageHistorical
+      ? 'info' as const
+      : referenceClosurePending
+        ? 'warning' as const
+        : workflowNextAction.tone;
+
+    const nextActionIcon = stageHistorical
+      ? 'check_circle'
+      : referenceClosurePending
+        ? 'logout'
+        : workflowNextAction.icon;
 
     const result = formatResultLabelValue(resultValue, 'Sin resultado');
 
@@ -5457,32 +5627,41 @@ this.createdEpisode = activeEpisode;
   get attendedInterviewCitations(): any[] {
     return filterPresentedCitations(
       this.citationEvents,
-      this.currentStageEvents,
+      this.workingStageEvents,
     );
   }
 
   get feedbackEvents(): any[] {
-    const episode =
-      this.longitudinal?.activeEpisode ??
-      this.episodeSummary ??
-      this.createdEpisode ??
-      null;
-
-    const currentStageId = resolveCurrentStageId(this.longitudinal, episode);
-
-    return filterFeedbackEvents(this.episodeEvents ?? [], currentStageId);
+    return filterFeedbackEvents(
+      this.episodeEvents ?? [],
+      this.workingStageId,
+    );
   }
 
   get episodeClosureDate(): string | null {
-    const closureEvent = this.orderedEpisodeEvents.find(
-      (event: any) => this.getEventTypeCode(event) === 'CIERRE',
-    );
-
     return (
       this.episodeSummary?.closedAt ??
+      this.episodeSummary?.closureDate ??
       this.createdEpisode?.closedAt ??
+      this.createdEpisode?.closureDate ??
       this.longitudinal?.activeEpisode?.closedAt ??
-      closureEvent?.eventDate ??
+      this.longitudinal?.activeEpisode?.closureDate ??
+      null
+    );
+  }
+
+  get workingStageClosureEvent(): any | null {
+    return (
+      this.workingStageEvents.find(
+        (event: any) => this.getEventTypeCode(event) === 'CIERRE',
+      ) ?? null
+    );
+  }
+
+  get workingStageClosureDate(): string | null {
+    return (
+      this.workingStage?.closedAt ??
+      this.workingStageClosureEvent?.eventDate ??
       null
     );
   }
@@ -5549,18 +5728,78 @@ this.createdEpisode = activeEpisode;
       });
     });
 
-    if (this.episodeClosureDate) {
+    const referenceEvents = this.workingStageEvents.filter(
+      (event: any) => this.getEventTypeCode(event) === 'REFERENCIA',
+    );
+
+    referenceEvents.forEach((reference: any, index: number) => {
+      const destinationProgramName =
+        reference?.destinationProgram?.name ??
+        reference?.toProgram?.name ??
+        reference?.targetProgram?.name ??
+        reference?.reference?.destinationProgram?.name ??
+        reference?.reference?.destinationProgramName ??
+        reference?.destinationProgramName ??
+        null;
+
+      const referenceComment =
+        reference?.comment ??
+        reference?.comments ??
+        reference?.description ??
+        null;
+
+      milestones.push({
+        code: 'Ref.',
+        title: 'Referencia entre programas',
+        icon: 'swap_horiz',
+        date:
+          reference?.eventDate ??
+          reference?.referenceDate ??
+          null,
+        sortOrder: 700 + index,
+        status: destinationProgramName
+          ? `Destino: ${destinationProgramName}`
+          : null,
+        description: referenceComment,
+        registeredByName:
+          reference?.registeredByName ??
+          reference?.createdByUser?.name ??
+          reference?.registeredByUser?.name ??
+          null,
+        createdAt: reference?.createdAt ?? null,
+        details: destinationProgramName
+          ? [`Programa destino: ${destinationProgramName}`]
+          : [],
+      });
+    });
+    if (this.workingStageClosureDate) {
+      const closureEvent = this.workingStageClosureEvent;
+
+      const closureReason =
+        this.workingStage?.closureReason?.name ??
+        this.workingStage?.closureReasonName ??
+        closureEvent?.closureReason?.name ??
+        closureEvent?.closureReasonName ??
+        null;
+
       milestones.push({
         code: 'Cierre',
-        title: 'Cierre del episodio',
+        title: 'Cierre de atención del programa',
         icon: 'event_busy',
-        date: this.episodeClosureDate,
+        date: this.workingStageClosureDate,
         sortOrder: 900,
-        status: null,
-        description: 'Término formal del episodio de demanda.',
-        registeredByName: null,
-        createdAt: null,
-        details: [],
+        status: closureReason ? `Motivo: ${closureReason}` : null,
+        description:
+          closureEvent?.comment ??
+          closureEvent?.observation ??
+          'Término formal de la atención en este programa.',
+        registeredByName:
+          closureEvent?.registeredByName ??
+          closureEvent?.createdByUser?.name ??
+          closureEvent?.registeredByUser?.name ??
+          null,
+        createdAt: closureEvent?.createdAt ?? null,
+        details: closureReason ? [`Motivo de cierre: ${closureReason}`] : [],
       });
     }
 
@@ -5748,7 +5987,7 @@ this.createdEpisode = activeEpisode;
   get demandCitationMilestones() {
     return buildDemandNewCitationMilestones(
       this.citationEvents,
-      this.currentStageEvents,
+      this.workingStageEvents,
       this.citationTypes,
     );
   }
@@ -5797,13 +6036,13 @@ this.createdEpisode = activeEpisode;
   get citationEvents(): any[] {
     return filterEventsByStage(
       this.allCitationEvents,
-      this.resolvedCurrentStageId,
+      this.workingStageId,
     );
   }
   get pendingCitationEvents(): any[] {
     return filterPendingCitationEvents(
       this.citationEvents,
-      this.currentStageEvents,
+      this.workingStageEvents,
     );
   }
 
@@ -5856,6 +6095,23 @@ this.createdEpisode = activeEpisode;
     return getSemaphoreDescriptionText(value);
   }
 
+  get semaphoreRangeText(): string {
+    return DEMAND_SEMAPHORE_RANGE_TEXT;
+  }
+  get currentSemaphoreDays(): number {
+    return Math.max(
+      0,
+      Number(
+        this.episodeSummary?.accumulatedDays ??
+          this.createdEpisode?.accumulatedDays ??
+          0,
+      ),
+    );
+  }
+
+  get currentSemaphoreColor(): string {
+    return getSemaphoreColorFromDays(this.currentSemaphoreDays) ?? '';
+  }
   get hasActiveEpisode(): boolean {
     return !!getCurrentEpisodeId(this.createdEpisode, this.episodeSummary);
   }
@@ -5955,7 +6211,7 @@ this.createdEpisode = activeEpisode;
   }
 
   get observationEvents(): any[] {
-    return filterObservationEvents(this.currentStageEvents);
+    return filterObservationEvents(this.workingStageEvents);
   }
 
   get availableEpisodes(): any[] {
@@ -6029,7 +6285,11 @@ this.createdEpisode = activeEpisode;
   }
 
   get canManageCurrentEpisode(): boolean {
-    if (this.requestedMode === 'view' || this.isHistoricalEpisode) {
+    if (
+      this.requestedMode === 'view' ||
+      this.isHistoricalEpisode ||
+      this.demandActionMatrix.historical
+    ) {
       return false;
     }
     /*

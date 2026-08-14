@@ -1,6 +1,7 @@
 ﻿import { formatDateForBackend } from '../utils/demand-new-format.utils';
 
 export interface ClosurePayload {
+  stageId: number;
   closureReasonId: number;
   closureDate: string;
   observation?: string;
@@ -8,6 +9,7 @@ export interface ClosurePayload {
 
 export interface ClosureContextInput {
   raw: any;
+  stageId?: number | null;
   originalRequestDate?: string | null;
   episodeEvents?: any[];
 }
@@ -25,9 +27,17 @@ export type ClosureContextResult =
 export function buildClosureContext(
   input: ClosureContextInput,
 ): ClosureContextResult {
+  const stageId = Number(input.stageId);
   const closureReasonId = Number(input.raw?.closureReasonId);
   const closureDate = formatDateForBackend(input.raw?.closureDate);
   const observation = String(input.raw?.observation ?? '').trim();
+
+  if (!Number.isFinite(stageId) || stageId <= 0) {
+    return {
+      valid: false,
+      errorMessage: 'No fue posible identificar la etapa que se desea cerrar.',
+    };
+  }
 
   if (!Number.isFinite(closureReasonId) || closureReasonId <= 0) {
     return {
@@ -71,6 +81,7 @@ export function buildClosureContext(
   return {
     valid: true,
     payload: {
+      stageId,
       closureReasonId,
       closureDate,
       observation: observation || undefined,

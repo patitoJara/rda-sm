@@ -1773,14 +1773,18 @@
   font-size: 1.12rem;
 }
 
-.operational-result-strip--pending,
-.operational-result-strip--waiting {
-  --result-border: #e7bd52;
-  --result-background: #fff8df;
-  --result-color: #745500;
-  --result-icon: #ffecb2;
+.operational-result-strip--pending {
+  --result-border: #e6c66a;
+  --result-background: #fffaf0;
+  --result-color: #6f5600;
+  --result-icon: #fff0bd;
 }
-
+.operational-result-strip--waiting {
+  --result-border: #77afd8;
+  --result-background: #edf7fd;
+  --result-color: #175d87;
+  --result-icon: #d7edf9;
+}
 .operational-result-strip--success {
   --result-border: #63b47b;
   --result-background: #eaf8ee;

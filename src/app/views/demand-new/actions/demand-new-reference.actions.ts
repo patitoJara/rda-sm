@@ -1,10 +1,11 @@
-import { formatDateForBackend } from '../utils/demand-new-format.utils';
+﻿import { formatDateForBackend } from '../utils/demand-new-format.utils';
 
 export interface ReferencePayload {
-  targetProgramId: number;
-  referenceDate: string;
+  originStageId: number;
+  destinationProgramId: number;
   reason: string;
   observation?: string;
+  confirmImpact: boolean;
 }
 
 export type ReferenceContextResult =
@@ -46,15 +47,24 @@ export function getAvailableReferencePrograms(
 export function buildReferenceContext(input: {
   raw: any;
   currentProgramId: number | null | undefined;
+  originStageId: number | null | undefined;
   originalRequestDate?: string | null;
   episodeEvents?: any[];
 }): ReferenceContextResult {
   const targetProgramId = Number(input.raw?.targetProgramId);
   const currentProgramId = Number(input.currentProgramId);
+  const originStageId = Number(input.originStageId);
   const referenceDate = formatDateForBackend(input.raw?.referenceDate);
   const reason = String(input.raw?.reason ?? '').trim();
   const observation =
     String(input.raw?.observation ?? '').trim() || undefined;
+
+  if (!originStageId) {
+    return {
+      valid: false,
+      errorMessage: 'No fue posible identificar la etapa de origen.',
+    };
+  }
 
   if (!targetProgramId) {
     return {
@@ -113,10 +123,11 @@ export function buildReferenceContext(input: {
   return {
     valid: true,
     payload: {
-      targetProgramId,
-      referenceDate,
+      originStageId,
+      destinationProgramId: targetProgramId,
       reason,
       observation,
+      confirmImpact: true,
     },
   };
 }

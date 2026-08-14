@@ -142,10 +142,11 @@ export interface EgressEpisodeRequest {
 }
 
 export interface ReferenceEpisodeRequest {
-  targetProgramId: number;
-  referenceDate?: string;
-  reason?: string;
+  originStageId: number;
+  destinationProgramId: number;
+  reason: string;
   observation?: string;
+  confirmImpact: boolean;
   [key: string]: any;
 }
 

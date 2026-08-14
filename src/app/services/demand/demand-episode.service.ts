@@ -111,6 +111,7 @@ export class DemandEpisodeService {
   closeEpisode(
     episodeId: number,
     payload: {
+      stageId: number;
       closureReasonId: number;
       closureDate: string;
       observation?: string;

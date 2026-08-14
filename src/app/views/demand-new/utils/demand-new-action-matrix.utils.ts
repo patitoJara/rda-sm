@@ -248,27 +248,62 @@ export function resolveDemandActionMatrix(
       DEMAND_ACTION_MATRIX_MESSAGES.episodeClosed,
     );
   }
-
   /*
-   * REFERENCIA YA EJECUTADA EN LA ETAPA DE ORIGEN.
+   * ETAPA YA CERRADA.
    *
-   * La etapa origen queda solo lectura.
-   * El episodio sigue abierto.
-   * La nueva etapa/programa comienza nuevamente desde ACTIVE_INITIAL.
+   * Solo el cierre formal convierte la etapa en histórica
+   * y la deja en modo solo lectura.
    */
-  if (input.referenceExecuted || input.stageClosed) {
+  if (input.stageClosed) {
     return {
       ...blockedMatrix(
         'REFERENCE_EXECUTED',
         DEMAND_ACTION_MATRIX_MESSAGES.stageClosed,
       ),
-
-      /*
-       * La causal registrada de la etapa es REFERENCIA.
-       * El episodio activo puede posteriormente terminar en ABANDONO
-       * desde su etapa vigente.
-       */
       allowedClosureOptions: ['REFERENCIA'],
+    };
+  }
+
+  /*
+   * REFERENCIA YA EJECUTADA, PERO CIERRE AÚN PENDIENTE.
+   *
+   * La persona ya fue derivada al programa receptor.
+   * La etapa de origen todavía debe registrar su cierre formal
+   * con causal REFERENCIA.
+   */
+  if (input.referenceExecuted) {
+    return {
+      scenario: 'REFERENCE_EXECUTED',
+
+      citation: action(
+        false,
+        'La etapa ya fue referida a otro programa.',
+      ),
+
+      attendance: action(
+        false,
+        'La etapa ya fue referida a otro programa.',
+      ),
+
+      feedback: action(
+        false,
+        'La etapa ya fue referida a otro programa.',
+      ),
+
+      observation: action(true),
+
+      reference: action(
+        false,
+        'La referencia ya fue registrada para esta etapa.',
+      ),
+
+      closure: action(true),
+
+      allowedClosureOptions: ['REFERENCIA'],
+
+      historical: false,
+      readonly: false,
+      refreshAfterClosure: true,
     };
   }
 
@@ -291,16 +326,11 @@ export function resolveDemandActionMatrix(
         DEMAND_ACTION_MATRIX_MESSAGES.attendanceBlockedByFeedback,
       ),
 
-      feedback: action(true),
+      feedback: action(false, 'Ya existe una retroalimentación registrada para esta etapa.'),
 
       observation: action(true),
 
-      reference: input.firstInterviewCompleted
-        ? action(true)
-        : action(
-            false,
-            DEMAND_ACTION_MATRIX_MESSAGES.referenceRequiresFirstInterview,
-          ),
+      reference: action(true),
 
       closure: action(true),
 
@@ -329,16 +359,11 @@ export function resolveDemandActionMatrix(
         DEMAND_ACTION_MATRIX_MESSAGES.attendanceBlockedByFeedback,
       ),
 
-      feedback: action(true),
+      feedback: action(false, 'Ya existe una retroalimentación registrada para esta etapa.'),
 
       observation: action(true),
 
-      reference: input.firstInterviewCompleted
-        ? action(true)
-        : action(
-            false,
-            DEMAND_ACTION_MATRIX_MESSAGES.referenceRequiresFirstInterview,
-          ),
+      reference: action(true),
 
       closure: action(true),
 
@@ -367,16 +392,11 @@ export function resolveDemandActionMatrix(
         DEMAND_ACTION_MATRIX_MESSAGES.attendanceBlockedByFeedback,
       ),
 
-      feedback: action(true),
+      feedback: action(false, 'Ya existe una retroalimentación registrada para esta etapa.'),
 
       observation: action(true),
 
-      reference: input.firstInterviewCompleted
-        ? action(true)
-        : action(
-            false,
-            DEMAND_ACTION_MATRIX_MESSAGES.referenceRequiresFirstInterview,
-          ),
+      reference: action(true),
 
       closure: action(true),
 
@@ -405,16 +425,11 @@ export function resolveDemandActionMatrix(
         DEMAND_ACTION_MATRIX_MESSAGES.attendanceBlockedByFeedback,
       ),
 
-      feedback: action(true),
+      feedback: action(false, 'Ya existe una retroalimentación registrada para esta etapa.'),
 
       observation: action(true),
 
-      reference: input.firstInterviewCompleted
-        ? action(true)
-        : action(
-            false,
-            DEMAND_ACTION_MATRIX_MESSAGES.referenceRequiresFirstInterview,
-          ),
+      reference: action(true),
 
       closure: action(true),
 
@@ -453,12 +468,7 @@ export function resolveDemandActionMatrix(
 
       observation: action(true),
 
-      reference: input.firstInterviewCompleted
-        ? action(true)
-        : action(
-            false,
-            DEMAND_ACTION_MATRIX_MESSAGES.referenceRequiresFirstInterview,
-          ),
+      reference: action(true),
 
       closure: action(true),
 
@@ -488,12 +498,7 @@ export function resolveDemandActionMatrix(
 
       observation: action(true),
 
-      reference: input.firstInterviewCompleted
-        ? action(true)
-        : action(
-            false,
-            DEMAND_ACTION_MATRIX_MESSAGES.referenceRequiresFirstInterview,
-          ),
+      reference: action(true),
 
       closure: action(true),
 
@@ -524,12 +529,7 @@ export function resolveDemandActionMatrix(
 
     observation: action(true),
 
-    reference: input.firstInterviewCompleted
-      ? action(true)
-      : action(
-          false,
-          DEMAND_ACTION_MATRIX_MESSAGES.referenceRequiresFirstInterview,
-        ),
+    reference: action(true),
 
     closure: action(true),
 

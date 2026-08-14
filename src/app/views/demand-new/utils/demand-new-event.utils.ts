@@ -1,4 +1,4 @@
-export function normalizeEventTime(value: unknown): string {
+﻿export function normalizeEventTime(value: unknown): string {
   return String(value ?? '')
     .trim()
     .slice(0, 5);
@@ -63,4 +63,107 @@ export function normalizeSemaphoreColor(
   value: string | null | undefined,
 ): string {
   return normalizeText(value);
+}
+export function resolveEventStageId(
+  event: any,
+): number | null {
+  const stageId = Number(
+    event?.stage?.id ??
+      event?.stageId,
+  );
+
+  return Number.isFinite(stageId) && stageId > 0
+    ? stageId
+    : null;
+}
+
+export function resolveEventTypeCode(
+  event: any,
+): string {
+  return normalizeText(
+    event?.eventType?.code ??
+      event?.eventTypeCode ??
+      event?.type?.code ??
+      event?.typeCode ??
+      '',
+  );
+}
+
+export function filterEventsByStageId(
+  events: any[] | null | undefined,
+  stageId: number | string | null | undefined,
+): any[] {
+  const normalizedStageId = Number(stageId);
+
+  if (
+    !Array.isArray(events) ||
+    !Number.isFinite(normalizedStageId) ||
+    normalizedStageId <= 0
+  ) {
+    return [];
+  }
+
+  return events.filter(
+    (event: any) =>
+      resolveEventStageId(event) === normalizedStageId,
+  );
+}
+
+export function hasStageEventType(
+  events: any[] | null | undefined,
+  stageId: number | string | null | undefined,
+  eventTypeCode: string,
+): boolean {
+  const normalizedType = normalizeText(eventTypeCode);
+
+  if (!normalizedType) {
+    return false;
+  }
+
+  return filterEventsByStageId(
+    events,
+    stageId,
+  ).some(
+    (event: any) =>
+      resolveEventTypeCode(event) === normalizedType,
+  );
+}
+
+export function hasStageReference(
+  events: any[] | null | undefined,
+  stageId: number | string | null | undefined,
+): boolean {
+  return hasStageEventType(
+    events,
+    stageId,
+    'REFERENCIA',
+  );
+}
+
+export function hasStageFormalClosure(
+  events: any[] | null | undefined,
+  stageId: number | string | null | undefined,
+): boolean {
+  return hasStageEventType(
+    events,
+    stageId,
+    'CIERRE',
+  );
+}
+
+export function filterStageCitationEvents(
+  events: any[] | null | undefined,
+  stageId: number | string | null | undefined,
+): any[] {
+  return filterEventsByStageId(
+    events,
+    stageId,
+  ).filter((event: any) => {
+    const code = resolveEventTypeCode(event);
+
+    return (
+      code === 'CITACION' ||
+      code === 'NUEVA_CITACION'
+    );
+  });
 }
