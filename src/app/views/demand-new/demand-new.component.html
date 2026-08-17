@@ -736,19 +736,42 @@
           </span>
         </div>
       </div>
+      <div class="summary-person-status">
+        <div
+          class="status-pill status-pill--days"
+          *ngIf="hasCurrentEpisode"
+        >
+          <span>Tiempo episodio</span>
 
-      <div class="status-pill">
-        <span>Estado</span>
+          <strong>
+            {{
+              episodeSummary?.accumulatedDays ??
+                createdEpisode?.accumulatedDays ??
+                0
+            }}
+            {{
+              (episodeSummary?.accumulatedDays ??
+                createdEpisode?.accumulatedDays ??
+                0) === 1
+                ? "día"
+                : "días"
+            }}
+          </strong>
+        </div>
 
-        <strong>
-          {{
-            episodeSummary?.state?.name ||
-              createdEpisode?.state?.name ||
-              formatStateLabel(
-                episodeSummary?.stateCode || createdEpisode?.stateCode
-              )
-          }}
-        </strong>
+        <div class="status-pill">
+          <span>Estado</span>
+
+          <strong>
+            {{
+              episodeSummary?.state?.name ||
+                createdEpisode?.state?.name ||
+                formatStateLabel(
+                  episodeSummary?.stateCode || createdEpisode?.stateCode
+                )
+            }}
+          </strong>
+        </div>
       </div>
     </div>
 
@@ -2172,154 +2195,284 @@
     </div>
   </mat-card>
 
-        <!-- =====================================================
 
-       SITUACIÓN OPERATIVA DE LA DEMANDA
+    <!-- =====================================================
+         ESTADO GLOBAL DEL EPISODIO
     ====================================================== -->
     <section
-      class="episode-operational-summary"
-      *ngIf="hasCurrentEpisode"
-      aria-labelledby="episodeOperationalTitle"
+      class="episode-global-overview"
+      *ngIf="selectedPerson && hasCurrentEpisode"
     >
-      <div class="operational-summary-header">
-        <div class="operational-summary-header__icon">
-          <mat-icon>monitor_heart</mat-icon>
-        </div>
 
+<mat-card class="current-demand-card current-demand-card--main">
+      <div class="card-header compact-card-header">
+        <mat-icon>description</mat-icon>
         <div>
-          <div id="quick-current-situation" class="navigation-quick-anchor"></div>
-          <span>SITUACIÓN ACTUAL</span>
+          <div id="quick-episode-status" class="navigation-quick-anchor"></div>
 
-          <h2 id="episodeOperationalTitle">
-            Resumen operativo de la demanda
-          </h2>
+          <h3>
+            {{
+              isHistoricalEpisode
+                ? "Estado de cierre del episodio"
+                : "Estado actual del episodio"
+            }}
+          </h3>
 
           <p>
-            Información prioritaria para conocer el estado del episodio y
-            orientar la siguiente gestión.
+            {{
+              isHistoricalEpisode
+                ? "Resumen histórico de la demanda finalizada."
+                : "Situación global y programa actual del episodio."
+            }}
           </p>
         </div>
       </div>
 
-      <div class="operational-summary-grid">
-        <!-- TIEMPO DE ESPERA -->
-        <article
-          class="operational-summary-card"
-          [ngClass]="
-            'operational-summary-card--' +
-            episodeOperationalSummary.waitingTone
-          "
-        >
-          <div class="operational-summary-card__icon">
-            <mat-icon>schedule</mat-icon>
-          </div>
-
-          <div class="operational-summary-card__content">
-            <span>TIEMPO DE ESPERA</span>
-
-            <strong class="operational-summary-card__number">
-              {{ episodeOperationalSummary.days }}
-              {{
-                episodeOperationalSummary.days === 1
-                  ? "día"
-                  : "días"
-              }}
-            </strong>
-
-            <small>
-              {{ episodeOperationalSummary.waitingLabel }}
-            </small>
-
-            <p>
-              Solicitud recibida:
-              {{ episodeOperationalSummary.requestDate }}
-            </p>
-          </div>
-        </article>
-
-        <!-- ESTADO Y PROGRAMA RESPONSABLE -->
-        <article
-          class="operational-summary-card operational-summary-card--state"
-        >
-          <div class="operational-summary-card__icon">
-            <mat-icon>assignment_turned_in</mat-icon>
-          </div>
-
-          <div class="operational-summary-card__content">
-            <span>ESTADO ACTUAL</span>
-
-            <strong>
-              {{ episodeOperationalSummary.state }}
-            </strong>
-
-            <small>Programa responsable</small>
-
-            <p>
-              {{ episodeOperationalSummary.program }}
-            </p>
-          </div>
-        </article>
-
-        <!-- ÚLTIMA GESTIÓN -->
-        <article
-          class="operational-summary-card operational-summary-card--management"
-        >
-          <div class="operational-summary-card__icon">
-            <mat-icon>history</mat-icon>
-          </div>
-
-          <div class="operational-summary-card__content">
-            <span>ÚLTIMA GESTIÓN</span>
-
-            <strong>
-              {{ episodeOperationalSummary.lastManagementTitle }}
-            </strong>
-
-            <small>
-              {{ episodeOperationalSummary.lastManagementDetail }}
-            </small>
-
-            <p>
-              {{ workingStageEvents.length }}
-              {{
-                workingStageEvents.length === 1
-                  ? "gestión registrada"
-                  : "gestiones registradas"
-              }}
-            </p>
-          </div>
-        </article>
-
-        <!-- PRÓXIMA ACCIÓN -->
-        <article
-          class="operational-summary-card"
-          [ngClass]="
-            'operational-summary-card--action-' +
-            episodeOperationalSummary.nextActionTone
-          "
-        >
-          <div class="operational-summary-card__icon">
-            <mat-icon>
-              {{ episodeOperationalSummary.nextActionIcon }}
-            </mat-icon>
-          </div>
-
-          <div class="operational-summary-card__content">
-            <span>PRÓXIMA ACCIÓN</span>
-
-            <strong>
-              {{ episodeOperationalSummary.nextActionTitle }}
-            </strong>
-
-            <p>
-              {{ episodeOperationalSummary.nextActionDetail }}
-            </p>
-          </div>
-        </article>
+      <div class="summary-row" *ngIf="hasCurrentEpisode">
+        <span>Programa responsable de la demanda</span>
+        <strong>{{
+          episodeSummary?.currentProgram?.name ||
+            createdEpisode?.currentProgram?.name ||
+            activeProgramName ||
+            "Sin programa"
+        }}</strong>
       </div>
 
-      <!-- HITOS OPERATIVOS DEL RESUMEN -->
-      <section class="operational-milestones">
+      <div class="summary-row" *ngIf="hasCurrentEpisode">
+        <span>Estado</span>
+        <strong>
+          {{
+            episodeSummary?.state?.name ||
+              createdEpisode?.state?.name ||
+              formatStateLabel(
+                episodeSummary?.stateCode || createdEpisode?.stateCode
+              )
+          }}
+        </strong>
+      </div>
+
+      <div class="summary-row" *ngIf="hasCurrentEpisode">
+        <span>Resultado</span>
+
+        <strong>
+          {{ currentStageResultLabel }}
+        </strong>
+      </div>
+  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
+    <span>Sustancia principal</span>
+    <strong>{{ episodeDemandBackground.primarySubstance }}</strong>
+  </div>
+
+  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
+    <span>Sustancias secundarias</span>
+    <strong>{{ episodeDemandBackground.secondarySubstances }}</strong>
+  </div>
+
+  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
+    <span>N.º tratamientos previos</span>
+    <strong>{{ episodeDemandBackground.previousTreatments }}</strong>
+  </div>
+
+  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
+    <span>Tipo de contacto</span>
+    <strong>{{ episodeDemandBackground.contactType }}</strong>
+  </div>
+
+  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
+    <span>Quién solicita</span>
+    <strong>{{ episodeDemandBackground.sender }}</strong>
+  </div>
+
+  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
+    <span>Quién deriva</span>
+    <strong>{{ episodeDemandBackground.diverter }}</strong>
+  </div>
+
+  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
+    <span>Contacto alternativo</span>
+    <strong>{{ episodeDemandBackground.alternateContact }}</strong>
+  </div>
+
+  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
+    <span>Primera citación</span>
+    <strong>
+      {{
+        firstCitationCurrentEpisode.registered
+          ? formatDisplayDate(firstCitationCurrentEpisode.date) +
+            " · " +
+            (firstCitationCurrentEpisode.time || "Hora no informada") +
+            " · " +
+            (firstCitationCurrentEpisode.professional || "Profesional no informado")
+          : "Sin registrar"
+      }}
+    </strong>
+  </div>
+
+  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
+    <span>Formulario SISTRAT</span>
+
+    <strong>
+      {{
+        isSistraComplete
+          ? "Completo"
+          : "Pendiente · " +
+            sistraPendingFields.length +
+            " antecedente" +
+            (sistraPendingFields.length === 1 ? "" : "s") +
+            " faltante" +
+            (sistraPendingFields.length === 1 ? "" : "s")
+      }}
+
+      <small *ngIf="!isSistraComplete">
+        {{ sistraPendingFields.join(" · ") }}
+      </small>
+    </strong>
+  </div>
+
+  <div class="summary-row" *ngIf="hasCurrentEpisode">
+    <span>Última gestión del episodio</span>
+    <strong>
+      {{
+        lastEpisodeEvent
+          ? (lastEpisodeEvent.eventType?.name ||
+              lastEpisodeEvent.eventType?.code ||
+              "Gestión registrada") +
+            " · " +
+            getEventProgramContext(lastEpisodeEvent).displayLabel +
+            " · " +
+            formatDisplayDate(lastEpisodeEvent.eventDate)
+          : "Sin gestión registrada"
+      }}
+    </strong>
+  </div>
+
+  <div
+    class="card-actions-preview"
+        *ngIf="selectedPerson"
+      >
+        <button
+          mat-flat-button
+          class="create-episode-trigger"
+          type="button"
+          [disabled]="!selectedPerson || (hasCurrentEpisode && !isHistoricalEpisode)"
+          (click)="showCreateEpisode()"
+        >
+          <mat-icon>add_circle</mat-icon>
+
+          {{
+            !selectedPerson
+              ? "Buscar persona primero"
+              : hasCurrentEpisode && !isHistoricalEpisode
+                ? "Episodio ya existente"
+                : "Crear episodio de demanda"
+          }}
+        </button>
+      </div>
+    </mat-card>
+
+
+      <!-- TRAYECTORIA GLOBAL DEL EPISODIO -->
+<mat-card
+      id="trayectoria"
+      #summarySection
+      class="current-demand-card longitudinal-anchor"
+      *ngIf="hasCurrentEpisode"
+      [class.longitudinal-anchor--highlighted]="
+        highlightedSummarySection === 'trayectoria'
+      "
+    >
+      <div class="card-header compact-card-header">
+        <mat-icon>timeline</mat-icon>
+        <div>
+          <h3>Trayectoria resumida</h3>
+          <p>Etapa actual y recorrido por programa.</p>
+        </div>
+      </div>
+
+      <div
+        class="trajectory-summary"
+        *ngIf="
+          compactProgramTrajectory.length > 0;
+          else currentProgramTrajectory
+        "
+      >
+        <ng-container *ngFor="let item of compactProgramTrajectory">
+          <div
+            *ngIf="item.kind === 'stage'"
+            class="trajectory-line"
+            [class.trajectory-line--current]="item.current"
+          >
+            <div class="trajectory-dot"></div>
+
+            <div>
+              <strong>{{ item.programName }}</strong>
+
+              <span>
+                {{ item.stageLabel }}
+
+                <ng-container
+                  *ngIf="
+                    item.daysInStage !== null &&
+                    item.daysInStage !== undefined
+                  "
+                >
+                  · {{ item.daysInStage }}
+                  {{ item.daysInStage === 1 ? "día" : "días" }}
+                </ng-container>
+              </span>
+            </div>
+          </div>
+
+          <div
+            *ngIf="item.kind === 'reference'"
+            class="trajectory-reference"
+          >
+            <mat-icon>south</mat-icon>
+
+            <div>
+              <strong>
+                Referencia ·
+                {{
+                  item.referenceDate
+                    ? formatDisplayDate(item.referenceDate)
+                    : "Fecha sin registro"
+                }}
+              </strong>
+
+              <span>
+                {{ item.originProgramName }}
+                →
+                {{ item.destinationProgramName }}
+              </span>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <ng-template #currentProgramTrajectory>
+        <div class="trajectory-line">
+          <div class="trajectory-dot"></div>
+
+          <div>
+            <strong>{{
+              episodeSummary?.currentProgram?.name ||
+                createdEpisode?.currentProgram?.name ||
+                activeProgramName ||
+                "Programa actual"
+            }}</strong>
+
+            <span>{{ stageVisualState || "Etapa pendiente" }}</span>
+          </div>
+        </div>
+      </ng-template>
+      <div class="empty-line" *ngIf="!episodeLoaded && !createdEpisode">
+        No existe episodio activo cargado. Prepare el episodio si corresponde.
+      </div>
+
+
+      </mat-card>
+
+      <section class="operational-milestones" *ngIf="hasCurrentEpisode">
         <div class="operational-milestones__heading">
           <mat-icon>account_tree</mat-icon>
           <div>
@@ -2410,7 +2563,7 @@
           >
             <mat-icon>event_busy</mat-icon>
             <div>
-              <span>Cierre</span>
+              <span>Cierre del episodio</span>
               <strong>
                 {{
                   episodeClosureDate
@@ -2425,44 +2578,9 @@
           </article>
         </div>
       </section>
-      <!-- RESULTADO ACTUAL -->
-      <div
-        class="operational-result-strip"
-        [ngClass]="'operational-result-strip--' + operationalResultTone"
-        [class.operational-result-strip--pending]="
-          episodeOperationalSummary.resultPending
-        "
-        [class.operational-result-strip--defined]="
-          !episodeOperationalSummary.resultPending
-        "
-      >
-        <div class="operational-result-strip__icon">
-          <mat-icon>
-            {{
-              episodeOperationalSummary.resultPending
-                ? "pending_actions"
-                : "task_alt"
-            }}
-          </mat-icon>
-        </div>
 
-        <div>
-          <span>RESULTADO ACTUAL</span>
-
-          <strong>
-            {{ episodeOperationalSummary.result }}
-          </strong>
-
-          <p>
-            {{
-              episodeOperationalSummary.resultPending
-                ? "Pendiente de evaluación y definición de resultado."
-                : "El episodio posee un resultado formal registrado."
-            }}
-          </p>
-        </div>
-      </div>
     </section>
+
 
 
 
@@ -2574,11 +2692,11 @@
     <button
       type="button"
       class="navigation-assist__item navigation-assist__item--quick"
-      matTooltip="Situación actual"
-      (click)="scrollToQuickAccess('quick-current-situation')"
+      matTooltip="Estado del episodio"
+      (click)="scrollToQuickAccess('quick-episode-status')"
     >
       <mat-icon>monitor_heart</mat-icon>
-      <span>Situación actual</span>
+      <span>Estado del episodio</span>
     </button>
 
     <button
@@ -2630,7 +2748,7 @@
       <i class="navigation-assist__badge"></i>
     </button>
   </aside>
-  <!-- DEMANDA ACTUAL -->
+  <!-- PROGRAMA CONSULTADO -->
   <section
     id="demanda-actual"
     #summarySection
@@ -2641,269 +2759,201 @@
     "
     *ngIf="selectedPerson"
   >
-    <mat-card class="current-demand-card current-demand-card--main">
-      <div class="card-header compact-card-header">
-        <mat-icon>description</mat-icon>
+
+
+
+
+
+      <!-- =====================================================
+           SITUACIÓN DEL PROGRAMA / ETAPA CONSULTADA
+      ====================================================== -->
+
+<section
+  class="episode-operational-summary episode-operational-summary--program"
+      *ngIf="hasCurrentEpisode"
+      aria-labelledby="episodeOperationalTitle"
+
+>
+<div class="operational-summary-header">
+        <div class="operational-summary-header__icon">
+          <mat-icon>monitor_heart</mat-icon>
+        </div>
+
         <div>
-          <h3>
-            {{
-              isHistoricalEpisode
-                ? "Estado de cierre del episodio"
-                : "Estado actual del episodio"
-            }}
-          </h3>
+          <div id="quick-current-situation" class="navigation-quick-anchor"></div>
+          <span>SITUACIÓN EN EL PROGRAMA CONSULTADO</span>
+
+          <h2 id="episodeOperationalTitle">
+            Resumen operativo de {{ episodeOperationalSummary.program }}
+          </h2>
 
           <p>
-            {{
-              isHistoricalEpisode
-                ? "Resumen histórico de la demanda finalizada."
-                : "Resumen operativo para continuidad de atención."
-            }}
+            Estado de la etapa correspondiente al programa desde el cual se
+            está consultando la ficha.
           </p>
         </div>
       </div>
 
-      <div class="summary-row" *ngIf="hasCurrentEpisode">
-        <span>Programa responsable de la demanda</span>
-        <strong>{{
-          episodeSummary?.currentProgram?.name ||
-            createdEpisode?.currentProgram?.name ||
-            activeProgramName ||
-            "Sin programa"
-        }}</strong>
-      </div>
-
-      <div class="summary-row" *ngIf="hasCurrentEpisode">
-        <span>Estado</span>
-        <strong>
-          {{
-            episodeSummary?.state?.name ||
-              createdEpisode?.state?.name ||
-              formatStateLabel(
-                episodeSummary?.stateCode || createdEpisode?.stateCode
-              )
-          }}
-        </strong>
-      </div>
-
-      <div class="summary-row" *ngIf="hasCurrentEpisode">
-        <span>Resultado</span>
-
-        <strong>
-          {{ currentStageResultLabel }}
-        </strong>
-      </div>
-  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
-    <span>Sustancia principal</span>
-    <strong>{{ episodeDemandBackground.primarySubstance }}</strong>
-  </div>
-
-  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
-    <span>Sustancias secundarias</span>
-    <strong>{{ episodeDemandBackground.secondarySubstances }}</strong>
-  </div>
-
-  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
-    <span>N.º tratamientos previos</span>
-    <strong>{{ episodeDemandBackground.previousTreatments }}</strong>
-  </div>
-
-  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
-    <span>Tipo de contacto</span>
-    <strong>{{ episodeDemandBackground.contactType }}</strong>
-  </div>
-
-  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
-    <span>Quién solicita</span>
-    <strong>{{ episodeDemandBackground.sender }}</strong>
-  </div>
-
-  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
-    <span>Quién deriva</span>
-    <strong>{{ episodeDemandBackground.diverter }}</strong>
-  </div>
-
-  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
-    <span>Contacto alternativo</span>
-    <strong>{{ episodeDemandBackground.alternateContact }}</strong>
-  </div>
-
-  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
-    <span>Primera citación</span>
-    <strong>
-      {{
-        firstCitationCurrentEpisode.registered
-          ? formatDisplayDate(firstCitationCurrentEpisode.date) +
-            " · " +
-            (firstCitationCurrentEpisode.time || "Hora no informada") +
-            " · " +
-            (firstCitationCurrentEpisode.professional || "Profesional no informado")
-          : "Sin registrar"
-      }}
-    </strong>
-  </div>
-
-  <div class="summary-row demand-background-row" *ngIf="hasCurrentEpisode">
-    <span>Formulario SISTRAT</span>
-
-    <strong>
-      {{
-        isSistraComplete
-          ? "Completo"
-          : "Pendiente · " +
-            sistraPendingFields.length +
-            " antecedente" +
-            (sistraPendingFields.length === 1 ? "" : "s") +
-            " faltante" +
-            (sistraPendingFields.length === 1 ? "" : "s")
-      }}
-
-      <small *ngIf="!isSistraComplete">
-        {{ sistraPendingFields.join(" · ") }}
-      </small>
-    </strong>
-  </div>
-
-  <div class="summary-row" *ngIf="hasCurrentEpisode">
-    <span>Última gestión</span>
-    <strong>
-      {{
-        lastCurrentStageEvent
-          ? (lastCurrentStageEvent.eventType?.name ||
-              lastCurrentStageEvent.eventType?.code ||
-              "Gestión registrada") +
-            " · " +
-            formatDisplayDate(lastCurrentStageEvent.eventDate)
-          : "Sin gestión registrada"
-      }}
-    </strong>
-  </div>
-
-  <div
-    class="card-actions-preview"
-        *ngIf="selectedPerson"
-      >
-        <button
-          mat-flat-button
-          class="create-episode-trigger"
-          type="button"
-          [disabled]="!selectedPerson || (hasCurrentEpisode && !isHistoricalEpisode)"
-          (click)="showCreateEpisode()"
+      <div class="operational-summary-grid">
+        <!-- TIEMPO EN EL PROGRAMA -->
+        <article
+          class="operational-summary-card"
+          [ngClass]="
+            'operational-summary-card--' +
+            episodeOperationalSummary.waitingTone
+          "
         >
-          <mat-icon>add_circle</mat-icon>
+          <div class="operational-summary-card__icon">
+            <mat-icon>schedule</mat-icon>
+          </div>
 
-          {{
-            !selectedPerson
-              ? "Buscar persona primero"
-              : hasCurrentEpisode && !isHistoricalEpisode
-                ? "Episodio ya existente"
-                : "Crear episodio de demanda"
-          }}
-        </button>
+          <div class="operational-summary-card__content">
+            <span>TIEMPO EN EL PROGRAMA</span>
+
+            <strong class="operational-summary-card__number">
+              {{ episodeOperationalSummary.days }}
+              {{
+                episodeOperationalSummary.days === 1
+                  ? "día"
+                  : "días"
+              }}
+            </strong>
+
+            <small>
+              {{ episodeOperationalSummary.waitingLabel }}
+            </small>
+
+            <p>
+              Solicitud recibida:
+              {{ episodeOperationalSummary.requestDate }}
+            </p>
+          </div>
+        </article>
+
+        <!-- ESTADO Y PROGRAMA CONSULTADO -->
+        <article
+          class="operational-summary-card operational-summary-card--state"
+          [class.operational-summary-card--stage-closed]="demandActionMatrix.historical"
+        >
+          <div class="operational-summary-card__icon">
+            <mat-icon>assignment_turned_in</mat-icon>
+          </div>
+
+          <div class="operational-summary-card__content">
+            <span>ESTADO ACTUAL</span>
+
+            <strong>
+              {{ episodeOperationalSummary.state }}
+            </strong>
+
+            <small>Programa consultado</small>
+
+            <p>
+              {{ episodeOperationalSummary.program }}
+            </p>
+          </div>
+        </article>
+
+        <!-- ÚLTIMA GESTIÓN -->
+        <article
+          class="operational-summary-card operational-summary-card--management"
+        >
+          <div class="operational-summary-card__icon">
+            <mat-icon>history</mat-icon>
+          </div>
+
+          <div class="operational-summary-card__content">
+            <span>ÚLTIMA GESTIÓN</span>
+
+            <strong>
+              {{ episodeOperationalSummary.lastManagementTitle }}
+            </strong>
+
+            <small>
+              {{ episodeOperationalSummary.lastManagementDetail }}
+            </small>
+
+            <p>
+              {{ workingStageEvents.length }}
+              {{
+                workingStageEvents.length === 1
+                  ? "gestión registrada"
+                  : "gestiones registradas"
+              }}
+            </p>
+          </div>
+        </article>
+
+        <!-- PRÓXIMA ACCIÓN -->
+        <article
+          class="operational-summary-card"
+          [ngClass]="
+            'operational-summary-card--action-' +
+            episodeOperationalSummary.nextActionTone
+          "
+        >
+          <div class="operational-summary-card__icon">
+            <mat-icon>
+              {{ episodeOperationalSummary.nextActionIcon }}
+            </mat-icon>
+          </div>
+
+          <div class="operational-summary-card__content">
+            <span>PRÓXIMA ACCIÓN</span>
+
+            <strong>
+              {{ episodeOperationalSummary.nextActionTitle }}
+            </strong>
+
+            <p>
+              {{ episodeOperationalSummary.nextActionDetail }}
+            </p>
+          </div>
+        </article>
       </div>
-    </mat-card>
+</section>
 
-    <mat-card
-      id="trayectoria"
-      #summarySection
-      class="current-demand-card longitudinal-anchor"
-      *ngIf="hasCurrentEpisode"
-      [class.longitudinal-anchor--highlighted]="
-        highlightedSummarySection === 'trayectoria'
-      "
-    >
-      <div class="card-header compact-card-header">
-        <mat-icon>timeline</mat-icon>
-        <div>
-          <h3>Trayectoria resumida</h3>
-          <p>Etapa actual y recorrido por programa.</p>
-        </div>
-      </div>
 
+      <!-- RESULTADO DE LA ETAPA CONSULTADA -->
       <div
-        class="trajectory-summary"
-        *ngIf="
-          compactProgramTrajectory.length > 0;
-          else currentProgramTrajectory
+        class="operational-result-strip"
+        [ngClass]="'operational-result-strip--' + operationalResultTone"
+        [class.operational-result-strip--pending]="
+          episodeOperationalSummary.resultPending
+        "
+        [class.operational-result-strip--defined]="
+          !episodeOperationalSummary.resultPending
         "
       >
-        <ng-container *ngFor="let item of compactProgramTrajectory">
-          <div
-            *ngIf="item.kind === 'stage'"
-            class="trajectory-line"
-            [class.trajectory-line--current]="item.current"
-          >
-            <div class="trajectory-dot"></div>
-
-            <div>
-              <strong>{{ item.programName }}</strong>
-
-              <span>
-                {{ item.stageLabel }}
-
-                <ng-container
-                  *ngIf="
-                    item.daysInStage !== null &&
-                    item.daysInStage !== undefined
-                  "
-                >
-                  · {{ item.daysInStage }}
-                  {{ item.daysInStage === 1 ? "día" : "días" }}
-                </ng-container>
-              </span>
-            </div>
-          </div>
-
-          <div
-            *ngIf="item.kind === 'reference'"
-            class="trajectory-reference"
-          >
-            <mat-icon>south</mat-icon>
-
-            <div>
-              <strong>
-                Referencia ·
-                {{
-                  item.referenceDate
-                    ? formatDisplayDate(item.referenceDate)
-                    : "Fecha sin registro"
-                }}
-              </strong>
-
-              <span>
-                {{ item.originProgramName }}
-                →
-                {{ item.destinationProgramName }}
-              </span>
-            </div>
-          </div>
-        </ng-container>
-      </div>
-
-      <ng-template #currentProgramTrajectory>
-        <div class="trajectory-line">
-          <div class="trajectory-dot"></div>
-
-          <div>
-            <strong>{{
-              episodeSummary?.currentProgram?.name ||
-                createdEpisode?.currentProgram?.name ||
-                activeProgramName ||
-                "Programa actual"
-            }}</strong>
-
-            <span>{{ stageVisualState || "Etapa pendiente" }}</span>
-          </div>
+        <div class="operational-result-strip__icon">
+          <mat-icon>
+            {{
+              episodeOperationalSummary.resultPending
+                ? "pending_actions"
+                : "task_alt"
+            }}
+          </mat-icon>
         </div>
-      </ng-template>
-      <div class="empty-line" *ngIf="!episodeLoaded && !createdEpisode">
-        No existe episodio activo cargado. Prepare el episodio si corresponde.
+
+        <div>
+          <span>RESULTADO DE LA ETAPA CONSULTADA</span>
+
+          <strong>
+            {{ episodeOperationalSummary.result }}
+          </strong>
+
+          <p>
+            {{
+              episodeOperationalSummary.resultPending
+                ? "Pendiente de evaluación y definición de resultado."
+                : "Resultado formal registrado en " +
+                  episodeOperationalSummary.program +
+                  "."
+            }}
+          </p>
+        </div>
       </div>
-
-
-      </mat-card>
-
-      <mat-card
+<mat-card
         class="current-demand-card episode-milestones-card"
         *ngIf="hasCurrentEpisode"
       >
@@ -2912,9 +2962,9 @@
           <mat-icon>event_note</mat-icon>
 
           <div>
-            <h4>Hitos del Programa</h4>
+            <h4>Hitos de {{ episodeOperationalSummary.program }}</h4>
             <p>
-              Secuencia operativa registrada por el programa.
+              Secuencia operativa registrada durante esta etapa.
             </p>
           </div>
         </div>
@@ -3099,7 +3149,7 @@
         </div>
 
         <div>
-          <span>Programa responsable</span>
+          <span>Programa consultado</span>
 
           <strong>
             {{
@@ -3700,7 +3750,7 @@
 
       <ng-template #noCitationEvents>
         <div class="empty-line">
-          No existen citaciones registradas en la etapa actual.
+          No existen citaciones registradas en la etapa consultada.
         </div>
       </ng-template>
     </mat-card>
@@ -3897,7 +3947,7 @@
           (click)="setHistoryTypeFilter('CIERRE')"
         >
           <mat-icon>logout</mat-icon>
-          <span>Cierre</span>
+          <span>Cierres</span>
         </button>
 
         <button

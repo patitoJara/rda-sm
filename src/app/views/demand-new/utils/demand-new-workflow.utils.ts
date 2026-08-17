@@ -1,4 +1,4 @@
-import {
+﻿import {
   DEMAND_CITATION_CODES,
   resolveAttendanceKind,
   resolveDemandWorkflowNextAction,
@@ -26,7 +26,7 @@ export interface DemandNewWorkflowInput {
   currentStageEvents: any[];
   citationTypes: any[];
   feedbackEvents: any[];
-  closureDate: string | null;
+  stageClosureDate: string | null;
   resultCode: string;
   canManage: boolean;
   programName: string;
@@ -126,7 +126,7 @@ export function resolveDemandNewNextAction(
     citations,
     feedbackRegistered:
       (input.feedbackEvents ?? []).length > 0,
-    closureRegistered: !!input.closureDate,
+    closureRegistered: !!input.stageClosureDate,
     resultCode: input.resultCode,
     canManage: input.canManage,
     programName: input.programName,

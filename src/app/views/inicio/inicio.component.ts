@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import {
   Component,
   OnDestroy,
@@ -44,6 +44,7 @@ import {
   SupervisorDashboardDTO,
 } from '../../core/models/demand-priority.models';
 import { DemandService } from '../../core/services/demand.service';
+import { getSemaphoreColorFromDays } from '../demand-new/utils/demand-new-semaphore.utils';
 import { TokenService } from '../../services/token.service';
 import {
   ProgramAnalysisDialogComponent,
@@ -354,15 +355,35 @@ export class InicioComponent implements OnInit, OnDestroy {
   canManageEpisode(
     episode: PrioritizedEpisodeDTO,
   ): boolean {
-    const responsibleProgramId = Number(
+    if (this.activeProgramId === null) {
+      return false;
+    }
+
+    const currentProgramId = Number(
       episode?.currentProgram?.id,
     );
 
-    return (
-      this.activeProgramId !== null &&
-      Number.isFinite(responsibleProgramId) &&
-      responsibleProgramId === this.activeProgramId
+    const originProgramId = Number(
+      episode?.originProgramId,
     );
+
+    if (
+      Number.isFinite(currentProgramId) &&
+      currentProgramId === this.activeProgramId
+    ) {
+      return true;
+    }
+
+    if (
+      Number(episode?.referenceCount ?? 0) > 0 &&
+      Number.isFinite(originProgramId) &&
+      originProgramId === this.activeProgramId &&
+      !episode?.closureDate
+    ) {
+      return true;
+    }
+
+    return false;
   }
   formatCompactDate(value: string | null | undefined): string {
     const text = String(value ?? '').trim();
@@ -462,17 +483,8 @@ export class InicioComponent implements OnInit, OnDestroy {
   ): 'VERDE' | 'AMARILLO' | 'ROJO' {
     const days = Math.max(0, Number(accumulatedDays ?? 0));
 
-    if (days >= 91) {
-      return 'ROJO';
-    }
-
-    if (days >= 46) {
-      return 'AMARILLO';
-    }
-
-    return 'VERDE';
+    return getSemaphoreColorFromDays(days) ?? 'VERDE';
   }
-
   getSemaphoreLabelByDays(
     accumulatedDays: number | null | undefined,
   ): string {

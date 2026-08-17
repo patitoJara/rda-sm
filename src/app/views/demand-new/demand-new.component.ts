@@ -854,7 +854,7 @@ export class DemandNewComponent
   readonly summaryNavigationItems: SummaryNavigationItem[] = [
     {
       id: 'demanda-actual',
-      label: 'Demanda actual',
+      label: 'Programa consultado',
       icon: 'assignment',
     },
     {
@@ -5095,7 +5095,7 @@ this.createdEpisode = activeEpisode;
     lastManagementDetail: string;
     nextActionTitle: string;
     nextActionDetail: string;
-    nextActionTone: 'info' | 'warning' | 'danger';
+    nextActionTone: 'info' | 'success' | 'warning' | 'danger';
     nextActionIcon: string;
     result: string;
     resultPending: boolean;
@@ -5107,7 +5107,7 @@ this.createdEpisode = activeEpisode;
       {};
 
     const operationalStage = this.workingStage ?? this.currentEpisodeStage;
-    const days = Math.max(0, Number(episode?.accumulatedDays ?? 0));
+    const days = Math.max(0, Number(operationalStage?.daysInStage ?? 0));
 
     const semaphoreCode = getSemaphoreColorFromDays(days);
     const waitingStopped = episode?.waitingStopped === true;
@@ -5195,7 +5195,7 @@ this.createdEpisode = activeEpisode;
       currentStageEvents: this.workingStageEvents,
       citationTypes: this.citationTypes,
       feedbackEvents: this.feedbackEvents,
-      closureDate: this.episodeClosureDate,
+      stageClosureDate: this.workingStageClosureDate,
       resultCode,
       canManage: this.canManageCurrentEpisode,
       programName: program,
@@ -5228,7 +5228,7 @@ this.createdEpisode = activeEpisode;
         : workflowNextAction.detail;
 
     const nextActionTone = stageHistorical
-      ? 'info' as const
+      ? 'success' as const
       : referenceClosurePending
         ? 'warning' as const
         : workflowNextAction.tone;
@@ -5393,7 +5393,18 @@ this.createdEpisode = activeEpisode;
     | 'success'
     | 'reference'
     | 'danger' {
-    const resultCode = this.currentStageResultCode;
+    const episode =
+      this.episodeSummary ??
+      this.createdEpisode ??
+      this.longitudinal?.activeEpisode ??
+      {};
+
+    const operationalStage = this.workingStage ?? this.currentEpisodeStage;
+
+    const resultCode = resolveCurrentStageResultCode(
+      operationalStage,
+      episode,
+    );
     if (!resultCode || resultCode === 'AUN_SIN_RESULTADO') {
       return 'pending';
     }

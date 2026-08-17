@@ -1,4 +1,4 @@
-<section class="priority-page">
+﻿<section class="priority-page">
   <!-- ENCABEZADO -->
   <header class="priority-hero">
     <div class="priority-hero__content">
@@ -742,10 +742,15 @@
         <tr
           mat-row
           *matRowDef="let row; columns: displayedColumns"
+          [class.priority-row--green]="
+            getSemaphoreColorByDays(row.accumulatedDays) === 'VERDE'
+          "
+          [class.priority-row--warning]="
+            getSemaphoreColorByDays(row.accumulatedDays) === 'AMARILLO'
+          "
           [class.priority-row--critical]="
             getSemaphoreColorByDays(row.accumulatedDays) === 'ROJO'
-          "
-        ></tr>
+          "        ></tr>
       </table>
     </div>
 

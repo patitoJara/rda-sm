@@ -1,4 +1,4 @@
-:host {
+﻿:host {
   display: block;
   min-height: 100%;
   background: #f4f7f9;
@@ -424,6 +424,31 @@
   box-shadow: inset 4px 0 0 #d72c2c;
 }
 
+/* Filas según semáforo de días */
+
+.priority-row--green {
+  background: #f2faf6;
+}
+
+.priority-row--green:hover {
+  background: #e7f6ee;
+}
+
+.priority-row--green .mat-mdc-cell:first-child {
+  box-shadow: inset 4px 0 0 #14965f;
+}
+
+.priority-row--warning {
+  background: #fffaf0;
+}
+
+.priority-row--warning:hover {
+  background: #fff3d6;
+}
+
+.priority-row--warning .mat-mdc-cell:first-child {
+  box-shadow: inset 4px 0 0 #e4a300;
+}
 /* Semáforo */
 
 .semaphore {

@@ -163,6 +163,9 @@
   }
 }
 
+.summary-person-status { display: flex; gap: 10px; }
+
+.status-pill--days { min-width: 120px; }
 .status-pill {
   display: grid;
   gap: 2px;
@@ -447,6 +450,7 @@
 
   span {
     display: block;
+    margin-bottom: 3px;
     font-size: 0.7rem;
     font-weight: 900;
     letter-spacing: 0.06em;
@@ -624,10 +628,20 @@
 }
 
 .current-demand-grid {
-  grid-template-columns: 0.8fr 1.4fr;
-  #trayectoria { grid-area: 2 / 1; }
-  .episode-milestones-card { grid-area: 1 / 2 / span 3; }
-  > .current-demand-card:last-child { grid-area: 3 / 1; }
+  grid-template-columns: 1fr;
+
+  .episode-operational-summary--program {
+    grid-column: 1 / -1;
+  }
+
+  .episode-milestones-card {
+    grid-column: 1 / -1;
+    grid-area: auto;
+  }
+
+  > .current-demand-card:last-child {
+    grid-area: auto;
+  }
 }
 
 .current-demand-grid--without-episode {
@@ -706,6 +720,7 @@
   strong,
   span {
     display: block;
+    margin-bottom: 3px;
   }
 
   strong {
@@ -2031,4 +2046,60 @@
   .operational-summary-card--warning
   small {
   color: #8a6200 !important;
+}
+
+/* ============================================================
+   RESUMEN GLOBAL DEL EPISODIO
+   Estado actual + Trayectoria / Ruta a ancho completo
+============================================================ */
+
+.episode-global-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.85fr);
+  gap: 14px;
+  align-items: start;
+  margin-top: 13px;
+}
+
+.episode-global-overview > .current-demand-card--main {
+  grid-area: 1 / 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.episode-global-overview > #trayectoria {
+  grid-area: 1 / 2;
+  min-width: 0;
+  margin: 0;
+}
+
+.episode-global-overview > .operational-milestones {
+  grid-area: 2 / 1 / auto / -1;
+  min-width: 0;
+  margin-top: 0;
+}
+
+@media (max-width: 1180px) {
+  .episode-global-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .episode-global-overview > * {
+    grid-area: auto;
+  }
+}
+
+/* ESTADOS RESUELTOS DE LA ETAPA */
+.episode-operational-summary {
+  .operational-summary-card--stage-closed,
+  .operational-summary-card--action-success {
+    background: #eaf7ee !important;
+    border-color: #86c99a !important;
+
+    .operational-summary-card__icon,
+    strong,
+    small {
+      color: #24733b !important;
+    }
+  }
 }
