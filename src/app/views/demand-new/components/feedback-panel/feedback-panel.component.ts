@@ -11,7 +11,12 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatNativeDateModule } from '@angular/material/core';
+import {
+  DateAdapter,
+  MAT_DATE_FORMATS,
+  MAT_DATE_LOCALE,
+  MatNativeDateModule,
+} from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
 
 interface FeedbackResultHelp {
@@ -21,6 +26,10 @@ interface FeedbackResultHelp {
   tone: 'neutral' | 'warning' | 'success' | 'danger';
 }
 
+import {
+  DemandNewDateAdapter,
+  DEMAND_NEW_DATE_FORMATS,
+} from '../../utils/demand-new-date-adapter';
 @Component({
   selector: 'app-feedback-panel',
   standalone: true,
@@ -35,6 +44,11 @@ interface FeedbackResultHelp {
     MatInputModule,
     MatNativeDateModule,
     MatSelectModule,
+  ],
+  providers: [
+    { provide: MAT_DATE_LOCALE, useValue: 'es-CL' },
+    { provide: MAT_DATE_FORMATS, useValue: DEMAND_NEW_DATE_FORMATS },
+    { provide: DateAdapter, useClass: DemandNewDateAdapter },
   ],
 })
 export class FeedbackPanelComponent {

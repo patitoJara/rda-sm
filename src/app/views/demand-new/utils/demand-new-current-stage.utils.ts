@@ -1,4 +1,4 @@
-function toPositiveId(value: unknown): number | null {
+﻿function toPositiveId(value: unknown): number | null {
   const numericValue = Number(value);
 
   return Number.isFinite(numericValue) && numericValue > 0
@@ -82,13 +82,23 @@ export function resolveLatestEvent(events: any[]): any | null {
   return [...safeEvents].sort((left: any, right: any) => {
     const leftTimestamp =
       `${left?.eventDate ?? ''}T${left?.eventTime ?? '00:00:00'}`;
+
     const rightTimestamp =
       `${right?.eventDate ?? ''}T${right?.eventTime ?? '00:00:00'}`;
 
-    return rightTimestamp.localeCompare(leftTimestamp);
+    const operationalComparison =
+      rightTimestamp.localeCompare(leftTimestamp);
+
+    if (operationalComparison !== 0) {
+      return operationalComparison;
+    }
+
+    const leftCreatedAt = String(left?.createdAt ?? '');
+    const rightCreatedAt = String(right?.createdAt ?? '');
+
+    return rightCreatedAt.localeCompare(leftCreatedAt);
   })[0];
 }
-
 export function resolveCurrentStageResultCode(
   currentStage: any,
   fallbackEpisode: any = null,

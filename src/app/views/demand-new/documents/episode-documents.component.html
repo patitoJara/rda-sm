@@ -1,4 +1,4 @@
-<div class="episode-documents">
+﻿<div class="episode-documents">
   <div class="document-toolbar">
     <div class="document-summary">
       <span class="document-count">
@@ -54,6 +54,7 @@
         <mat-select
           formControlName="documentTypeCode"
           [disabled]="loadingTypes || uploading"
+          panelClass="person-editor-select-panel"
         >
           <mat-option
             *ngFor="let type of documentTypes"

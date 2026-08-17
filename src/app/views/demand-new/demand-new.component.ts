@@ -1,4 +1,5 @@
 ﻿import {
+  resolveStageEntryContext,
   resolveWorkingStage,
   resolveWorkingStageId,
 } from './utils/demand-new-stage.utils';
@@ -32,7 +33,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatNativeDateModule } from '@angular/material/core';
+import {
+  DateAdapter,
+  MAT_DATE_FORMATS,
+  MAT_DATE_LOCALE,
+  MatNativeDateModule,
+} from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -199,6 +205,10 @@ import {
   reorderSecondarySubstanceMap,
 } from './utils/demand-new-substance.utils';
 
+import {
+  DemandNewDateAdapter,
+  DEMAND_NEW_DATE_FORMATS,
+} from './utils/demand-new-date-adapter';
 @Component({
   selector: 'app-demand-new',
   standalone: true,
@@ -223,6 +233,11 @@ import {
     MatNativeDateModule,
     EpisodeDocumentsComponent,
     FeedbackPanelComponent,
+  ],
+  providers: [
+    { provide: MAT_DATE_LOCALE, useValue: 'es-CL' },
+    { provide: MAT_DATE_FORMATS, useValue: DEMAND_NEW_DATE_FORMATS },
+    { provide: DateAdapter, useClass: DemandNewDateAdapter },
   ],
 })
 export class DemandNewComponent
@@ -4162,6 +4177,7 @@ this.createdEpisode = activeEpisode;
       });
   }
 
+  navigationAssistOpen = false;
   navigationAssistActionsOpen = false;
 
   get sistraReportData(): SistraReportData {
@@ -4382,7 +4398,10 @@ this.createdEpisode = activeEpisode;
   }
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (!this.navigationAssistActionsOpen) {
+    if (
+      !this.navigationAssistOpen &&
+      !this.navigationAssistActionsOpen
+    ) {
       return;
     }
 
@@ -4393,16 +4412,30 @@ this.createdEpisode = activeEpisode;
     }
 
     this.navigationAssistActionsOpen = false;
+    this.navigationAssistOpen = false;
   }
 
   @HostListener('document:keydown.escape')
   onDocumentEscape(): void {
-    this.navigationAssistActionsOpen = false;
-  }
-  toggleNavigationAssistActions(): void {
-    this.navigationAssistActionsOpen = !this.navigationAssistActionsOpen;
+    if (this.navigationAssistActionsOpen) {
+      this.navigationAssistActionsOpen = false;
+      return;
+    }
+
+    if (this.navigationAssistOpen) {
+      this.navigationAssistOpen = false;
+    }
   }
 
+  openNavigationAssist(): void {
+    this.navigationAssistOpen = true;
+  }
+
+  toggleNavigationAssistActions(): void {
+    this.navigationAssistOpen = true;
+    this.navigationAssistActionsOpen =
+      !this.navigationAssistActionsOpen;
+  }
   openOperativeActionFromAssist(panel: ActiveActionPanel): void {
     this.openActionPanel(panel);
 
@@ -4410,7 +4443,7 @@ this.createdEpisode = activeEpisode;
       return;
     }
 
-    this.navigationAssistActionsOpen = false;
+
 
     setTimeout(() => {
       const target = document.getElementById('operationPanelShell');
@@ -5089,6 +5122,7 @@ this.createdEpisode = activeEpisode;
     waitingLabel: string;
     waitingTone: 'success' | 'warning' | 'danger' | 'neutral';
     requestDate: string;
+    requestLabel: string;
     state: string;
     program: string;
     lastManagementTitle: string;
@@ -5129,7 +5163,18 @@ this.createdEpisode = activeEpisode;
       waitingTone = 'danger';
     }
 
-    const requestDate = formatDisplayDateValue(episode?.originalRequestDate);
+    const stageEntryContext = resolveStageEntryContext(
+      operationalStage,
+      this.longitudinal?.references ?? [],
+      episode?.originalRequestDate ?? null,
+    );
+
+    const requestLabel =
+      stageEntryContext.kind === 'REFERENCE_RECEPTION'
+        ? 'Recepción por referencia'
+        : 'Solicitud recibida';
+
+    const requestDate = formatDisplayDateValue(stageEntryContext.date);
 
     const stateValue =
       operationalStage?.state?.name ??
@@ -5184,7 +5229,7 @@ this.createdEpisode = activeEpisode;
             ? ` · ${formatDisplayTimeValue(lastEvent.eventTime)}`
             : ''
         }`
-      : 'El episodio todavía no registra actividades.';
+      : 'La etapa consultada todavía no registra actividades.';
 
     const resultValue = resolveCurrentStageResultValue(operationalStage, episode);
 
@@ -5251,6 +5296,8 @@ this.createdEpisode = activeEpisode;
       waitingLabel,
       waitingTone,
       requestDate,
+
+      requestLabel,
       state,
       program,
       lastManagementTitle,
@@ -5427,6 +5474,7 @@ this.createdEpisode = activeEpisode;
 
     return 'pending';
   }
+
   get orderedEpisodeEvents(): any[] {
     const events = [...(this.episodeEvents ?? [])];
 
@@ -5434,7 +5482,17 @@ this.createdEpisode = activeEpisode;
       const dateA = getEventSortDate(a);
       const dateB = getEventSortDate(b);
 
-      return dateB - dateA;
+      if (dateB !== dateA) {
+        return dateB - dateA;
+      }
+
+      const createdAtA = new Date(a?.createdAt ?? '').getTime();
+      const createdAtB = new Date(b?.createdAt ?? '').getTime();
+
+      const safeCreatedAtA = Number.isNaN(createdAtA) ? 0 : createdAtA;
+      const safeCreatedAtB = Number.isNaN(createdAtB) ? 0 : createdAtB;
+
+      return safeCreatedAtB - safeCreatedAtA;
     });
   }
 
@@ -5635,6 +5693,31 @@ this.createdEpisode = activeEpisode;
     return episode?.createdAt ?? null;
   }
 
+  get globalPendingCitationEvents(): any[] {
+    return filterPendingCitationEvents(
+      this.allCitationEvents,
+      this.episodeEvents ?? [],
+    );
+  }
+
+  get globalUpcomingCitationEvents(): any[] {
+    return this.globalPendingCitationEvents.filter(
+      (item: any) => !this.isExpiredCitation(item),
+    );
+  }
+
+  get globalAttendedInterviewCitations(): any[] {
+    return filterPresentedCitations(
+      this.allCitationEvents,
+      this.episodeEvents ?? [],
+    );
+  }
+  get globalFeedbackEvents(): any[] {
+    return filterFeedbackEvents(
+      this.episodeEvents ?? [],
+      null,
+    );
+  }
   get attendedInterviewCitations(): any[] {
     return filterPresentedCitations(
       this.citationEvents,
@@ -5680,18 +5763,41 @@ this.createdEpisode = activeEpisode;
   get performedEpisodeMilestones(): any[] {
     const milestones: any[] = [];
 
-    if (this.episodeOriginDate) {
+
+    const episode =
+      this.episodeSummary ??
+      this.createdEpisode ??
+      this.longitudinal?.activeEpisode ??
+      {};
+
+    const stageEntryContext = resolveStageEntryContext(
+      this.workingStage ?? this.currentEpisodeStage,
+      this.longitudinal?.references ?? [],
+      episode?.originalRequestDate ?? this.episodeOriginDate,
+    );
+
+    if (stageEntryContext.date) {
+      const isOriginalRequest =
+        stageEntryContext.kind === 'ORIGINAL_REQUEST';
+
       milestones.push({
-        code: 'Solic.',
-        title: 'Solicitud original',
-        icon: 'flag',
-        date: this.episodeOriginDate,
+        code: stageEntryContext.code,
+        title: stageEntryContext.title,
+        icon: isOriginalRequest ? 'flag' : 'move_to_inbox',
+        date: stageEntryContext.date,
         sortOrder: 0,
         status: null,
         description: null,
-        registeredByName: this.episodeOriginRegisteredByName,
-        createdAt: this.episodeOriginCreatedAt,
-        details: [],
+        registeredByName: isOriginalRequest
+          ? this.episodeOriginRegisteredByName
+          : stageEntryContext.registeredByName,
+        createdAt: isOriginalRequest
+          ? this.episodeOriginCreatedAt
+          : stageEntryContext.createdAt,
+        details:
+          !isOriginalRequest && stageEntryContext.originProgramName
+            ? [`Programa de origen: ${stageEntryContext.originProgramName}`]
+            : [],
       });
     }
 
@@ -5799,11 +5905,8 @@ this.createdEpisode = activeEpisode;
         icon: 'event_busy',
         date: this.workingStageClosureDate,
         sortOrder: 900,
-        status: closureReason ? `Motivo: ${closureReason}` : null,
-        description:
-          closureEvent?.comment ??
-          closureEvent?.observation ??
-          'Término formal de la atención en este programa.',
+        status: null,
+        description: null,
         registeredByName:
           closureEvent?.registeredByName ??
           closureEvent?.createdByUser?.name ??

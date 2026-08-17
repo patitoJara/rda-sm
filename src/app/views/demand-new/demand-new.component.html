@@ -319,7 +319,13 @@
             ></mat-datepicker-toggle>
 
             <mat-datepicker #birthDatePicker></mat-datepicker>
-          </mat-form-field>
+
+            <mat-hint>DD/MM/AAAA o DDMMAAAA · también puede usar el calendario.</mat-hint>
+
+            <mat-error *ngIf="personForm.controls.birthDate.hasError('matDatepickerParse')">
+              Ingrese una fecha válida.
+            </mat-error>
+</mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Género</mat-label>
@@ -1436,7 +1442,6 @@
             [matDatepicker]="citationDatePicker"
             formControlName="eventDate"
             placeholder="dd/mm/aaaa"
-            readonly
           />
 
           <mat-datepicker-toggle
@@ -1446,12 +1451,18 @@
 
           <mat-datepicker #citationDatePicker></mat-datepicker>
 
+          <mat-hint>DD/MM/AAAA o DDMMAAAA · también puede usar el calendario.</mat-hint>
+
           <mat-error
             *ngIf="citationForm.controls.eventDate.hasError('required')"
           >
             La fecha es obligatoria.
           </mat-error>
-        </mat-form-field>
+
+          <mat-error *ngIf="citationForm.controls.eventDate.hasError('matDatepickerParse')">
+            Ingrese una fecha válida.
+          </mat-error>
+</mat-form-field>
 
         <div class="time-period-grid">
           <mat-form-field appearance="outline" floatLabel="always" class="time-hour-field">
@@ -1888,7 +1899,6 @@
             [matDatepicker]="referenceDatePicker"
             formControlName="referenceDate"
             placeholder="dd/mm/aaaa"
-            readonly
           />
 
           <mat-datepicker-toggle
@@ -1898,12 +1908,18 @@
 
           <mat-datepicker #referenceDatePicker></mat-datepicker>
 
+          <mat-hint>DD/MM/AAAA o DDMMAAAA · también puede usar el calendario.</mat-hint>
+
           <mat-error
             *ngIf="referenceForm.controls.referenceDate.hasError('required')"
           >
             La fecha de referencia es obligatoria.
           </mat-error>
-        </mat-form-field>
+
+          <mat-error *ngIf="referenceForm.controls.referenceDate.hasError('matDatepickerParse')">
+            Ingrese una fecha válida.
+          </mat-error>
+</mat-form-field>
 
         <mat-form-field appearance="outline" floatLabel="always" class="span-full">
           <mat-label>Motivo de la referencia</mat-label>
@@ -2023,7 +2039,6 @@
       [matDatepicker]="closureDatePicker"
       formControlName="closureDate"
       placeholder="dd/mm/aaaa"
-      readonly
     />
 
     <mat-datepicker-toggle
@@ -2033,12 +2048,18 @@
 
     <mat-datepicker #closureDatePicker></mat-datepicker>
 
+    <mat-hint>DD/MM/AAAA o DDMMAAAA · también puede usar el calendario.</mat-hint>
+
     <mat-error
       *ngIf="closureForm.controls.closureDate.hasError('required')"
     >
       La fecha de cierre es obligatoria.
     </mat-error>
-  </mat-form-field>
+
+    <mat-error *ngIf="closureForm.controls.closureDate.hasError('matDatepickerParse')">
+      Ingrese una fecha válida.
+    </mat-error>
+</mat-form-field>
 
   <mat-form-field
     appearance="outline"
@@ -2486,9 +2507,9 @@
             <mat-icon>event</mat-icon>
             <div>
               <span>Citaciones</span>
-              <strong>{{ citationEvents.length }}</strong>
+              <strong>{{ allCitationEvents.length }}</strong>
               <small>
-                {{ pendingCitationEvents.length }} sin asistencia · {{ currentPendingCitationEvents.length }} próximas
+                {{ globalPendingCitationEvents.length }} sin asistencia · {{ globalUpcomingCitationEvents.length }} próximas
               </small>
             </div>
           </article>
@@ -2497,29 +2518,29 @@
             <mat-icon>groups</mat-icon>
             <div>
               <span>Entrevistas asistidas</span>
-              <strong>{{ attendedInterviewCitations.length }}</strong>
+              <strong>{{ globalAttendedInterviewCitations.length }}</strong>
               <small>Asistencias confirmadas</small>
             </div>
           </article>
 
           <article
             class="operational-milestone"
-            [class.operational-milestone--completed]="feedbackEvents.length > 0"
-            [class.operational-milestone--pending]="feedbackEvents.length === 0"
+            [class.operational-milestone--completed]="globalFeedbackEvents.length > 0"
+            [class.operational-milestone--pending]="globalFeedbackEvents.length === 0"
           >
             <mat-icon>assignment_turned_in</mat-icon>
             <div>
               <span>Retroalimentación</span>
               <strong>
                 {{
-                  feedbackEvents.length
-                    ? formatDisplayDate(feedbackEvents[0].eventDate)
+                  globalFeedbackEvents.length
+                    ? formatDisplayDate(globalFeedbackEvents[0].eventDate)
                     : "Pendiente"
                 }}
               </strong>
               <small>
                 {{
-                  feedbackEvents.length
+                  globalFeedbackEvents.length
                     ? "Decisión registrada"
                     : "Sin decisión registrada"
                 }}
@@ -2530,16 +2551,16 @@
           <article
             class="operational-milestone operational-milestone--commitment"
             [class.operational-milestone--commitment-leve]="
-              feedbackEvents.length &&
-              getFeedbackCommitmentLabel(feedbackEvents[0]) === 'Leve'
+              globalFeedbackEvents.length &&
+              getFeedbackCommitmentLabel(globalFeedbackEvents[0]) === 'Leve'
             "
             [class.operational-milestone--commitment-moderado]="
-              feedbackEvents.length &&
-              getFeedbackCommitmentLabel(feedbackEvents[0]) === 'Moderado'
+              globalFeedbackEvents.length &&
+              getFeedbackCommitmentLabel(globalFeedbackEvents[0]) === 'Moderado'
             "
             [class.operational-milestone--commitment-severo]="
-              feedbackEvents.length &&
-              getFeedbackCommitmentLabel(feedbackEvents[0]) === 'Severo'
+              globalFeedbackEvents.length &&
+              getFeedbackCommitmentLabel(globalFeedbackEvents[0]) === 'Severo'
             "
           >
             <mat-icon>psychology</mat-icon>
@@ -2547,8 +2568,8 @@
               <span>Compromiso biopsicosocial</span>
               <strong>
                 {{
-                  feedbackEvents.length
-                    ? getFeedbackCommitmentLabel(feedbackEvents[0])
+                  globalFeedbackEvents.length
+                    ? getFeedbackCommitmentLabel(globalFeedbackEvents[0])
                     : "Sin evaluación"
                 }}
               </strong>
@@ -2623,6 +2644,8 @@
   <!-- ASISTENCIA DE NAVEGACIÓN LATERAL -->
   <aside
     class="navigation-assist"
+    [class.navigation-assist--open]="navigationAssistOpen"
+    (mouseenter)="openNavigationAssist()"
     *ngIf="selectedPerson && hasCurrentEpisode"
     aria-label="Accesos rápidos de la ficha"
   >
@@ -2824,7 +2847,7 @@
             </small>
 
             <p>
-              Solicitud recibida:
+              {{ episodeOperationalSummary.requestLabel }}:
               {{ episodeOperationalSummary.requestDate }}
             </p>
           </div>
@@ -3291,7 +3314,6 @@
           [matDatepicker]="originalRequestDatePicker"
           formControlName="originalRequestDate"
           placeholder="dd/mm/aaaa"
-          readonly
         />
 
         <mat-datepicker-toggle
@@ -3301,12 +3323,18 @@
 
         <mat-datepicker #originalRequestDatePicker></mat-datepicker>
 
+        <mat-hint>DD/MM/AAAA o DDMMAAAA · también puede usar el calendario.</mat-hint>
+
         <mat-error
           *ngIf="episodeForm.controls.originalRequestDate.hasError('required')"
         >
           La fecha de solicitud es obligatoria.
         </mat-error>
-      </mat-form-field>
+
+        <mat-error *ngIf="episodeForm.controls.originalRequestDate.hasError('matDatepickerParse')">
+          Ingrese una fecha válida.
+        </mat-error>
+</mat-form-field>
 
       <mat-form-field appearance="outline">
         <mat-label>Programa inicial</mat-label>
@@ -3786,7 +3814,7 @@
 
       <ng-template #noRecentObservations>
         <div class="empty-line">
-          No existen observaciones registradas en el programa.
+          No existen observaciones registradas en la etapa consultada.
         </div>
       </ng-template>
     </mat-card>

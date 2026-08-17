@@ -74,7 +74,6 @@
       [matDatepicker]="feedbackDatePicker"
       formControlName="eventDate"
       placeholder="dd/mm/aaaa"
-      readonly
     />
 
     <mat-datepicker-toggle
@@ -83,7 +82,13 @@
     ></mat-datepicker-toggle>
 
     <mat-datepicker #feedbackDatePicker></mat-datepicker>
+    <mat-hint>
+      DD/MM/AAAA o DDMMAAAA · también puede usar el calendario.
+    </mat-hint>
 
+    <mat-error *ngIf="form.get('eventDate')?.hasError('matDatepickerParse')">
+      Ingrese una fecha válida.
+    </mat-error>
     <mat-error *ngIf="form.get('eventDate')?.hasError('required')">
       La fecha es obligatoria.
     </mat-error>

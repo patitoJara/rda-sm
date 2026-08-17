@@ -27,7 +27,7 @@ export function resolveStageId(
 export function resolveStageOrder(
   stage: any,
 ): number {
-  const order = Number(stage?.order ?? 0);
+  const order = Number(stage?.stageOrder ?? stage?.order ?? 0);
 
   return Number.isFinite(order)
     ? order
@@ -142,4 +142,72 @@ export function resolveWorkingStageId(
       requestedStageId,
     ),
   );
+}
+
+export interface StageEntryContext {
+  kind: 'ORIGINAL_REQUEST' | 'REFERENCE_RECEPTION';
+  code: string;
+  title: string;
+  date: string | null;
+  originProgramName: string | null;
+  registeredByName: string | null;
+  createdAt: string | null;
+}
+
+export function resolveStageEntryContext(
+  stage: any,
+  references: any[] | null | undefined,
+  originalRequestDate: string | null | undefined,
+): StageEntryContext {
+  const stageId = resolveStageId(stage);
+
+  const stageOrder = Number(
+    stage?.stageOrder ??
+      stage?.order ??
+      0,
+  );
+
+  if (!Number.isFinite(stageOrder) || stageOrder <= 1) {
+    return {
+      kind: 'ORIGINAL_REQUEST',
+      code: 'Solic.',
+      title: 'Solicitud original',
+      date: originalRequestDate ?? null,
+      originProgramName: null,
+      registeredByName: null,
+      createdAt: null,
+    };
+  }
+
+  const safeReferences = Array.isArray(references)
+    ? references
+    : [];
+
+  const incomingReference =
+    safeReferences.find(
+      (reference: any) =>
+        Number(reference?.destinationStageId) === stageId,
+    ) ?? null;
+
+  return {
+    kind: 'REFERENCE_RECEPTION',
+    code: 'Ref.',
+    title: 'Recepción por referencia',
+    date:
+      incomingReference?.referenceDate ??
+      incomingReference?.eventDate ??
+      null,
+    originProgramName:
+      incomingReference?.originProgram?.name ??
+      incomingReference?.originProgramName ??
+      null,
+    registeredByName:
+      incomingReference?.registeredByName ??
+      incomingReference?.createdByUser?.name ??
+      incomingReference?.registeredByUser?.name ??
+      null,
+    createdAt:
+      incomingReference?.createdAt ??
+      null,
+  };
 }

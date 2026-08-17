@@ -1,27 +1,75 @@
-import { todayDateOnly } from './demand-new-date.utils';
+﻿import { todayDateOnly } from './demand-new-date.utils';
 import {
   normalizeEventTime,
   normalizeText,
 } from './demand-new-event.utils';
 
-export function isExpiredCitation(item: any): boolean {
-  const eventDate = String(item?.eventDate ?? '');
+function resolveCitationDateTime(item: any): Date | null {
+  const eventDate = String(item?.eventDate ?? '').trim();
+  const eventTime = normalizeEventTime(item?.eventTime);
 
-  return !!eventDate && eventDate < todayDateOnly();
+  if (!eventDate || !eventTime) {
+    return null;
+  }
+
+  const dateTime = new Date(`${eventDate}T${eventTime}`);
+
+  return Number.isNaN(dateTime.getTime())
+    ? null
+    : dateTime;
+}
+
+export function isExpiredCitation(item: any): boolean {
+  const eventDate = String(item?.eventDate ?? '').trim();
+  const today = todayDateOnly();
+
+  if (!eventDate) {
+    return false;
+  }
+
+  if (eventDate < today) {
+    return true;
+  }
+
+  if (eventDate > today) {
+    return false;
+  }
+
+  const citationDateTime = resolveCitationDateTime(item);
+
+  return citationDateTime
+    ? citationDateTime.getTime() <= Date.now()
+    : false;
 }
 
 export function isTodayCitation(item: any): boolean {
-  const eventDate = String(item?.eventDate ?? '');
+  const eventDate = String(item?.eventDate ?? '').trim();
 
   return !!eventDate && eventDate === todayDateOnly();
 }
 
 export function isFutureCitation(item: any): boolean {
-  const eventDate = String(item?.eventDate ?? '');
+  const eventDate = String(item?.eventDate ?? '').trim();
+  const today = todayDateOnly();
 
-  return !!eventDate && eventDate > todayDateOnly();
+  if (!eventDate) {
+    return false;
+  }
+
+  if (eventDate > today) {
+    return true;
+  }
+
+  if (eventDate < today) {
+    return false;
+  }
+
+  const citationDateTime = resolveCitationDateTime(item);
+
+  return citationDateTime
+    ? citationDateTime.getTime() > Date.now()
+    : false;
 }
-
 export function getCitationNumber(
   item: any,
   citationEvents: any[],
