@@ -711,24 +711,29 @@
           <td mat-cell *matCellDef="let row">
             <div class="row-actions">
               <button
-                mat-icon-button
-                type="button"
-                matTooltip="Ver ficha longitudinal"
-                aria-label="Ver ficha longitudinal"
-                (click)="openEpisode(row, 'view')"
-              >
-                <mat-icon>visibility</mat-icon>
-              </button>
-
-              <button
-                *ngIf="!isHistoricalMode && canManageEpisode(row)"
                 mat-flat-button
                 type="button"
-                matTooltip="Gestionar episodio"
-                (click)="openEpisode(row, 'manage')"
+                [matTooltip]="
+                  isHistoricalMode
+                    ? 'Ver ficha longitudinal'
+                    : 'Abrir ficha longitudinal'
+                "
+                (click)="
+                  openEpisode(
+                    row,
+                    isHistoricalMode ? 'view' : 'manage'
+                  )
+                "
               >
-                <mat-icon>arrow_forward</mat-icon>
-                Gestionar
+                <mat-icon>
+                  {{ isHistoricalMode ? "visibility" : "arrow_forward" }}
+                </mat-icon>
+
+                {{
+                  isHistoricalMode
+                    ? "Ver ficha"
+                    : "Abrir ficha"
+                }}
               </button>
             </div>
           </td>

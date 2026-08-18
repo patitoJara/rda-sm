@@ -288,6 +288,14 @@
             <h3>Identificación personal</h3>
             <p>Datos de individualización de la persona.</p>
           </div>
+
+          <div
+            class="person-editor-age-badge"
+            *ngIf="personAge !== null"
+          >
+            <mat-icon>cake</mat-icon>
+            <span>Edad: {{ personAge }} años</span>
+          </div>
         </div>
 
         <div class="person-editor-grid">
@@ -302,15 +310,16 @@
             />
           </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Fecha de nacimiento</mat-label>
+          <mat-form-field appearance="outline" class="person-editor-field--long-label">
+            <mat-label>Fecha de nacimiento · DD/MM/AAAA o DDMMAAAA</mat-label>
             <mat-icon matPrefix>cake</mat-icon>
 
             <input
               matInput
               [matDatepicker]="birthDatePicker"
               formControlName="birthDate"
-              placeholder="dd/mm/aaaa"
+
+              (blur)="normalizeBirthDateInput($event)"
             />
 
             <mat-datepicker-toggle
@@ -320,12 +329,26 @@
 
             <mat-datepicker #birthDatePicker></mat-datepicker>
 
-            <mat-hint>DD/MM/AAAA o DDMMAAAA · también puede usar el calendario.</mat-hint>
+            <!--
+            <mat-hint>
+              <ng-container *ngIf="personAge !== null; else birthDateFormatHint">
+                Edad: {{ personAge }} años · DD/MM/AAAA o DDMMAAAA
+              </ng-container>
 
-            <mat-error *ngIf="personForm.controls.birthDate.hasError('matDatepickerParse')">
+
+               <ng-template #birthDateFormatHint>
+                DD/MM/AAAA o DDMMAAAA · también puede usar el calendario.
+              </ng-template>
+            </mat-hint>
+            -->
+            <mat-error
+              *ngIf="
+                personForm.controls.birthDate.hasError('matDatepickerParse')
+              "
+            >
               Ingrese una fecha válida.
             </mat-error>
-</mat-form-field>
+          </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Género</mat-label>
@@ -345,7 +368,7 @@
             <input
               matInput
               formControlName="firstName"
-              placeholder="Primer nombre"
+
             />
           </mat-form-field>
 
@@ -356,7 +379,7 @@
             <input
               matInput
               formControlName="secondName"
-              placeholder="Segundo nombre"
+
             />
           </mat-form-field>
 
@@ -367,7 +390,7 @@
             <input
               matInput
               formControlName="firstLastName"
-              placeholder="Primer apellido"
+
             />
           </mat-form-field>
 
@@ -378,7 +401,7 @@
             <input
               matInput
               formControlName="secondLastName"
-              placeholder="Segundo apellido"
+
             />
           </mat-form-field>
         </div>
@@ -403,25 +426,25 @@
 
         <div class="person-editor-grid">
           <mat-form-field appearance="outline">
-            <mat-label>Teléfono</mat-label>
+            <mat-label>Teléfono · Ej.: 9 1234 5678</mat-label>
             <mat-icon matPrefix>phone</mat-icon>
 
             <input
               matInput
               formControlName="phone"
-              placeholder="Ej.: 9 1234 5678"
+
             />
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Correo electrónico</mat-label>
+            <mat-label>Correo electrónico · correo&#64;ejemplo.cl</mat-label>
             <mat-icon matPrefix>mail</mat-icon>
 
             <input
               matInput
               type="email"
               formControlName="email"
-              placeholder="correo@ejemplo.cl"
+
             />
           </mat-form-field>
 
@@ -437,13 +460,13 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="span-2">
-            <mat-label>Dirección</mat-label>
+            <mat-label>Dirección · Calle, número y referencia</mat-label>
             <mat-icon matPrefix>home</mat-icon>
 
             <input
               matInput
               formControlName="address"
-              placeholder="Calle, número y referencia"
+
             />
           </mat-form-field>
         </div>
@@ -557,41 +580,41 @@
             <input
               matInput
               formControlName="contactName"
-              placeholder="Nombre completo"
+
             />
           </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Parentesco o relación</mat-label>
+          <mat-form-field appearance="outline" class="person-editor-field--long-label">
+            <mat-label>Parentesco o relación · Ej.: madre, hermano, pareja</mat-label>
             <mat-icon matPrefix>family_restroom</mat-icon>
 
             <input
               matInput
               formControlName="contactDescription"
-              placeholder="Ej.: madre, hermano, pareja"
+
             />
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Teléfono del contacto</mat-label>
+            <mat-label>Teléfono del contacto · Ej.: 9 1234 5678</mat-label>
             <mat-icon matPrefix>phone_in_talk</mat-icon>
 
             <input
               matInput
               formControlName="contactCellphone"
-              placeholder="Ej.: 9 1234 5678"
+
             />
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Correo del contacto</mat-label>
+            <mat-label>Correo del contacto · correo&#64;ejemplo.cl</mat-label>
             <mat-icon matPrefix>alternate_email</mat-icon>
 
             <input
               matInput
               type="email"
               formControlName="contactEmail"
-              placeholder="correo@ejemplo.cl"
+
             />
           </mat-form-field>
         </div>
@@ -606,15 +629,13 @@
 
     <!-- ACCIONES -->
     <div class="person-editor-actions">
-      <div class="empty-banner">
+      <div
+        class="empty-banner"
+        *ngIf="personForm.invalid && !isSavingPerson"
+      >
         <mat-icon>info</mat-icon>
-
         <span>
-          {{
-            selectedPerson?.id
-              ? "Los cambios actualizarán los datos existentes de la persona y su referente de contacto."
-              : "Al guardar, la persona y su referente serán registrados en el backend."
-          }}
+          Complete los campos obligatorios marcados con * para habilitar Guardar persona.
         </span>
       </div>
 
@@ -797,6 +818,11 @@
                 ? formatDisplayDate(selectedPerson.birthdate)
                 : "Sin información"
             }}
+
+
+            <ng-container *ngIf="selectedPersonAge !== null">
+              · {{ selectedPersonAge }} años
+            </ng-container>
           </strong>
         </div>
       </div>
@@ -2222,7 +2248,7 @@
     ====================================================== -->
     <section
       class="episode-global-overview"
-      *ngIf="selectedPerson && hasCurrentEpisode"
+      *ngIf="selectedPerson"
     >
 
 <mat-card class="current-demand-card current-demand-card--main">

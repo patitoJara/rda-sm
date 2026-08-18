@@ -1,4 +1,4 @@
-/* =========================================================
+﻿/* =========================================================
    EDITOR DE PERSONA
    Crear persona: turquesa
    Editar persona: ámbar
@@ -226,12 +226,13 @@
 }
 
 .person-editor-section__header {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
 
   min-height: 38px;
-  margin: -2px -2px 5px;
+  margin: -2px -2px 10px;
   padding: 5px 8px;
 
   border: 1px solid #c6e1e5;
@@ -387,7 +388,7 @@
   min-width: 0;
   min-height: 42px;
 
-  padding: 9px 4px 3px 5px !important;
+  padding: 9px 6px 3px 10px !important;
 }
 
 :host ::ng-deep .person-editor-form .mat-mdc-form-field-icon-prefix {
@@ -445,7 +446,7 @@
   color: #173f49;
 
   font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 600 !important;
   line-height: 1.15;
 }
 
@@ -1019,4 +1020,146 @@
     width: 100%;
     min-width: 0;
   }
+}
+
+/* =========================================================
+   CAMPOS PERSONA - AJUSTE VISUAL DEFINITIVO
+========================================================= */
+
+/* Más separación entre icono y zona de contenido */
+:host ::ng-deep
+.person-editor-form
+.mat-mdc-form-field-icon-prefix {
+  margin-right: 7px !important;
+}
+
+/*
+ * Identificador pequeño del campo.
+ * Se desplaza hacia la derecha para liberar visualmente
+ * el espacio ocupado por el icono.
+ */
+:host ::ng-deep
+.person-editor-form
+.mat-mdc-floating-label {
+  padding-left: 22px !important;
+
+  color: #405f66 !important;
+
+  font-size: 0.82rem !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+}
+
+/* Indicador de campo obligatorio */
+:host ::ng-deep
+.person-editor-form
+.mat-mdc-form-field-required-marker {
+  display: inline-block;
+
+  margin-left: 3px;
+
+  color: #c62828 !important;
+
+  font-size: 1rem !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+}
+
+/* =========================================================
+   BOTÓN GUARDAR - ESTADO DESHABILITADO LEGIBLE
+========================================================= */
+
+.person-editor-save-btn.mat-mdc-button-disabled,
+.person-editor-save-btn:disabled {
+  opacity: 1 !important;
+
+  --mdc-filled-button-disabled-container-color: #86c8d1;
+  --mdc-filled-button-disabled-label-text-color: #ffffff;
+
+  --mat-filled-button-disabled-state-layer-color: #86c8d1;
+  --mat-filled-button-disabled-state-layer-opacity: 1;
+
+  background: #86c8d1 !important;
+  border-color: #6fb8c3 !important;
+  color: #ffffff !important;
+
+  cursor: not-allowed;
+}
+
+.person-editor-save-btn.mat-mdc-button-disabled .mdc-button__label,
+.person-editor-save-btn:disabled .mdc-button__label,
+.person-editor-save-btn.mat-mdc-button-disabled span,
+.person-editor-save-btn:disabled span {
+  color: #ffffff !important;
+  opacity: 1 !important;
+  font-weight: 900 !important;
+}
+
+.person-editor-save-btn.mat-mdc-button-disabled mat-icon,
+.person-editor-save-btn:disabled mat-icon {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+/* =========================================================
+   PULIDO FINAL EDITOR DE PERSONA
+========================================================= */
+
+/* Labels especialmente largos */
+:host ::ng-deep
+.person-editor-form
+.person-editor-field--long-label
+.mat-mdc-floating-label {
+  font-size: 0.74rem !important;
+}
+
+/* Neutraliza el fondo de autocompletado del navegador */
+:host ::ng-deep
+.person-editor-form
+input.mat-mdc-input-element:-webkit-autofill,
+:host ::ng-deep
+.person-editor-form
+input.mat-mdc-input-element:-webkit-autofill:hover,
+:host ::ng-deep
+.person-editor-form
+input.mat-mdc-input-element:-webkit-autofill:focus {
+  -webkit-text-fill-color: #173f49 !important;
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  box-shadow: 0 0 0 1000px #ffffff inset !important;
+  transition: background-color 9999s ease-out 0s;
+}
+/* =========================================================
+   EDAD EN IDENTIFICACIÓN PERSONAL
+========================================================= */
+
+.person-editor-age-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  margin-left: auto;
+  padding: 5px 10px;
+
+  border: 1px solid #b8dce1;
+  border-radius: 999px;
+
+  background: #ffffff;
+  color: #08798a;
+
+  font-size: 0.72rem;
+  font-weight: 850;
+  line-height: 1;
+
+  white-space: nowrap;
+
+  box-shadow: 0 3px 8px rgba(8, 121, 138, 0.08);
+}
+
+.person-editor-age-badge mat-icon {
+  width: 16px;
+  height: 16px;
+
+  font-size: 16px;
+  line-height: 16px;
+
+  color: #08798a;
 }

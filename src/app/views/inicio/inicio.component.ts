@@ -351,40 +351,6 @@ export class InicioComponent implements OnInit, OnDestroy {
       },
     );
   }
-
-  canManageEpisode(
-    episode: PrioritizedEpisodeDTO,
-  ): boolean {
-    if (this.activeProgramId === null) {
-      return false;
-    }
-
-    const currentProgramId = Number(
-      episode?.currentProgram?.id,
-    );
-
-    const originProgramId = Number(
-      episode?.originProgramId,
-    );
-
-    if (
-      Number.isFinite(currentProgramId) &&
-      currentProgramId === this.activeProgramId
-    ) {
-      return true;
-    }
-
-    if (
-      Number(episode?.referenceCount ?? 0) > 0 &&
-      Number.isFinite(originProgramId) &&
-      originProgramId === this.activeProgramId &&
-      !episode?.closureDate
-    ) {
-      return true;
-    }
-
-    return false;
-  }
   formatCompactDate(value: string | null | undefined): string {
     const text = String(value ?? '').trim();
 

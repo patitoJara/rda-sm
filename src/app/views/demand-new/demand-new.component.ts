@@ -421,6 +421,78 @@ export class DemandNewComponent
     contactEmail: ['', Validators.email],
   });
 
+  get personAge(): number | null {
+    const birthDate = this.personForm.controls.birthDate.value;
+
+    if (!(birthDate instanceof Date) || Number.isNaN(birthDate.getTime())) {
+      return null;
+    }
+
+    const today = new Date();
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+
+    const hasNotHadBirthdayThisYear =
+      today.getMonth() < birthDate.getMonth() ||
+      (today.getMonth() === birthDate.getMonth() &&
+        today.getDate() < birthDate.getDate());
+
+    if (hasNotHadBirthdayThisYear) {
+      age--;
+    }
+
+    return age >= 0 ? age : null;
+  }
+  get selectedPersonAge(): number | null {
+    const birthDate = parseBackendDate(this.selectedPerson?.birthdate);
+
+    if (!(birthDate instanceof Date) || Number.isNaN(birthDate.getTime())) {
+      return null;
+    }
+
+    const today = new Date();
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+
+    const hasNotHadBirthdayThisYear =
+      today.getMonth() < birthDate.getMonth() ||
+      (today.getMonth() === birthDate.getMonth() &&
+        today.getDate() < birthDate.getDate());
+
+    if (hasNotHadBirthdayThisYear) {
+      age--;
+    }
+
+    return age >= 0 ? age : null;
+  }
+  normalizeBirthDateInput(event: FocusEvent): void {
+    const input = event.target as HTMLInputElement | null;
+
+    if (!input) {
+      return;
+    }
+
+    const control = this.personForm.controls.birthDate;
+    const rawValue = input.value?.trim();
+
+    if (!rawValue) {
+      return;
+    }
+
+    const adapter = new DemandNewDateAdapter('es-CL');
+
+    const parsedDate = adapter.parse(rawValue);
+
+    if (!parsedDate) {
+      return;
+    }
+
+    control.setValue(parsedDate);
+    control.markAsDirty();
+    control.updateValueAndValidity();
+
+    input.value = adapter.format(parsedDate);
+  }
   episodeForm = this.fb.group({
     episodeTypeId: [null as number | null, Validators.required],
 
@@ -6419,6 +6491,7 @@ this.createdEpisode = activeEpisode;
       this.tokenService.getActiveProgramId(),
       this.episodeSummary,
       this.longitudinal,
+      this.episodeEvents,
     );
   }
 
