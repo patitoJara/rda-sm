@@ -1653,3 +1653,327 @@ mat-paginator {
     border-color: #d1eaee !important;
   }
 }
+
+/* ============================================================
+   AJUSTES FINALES INICIO
+   ============================================================ */
+
+/* ---------- Acciones encabezado ---------- */
+
+.hero-action {
+  min-height: 34px;
+  border-radius: 9px !important;
+  font-weight: 700;
+}
+
+.hero-action mat-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
+.hero-action--secondary {
+  color: #0f6b75 !important;
+  border-color: rgba(255, 255, 255, 0.82) !important;
+  background: #ffffff !important;
+}
+
+.hero-action--secondary:hover {
+  background: #eaf8fa !important;
+  border-color: #d1eaee !important;
+}
+
+.hero-action--navigation {
+  color: #0c5e68 !important;
+  border-color: rgba(255, 255, 255, 0.92) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+}
+
+.hero-action--navigation:hover {
+  background: #ffffff !important;
+}
+
+.hero-action--utility {
+  color: rgba(255, 255, 255, 0.94) !important;
+  border-color: rgba(255, 255, 255, 0.55) !important;
+  background: transparent !important;
+  font-weight: 650;
+}
+
+.hero-action--utility mat-icon {
+  color: rgba(255, 255, 255, 0.94) !important;
+}
+
+.hero-action--utility:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.82) !important;
+}
+
+/* ---------- Paginación ---------- */
+
+.table-pagination {
+  min-height: 54px;
+}
+
+.table-pagination__summary {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  padding: 0 16px;
+  color: #405960;
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.table-pagination .mat-mdc-paginator-range-label {
+  display: none !important;
+}
+
+/* ---------- Acción Ver ficha ---------- */
+
+.row-view-button {
+  color: #0b67c2 !important;
+  background: #ffffff !important;
+  border: 1px solid #0b67c2 !important;
+}
+
+.row-view-button mat-icon {
+  color: #0b67c2 !important;
+}
+
+.row-view-button:hover {
+  color: #0759aa !important;
+  background: #eef6ff !important;
+  border-color: #0759aa !important;
+}
+
+/* ---------- Ajustes desktop ---------- */
+
+@media (min-width: 901px) {
+  /* Bandeja + filtros integrados */
+
+  .priority-table-card {
+    border-bottom-right-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+  }
+
+  .filters-card {
+    margin-top: 0 !important;
+    padding: 10px 14px !important;
+
+    border-top: 0 !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 12px !important;
+    border-bottom-left-radius: 12px !important;
+
+    box-shadow: none !important;
+  }
+
+  mat-paginator {
+    border-bottom: 1px solid #dfe8eb;
+  }
+
+  /* Histórico compacto */
+
+  .historical-mode-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    min-height: 44px;
+    margin: 10px 20px 6px;
+    padding: 7px 12px;
+  }
+
+  .historical-mode-banner > mat-icon {
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    font-size: 22px;
+  }
+
+  .historical-mode-banner > div {
+    display: flex;
+    min-width: 0;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .historical-mode-banner strong {
+    flex: 0 0 auto;
+    font-size: 0.82rem;
+    line-height: 1.2;
+  }
+
+  .historical-mode-banner span {
+    overflow: hidden;
+    font-size: 0.72rem;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .priority-table-card--historical .column-help {
+    margin-top: 0;
+  }
+
+  /* Ayuda de columnas */
+
+  .column-help {
+    margin: 0 20px 6px;
+    border-radius: 8px;
+  }
+
+  .column-help summary {
+    min-height: 32px;
+    padding: 5px 10px;
+    font-size: 0.74rem;
+  }
+
+  .column-help summary mat-icon {
+    width: 17px;
+    height: 17px;
+    font-size: 17px;
+  }
+
+  .column-help__grid {
+    gap: 6px 14px;
+    padding: 0 10px 10px;
+    font-size: 0.71rem;
+  }
+
+  /* Filtros inferiores */
+
+  .filters-card form,
+  .filters-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .filter-field {
+    width: 270px;
+    margin: 0 !important;
+  }
+
+  .filter-field--program {
+    width: 280px;
+  }
+
+  .filter-field--result {
+    width: 265px;
+  }
+
+  .filters-form__actions {
+    align-self: center;
+    padding: 0;
+  }
+
+  .filters-card button {
+    min-height: 40px;
+    border-radius: 9px;
+    font-size: 0.74rem;
+    font-weight: 700;
+  }
+
+  .filters-card button[mat-stroked-button] {
+    min-width: 86px;
+  }
+
+  .filters-card button[mat-flat-button] {
+    min-width: 112px;
+  }
+
+  :host ::ng-deep .filters-card .filter-field .mat-mdc-text-field-wrapper {
+    min-height: 48px !important;
+    height: 48px !important;
+
+    background: #ffffff;
+
+    transition:
+      background 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  :host
+    ::ng-deep
+    .filters-card
+    .filter-field:hover
+    .mat-mdc-text-field-wrapper {
+    background: #fcfefe;
+  }
+
+  :host
+    ::ng-deep
+    .filters-card
+    .filter-field.mat-focused
+    .mat-mdc-text-field-wrapper {
+    box-shadow: 0 0 0 3px rgba(0, 121, 140, 0.1);
+  }
+
+  :host ::ng-deep .filters-card .filter-field .mat-mdc-form-field-flex {
+    min-height: 48px !important;
+    height: 48px !important;
+    align-items: center;
+  }
+
+  :host ::ng-deep .filters-card .filter-field .mat-mdc-form-field-infix {
+    min-width: 0;
+    min-height: 48px !important;
+    padding: 12px 4px 7px 5px !important;
+  }
+
+  :host ::ng-deep .filters-card .filter-field .mat-mdc-floating-label {
+    color: #566f77;
+    font-size: 0.82rem;
+    font-weight: 750;
+  }
+
+  :host ::ng-deep .filters-card .filter-field .mat-mdc-select-value,
+  :host ::ng-deep .filters-card .filter-field .mat-mdc-select-value-text {
+    color: #263f47;
+    font-size: 0.84rem;
+    font-weight: 650;
+  }
+
+  :host ::ng-deep .filters-card .filter-field .mat-mdc-form-field-icon-prefix {
+    display: flex;
+    flex: 0 0 42px;
+
+    width: 42px;
+    min-width: 42px;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 7px 0 9px !important;
+    margin: 0 10px 0 0 !important;
+  }
+
+  :host
+    ::ng-deep
+    .filters-card
+    .filter-field
+    .mat-mdc-form-field-icon-prefix
+    mat-icon {
+    width: 20px;
+    height: 20px;
+
+    margin: 0 !important;
+
+    color: #00798c;
+
+    font-size: 20px;
+    line-height: 20px;
+  }
+
+  :host
+    ::ng-deep
+    .filters-card
+    .filter-field
+    .mat-mdc-form-field-subscript-wrapper {
+    display: none !important;
+    min-height: 0 !important;
+  }
+}

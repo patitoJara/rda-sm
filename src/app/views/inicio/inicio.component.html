@@ -52,6 +52,7 @@
       <button
         mat-stroked-button
         type="button"
+        class="hero-action hero-action--secondary"
         (click)="openProgramAnalysis()"
       >
         <mat-icon>analytics</mat-icon>
@@ -59,23 +60,18 @@
       </button>
 
       <a
-        mat-flat-button
+        mat-stroked-button
         routerLink="/directory-communications"
-        class="directory-communications-btn"
+        class="hero-action hero-action--secondary"
       >
         <mat-icon>contact_mail</mat-icon>
         Directorio y comunicaciones
-      </a>
-      <a mat-flat-button routerLink="/demand-new">
-        <mat-icon>person_search</mat-icon>
-        Buscar o crear demanda
       </a>
 
       <button
         mat-stroked-button
         type="button"
-        class="priority-history-toggle"
-        [class.priority-history-toggle--active]="isHistoricalMode"
+        class="hero-action hero-action--navigation"
         [disabled]="loadingEpisodes"
         (click)="
           setEpisodeListMode(
@@ -97,6 +93,7 @@
       <button
         mat-stroked-button
         type="button"
+        class="hero-action hero-action--utility"
         [disabled]="loadingDashboard || loadingEpisodes"
         (click)="refresh()"
       >
@@ -203,11 +200,19 @@
       [formGroup]="filtersForm"
       (ngSubmit)="applyFilters()"
     >
-      <mat-form-field appearance="outline">
+      <mat-form-field
+        appearance="outline"
+        class="filter-field filter-field--program"
+      >
         <mat-label>Programa responsable</mat-label>
+
         <mat-icon matPrefix>business</mat-icon>
 
-        <mat-select formControlName="programId">
+        <mat-select
+          formControlName="programId"
+          panelClass="person-editor-select-panel"
+          aria-label="Programa responsable"
+        >
           <mat-option [value]="null">
             Todos los programas autorizados
           </mat-option>
@@ -221,11 +226,21 @@
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Resultado actual</mat-label>
+      <mat-form-field
+        appearance="outline"
+        class="filter-field filter-field--result"
+      >
+        <mat-label>
+          {{ isHistoricalMode ? "Resultado de cierre" : "Resultado actual" }}
+        </mat-label>
+
         <mat-icon matPrefix>fact_check</mat-icon>
 
-        <mat-select formControlName="resultCode">
+        <mat-select
+          formControlName="resultCode"
+          panelClass="person-editor-select-panel"
+          aria-label="Resultado"
+        >
           <mat-option value="">
             Todos los resultados
           </mat-option>
@@ -713,11 +728,8 @@
               <button
                 mat-flat-button
                 type="button"
-                [matTooltip]="
-                  isHistoricalMode
-                    ? 'Ver ficha longitudinal'
-                    : 'Abrir ficha longitudinal'
-                "
+                class="row-view-button"
+                matTooltip="Ver ficha longitudinal"
                 (click)="
                   openEpisode(
                     row,
@@ -725,15 +737,8 @@
                   )
                 "
               >
-                <mat-icon>
-                  {{ isHistoricalMode ? "visibility" : "arrow_forward" }}
-                </mat-icon>
-
-                {{
-                  isHistoricalMode
-                    ? "Ver ficha"
-                    : "Abrir ficha"
-                }}
+                <mat-icon>visibility</mat-icon>
+                Ver ficha
               </button>
             </div>
           </td>
@@ -758,17 +763,24 @@
           "        ></tr>
       </table>
     </div>
-
-    <mat-paginator
+    <div
+      class="table-pagination"
       *ngIf="!episodesError"
-      [length]="totalElements"
-      [pageIndex]="pageIndex"
-      [pageSize]="pageSize"
-      [pageSizeOptions]="pageSizeOptions"
-      showFirstLastButtons
-      aria-label="Paginación de demandas priorizadas"
-      (page)="onPageChange($event)"
-    ></mat-paginator>
+    >
+      <div class="table-pagination__summary">
+        {{ paginationSummary }}
+      </div>
+
+      <mat-paginator
+        [length]="totalElements"
+        [pageIndex]="pageIndex"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="pageSizeOptions"
+        showFirstLastButtons
+        aria-label="Paginación de demandas priorizadas"
+        (page)="onPageChange($event)"
+      ></mat-paginator>
+    </div>
   </mat-card>
 
   <div class="privacy-note">

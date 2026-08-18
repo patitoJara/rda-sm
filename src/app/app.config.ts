@@ -1,4 +1,4 @@
-import { ApplicationConfig } from '@angular/core';
+﻿import { ApplicationConfig } from '@angular/core';
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import {
@@ -16,6 +16,8 @@ import { loaderInterceptor } from './core/interceptors/loader.interceptor';
 
 import { provideMomentDateAdapter } from '@angular/material-moment-adapter';
 import { MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
+import { MatPaginatorIntl } from '@angular/material/paginator';
+import { getSpanishPaginatorIntl } from './core/material/paginator-intl';
 
 export const MY_FORMATS = {
   parse: {
@@ -56,9 +58,15 @@ export const appConfig: ApplicationConfig = {
       useValue: 'es-CL',
     },
 
-    {
+    
+{
       provide: MAT_DATE_FORMATS,
       useValue: MY_FORMATS,
+    },
+
+    {
+      provide: MatPaginatorIntl,
+      useFactory: getSpanishPaginatorIntl,
     },
 
     provideCharts(withDefaultRegisterables()),

@@ -44,6 +44,7 @@ import {
   SupervisorDashboardDTO,
 } from '../../core/models/demand-priority.models';
 import { DemandService } from '../../core/services/demand.service';
+import { DemandListStateService } from '../../core/services/demand-list-state.service';
 import { getSemaphoreColorFromDays } from '../demand-new/utils/demand-new-semaphore.utils';
 import { TokenService } from '../../services/token.service';
 import {
@@ -89,6 +90,7 @@ interface ResultOption {
 export class InicioComponent implements OnInit, OnDestroy {
   private readonly tokenService = inject(TokenService);
   private readonly demandService = inject(DemandService);
+  private readonly demandListState = inject(DemandListStateService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
 
@@ -122,7 +124,7 @@ export class InicioComponent implements OnInit, OnDestroy {
     return this.episodeListMode === 'closed';
   }
 
-  readonly pageSizeOptions = [10, 20, 50];
+  readonly pageSizeOptions = [20, 50, 100];
 
   readonly displayedColumns = [
     'semaphore',
@@ -170,41 +172,37 @@ export class InicioComponent implements OnInit, OnDestroy {
   };
 
   currentSort: string | null = null;
-
-  readonly resultOptions: ResultOption[] = [
+  readonly activeResultOptions: ResultOption[] = [
+    {
+      code: 'AUN_SIN_RESULTADO',
+      name: 'Aún sin resultado',
+    },
     {
       code: 'LISTA_ESPERA',
       name: 'Lista de espera',
     },
+  ];
+
+  readonly historicalResultOptions: ResultOption[] = [
     {
-      code: 'AUN_SIN_RESULTADO',
-      name: 'Aún sin resultado',
+      code: 'INGRESO_TRATAMIENTO',
+      name: 'Ingreso a tratamiento',
     },
     {
       code: 'REFERENCIA',
       name: 'Referencia',
     },
     {
-      code: 'INGRESO_TRATAMIENTO',
-      name: 'Ingreso a tratamiento',
-    },
-    {
-      code: 'EGRESO',
-      name: 'Egreso',
-    },
-    {
-      code: 'NO_ES_PERFIL',
-      name: 'No es perfil',
-    },
-    {
-      code: 'NO_CORRESPONDE',
-      name: 'No corresponde',
-    },
-    {
       code: 'ABANDONO',
       name: 'Abandono',
     },
   ];
+
+  get resultOptions(): ResultOption[] {
+    return this.isHistoricalMode
+      ? this.historicalResultOptions
+      : this.activeResultOptions;
+  }
 
   readonly filtersForm = new FormGroup({
     programId: new FormControl<number | null>(null),
@@ -215,6 +213,7 @@ export class InicioComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadSessionContext();
+    this.restoreListState();
 
     this.refresh();
 
@@ -271,11 +270,14 @@ export class InicioComponent implements OnInit, OnDestroy {
     this.episodes = [];
     this.totalElements = 0;
 
+    this.saveListState();
+
     this.loadEpisodes();
   }
 
   applyFilters(): void {
     this.pageIndex = 0;
+    this.saveListState();
     this.loadEpisodes();
   }
 
@@ -291,6 +293,7 @@ export class InicioComponent implements OnInit, OnDestroy {
     );
 
     this.pageIndex = 0;
+    this.saveListState();
     this.loadEpisodes();
   }
 
@@ -303,11 +306,13 @@ export class InicioComponent implements OnInit, OnDestroy {
         : null;
 
     this.pageIndex = 0;
+    this.saveListState();
     this.loadEpisodes();
   }
   onPageChange(event: PageEvent): void {
     this.pageIndex = event.pageIndex;
     this.pageSize = event.pageSize;
+    this.saveListState();
     this.loadEpisodes();
   }
 
@@ -495,6 +500,37 @@ export class InicioComponent implements OnInit, OnDestroy {
 
     return 'semaphore--neutral';
   }
+  get paginationStart(): number {
+    if (this.totalElements <= 0) {
+      return 0;
+    }
+
+    return this.pageIndex * this.pageSize + 1;
+  }
+
+  get paginationEnd(): number {
+    if (this.totalElements <= 0) {
+      return 0;
+    }
+
+    return Math.min(
+      (this.pageIndex + 1) * this.pageSize,
+      this.totalElements,
+    );
+  }
+
+  get paginationSummary(): string {
+    if (this.totalElements <= 0) {
+      return 'Sin demandas';
+    }
+
+    const total = this.totalElements.toLocaleString('es-CL');
+
+    return `Mostrando ${this.paginationStart}–${this.paginationEnd} de ${total} ${
+      this.totalElements === 1 ? 'demanda' : 'demandas'
+    }`;
+  }
+
 
   get averageDaysLabel(): string {
     const value = Number(
@@ -610,6 +646,40 @@ export class InicioComponent implements OnInit, OnDestroy {
       });
   }
 
+  private saveListState(): void {
+    const filters = this.filtersForm.getRawValue();
+
+    this.demandListState.save({
+      mode: this.episodeListMode,
+      pageIndex: this.pageIndex,
+      pageSize: this.pageSize,
+      programId: filters.programId,
+      resultCode: filters.resultCode,
+      sort: this.currentSort,
+    });
+  }
+  private restoreListState(): void {
+    const state = this.demandListState.load();
+
+    if (!state) {
+      return;
+    }
+
+    this.episodeListMode = state.mode;
+    this.pageIndex = state.pageIndex;
+    this.pageSize = state.pageSize;
+    this.currentSort = state.sort;
+
+    this.filtersForm.reset(
+      {
+        programId: state.programId,
+        resultCode: state.resultCode,
+      },
+      {
+        emitEvent: false,
+      },
+    );
+  }
   private loadSessionContext(): void {
     const profile = this.tokenService.getUserProfile();
 
