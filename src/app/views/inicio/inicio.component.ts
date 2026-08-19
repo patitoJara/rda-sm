@@ -40,12 +40,16 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { finalize } from 'rxjs';
 
 import {
+  DemandEpisodeProgramContextDTO,
   PrioritizedEpisodeDTO,
   SupervisorDashboardDTO,
 } from '../../core/models/demand-priority.models';
 import { DemandService } from '../../core/services/demand.service';
 import { DemandListStateService } from '../../core/services/demand-list-state.service';
 import { getSemaphoreColorFromDays } from '../demand-new/utils/demand-new-semaphore.utils';
+import {
+  resolveEpisodeAccessModeFromProgramContext,
+} from '../demand-new/utils/demand-new-permission.utils';
 import { TokenService } from '../../services/token.service';
 import {
   ProgramAnalysisDialogComponent,
@@ -107,6 +111,9 @@ export class InicioComponent implements OnInit, OnDestroy {
 
   dashboard: SupervisorDashboardDTO | null = null;
   episodes: PrioritizedEpisodeDTO[] = [];
+
+  readonly programContextsByEpisodeId =
+    new Map<number, DemandEpisodeProgramContextDTO>();
 
   loadingDashboard = false;
   loadingEpisodes = false;
@@ -341,6 +348,28 @@ export class InicioComponent implements OnInit, OnDestroy {
     });
   }
 
+  getEpisodeOpenMode(
+    episode: PrioritizedEpisodeDTO,
+  ): 'view' | 'manage' {
+    if (this.isHistoricalMode) {
+      return 'view';
+    }
+
+    const context =
+      this.programContextsByEpisodeId.get(
+        episode.episodeId,
+      );
+
+    const accessMode =
+      resolveEpisodeAccessModeFromProgramContext(
+        this.activeProgramId,
+        context,
+      );
+
+    return accessMode === 'MANAGE'
+      ? 'manage'
+      : 'view';
+  }
   openEpisode(
     episode: PrioritizedEpisodeDTO,
     mode: 'view' | 'manage',
@@ -627,6 +656,8 @@ export class InicioComponent implements OnInit, OnDestroy {
           this.totalElements = Number(
             response?.totalElements ?? 0,
           );
+
+          this.loadEpisodeProgramContexts(this.episodes);
         },
 
         error: (error: HttpErrorResponse) => {
@@ -646,6 +677,69 @@ export class InicioComponent implements OnInit, OnDestroy {
       });
   }
 
+  private loadEpisodeProgramContexts(
+    episodes: PrioritizedEpisodeDTO[],
+  ): void {
+    this.programContextsByEpisodeId.clear();
+
+    const programId = this.activeProgramId;
+
+    const episodeIds = Array.from(
+      new Set(
+        episodes
+          .map((episode) => Number(episode.episodeId))
+          .filter(
+            (episodeId) =>
+              Number.isFinite(episodeId) &&
+              episodeId > 0,
+          ),
+      ),
+    );
+
+    if (
+      programId === null ||
+      programId <= 0 ||
+      episodeIds.length === 0
+    ) {
+      return;
+    }
+
+    this.demandService
+      .getEpisodeProgramContexts({
+        programId,
+        episodeIds,
+      })
+      .subscribe({
+        next: (contexts) => {
+          this.programContextsByEpisodeId.clear();
+
+          for (const context of contexts ?? []) {
+            this.programContextsByEpisodeId.set(
+              context.episodeId,
+              context,
+            );
+          }
+
+          console.debug(
+            '[Inicio] Contextos por programa cargados:',
+            {
+              programId,
+              episodeIds,
+              contexts,
+            },
+          );
+        },
+
+        error: (error: HttpErrorResponse) => {
+          this.programContextsByEpisodeId.clear();
+
+          console.error(
+            '[Inicio] Error cargando contextos por programa:',
+            error,
+          );
+        },
+      });
+  }
   private saveListState(): void {
     const filters = this.filtersForm.getRawValue();
 

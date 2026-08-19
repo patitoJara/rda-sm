@@ -5,6 +5,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 import {
+  DemandEpisodeProgramContextDTO,
+  DemandEpisodeProgramContextsRequest,
   PageDTO,
   PrioritizedEpisodeDTO,
   PrioritizedEpisodeQuery,
@@ -268,6 +270,14 @@ export class DemandService {
     );
   }
 
+  getEpisodeProgramContexts(
+    request: DemandEpisodeProgramContextsRequest,
+  ): Observable<DemandEpisodeProgramContextDTO[]> {
+    return this.http.post<DemandEpisodeProgramContextDTO[]>(
+      `${this.demandUrl}/episodes/program-contexts`,
+      request,
+    );
+  }
   getSupervisorDashboard(): Observable<SupervisorDashboardDTO> {
     return this.http.get<SupervisorDashboardDTO>(
       `${this.demandUrl}/dashboard/supervisor`,

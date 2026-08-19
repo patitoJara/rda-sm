@@ -733,7 +733,7 @@
                 (click)="
                   openEpisode(
                     row,
-                    isHistoricalMode ? 'view' : 'manage'
+                    getEpisodeOpenMode(row)
                   )
                 "
               >

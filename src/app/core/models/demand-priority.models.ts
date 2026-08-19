@@ -1,4 +1,4 @@
-export interface DemandProgramSummaryDTO {
+﻿export interface DemandProgramSummaryDTO {
   id: number;
   name: string;
   active?: boolean;
@@ -50,6 +50,22 @@ export interface PrioritizedEpisodeDTO {
   suggestedAction: string | null;
 }
 
+export interface DemandEpisodeProgramContextDTO {
+  episodeId: number;
+  programId: number;
+  programName: string;
+  stageId: number;
+  stageStateCode: string;
+  stageResultCode: string;
+  receivedAt: string;
+  closureDate: string | null;
+  closed: boolean;
+}
+
+export interface DemandEpisodeProgramContextsRequest {
+  programId: number;
+  episodeIds: number[];
+}
 export interface PageSortDTO {
   sorted: boolean;
   empty: boolean;

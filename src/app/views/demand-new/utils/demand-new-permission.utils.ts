@@ -111,6 +111,51 @@ export function resolveEpisodeAccessMode(
   return 'MANAGE';
 }
 
+export interface EpisodeProgramContextAccess {
+  programId: number | string | null | undefined;
+  stageId: number | string | null | undefined;
+  closed: boolean | null | undefined;
+}
+
+export function resolveEpisodeAccessModeFromProgramContext(
+  activeProgramId: number | string | null | undefined,
+  context: EpisodeProgramContextAccess | null | undefined,
+): EpisodeAccessMode {
+  const normalizedProgramId = Number(activeProgramId);
+
+  if (
+    !Number.isFinite(normalizedProgramId) ||
+    normalizedProgramId <= 0
+  ) {
+    return 'NO_ACCESS';
+  }
+
+  if (!context) {
+    return 'NO_ACCESS';
+  }
+
+  const contextProgramId = Number(context.programId);
+  const stageId = Number(context.stageId);
+
+  if (
+    !Number.isFinite(contextProgramId) ||
+    contextProgramId <= 0 ||
+    contextProgramId !== normalizedProgramId
+  ) {
+    return 'NO_ACCESS';
+  }
+
+  if (
+    !Number.isFinite(stageId) ||
+    stageId <= 0
+  ) {
+    return 'NO_ACCESS';
+  }
+
+  return context.closed
+    ? 'VIEW'
+    : 'MANAGE';
+}
 export function canManageEpisode(
   activeProgramId: number | string | null | undefined,
   sessionProgramId: number | string | null | undefined,
