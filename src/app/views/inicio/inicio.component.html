@@ -302,17 +302,18 @@
         </span>
 
         <h2>
+          <mat-icon *ngIf="isHistoricalMode">lock</mat-icon>
           {{
             isHistoricalMode
-              ? "Demandas cerradas"
-              : "Demandas ordenadas por prioridad"
+              ? "Historial disponible en modo de consulta"
+              : "Demandas activas ordenadas por prioridad"
           }}
         </h2>
 
         <p>
           {{
             isHistoricalMode
-              ? "Consulte episodios finalizados y su ficha longitudinal."
+              ? "Las demandas cerradas pueden revisarse, pero no admiten nuevas gestiones."
               : "Los casos con mayor cantidad de días acumulados aparecen primero."
           }}
         </p>
@@ -322,21 +323,6 @@
         <strong>{{ totalElements }}</strong>
         <span>
           {{ totalElements === 1 ? "demanda" : "demandas" }}
-        </span>
-      </div>
-    </div>
-
-    <div
-      class="historical-mode-banner"
-      *ngIf="isHistoricalMode"
-    >
-      <mat-icon>lock</mat-icon>
-
-      <div>
-        <strong>Historial disponible en modo de consulta</strong>
-        <span>
-          Las demandas cerradas pueden revisarse, pero no admiten nuevas
-          gestiones.
         </span>
       </div>
     </div>
@@ -729,7 +715,13 @@
                 mat-flat-button
                 type="button"
                 class="row-view-button"
-                matTooltip="Ver ficha longitudinal"
+                [class.row-view-button--manage]="
+                  getEpisodeOpenMode(row) === 'manage'
+                "
+                [class.row-view-button--view]="
+                  getEpisodeOpenMode(row) === 'view'
+                "
+                [matTooltip]="getEpisodeActionTooltip(row)"
                 (click)="
                   openEpisode(
                     row,
@@ -737,8 +729,11 @@
                   )
                 "
               >
-                <mat-icon>visibility</mat-icon>
-                Ver ficha
+                <mat-icon>
+                  {{ getEpisodeActionIcon(row) }}
+                </mat-icon>
+
+                {{ getEpisodeActionLabel(row) }}
               </button>
             </div>
           </td>

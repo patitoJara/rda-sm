@@ -1746,6 +1746,41 @@ mat-paginator {
   background: #eef6ff !important;
   border-color: #0759aa !important;
 }
+/* Gestionar: acción operativa principal */
+.row-view-button.row-view-button--manage {
+  color: #ffffff !important;
+  background: #0b67c2 !important;
+  border-color: #0b67c2 !important;
+  font-weight: 700;
+}
+
+.row-view-button.row-view-button--manage mat-icon {
+  color: #ffffff !important;
+}
+
+.row-view-button.row-view-button--manage:hover {
+  color: #ffffff !important;
+  background: #0759aa !important;
+  border-color: #0759aa !important;
+}
+
+/* Solo lectura: acción de consulta */
+.row-view-button.row-view-button--view {
+  color: #5f6f78 !important;
+  background: #ffffff !important;
+  border-color: #aebbc2 !important;
+  font-weight: 650;
+}
+
+.row-view-button.row-view-button--view mat-icon {
+  color: #70818a !important;
+}
+
+.row-view-button.row-view-button--view:hover {
+  color: #43545d !important;
+  background: #f4f7f8 !important;
+  border-color: #87979f !important;
+}
 
 /* ---------- Ajustes desktop ---------- */
 
@@ -1975,5 +2010,136 @@ mat-paginator {
     .mat-mdc-form-field-subscript-wrapper {
     display: none !important;
     min-height: 0 !important;
+  }
+}
+
+/* ============================================================
+   AJUSTE FINAL ANCHOS OPERATIVOS BANDEJA
+   Prioriza programa, última gestión, acción sugerida y acciones.
+   ============================================================ */
+
+@media (min-width: 901px) {
+  .mat-column-requestDate,
+  .mat-column-citationFirstFirst,
+  .mat-column-citationSecondFirst,
+  .mat-column-citationFirstSecond,
+  .mat-column-citationSecondSecond,
+  .mat-column-citationFirstThird,
+  .mat-column-citationSecondThird,
+  .mat-column-optionalInterview,
+  .mat-column-feedback,
+  .mat-column-closure {
+    width: 3.5% !important;
+  }
+
+  .mat-column-program {
+    width: 9% !important;
+  }
+
+  .mat-column-result {
+    width: 7% !important;
+  }
+
+  .mat-column-commitment {
+    width: 6% !important;
+  }
+
+  .mat-column-lastManagement {
+    width: 9% !important;
+  }
+
+  .mat-column-suggestedAction {
+    width: 12% !important;
+  }
+
+  .mat-column-actions {
+    width: 8% !important;
+  }
+
+  .suggested-action {
+    max-width: none;
+  }
+
+  .management-value {
+    max-width: none;
+  }
+
+  .program-value {
+    max-width: none;
+  }
+}
+
+/* ============================================================
+   AJUSTE FINAL ANCHOS OPERATIVOS BANDEJA
+   Prioriza programa, última gestión, acción sugerida y acciones.
+   ============================================================ */
+
+@media (min-width: 901px) {
+  .mat-column-requestDate,
+  .mat-column-citationFirstFirst,
+  .mat-column-citationSecondFirst,
+  .mat-column-citationFirstSecond,
+  .mat-column-citationSecondSecond,
+  .mat-column-citationFirstThird,
+  .mat-column-citationSecondThird,
+  .mat-column-optionalInterview,
+  .mat-column-feedback,
+  .mat-column-closure {
+    width: 3.5% !important;
+  }
+
+  .mat-column-program {
+    width: 9% !important;
+  }
+
+  .mat-column-result {
+    width: 7% !important;
+  }
+
+  .mat-column-commitment {
+    width: 6% !important;
+  }
+
+  .mat-column-lastManagement {
+    width: 9% !important;
+  }
+
+  .mat-column-suggestedAction {
+    width: 12% !important;
+  }
+
+  .mat-column-actions {
+    width: 8% !important;
+  }
+
+  .suggested-action {
+    max-width: none;
+  }
+
+  .management-value {
+    max-width: none;
+  }
+
+  .program-value {
+    max-width: none;
+  }
+}
+
+/* ============================================================
+   MICROAJUSTE FINAL FECHA SOLICITUD
+   Da más aire a Solic. sin alterar el equilibrio general.
+   ============================================================ */
+
+@media (min-width: 901px) {
+  .mat-column-requestDate {
+    width: 4.2% !important;
+  }
+
+  .mat-column-optionalInterview {
+    width: 3.1% !important;
+  }
+
+  .mat-column-closure {
+    width: 3.1% !important;
   }
 }

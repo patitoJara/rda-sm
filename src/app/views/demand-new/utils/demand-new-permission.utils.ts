@@ -7,6 +7,31 @@ import {
   resolveWorkingStage,
 } from './demand-new-stage.utils';
 
+export function isEpisodeClosed(episode: any): boolean {
+  const stateCode = String(
+    episode?.state?.code ??
+      episode?.stateCode ??
+      episode?.status ??
+      '',
+  )
+    .trim()
+    .toUpperCase();
+
+  return (
+    stateCode === 'CERRADO' ||
+    stateCode === 'CERRADA' ||
+    !!episode?.closedAt ||
+    !!episode?.closureDate
+  );
+}
+
+export function hasOpenEpisode(
+  episodes: any[] | null | undefined,
+): boolean {
+  return (episodes ?? []).some(
+    (episode) => !isEpisodeClosed(episode),
+  );
+}
 export type EpisodeAccessMode =
   | 'NO_ACCESS'
   | 'VIEW'

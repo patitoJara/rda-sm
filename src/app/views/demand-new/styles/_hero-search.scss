@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    HERO INICIAL
    ============================================================ */
 
@@ -345,4 +345,103 @@
 .secondary-btn {
   color: #0f5964 !important;
   border-color: rgba(15, 89, 100, 0.26) !important;
+}
+
+/* ============================================================
+   EPISODIOS DISPONIBLES
+============================================================ */
+
+.available-episodes__list {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.available-episode-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+
+  min-height: 74px;
+  padding: 12px 14px;
+
+  border: 1px solid rgba(14, 91, 103, 0.16);
+  border-radius: 14px;
+  background: #ffffff;
+
+  box-shadow: 0 4px 12px rgba(15, 47, 61, 0.05);
+}
+
+.available-episode-card__main {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.available-episode-card__main strong {
+  color: #1f4f5b;
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.available-episode-card__main span {
+  overflow: hidden;
+
+  color: #385f69;
+  font-size: 0.82rem;
+  font-weight: 750;
+  line-height: 1.2;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.available-episode-card__main small {
+  color: #71878d;
+  font-size: 0.74rem;
+  font-weight: 650;
+}
+
+.available-episode-card__status {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.available-episode-card__status > span {
+  display: inline-flex;
+  align-items: center;
+
+  min-height: 28px;
+  padding: 0 10px;
+
+  border: 1px solid #c8d8dc;
+  border-radius: 999px;
+  background: #f3f7f8;
+
+  color: #526d74;
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.available-episode-card__status button {
+  min-width: 132px;
+  min-height: 36px;
+}
+
+@media (max-width: 760px) {
+  .available-episode-card {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .available-episode-card__status {
+    justify-content: space-between;
+  }
 }

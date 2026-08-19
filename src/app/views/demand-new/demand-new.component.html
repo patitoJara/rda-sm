@@ -61,7 +61,7 @@
   <!-- TIMBRE DE AGUA -->
   <div
     class="demand-page-readonly-watermark"
-    *ngIf="selectedPerson?.id && !canManageCurrentEpisode"
+    *ngIf="selectedPerson?.id && !canManageCurrentEpisode && !showCreateEpisodeForm"
     aria-hidden="true"
   >
     {{
@@ -172,7 +172,7 @@
       </div>
       <section
         class="available-episodes"
-        *ngIf="hasMultipleAvailableEpisodes"
+        *ngIf="hasMultipleAvailableEpisodes && !showCreateEpisodeForm"
       >
         <div class="available-episodes__header">
           <mat-icon>history</mat-icon>
@@ -188,7 +188,7 @@
         <div class="available-episodes__list">
           <article
             class="available-episode-card"
-            *ngFor="let episode of availableEpisodes"
+            *ngFor="let episode of availableEpisodes; trackBy: trackAvailableEpisode"
           >
             <div class="available-episode-card__main">
               <strong>
@@ -696,7 +696,7 @@
     <!-- AVISO GENERAL DE SOLO LECTURA -->
     <div
       class="longitudinal-readonly-banner"
-      *ngIf="selectedPerson.id && !canManageCurrentEpisode"
+      *ngIf="selectedPerson.id && !canManageCurrentEpisode && !showCreateEpisodeForm"
     >
       <mat-icon>lock</mat-icon>
 
@@ -766,7 +766,7 @@
       <div class="summary-person-status">
         <div
           class="status-pill status-pill--days"
-          *ngIf="hasCurrentEpisode"
+          *ngIf="hasCurrentEpisode && !showCreateEpisodeForm"
         >
           <span>Tiempo episodio</span>
 
@@ -2248,7 +2248,7 @@
     ====================================================== -->
     <section
       class="episode-global-overview"
-      *ngIf="selectedPerson"
+      *ngIf="selectedPerson && hasCurrentEpisode && !showCreateEpisodeForm"
     >
 
 <mat-card class="current-demand-card current-demand-card--main">
@@ -2263,6 +2263,20 @@
                 ? "Estado de cierre del episodio"
                 : "Estado actual del episodio"
             }}
+            <span *ngIf="hasCurrentEpisode">
+              ·
+              {{
+                episodeSummary?.code ||
+                  episodeSummary?.episodeCode ||
+                  createdEpisode?.code ||
+                  createdEpisode?.episodeCode ||
+                  longitudinal?.episode?.code ||
+                  longitudinal?.episode?.episodeCode ||
+                  longitudinal?.activeEpisode?.code ||
+                  longitudinal?.activeEpisode?.episodeCode ||
+                  ""
+              }}
+            </span>
           </h3>
 
           <p>
@@ -2401,7 +2415,7 @@
           mat-flat-button
           class="create-episode-trigger"
           type="button"
-          [disabled]="!selectedPerson || (hasCurrentEpisode && !isHistoricalEpisode)"
+          [disabled]="!selectedPerson || hasOpenAvailableEpisode || (hasCurrentEpisode && !isHistoricalEpisode)"
           (click)="showCreateEpisode()"
         >
           <mat-icon>add_circle</mat-icon>
@@ -2409,7 +2423,9 @@
           {{
             !selectedPerson
               ? "Buscar persona primero"
-              : hasCurrentEpisode && !isHistoricalEpisode
+              : hasOpenAvailableEpisode
+                ? "Episodio abierto existente"
+                : hasCurrentEpisode && !isHistoricalEpisode
                 ? "Episodio ya existente"
                 : "Crear episodio de demanda"
           }}
@@ -2637,7 +2653,7 @@
   <div
     id="longitudinal-navigation-anchor"
     class="longitudinal-navigation-anchor"
-    *ngIf="selectedPerson && hasCurrentEpisode"
+    *ngIf="selectedPerson && hasCurrentEpisode && !showCreateEpisodeForm"
     aria-hidden="true"
   ></div>
 
@@ -2672,7 +2688,7 @@
     class="navigation-assist"
     [class.navigation-assist--open]="navigationAssistOpen"
     (mouseenter)="openNavigationAssist()"
-    *ngIf="selectedPerson && hasCurrentEpisode"
+    *ngIf="selectedPerson && hasCurrentEpisode && !showCreateEpisodeForm"
     aria-label="Accesos rápidos de la ficha"
   >
     <button
@@ -2819,7 +2835,7 @@
 
 <section
   class="episode-operational-summary episode-operational-summary--program"
-      *ngIf="hasCurrentEpisode"
+      *ngIf="hasCurrentEpisode && !showCreateEpisodeForm"
       aria-labelledby="episodeOperationalTitle"
 
 >
@@ -2966,6 +2982,7 @@
       <!-- RESULTADO DE LA ETAPA CONSULTADA -->
       <div
         class="operational-result-strip"
+        *ngIf="hasCurrentEpisode && !showCreateEpisodeForm"
         [ngClass]="'operational-result-strip--' + operationalResultTone"
         [class.operational-result-strip--pending]="
           episodeOperationalSummary.resultPending
@@ -3004,7 +3021,7 @@
       </div>
 <mat-card
         class="current-demand-card episode-milestones-card"
-        *ngIf="hasCurrentEpisode"
+        *ngIf="hasCurrentEpisode && !showCreateEpisodeForm"
       >
         <section class="episode-milestones">
         <div class="episode-milestones__header">
@@ -3159,7 +3176,7 @@
       </section>
     </mat-card>
 
-    <mat-card class="current-demand-card" *ngIf="hasCurrentEpisode">
+    <mat-card class="current-demand-card" *ngIf="hasCurrentEpisode && !showCreateEpisodeForm">
       <div class="card-header compact-card-header">
         <mat-icon>monitoring</mat-icon>
         <div>
@@ -3697,7 +3714,7 @@
   <!-- BLOQUES SECUNDARIOS DE LA FICHA -->
   <section
     class="longitudinal-detail-grid"
-    *ngIf="selectedPerson && hasCurrentEpisode"
+    *ngIf="selectedPerson && hasCurrentEpisode && !showCreateEpisodeForm"
   >
     <mat-card
       id="citaciones"
@@ -3868,7 +3885,7 @@
   <!-- DOCUMENTOS DEL EPISODIO -->
   <section
     class="longitudinal-full-section"
-    *ngIf="selectedPerson && hasCurrentEpisode && currentDocumentEpisodeId"
+    *ngIf="selectedPerson && hasCurrentEpisode && currentDocumentEpisodeId && !showCreateEpisodeForm"
   >
     <mat-card
       id="documentos"
@@ -3906,10 +3923,13 @@
       highlightedSummarySection === 'trazabilidad'
     "
     *ngIf="
-      hasActiveEpisode ||
-      episodeEvents.length ||
-      isLoadingLongitudinal ||
-      longitudinalError
+      !showCreateEpisodeForm &&
+      (
+        hasActiveEpisode ||
+        episodeEvents.length ||
+        isLoadingLongitudinal ||
+        longitudinalError
+      )
     "
   >
     <div class="episode-history-card__accent"></div>

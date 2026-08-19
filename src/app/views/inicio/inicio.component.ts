@@ -370,6 +370,29 @@ export class InicioComponent implements OnInit, OnDestroy {
       ? 'manage'
       : 'view';
   }
+  getEpisodeActionLabel(
+    episode: PrioritizedEpisodeDTO,
+  ): string {
+    return this.getEpisodeOpenMode(episode) === 'manage'
+      ? 'Gestionar'
+      : 'Solo lectura';
+  }
+
+  getEpisodeActionIcon(
+    episode: PrioritizedEpisodeDTO,
+  ): string {
+    return this.getEpisodeOpenMode(episode) === 'manage'
+      ? 'edit'
+      : 'visibility';
+  }
+
+  getEpisodeActionTooltip(
+    episode: PrioritizedEpisodeDTO,
+  ): string {
+    return this.getEpisodeOpenMode(episode) === 'manage'
+      ? 'Gestionar demanda'
+      : 'Abrir ficha en modo solo lectura';
+  }
   openEpisode(
     episode: PrioritizedEpisodeDTO,
     mode: 'view' | 'manage',

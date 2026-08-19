@@ -175,7 +175,11 @@ import {
   buildCitationContext,
   handleCitationSuccess,
 } from './actions/demand-new-citation.actions';
-import { canManageEpisode } from './utils/demand-new-permission.utils';
+import {
+  canManageEpisode,
+  hasOpenEpisode,
+  isEpisodeClosed,
+} from './utils/demand-new-permission.utils';
 import { resetLoadedDemandView } from './state/demand-new-reset.state';
 import { rutValidator } from '../../core/validator/rut.validator';
 import { DemandNewAuxiliaryCatalogState } from './state/demand-new-auxiliary-catalog.state';
@@ -1103,7 +1107,7 @@ export class DemandNewComponent
       this.searchForm.controls.rut.setValue(requestedRut, {
         emitEvent: false,
       });
-      this.searchPerson();
+      this.searchPerson(true);
     }
   }
 
@@ -1735,7 +1739,11 @@ export class DemandNewComponent
     }
   }
 
-  searchPerson(): void {
+  searchPerson(preserveRequestedEpisode = false): void {
+    if (!preserveRequestedEpisode) {
+      this.requestedEpisodeId = null;
+      this.requestedMode = null;
+    }
     this.showDemandantDetails = false;
     this.searchForm.markAllAsTouched();
 
@@ -1825,6 +1833,37 @@ export class DemandNewComponent
 
     this.demandEpisodeService.getLongitudinalByRut(rut).subscribe({
       next: (data) => {
+        console.log('[DemandNew] Episodios encontrados:', data?.episodes);
+
+        const availableEpisodes = Array.isArray(data?.episodes)
+          ? data.episodes
+          : [];
+
+        const requiresEpisodeSelection =
+          !this.requestedEpisodeId &&
+          availableEpisodes.length > 1;
+
+        if (requiresEpisodeSelection) {
+          this.applyLongitudinalData({
+            ...data,
+            activeEpisode: null,
+            episode: null,
+            stages: [],
+            events: [],
+          });
+
+          this.createdEpisode = null;
+          this.episodeSummary = null;
+          this.episodeLoaded = false;
+          this.stageLoaded = false;
+          this.episodeEvents = [];
+          this.episodeSubstances = [];
+          this.episodeSubstancesLoaded = false;
+
+          this.isSearching = false;
+          return;
+        }
+
         this.applyLongitudinalData(data);
 
         const loadedEpisodeId = Number(
@@ -1862,9 +1901,7 @@ export class DemandNewComponent
           });
         }
 
-        const availableEpisodes = Array.isArray(data?.episodes)
-          ? data.episodes
-          : [];
+        
 
         if (
           this.requestedEpisodeId &&
@@ -1955,17 +1992,26 @@ export class DemandNewComponent
 
           this.selectedContact = null;
 
-          this.personForm.patchValue(
-            {
-              contactName: '',
-              contactDescription: '',
-              contactCellphone: '',
-              contactEmail: '',
-            },
-            {
-              emitEvent: false,
-            },
-          );
+          const currentContactValues = this.personForm.getRawValue();
+
+          if (
+            currentContactValues.contactName ||
+            currentContactValues.contactDescription ||
+            currentContactValues.contactCellphone ||
+            currentContactValues.contactEmail
+          ) {
+            this.personForm.patchValue(
+              {
+                contactName: '',
+                contactDescription: '',
+                contactCellphone: '',
+                contactEmail: '',
+              },
+              {
+                emitEvent: false,
+              },
+            );
+          }
 
           return;
         }
@@ -2389,6 +2435,12 @@ export class DemandNewComponent
     if (!this.selectedPerson?.id) {
       this.episodeSaveError =
         'Debe seleccionar una persona antes de crear el episodio.';
+      return;
+    }
+
+    if (this.hasOpenAvailableEpisode) {
+      this.episodeSaveError =
+        'La persona ya posee un episodio abierto. Debe continuar gestionando ese episodio antes de crear uno nuevo.';
       return;
     }
 
@@ -6423,9 +6475,16 @@ this.createdEpisode = activeEpisode;
       return dateB.localeCompare(dateA);
     });
   }
+  get hasOpenAvailableEpisode(): boolean {
+    return hasOpenEpisode(this.availableEpisodes);
+  }
 
   get hasMultipleAvailableEpisodes(): boolean {
     return !this.hasCurrentEpisode && this.availableEpisodes.length > 1;
+  }
+
+  trackAvailableEpisode(index: number, episode: any): number | string {
+    return episode?.id ?? episode?.episodeId ?? episode?.episodeCode ?? index;
   }
 
   selectAvailableEpisode(episode: any): void {
