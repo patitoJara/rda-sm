@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+﻿import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 
 import { ErrorConfirmDialogComponent } from '../../shared/confirm-dialog/errorConfirmDialogComponent';
@@ -33,14 +33,15 @@ export class BackendStatusService {
         title: 'Servicio temporalmente no disponible',
         message:
           'No fue posible comunicarse con el servidor.\n\n' +
-          'Verifique su conexión de red o intente nuevamente en unos minutos.',
+          'Verifique su conexión de red y, cuando esté disponible nuevamente, presione Reintentar.',
         icon: 'cloud_off',
-        confirmText: 'Entendido',
+        confirmText: 'Reintentar',
       },
     });
 
     dialogRef.afterClosed().subscribe(() => {
       this.unavailableDialogOpen = false;
+      window.location.reload();
     });
   }
 }

@@ -1,4 +1,4 @@
-import {
+﻿import {
   Component,
   inject,
   AfterViewInit,
@@ -23,7 +23,6 @@ import { A11yModule } from '@angular/cdk/a11y';
 // Servicios
 import { AuthLoginService } from '../../services/auth.login.service';
 import { TokenService } from '../../services/token.service';
-import { SessionService } from '../../core/services/session.service';
 import { AppCacheService } from '../../core/services/app-cache.service';
 
 // Dialog
@@ -51,7 +50,6 @@ export class LoginComponent implements AfterViewInit {
   private fb = inject(FormBuilder);
   private auth = inject(AuthLoginService);
   private tokenService = inject(TokenService);
-  private sessionService = inject(SessionService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private dialog = inject(MatDialog);
@@ -122,14 +120,13 @@ export class LoginComponent implements AfterViewInit {
         const returnUrl =
           this.route.snapshot.queryParamMap.get('returnUrl') || '/inicio';
 
-        console.log('[login] ⏳ Navegando y reiniciando sesión...');
+        console.log('[login] ⏳ Navegando al sistema...');
 
         // =========================
         // NAVEGACIÓN + SESIÓN
         // =========================
         this.router.navigateByUrl(returnUrl, { replaceUrl: true }).then(() => {
-          // 🔑 AQUÍ SE REINICIA LA SESIÓN (mata timers viejos)
-          this.sessionService.startSession('login');
+          // La sesión será inicializada por TemplateComponent.
           this.loading = false;
         });
       },

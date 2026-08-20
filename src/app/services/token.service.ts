@@ -1,4 +1,4 @@
-//C:\Users\pjara\Documents\DESARROLLO\ANGULAR\rda-sm\src\app\services\token.service.ts
+﻿//C:\Users\pjara\Documents\DESARROLLO\ANGULAR\rda-sm\src\app\services\token.service.ts
 
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
@@ -42,10 +42,8 @@ export class TokenService {
   */
 
   setTokens(token: string, refreshToken: string): void {
-    sessionStorage.setItem(this.TOKEN_KEY, token);
+    this.setAccessToken(token);
     sessionStorage.setItem(this.REFRESH_KEY, refreshToken);
-
-    this.setExpirationFromToken(token); // 🔥 CLAVE ABSOLUTA
 
     console.log('[TokenService] 💾 Tokens guardados en sessionStorage');
   }
@@ -74,6 +72,8 @@ export class TokenService {
 
   setAccessToken(token: string): void {
     sessionStorage.setItem(this.TOKEN_KEY, token);
+    this.setExpirationFromToken(token);
+
     console.log('[TokenService] 🔄 Access token actualizado');
   }
 
@@ -84,9 +84,25 @@ export class TokenService {
   clear(): void {
     sessionStorage.removeItem(this.TOKEN_KEY);
     sessionStorage.removeItem(this.REFRESH_KEY);
+    sessionStorage.removeItem(this.EXPIRES_AT_KEY);
+
+    sessionStorage.removeItem('profile');
+    sessionStorage.removeItem('roles');
+    sessionStorage.removeItem('programs');
+    sessionStorage.removeItem('authorities');
+
     sessionStorage.removeItem(this.ACTIVE_PROGRAM_KEY);
     sessionStorage.removeItem(this.ACTIVE_ROLE_KEY);
     sessionStorage.removeItem(this.ACTIVE_PROGRAM_ID_KEY);
+
+    this.activeRoleMemory = null;
+    this.activeProgramMemory = null;
+    this.activeProgramIdMemory = null;
+
+    this.activeRole$.next(null);
+    this.activeProgram$.next(null);
+
+    console.log('[TokenService] 🧹 Contexto de sesión eliminado');
   }
 
   // =====================================================

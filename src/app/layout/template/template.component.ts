@@ -1,6 +1,7 @@
-import {
+﻿import {
   Component,
   OnInit,
+  OnDestroy,
   ViewChild,
   inject,
   ChangeDetectorRef,
@@ -8,7 +9,7 @@ import {
 import { Router, RouterOutlet, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Observable, map, shareReplay, interval, Subscription } from 'rxjs';
+import { Observable, map, shareReplay, Subscription } from 'rxjs';
 import { MatSidenavModule, MatSidenav } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
@@ -29,7 +30,6 @@ import { firstValueFrom } from 'rxjs';
 import { NavigationStateService } from '@app/core/services/navigation-state.service';
 import { SessionService } from '@app/core/services/session.service';
 import { DashboardComponent } from '../../views/dashboard/dashboard.component';
-import { TimeService } from '@app/core/services/time.service';
 
 let globalReloadListenerAdded = false;
 
@@ -62,7 +62,7 @@ function registerGlobalReloadListener(callback: (e: any) => void) {
     FormsModule,
   ],
 })
-export class TemplateComponent implements OnInit {
+export class TemplateComponent implements OnInit, OnDestroy {
   private dialog = inject(MatDialog);
   @ViewChild('drawer') drawer!: MatSidenav;
   mantenedoresOpen = true;
@@ -84,7 +84,6 @@ export class TemplateComponent implements OnInit {
   private expirationRetryCount = 0;
   private readonly MAX_EXP_RETRIES = 5;
   private sessionService = inject(SessionService);
-  private timeService = inject(TimeService);
 
   private readonly PROGRAM_REQUIRED_ROLES = ['ADMINISTRATIVO'];
 
@@ -100,10 +99,11 @@ export class TemplateComponent implements OnInit {
   menuVisible = false;
   isLoading = false;
 
-  remainingMinutes: number = 60;
-  private timerSub?: Subscription;
+  remainingMinutes = 0;
   showExtendButton = false;
   isRefreshing = false;
+
+  private readonly sessionSubscriptions = new Subscription();
 
   isHandset$: Observable<boolean> = this.breakpointObserver
     .observe([Breakpoints.Handset])
@@ -115,6 +115,29 @@ export class TemplateComponent implements OnInit {
   isSessionReady: boolean = false;
 
   ngOnInit(): void {
+    // =========================================================
+    // SESIÓN CENTRALIZADA
+    // TemplateComponent solo refleja el estado del SessionService.
+    // =========================================================
+    this.sessionSubscriptions.add(
+      this.sessionService.remainingMinutes$.subscribe((minutes) => {
+        this.remainingMinutes = minutes;
+        this.cdr.detectChanges();
+      }),
+    );
+
+    this.sessionSubscriptions.add(
+      this.sessionService.canExtend$.subscribe((canExtend) => {
+        this.showExtendButton = canExtend;
+        this.cdr.detectChanges();
+      }),
+    );
+
+    this.sessionSubscriptions.add(
+      this.sessionService.sessionExpired$.subscribe(() => {
+        this.handleSessionTimeout();
+      }),
+    );
     // Listener global que jamás se duplicará
     registerGlobalReloadListener((e: any) => {
       console.log(
@@ -204,7 +227,6 @@ export class TemplateComponent implements OnInit {
 
       this.isSessionReady = true;
       this.sessionService.startSessionFromToken();
-      this.startRealExpirationTimer();
 
       this.cdr.detectChanges();
 
@@ -268,13 +290,16 @@ export class TemplateComponent implements OnInit {
     // =============================================
     // 🧭 SELECCIÓN DE CONTEXTO
     // =============================================
-    this.needsContextSelection =
-      this.userRoles.length > 1 ||
-      (this.activeRoleRequiresProgram && this.userPrograms.length > 1);
-
     const contextReady =
       !!this.activeRole &&
       (!this.activeRoleRequiresProgram || !!this.activeProgram);
+
+    this.needsContextSelection =
+      !contextReady &&
+      (
+        this.userRoles.length > 1 ||
+        (this.activeRoleRequiresProgram && this.userPrograms.length > 1)
+      );
 
     if (!this.needsContextSelection && contextReady) {
       this.menuVisible = true;
@@ -285,7 +310,6 @@ export class TemplateComponent implements OnInit {
 
     this.isSessionReady = true;
     this.sessionService.startSessionFromToken();
-    this.startRealExpirationTimer();
 
     this.cdr.detectChanges();
 
@@ -300,62 +324,42 @@ export class TemplateComponent implements OnInit {
     });
   }
 
-  startTimer(minutes: number): void {
-    this.remainingMinutes = minutes;
-    this.showExtendButton = false;
-
-    if (this.timerSub) this.timerSub.unsubscribe();
-
-    this.timerSub = interval(60000).subscribe(() => {
-      if (this.remainingMinutes > 0) {
-        this.remainingMinutes--;
-        this.showExtendButton = this.remainingMinutes <= 3;
-      }
-
-      if (this.remainingMinutes === 0) {
-        this.handleSessionTimeout();
-      }
-
-      this.cdr.detectChanges();
-    });
-  }
-
   async extendSession(): Promise<void> {
     if (this.isRefreshing) return;
+
     this.isRefreshing = true;
 
     try {
-      this.snackBar.open('🔄 Renovando sesión...', '', { duration: 2000 });
+      this.snackBar.open('🔄 Renovando sesión...', '', {
+        duration: 2000,
+      });
 
       await firstValueFrom(this.auth.refresh());
 
-      // 🔥 1️⃣ Reiniciar timer central REAL
-      this.sessionService.startSessionFromToken();
-
-      // 🔥 2️⃣ Reiniciar contador visual
-      this.startRealExpirationTimer();
-
-      this.showExtendButton = false;
+      // El refresh ya guardó el JWT nuevo y su expiración.
+      // SessionService reconstruye todo desde esa única fuente.
+      this.sessionService.restartFromCurrentToken();
 
       this.snackBar.open('✅ Sesión extendida correctamente', '', {
         duration: 2000,
       });
     } catch {
-      // logout lo maneja AuthLoginService
+      // El error se propaga desde AuthLoginService.
+      // La política de invalidación corresponde al interceptor/sesión.
     } finally {
       this.isRefreshing = false;
       this.cdr.detectChanges();
     }
   }
-
   private handleSessionTimeout(): void {
-    this.snackBar.open('⏰ Sesión expirada. Cerrando...', '', {
+    this.snackBar.open('⏰ Sesión expirada. Ingrese nuevamente.', '', {
       duration: 3000,
       horizontalPosition: 'end',
       verticalPosition: 'top',
       panelClass: ['mat-mdc-snack-bar-error'],
     });
-    this.logout();
+
+    this.sessionService.logout('timeout');
   }
 
   private showContextWarning(message: string): void {
@@ -548,66 +552,16 @@ export class TemplateComponent implements OnInit {
       })
       .afterClosed()
       .subscribe((ok) => {
-        if (ok) {
-          if (this.isLoggingOut) return;
-          this.isLoggingOut = true;
-
-          if (this.timerSub) {
-            this.timerSub.unsubscribe();
-            this.timerSub = undefined;
-          }
-
-          this.tokenService.clear();
-          this.router.navigate(['/auth/login']);
-        } else {
-          // 🔥 CLAVE ABSOLUTA
-          console.log(
-            '[TemplateComponent] 🔁 Logout cancelado, reanudando sesión',
-          );
-          this.startRealExpirationTimer();
+        if (!ok || this.isLoggingOut) {
+          return;
         }
+
+        this.isLoggingOut = true;
+        this.sessionService.logout('manual');
       });
   }
-
-  startRealExpirationTimer(): void {
-    const exp = this.tokenService.getTokenExpiration();
-
-    if (!exp) {
-      console.warn('[TemplateComponent] No hay expiración registrada');
-      return;
-    }
-
-    let remainingMs = exp - this.timeService.nowMs();
-
-    this.remainingMinutes = Math.max(0, Math.floor(remainingMs / 60000));
-
-    this.showExtendButton = this.remainingMinutes <= 5;
-
-    console.log(
-      `[TemplateComponent] Sesión expira en ${this.remainingMinutes} minutos`,
-    );
-
-    if (this.timerSub) {
-      this.timerSub.unsubscribe();
-      this.timerSub = undefined;
-    }
-
-    this.timerSub = interval(60000).subscribe(() => {
-      remainingMs = exp - this.timeService.nowMs();
-
-      this.remainingMinutes = Math.max(0, Math.floor(remainingMs / 60000));
-
-      this.showExtendButton = this.remainingMinutes <= 5;
-
-      if (this.remainingMinutes <= 0) {
-        this.timerSub?.unsubscribe();
-        this.timerSub = undefined;
-        this.handleSessionTimeout();
-        return;
-      }
-
-      this.cdr.detectChanges();
-    });
+  ngOnDestroy(): void {
+    this.sessionSubscriptions.unsubscribe();
   }
 
   toggleMantenedores(): void {

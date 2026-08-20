@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 // ✅ AUTH LOGIN SERVICE
 // Maneja autenticación, tokens, perfil, roles y refresh
 // ============================================================
@@ -84,8 +84,6 @@ export class AuthLoginService {
         if (!res || !res.token) throw new Error('Respuesta de login inválida.');
 
         console.log('[AuthLoginService] 🧩 Respuesta login completa:', res);
-
-        this.tokenService.setExpirationFromToken(res.token);
 
         const accessToken = res.token;
         const refreshToken = res.refreshToken;
@@ -249,9 +247,9 @@ export class AuthLoginService {
 
     if (!refreshToken) {
       console.warn(
-        '[AuthLoginService] ⚠️ RefreshToken perdido, cerrando sesión',
+        '[AuthLoginService] ⚠️ No hay refreshToken disponible.',
       );
-      this.logout();
+
       return throwError(() => new Error('No refresh token'));
     }
 
@@ -268,17 +266,14 @@ export class AuthLoginService {
         const newRefresh = res.refreshToken ?? refreshToken;
 
         this.tokenService.setTokens(res.token, newRefresh);
-        this.tokenService.setExpirationFromToken(res.token);
-
         console.log('[AuthLoginService] 🔁 Token refrescado correctamente.');
       }),
       map((res) => res.token),
       catchError((err) => {
         console.error('[AuthLoginService] ❌ Refresh falló:', err);
 
-        // 🔥 SOLO AQUÍ logout
-        this.logout();
-
+        // La capa de sesión/interceptor decide si corresponde
+        // invalidar la autenticación o conservarla.
         return throwError(() => err);
       }),
     );

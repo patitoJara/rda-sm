@@ -1,4 +1,4 @@
-// src/app/core/interceptors/auth.interceptor.ts
+﻿// src/app/core/interceptors/auth.interceptor.ts
 
 import {
   HttpErrorResponse,
@@ -16,6 +16,7 @@ import {
 
 import { TokenService } from '../../services/token.service';
 import { AuthLoginService } from '../../services/auth.login.service';
+import { SessionService } from '../services/session.service';
 
 let isRefreshing = false;
 
@@ -28,6 +29,7 @@ let refreshSubject = new ReplaySubject<string>(1);
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const tokenService = inject(TokenService);
   const authService = inject(AuthLoginService);
+  const sessionService = inject(SessionService);
 
   const isAuthRequest =
     req.url.includes('/auth/login') ||
@@ -76,7 +78,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           '[AuthInterceptor] No hay refresh token disponible.',
         );
 
-        tokenService.clear();
+        sessionService.invalidateSession();
 
         return throwError(() => error);
       }
@@ -110,36 +112,26 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       refreshSubject = new ReplaySubject<string>(1);
 
       return authService.refresh().pipe(
-        switchMap((response: any) => {
-          const newAccessToken =
-            response?.token || response?.accessToken;
-
-          const newRefreshToken = response?.refreshToken;
-
+        switchMap((newAccessToken: string) => {
           if (!newAccessToken) {
             const invalidResponseError = new Error(
               'La renovación no entregó un access token válido.',
             );
 
-            tokenService.clear();
             refreshSubject.error(invalidResponseError);
+            sessionService.invalidateSession();
 
             return throwError(() => invalidResponseError);
           }
 
           /**
-           * Guardamos los tokens recibidos.
-           * Si el backend no rota el refresh token, conservamos el actual.
+           * AuthLoginService.refresh() ya guardó:
+           * - access token;
+           * - refresh token;
+           * - expiración real del JWT.
+           *
+           * El interceptor solo coordina las solicitudes pendientes.
            */
-          if (newRefreshToken) {
-            tokenService.setTokens(
-              newAccessToken,
-              newRefreshToken,
-            );
-          } else {
-            tokenService.setAccessToken(newAccessToken);
-          }
-
           refreshSubject.next(newAccessToken);
           refreshSubject.complete();
 
@@ -175,7 +167,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             refreshError.status === 401 ||
             refreshError.status === 403
           ) {
-            tokenService.clear();
+            sessionService.invalidateSession();
           }
 
           return throwError(() => refreshError);
