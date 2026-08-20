@@ -2246,7 +2246,47 @@
     <!-- =====================================================
          ESTADO GLOBAL DEL EPISODIO
     ====================================================== -->
-    <section
+    <!-- =====================================================
+     ESTADO SIN EPISODIO - ACCION CREAR
+====================================================== -->
+<mat-card
+  class="current-demand-card no-episode-action-card"
+  *ngIf="
+    selectedPerson &&
+    !hasCurrentEpisode &&
+    !hasOpenAvailableEpisode &&
+    !showCreateEpisodeForm
+  "
+>
+  <div class="no-episode-action-card__content">
+    <div class="no-episode-action-card__icon">
+      <mat-icon>create_new_folder</mat-icon>
+    </div>
+
+    <div class="no-episode-action-card__text">
+      <span>GESTIÓN DE DEMANDA</span>
+
+      <h3>Sin episodio de demanda</h3>
+
+      <p>
+        La persona está registrada y actualmente no posee un episodio
+        de demanda. ¿Desea crear uno ahora?
+      </p>
+    </div>
+
+    <button
+      mat-flat-button
+      class="create-episode-trigger"
+      type="button"
+      (click)="showCreateEpisode()"
+    >
+      <mat-icon>add_circle</mat-icon>
+      Crear episodio de demanda
+    </button>
+  </div>
+</mat-card>
+
+<section
       class="episode-global-overview"
       *ngIf="selectedPerson && hasCurrentEpisode && !showCreateEpisodeForm"
     >
@@ -2432,9 +2472,7 @@
         </button>
       </div>
     </mat-card>
-
-
-      <!-- TRAYECTORIA GLOBAL DEL EPISODIO -->
+<!-- TRAYECTORIA GLOBAL DEL EPISODIO -->
 <mat-card
       id="trayectoria"
       #summarySection

@@ -40,10 +40,14 @@ export interface DemandPersonDTO {
   rut?: string;
   run?: string;
   dv?: string;
+
   firstName?: string;
+  firstLastName?: string;
   lastName?: string;
   secondLastName?: string;
   fullName?: string;
+
+  birthdate?: string;
   birthDate?: string;
   sexId?: number;
   communeId?: number;

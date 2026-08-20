@@ -415,6 +415,7 @@
       <table
         mat-table
         [dataSource]="episodes"
+        multiTemplateDataRows
         [trackBy]="trackByEpisodeId"
         matSort
         (matSortChange)="onSortChange($event)"
@@ -460,9 +461,25 @@
 
           <td mat-cell *matCellDef="let row">
             <div class="person-cell">
-              <div class="person-cell__icon">
-                <mat-icon>person</mat-icon>
-              </div>
+              <button
+  mat-icon-button
+  type="button"
+  class="person-cell__icon person-cell__icon--button"
+  matTooltip="Ver datos del demandante"
+  [attr.aria-label]="
+    'Ver datos del demandante ' +
+    (row.personName || 'sin nombre')
+  "
+  (click)="togglePersonDetails(row, $event)"
+>
+  <mat-icon>
+    {{
+      isPersonDetailsExpanded(row)
+        ? "expand_less"
+        : "person"
+    }}
+  </mat-icon>
+</button>
 
               <div>
                 <strong>{{ row.personName || "Sin nombre" }}</strong>
@@ -739,6 +756,185 @@
           </td>
         </ng-container>
 
+        <!-- DETALLE DEL DEMANDANTE -->
+        <ng-container matColumnDef="personDetail">
+          <td
+            mat-cell
+            *matCellDef="let row"
+            [attr.colspan]="displayedColumns.length"
+            class="person-detail-cell"
+          >
+            <div
+              class="person-detail-panel"
+              *ngIf="isPersonDetailsExpanded(row)"
+            >
+              <div
+                class="person-detail-loading"
+                *ngIf="loadingPersonEpisodeId === row.episodeId"
+              >
+                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                <span>Cargando datos del demandante...</span>
+              </div>
+
+              <div
+                class="person-detail-error"
+                *ngIf="personDetailErrorByEpisodeId[row.episodeId]"
+              >
+                <mat-icon>error_outline</mat-icon>
+                <span>
+                  {{ personDetailErrorByEpisodeId[row.episodeId] }}
+                </span>
+              </div>
+
+              <ng-container
+                *ngIf="personDetailByEpisodeId[row.episodeId] as detail"
+              >
+                <div class="person-detail-header">
+  <div>
+    <mat-icon>person</mat-icon>
+
+    <div>
+      <strong>
+        {{
+          detail.person.fullName ||
+            (
+              (detail.person.firstName || "") +
+              " " +
+              (detail.person.lastName || "") +
+              " " +
+              (detail.person.secondLastName || "")
+            ).trim() ||
+            row.personName ||
+            "Sin nombre"
+        }}
+        ·
+        {{
+          detail.person.rut ||
+            detail.person.run ||
+            row.rut ||
+            "Sin RUN"
+        }}
+      </strong>
+
+      <span>
+        Datos del demandante · Información de consulta · Solo lectura
+      </span>
+    </div>
+  </div>
+</div>
+
+                <div class="person-detail-grid">
+                  <div class="person-detail-section">
+                    <div class="person-detail-section__title">
+                      <mat-icon>badge</mat-icon>
+                      <span>Demandante</span>
+                    </div>
+
+                    <div class="person-detail-fields">
+
+                      <div>
+  <span>Fecha de nacimiento</span>
+  <strong>
+    {{
+      formatCompactDate(
+        detail.person.birthdate ||
+        detail.person.birthDate
+      )
+    }}
+  </strong>
+</div>
+
+<div>
+  <span>Edad</span>
+  <strong>
+    {{
+      getPersonAge(
+        detail.person.birthdate ||
+        detail.person.birthDate
+      ) !== null
+        ? getPersonAge(
+            detail.person.birthdate ||
+            detail.person.birthDate
+          ) + " años"
+        : "Sin información"
+    }}
+  </strong>
+</div>
+
+<div>
+  <span>Teléfono</span>
+                        <strong>
+                          {{ detail.person.phone || "Sin información" }}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>Correo</span>
+                        <strong>
+                          {{ detail.person.email || "Sin información" }}
+                        </strong>
+                      </div>
+
+                      <div class="person-detail-field--wide">
+                        <span>Dirección</span>
+                        <strong>
+                          {{ detail.person.address || "Sin información" }}
+                        </strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="person-detail-section person-detail-section--contact">
+                    <div class="person-detail-section__title">
+                      <mat-icon>contact_phone</mat-icon>
+                      <span>Referente</span>
+                    </div>
+
+                    <div
+                      class="person-detail-fields"
+                      *ngIf="detail.contact; else noContact"
+                    >
+                      <div>
+                        <span>Nombre</span>
+                        <strong>
+                          {{ detail.contact.name || "Sin información" }}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>Relación / descripción</span>
+                        <strong>
+                          {{ detail.contact.description || "Sin información" }}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>Teléfono</span>
+                        <strong>
+                          {{ detail.contact.cellphone || "Sin información" }}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>Correo</span>
+                        <strong>
+                          {{ detail.contact.email || "Sin información" }}
+                        </strong>
+                      </div>
+                    </div>
+
+                    <ng-template #noContact>
+                      <div class="person-detail-empty">
+                        <mat-icon>person_off</mat-icon>
+                        <span>No registra referente.</span>
+                      </div>
+                    </ng-template>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+          </td>
+        </ng-container>
         <tr
           mat-header-row
           *matHeaderRowDef="displayedColumns; sticky: true"
@@ -756,6 +952,15 @@
           [class.priority-row--critical]="
             getSemaphoreColorByDays(row.accumulatedDays) === 'ROJO'
           "        ></tr>
+        <tr
+          mat-row
+          *matRowDef="
+            let row;
+            columns: ['personDetail'];
+
+          "
+          class="person-detail-row"
+        ></tr>
       </table>
     </div>
     <div

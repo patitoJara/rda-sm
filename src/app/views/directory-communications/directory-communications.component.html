@@ -1,4 +1,4 @@
-<section class="directory-page">
+﻿<section class="directory-page">
   <header class="directory-hero">
     <div>
       <span class="directory-hero__eyebrow">
@@ -112,17 +112,17 @@
     </div>
 
     <form [formGroup]="filtersForm">
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" class="directory-filter-field directory-filter-field--search">
         <mat-label>Nombre, correo, cargo o programa</mat-label>
         <mat-icon matPrefix>search</mat-icon>
         <input matInput formControlName="q" />
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" class="directory-filter-field directory-filter-field--search">
         <mat-label>Programa</mat-label>
         <mat-icon matPrefix>business</mat-icon>
 
-        <mat-select formControlName="programId">
+        <mat-select formControlName="programId" panelClass="person-editor-select-panel">
           <mat-option [value]="null">Todos los programas</mat-option>
 
           <mat-option
@@ -134,11 +134,11 @@
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" class="directory-filter-field directory-filter-field--search">
         <mat-label>Rol o tipo de contacto</mat-label>
         <mat-icon matPrefix>badge</mat-icon>
 
-        <mat-select formControlName="role">
+        <mat-select formControlName="role" panelClass="person-editor-select-panel">
           <mat-option value="">Todos</mat-option>
 
           <mat-option
@@ -214,6 +214,8 @@
       </button>
     </div>
   </mat-card>
+
+  <div class="directory-workspace">
 
   <section
     class="institutional-section"
@@ -568,4 +570,6 @@
       </mat-card>
     </ng-template>
   </section>
+
+  </div>
 </section>

@@ -37,14 +37,15 @@ import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { finalize } from 'rxjs';
-
+import { catchError, finalize, map, of, switchMap } from 'rxjs';
 import {
   DemandEpisodeProgramContextDTO,
   PrioritizedEpisodeDTO,
   SupervisorDashboardDTO,
 } from '../../core/models/demand-priority.models';
-import { DemandService } from '../../core/services/demand.service';
+import { DemandPersonDTO, DemandService } from '../../core/services/demand.service';
+import { ContactService } from '../../services/contact.service';
+import { Contact } from '../../models/contact';
 import { DemandListStateService } from '../../core/services/demand-list-state.service';
 import { getSemaphoreColorFromDays } from '../demand-new/utils/demand-new-semaphore.utils';
 import {
@@ -94,6 +95,7 @@ interface ResultOption {
 export class InicioComponent implements OnInit, OnDestroy {
   private readonly tokenService = inject(TokenService);
   private readonly demandService = inject(DemandService);
+  private readonly contactService = inject(ContactService);
   private readonly demandListState = inject(DemandListStateService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
@@ -121,6 +123,21 @@ export class InicioComponent implements OnInit, OnDestroy {
   dashboardError: string | null = null;
   episodesError: string | null = null;
 
+  expandedPersonEpisodeId: number | null = null;
+  loadingPersonEpisodeId: number | null = null;
+
+  readonly personDetailByEpisodeId: Record<
+    number,
+    {
+      person: DemandPersonDTO;
+      contact: Contact | null;
+    }
+  > = {};
+
+  readonly personDetailErrorByEpisodeId: Record<
+    number,
+    string | null
+  > = {};
   pageIndex = 0;
   pageSize = 20;
   totalElements = 0;
@@ -408,6 +425,52 @@ export class InicioComponent implements OnInit, OnDestroy {
       },
     );
   }
+  getPersonAge(
+    birthdate: string | null | undefined,
+  ): number | null {
+    const value = String(birthdate ?? '').trim();
+
+    if (!value) {
+      return null;
+    }
+
+    const parts = value.slice(0, 10).split('-');
+
+    if (parts.length !== 3) {
+      return null;
+    }
+
+    const year = Number(parts[0]);
+    const month = Number(parts[1]);
+    const day = Number(parts[2]);
+
+    if (
+      !Number.isFinite(year) ||
+      !Number.isFinite(month) ||
+      !Number.isFinite(day)
+    ) {
+      return null;
+    }
+
+    const today = new Date();
+
+    let age = today.getFullYear() - year;
+
+    const monthDifference =
+      today.getMonth() + 1 - month;
+
+    if (
+      monthDifference < 0 ||
+      (
+        monthDifference === 0 &&
+        today.getDate() < day
+      )
+    ) {
+      age--;
+    }
+
+    return age >= 0 ? age : null;
+  }
   formatCompactDate(value: string | null | undefined): string {
     const text = String(value ?? '').trim();
 
@@ -651,6 +714,101 @@ export class InicioComponent implements OnInit, OnDestroy {
       });
   }
 
+  togglePersonDetails(
+    episode: PrioritizedEpisodeDTO,
+    event: MouseEvent,
+  ): void {
+    event.stopPropagation();
+
+    const episodeId = Number(episode.episodeId);
+
+    if (!Number.isFinite(episodeId) || episodeId <= 0) {
+      return;
+    }
+
+    if (this.expandedPersonEpisodeId === episodeId) {
+      this.expandedPersonEpisodeId = null;
+      return;
+    }
+
+    this.expandedPersonEpisodeId = episodeId;
+
+    if (
+      this.personDetailByEpisodeId[episodeId] ||
+      this.loadingPersonEpisodeId === episodeId
+    ) {
+      return;
+    }
+
+    this.loadPersonDetails(episode);
+  }
+
+  readonly isPersonDetailRow = (
+    _index: number,
+    episode: PrioritizedEpisodeDTO,
+  ): boolean => {
+    return this.isPersonDetailsExpanded(episode);
+  };
+  isPersonDetailsExpanded(
+    episode: PrioritizedEpisodeDTO,
+  ): boolean {
+    return this.expandedPersonEpisodeId === Number(episode.episodeId);
+  }
+
+  private loadPersonDetails(
+    episode: PrioritizedEpisodeDTO,
+  ): void {
+    const episodeId = Number(episode.episodeId);
+    const rut = String(episode.rut ?? '').trim();
+
+    if (!rut) {
+      this.personDetailErrorByEpisodeId[episodeId] =
+        'No fue posible identificar el RUN del demandante.';
+      return;
+    }
+
+    this.loadingPersonEpisodeId = episodeId;
+    this.personDetailErrorByEpisodeId[episodeId] = null;
+
+    this.demandService
+      .findPersonByRut(rut)
+      .pipe(
+        switchMap((person) => {
+          const postulantId = Number(person?.id);
+
+          if (!Number.isFinite(postulantId) || postulantId <= 0) {
+            return of({
+              person,
+              contact: null as Contact | null,
+            });
+          }
+
+          return this.contactService
+            .getByPostulant(postulantId)
+            .pipe(
+              catchError(() => of(null)),
+              map((contact) => ({
+                person,
+                contact,
+              })),
+            );
+        }),
+        finalize(() => {
+          if (this.loadingPersonEpisodeId === episodeId) {
+            this.loadingPersonEpisodeId = null;
+          }
+        }),
+      )
+      .subscribe({
+        next: (detail) => {
+          this.personDetailByEpisodeId[episodeId] = detail;
+        },
+        error: () => {
+          this.personDetailErrorByEpisodeId[episodeId] =
+            'No fue posible cargar los datos del demandante.';
+        },
+      });
+  }
   loadEpisodes(): void {
     this.loadingEpisodes = true;
     this.episodesError = null;
@@ -675,10 +833,38 @@ export class InicioComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (response) => {
-          this.episodes = response?.content ?? [];
-          this.totalElements = Number(
+          const episodes = response?.content ?? [];
+          const totalElements = Number(
             response?.totalElements ?? 0,
           );
+
+          const totalPages = Math.max(
+            1,
+            Math.ceil(totalElements / this.pageSize),
+          );
+
+          const lastValidPageIndex = totalPages - 1;
+
+          if (
+            totalElements > 0 &&
+            this.pageIndex > lastValidPageIndex
+          ) {
+            this.pageIndex = lastValidPageIndex;
+            this.saveListState();
+            this.loadEpisodes();
+            return;
+          }
+
+          if (
+            totalElements === 0 &&
+            this.pageIndex !== 0
+          ) {
+            this.pageIndex = 0;
+            this.saveListState();
+          }
+
+          this.episodes = episodes;
+          this.totalElements = totalElements;
 
           this.loadEpisodeProgramContexts(this.episodes);
         },

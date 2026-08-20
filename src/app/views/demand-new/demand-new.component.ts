@@ -2075,6 +2075,18 @@ export class DemandNewComponent
           this.selectedPerson = person;
           this.personLoaded = true;
           this.personNotFound = false;
+          // Limpiar contexto residual de episodio al entrar por fallback.
+          this.longitudinal = null;
+          this.episodeSummary = null;
+          this.createdEpisode = null;
+          this.requestedEpisodeId = null;
+
+          this.episodeLoaded = false;
+          this.stageLoaded = false;
+
+          this.episodeEvents = [];
+          this.episodeSubstances = [];
+          this.episodeSubstancesLoaded = false;
 
           this.showCreatePersonForm = false;
           this.showCreateEpisodeForm = false;
