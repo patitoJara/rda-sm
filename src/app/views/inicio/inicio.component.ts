@@ -50,6 +50,7 @@ import { DemandListStateService } from '../../core/services/demand-list-state.se
 import { getSemaphoreColorFromDays } from '../demand-new/utils/demand-new-semaphore.utils';
 import {
   resolveEpisodeAccessModeFromProgramContext,
+  resolveEpisodeSuggestedActionFromProgramContext,
 } from '../demand-new/utils/demand-new-permission.utils';
 import { TokenService } from '../../services/token.service';
 import {
@@ -233,6 +234,9 @@ export class InicioComponent implements OnInit, OnDestroy {
     resultCode: new FormControl<string>('', {
       nonNullable: true,
     }),
+    search: new FormControl<string>('', {
+      nonNullable: true,
+    }),
   });
 
   ngOnInit(): void {
@@ -284,6 +288,7 @@ export class InicioComponent implements OnInit, OnDestroy {
       {
         programId: null,
         resultCode: '',
+        search: '',
       },
       {
         emitEvent: false,
@@ -310,6 +315,7 @@ export class InicioComponent implements OnInit, OnDestroy {
       {
         programId: null,
         resultCode: '',
+        search: '',
       },
       {
         emitEvent: false,
@@ -410,6 +416,20 @@ export class InicioComponent implements OnInit, OnDestroy {
       ? 'Gestionar demanda'
       : 'Abrir ficha en modo solo lectura';
   }
+  getEpisodeSuggestedActionLabel(
+    episode: PrioritizedEpisodeDTO,
+  ): string {
+    const context =
+      this.programContextsByEpisodeId.get(
+        episode.episodeId,
+      );
+
+    return resolveEpisodeSuggestedActionFromProgramContext(
+      this.activeProgramId,
+      context,
+      episode.suggestedAction,
+    );
+  }
   openEpisode(
     episode: PrioritizedEpisodeDTO,
     mode: 'view' | 'manage',
@@ -484,7 +504,7 @@ export class InicioComponent implements OnInit, OnDestroy {
       return text;
     }
 
-    return `${parts[2]}/${parts[1]}/${parts[0].slice(-2)}`;
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
   }
 
   formatCompactTime(value: string | null | undefined): string {
@@ -824,6 +844,7 @@ export class InicioComponent implements OnInit, OnDestroy {
           ? 'CERRADO'
           : 'EN_TRAMITE',
         resultCode: filters.resultCode || null,
+        search: filters.search.trim() || null,
         sort: this.currentSort,
       })
       .pipe(
@@ -958,6 +979,7 @@ export class InicioComponent implements OnInit, OnDestroy {
       pageSize: this.pageSize,
       programId: filters.programId,
       resultCode: filters.resultCode,
+      search: filters.search,
       sort: this.currentSort,
     });
   }
@@ -977,6 +999,7 @@ export class InicioComponent implements OnInit, OnDestroy {
       {
         programId: state.programId,
         resultCode: state.resultCode,
+        search: state.search,
       },
       {
         emitEvent: false,

@@ -8,6 +8,7 @@ export interface DemandListState {
   pageSize: number;
   programId: number | null;
   resultCode: string;
+  search: string;
   sort: string | null;
 }
 
@@ -55,11 +56,13 @@ export class DemandListStateService {
         programIdValue > 0
           ? programIdValue
           : null;
-
       const resultCode = String(
         parsed.resultCode ?? '',
       ).trim();
 
+      const search = String(
+        parsed.search ?? '',
+      ).trim();
       const sort = parsed.sort
         ? String(parsed.sort)
         : null;
@@ -70,6 +73,7 @@ export class DemandListStateService {
         pageSize,
         programId,
         resultCode,
+        search,
         sort,
       };
     } catch {

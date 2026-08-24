@@ -228,6 +228,24 @@
 
       <mat-form-field
         appearance="outline"
+        class="filter-field filter-field--search"
+      >
+        <mat-label>Nombre o RUN</mat-label>
+
+        <mat-icon matPrefix>search</mat-icon>
+
+        <input
+          matInput
+          type="text"
+          formControlName="search"
+          autocomplete="off"
+          placeholder="Ej.: Sofia o 14.036.818-0"
+          aria-label="Buscar por nombre o RUN"
+        />
+      </mat-form-field>
+
+      <mat-form-field
+        appearance="outline"
         class="filter-field filter-field--result"
       >
         <mat-label>
@@ -280,8 +298,8 @@
       <mat-icon>info</mat-icon>
 
       <span>
-        La búsqueda por nombre o RUN, profesional, semáforo y rango de días
-        será incorporada cuando dichos filtros estén disponibles en la API.
+        Los filtros por profesional, semáforo y rango de días
+        serán incorporados cuando estén disponibles en la API.
       </span>
     </div>
   </mat-card>
@@ -714,7 +732,7 @@
               <mat-icon>assistant_direction</mat-icon>
 
               <span>
-                {{ row.suggestedAction || "Revisar continuidad" }}
+                {{ getEpisodeSuggestedActionLabel(row) }}
               </span>
             </div>
           </td>

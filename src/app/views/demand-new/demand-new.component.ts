@@ -1,5 +1,7 @@
 ﻿import {
   resolveStageEntryContext,
+  resolveStageReceptionContext,
+  resolveStageDays,
   resolveWorkingStage,
   resolveWorkingStageId,
 } from './utils/demand-new-stage.utils';
@@ -192,6 +194,7 @@ import {
 
 import {
   resolveDemandActionMatrix,
+  resolveFeedbackSaveAction,
   DemandActionMatrix,
   DemandClosureOption,
   DemandFeedbackResult,
@@ -285,8 +288,13 @@ export class DemandNewComponent
   citationForm = this.fb.group({
     citationTypeCode: ['', Validators.required],
     eventDate: new FormControl<Date | null>(new Date(), Validators.required),
-    eventHour: ['', Validators.required],
-    eventPeriod: ['AM', Validators.required],
+    eventHour: [
+      '',
+      [
+        Validators.required,
+        Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/),
+      ],
+    ],
     programProfessionalId: new FormControl<number | null>(
       null,
       Validators.required,
@@ -304,7 +312,7 @@ export class DemandNewComponent
       validators: [Validators.required],
     }),
 
-    comment: ['', Validators.required],
+    comment: [''],
   });
 
   readonly allowedFeedbackResultCodes = new Set([
@@ -320,10 +328,9 @@ export class DemandNewComponent
       '',
       [
         Validators.required,
-        Validators.pattern(/^(0?[1-9]|1[0-2]):[0-5][0-9]$/),
+        Validators.pattern(/^([01]\d|2[0-3]):[0-5]\d$/),
       ],
     ],
-    eventPeriod: ['AM', Validators.required],
     programProfessionalId: new FormControl<number | null>(
       null,
       Validators.required,
@@ -3109,6 +3116,15 @@ export class DemandNewComponent
       return;
     }
 
+    const feedbackSaveAction = resolveFeedbackSaveAction(
+      this.demandActionMatrix,
+      feedbackContext.payload.resultCode,
+    );
+
+    if (!feedbackSaveAction.enabled) {
+      this.interviewError = feedbackSaveAction.message;
+      return;
+    }
     const dialogRef = this.dialog.open(ConfirmDialogYesNoComponent, {
       width: '470px',
       disableClose: true,
@@ -3156,6 +3172,7 @@ export class DemandNewComponent
           const feedbackResult = handleFeedbackSuccess(event);
 
           this.interviewSuccess = feedbackResult.successMessage;
+          this.showOperationSuccess(this.interviewSuccess);
           this.interviewForm.reset(feedbackResult.resetValue);
 
           this.loadEpisodeLongitudinal(episodeId);
@@ -3273,6 +3290,49 @@ export class DemandNewComponent
     return canRegisterReference(this.currentEpisodeStage ?? episode);
   }
 
+  private showOperationSuccess(message: string | null | undefined): void {
+
+    const normalizedMessage = String(message ?? '').trim();
+
+
+    if (!normalizedMessage) {
+
+      return;
+
+    }
+
+
+    this.dialog.open(ConfirmDialogOkComponent, {
+
+      width: '460px',
+
+      maxWidth: '95vw',
+
+      disableClose: true,
+
+      panelClass: 'rda-confirm-dialog',
+
+      backdropClass: 'app-backdrop',
+
+      data: {
+
+        title: 'Operación exitosa',
+
+        message: normalizedMessage,
+
+        confirmText: 'Aceptar',
+
+        color: 'primary',
+
+        icon: 'check_circle',
+
+      },
+
+    });
+
+  }
+
+
   get availableReferencePrograms(): any[] {
     return getAvailableReferencePrograms(this.programs, this.activeProgramId);
   }
@@ -3318,36 +3378,88 @@ export class DemandNewComponent
       this.referenceError = referenceContext.errorMessage;
       return;
     }
+    const destinationProgramId = Number(
+      referenceContext.payload.destinationProgramId,
+    );
 
-    this.isSavingReference = true;
-    this.referenceError = null;
-    this.referenceSuccess = null;
+    const destinationProgram = this.programs.find(
+      (program: any) =>
+        Number(program?.id) === destinationProgramId,
+    );
 
-    this.demandService
-      .createReference(episodeId, referenceContext.payload)
-      .pipe(
-        finalize(() => {
-          this.isSavingReference = false;
-        }),
-      )
-      .subscribe({
-        next: () => {
-          this.referenceSuccess = getReferenceSuccessMessage();
-          this.loadEpisodeLongitudinal(episodeId);
+    const destinationProgramName =
+      destinationProgram?.name ??
+      'Programa destino no identificado';
 
-          setTimeout(() => {
-            if (this.activeActionPanel === 'reference') {
-              this.closeActionPanel();
-            }
-          }, 1800);
+    const referenceConfirmationMessage =
+      '¿Está seguro de que desea realizar esta referencia?\n\n' +
+      `Programa de origen: ${this.activeProgramName ?? 'Programa actual'}\n` +
+      `Programa destino: ${destinationProgramName}\n\n` +
+      `Motivo: ${referenceContext.payload.reason}\n\n` +
+      'Esta acción registrará la referencia al programa seleccionado. ' +
+      'El episodio continuará su trayectoria en la red.';
+
+    const referenceConfirmRef = this.dialog.open(
+      ConfirmDialogYesNoComponent,
+      {
+        width: '460px',
+        maxWidth: '95vw',
+        disableClose: true,
+        panelClass: 'rda-confirm-dialog',
+        backdropClass: 'app-backdrop',
+        data: {
+          title: 'Confirmar referencia',
+          message: referenceConfirmationMessage,
+          confirmText: 'Confirmar referencia',
+          cancelText: 'Cancelar',
+          color: 'warn',
+          icon: 'warning',
         },
-        error: (error: HttpErrorResponse) => {
-          console.error('[DemandNew] Error registrando referencia:', error);
+      },
+    );
 
-          this.referenceError = getReferenceErrorMessage(error);
-        },
-      });
+    referenceConfirmRef.afterClosed().subscribe(
+      (confirmed: boolean) => {
+        if (!confirmed) {
+          return;
+        }
+
+        this.isSavingReference = true;
+        this.referenceError = null;
+        this.referenceSuccess = null;
+
+        this.demandService
+          .createReference(episodeId, referenceContext.payload)
+          .pipe(
+            finalize(() => {
+              this.isSavingReference = false;
+            }),
+          )
+          .subscribe({
+            next: () => {
+              this.referenceSuccess = getReferenceSuccessMessage();
+              this.showOperationSuccess(this.referenceSuccess);
+              this.loadEpisodeLongitudinal(episodeId);
+
+              setTimeout(() => {
+                if (this.activeActionPanel === 'reference') {
+                  this.closeActionPanel();
+                }
+              }, 1800);
+            },
+            error: (error: HttpErrorResponse) => {
+              console.error(
+                '[DemandNew] Error registrando referencia:',
+                error,
+              );
+
+              this.referenceError = getReferenceErrorMessage(error);
+            },
+          });
+      },
+    );
   }
+
   saveClosure(): void {
     if (!this.ensureCanManageCurrentEpisode()) {
       return;
@@ -3462,6 +3574,7 @@ export class DemandNewComponent
         .subscribe({
           next: () => {
             this.closureSuccess = getClosureSuccessMessage();
+            this.showOperationSuccess(this.closureSuccess);
 
             setTimeout(() => {
               if (this.activeActionPanel === 'egressClosure') {
@@ -3589,6 +3702,7 @@ export class DemandNewComponent
           const observationResult = handleObservationSuccess(event);
 
           this.observationSuccess = observationResult.successMessage;
+          this.showOperationSuccess(this.observationSuccess);
           this.observationForm.reset(observationResult.resetValue);
 
           this.loadEpisodeLongitudinal(episodeId);
@@ -4485,6 +4599,8 @@ this.createdEpisode = activeEpisode;
   }
 
   handleNavigationAssistItem(item: SummaryNavigationItem): void {
+    this.closeNavigationAssistMenus();
+
     if (item.id === 'informe-sistra') {
       const html = this.sistraReport.generate(this.sistraReportData);
       this.sistraReport.printHtml(html);
@@ -4494,6 +4610,11 @@ this.createdEpisode = activeEpisode;
 
     this.scrollToSummarySection(item.id);
   }
+  navigateQuickAccessFromAssist(targetId: string): void {
+    this.closeNavigationAssistMenus();
+    this.scrollToQuickAccess(targetId);
+  }
+
   scrollToQuickAccess(targetId: string): void {
     const target = document.getElementById(targetId);
 
@@ -4567,6 +4688,11 @@ this.createdEpisode = activeEpisode;
     this.navigationAssistOpen = true;
   }
 
+  closeNavigationAssistMenus(): void {
+    this.navigationAssistActionsOpen = false;
+    this.navigationAssistOpen = false;
+  }
+
   toggleNavigationAssistActions(): void {
     this.navigationAssistOpen = true;
     this.navigationAssistActionsOpen =
@@ -4578,6 +4704,8 @@ this.createdEpisode = activeEpisode;
     if (this.activeActionPanel !== panel) {
       return;
     }
+
+    this.closeNavigationAssistMenus();
 
 
 
@@ -4630,6 +4758,8 @@ this.createdEpisode = activeEpisode;
     if (this.activeActionPanel !== panel) {
       return;
     }
+
+    this.closeNavigationAssistMenus();
 
     setTimeout(() => {
       const target = document.getElementById('operationPanelShell');
@@ -4688,7 +4818,6 @@ this.createdEpisode = activeEpisode;
         citationTypeCode: null,
         eventDate: new Date(),
         eventHour: '',
-        eventPeriod: 'AM',
         programProfessionalId: null,
         professionName: '',
         citationComment: '',
@@ -4707,7 +4836,6 @@ this.createdEpisode = activeEpisode;
       this.interviewForm.reset({
         eventDate: new Date(),
         eventHour: '',
-        eventPeriod: 'AM',
         programProfessionalId: null,
         professionName: '',
         biopsychosocialCommitmentCode: null,
@@ -5048,6 +5176,7 @@ this.createdEpisode = activeEpisode;
           const citationResult = handleCitationSuccess(event);
 
           this.citationSuccess = citationResult.successMessage;
+          this.showOperationSuccess(this.citationSuccess);
 
           this.citationForm.reset(citationResult.resetValue);
 
@@ -5175,6 +5304,7 @@ this.createdEpisode = activeEpisode;
 
           this.episodeEvents = attendanceResult.episodeEvents;
           this.attendanceSuccess = attendanceResult.successMessage;
+          this.showOperationSuccess(this.attendanceSuccess);
         },
 
         error: (error: any) => {
@@ -5277,7 +5407,11 @@ this.createdEpisode = activeEpisode;
       {};
 
     const operationalStage = this.workingStage ?? this.currentEpisodeStage;
-    const days = Math.max(0, Number(operationalStage?.daysInStage ?? 0));
+    const days = resolveStageDays(
+      operationalStage,
+      this.longitudinal?.references ?? [],
+      episode?.originalRequestDate ?? this.episodeOriginDate,
+    );
 
     const semaphoreCode = getSemaphoreColorFromDays(days);
     const waitingStopped = episode?.waitingStopped === true;
@@ -5299,18 +5433,16 @@ this.createdEpisode = activeEpisode;
       waitingTone = 'danger';
     }
 
-    const stageEntryContext = resolveStageEntryContext(
+    const stageReceptionContext = resolveStageReceptionContext(
       operationalStage,
       this.longitudinal?.references ?? [],
-      episode?.originalRequestDate ?? null,
     );
 
-    const requestLabel =
-      stageEntryContext.kind === 'REFERENCE_RECEPTION'
-        ? 'Recepción por referencia'
-        : 'Solicitud recibida';
+    const requestLabel = stageReceptionContext.label;
 
-    const requestDate = formatDisplayDateValue(stageEntryContext.date);
+    const requestDate = formatDisplayDateValue(
+      stageReceptionContext.date,
+    );
 
     const stateValue =
       operationalStage?.state?.name ??

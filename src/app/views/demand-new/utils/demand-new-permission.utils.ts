@@ -138,6 +138,7 @@ export function resolveEpisodeAccessMode(
 
 export interface EpisodeProgramContextAccess {
   programId: number | string | null | undefined;
+  programName?: string | null | undefined;
   stageId: number | string | null | undefined;
   closed: boolean | null | undefined;
 }
@@ -177,9 +178,45 @@ export function resolveEpisodeAccessModeFromProgramContext(
     return 'NO_ACCESS';
   }
 
-  return context.closed
-    ? 'VIEW'
-    : 'MANAGE';
+  if (context.closed === true) {
+    return 'VIEW';
+  }
+
+  if (context.closed === false) {
+    return 'MANAGE';
+  }
+
+  return 'NO_ACCESS';
+}
+export function resolveEpisodeSuggestedActionFromProgramContext(
+  activeProgramId: number | string | null | undefined,
+  context: EpisodeProgramContextAccess | null | undefined,
+  suggestedAction: string | null | undefined,
+): string {
+  const accessMode =
+    resolveEpisodeAccessModeFromProgramContext(
+      activeProgramId,
+      context,
+    );
+
+  if (accessMode === 'MANAGE') {
+    return (
+      String(suggestedAction ?? '').trim() ||
+      'Revisar continuidad'
+    );
+  }
+
+  if (accessMode === 'VIEW') {
+    const programName = String(
+      context?.programName ?? '',
+    ).trim();
+
+    return programName
+      ? `Etapa finalizada en ${programName}`
+      : 'Etapa finalizada';
+  }
+
+  return 'Sin gestión disponible para este programa';
 }
 export function canManageEpisode(
   activeProgramId: number | string | null | undefined,

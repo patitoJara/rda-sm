@@ -1915,3 +1915,194 @@ mat-panel-description {
     display: none !important;
   }
 }
+/* ============================================================
+   DIRECTORIO - AJUSTE FINO PARA ZOOM 100%
+   ============================================================ */
+
+/* Panel principal del programa con mayor identidad visual */
+.program-directory mat-expansion-panel {
+  border-color: #c8dadd;
+  background: #f7fafb;
+}
+
+.program-directory .mat-expansion-panel-header {
+  min-height: 54px;
+  background: #eef5f6;
+}
+
+.program-directory .mat-expansion-panel-header:hover {
+  background: #e8f1f3;
+}
+
+/* Resumen del programa más compacto */
+.program-summary {
+  gap: 7px;
+  margin-bottom: 9px;
+  padding: 7px;
+}
+
+.program-summary div {
+  padding: 7px 9px;
+}
+
+.program-summary span {
+  font-size: 0.62rem;
+}
+
+.program-summary strong {
+  margin-top: 2px;
+  font-size: 0.72rem;
+  line-height: 1.2;
+}
+
+/* Botones de programa */
+.program-actions {
+  margin-bottom: 8px;
+  gap: 6px;
+}
+
+.program-actions button {
+  min-height: 31px;
+  padding-inline: 9px;
+  font-size: 0.68rem;
+}
+
+/* Grupos internos más compactos */
+.directory-contact-group {
+  margin-top: 9px;
+  border-radius: 10px;
+}
+
+.directory-contact-group__heading {
+  gap: 8px;
+  padding: 7px 9px;
+}
+
+.directory-contact-group__heading strong {
+  font-size: 0.76rem;
+}
+
+.directory-contact-group__heading small {
+  margin-top: 1px;
+  font-size: 0.62rem;
+  line-height: 1.25;
+}
+
+.directory-contact-group__icon {
+  flex-basis: 27px;
+  width: 27px;
+  height: 27px;
+  border-radius: 7px;
+}
+
+.directory-contact-group__icon mat-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+}
+
+/* Tabla compacta */
+.directory-people-table th,
+.directory-people-table td {
+  padding: 5px 8px;
+}
+
+.directory-people-table th {
+  font-size: 0.58rem;
+  line-height: 1.15;
+}
+
+.directory-people-table td {
+  font-size: 0.68rem;
+  line-height: 1.2;
+}
+
+.directory-people-table td > strong {
+  font-size: 0.69rem;
+  line-height: 1.2;
+}
+
+.directory-person-role {
+  font-size: 0.66rem;
+  line-height: 1.2;
+}
+
+/* Correo compacto pero legible */
+.directory-email-button {
+  min-height: 26px !important;
+  line-height: 1.1 !important;
+  font-size: 0.64rem !important;
+  white-space: nowrap;
+}
+
+.directory-email-button .mat-icon {
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+}
+
+/* Teléfono en una sola línea */
+.directory-phone {
+  gap: 3px;
+  font-size: 0.64rem;
+  white-space: nowrap;
+}
+
+.directory-phone mat-icon {
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+}
+
+/* Selección ocupa menos ancho */
+.directory-people-table__selection {
+  width: 72px;
+  min-width: 72px;
+}
+
+/* Controlar ancho relativo de columnas */
+.directory-people-table th:nth-child(1),
+.directory-people-table td:nth-child(1) {
+  width: 28%;
+}
+
+.directory-people-table th:nth-child(2),
+.directory-people-table td:nth-child(2) {
+  width: 19%;
+}
+
+.directory-people-table th:nth-child(3),
+.directory-people-table td:nth-child(3) {
+  width: 31%;
+}
+
+.directory-contact-group--clinical
+.directory-people-table th:nth-child(4),
+.directory-contact-group--clinical
+.directory-people-table td:nth-child(4) {
+  width: 15%;
+  white-space: nowrap;
+}
+
+/* Filas ligeramente más distinguibles */
+.directory-people-table tbody tr:nth-child(even) {
+  background: #fbfdfd;
+}
+
+.directory-people-table tbody tr:hover {
+  background: #f1f7f8;
+}
+
+/* Checkbox más alineado */
+.directory-people-table__selection mat-checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mantener tabla usable en pantallas menores */
+@media (max-width: 1100px) {
+  .directory-people-table {
+    min-width: 760px;
+  }
+}

@@ -142,7 +142,7 @@
                 <strong>
                   {{
                     stage.receivedAt
-                      | date: "dd/MM/yyyy HH:mm"
+                      | date: "dd-MM-yyyy HH:mm"
                   }}
                 </strong>
               </div>
@@ -153,7 +153,7 @@
                   {{
                     stage.closedAt
                       ? (stage.closedAt
-                          | date: "dd/MM/yyyy HH:mm")
+                          | date: "dd-MM-yyyy HH:mm")
                       : "Etapa vigente"
                   }}
                 </strong>
@@ -201,7 +201,7 @@
             <small>
               {{
                 reference.referenceDate
-                  | date: "dd/MM/yyyy HH:mm"
+                  | date: "dd-MM-yyyy HH:mm"
               }}
             </small>
 

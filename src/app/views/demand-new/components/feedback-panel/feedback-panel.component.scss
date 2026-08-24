@@ -410,3 +410,145 @@
     grid-column: span 6;
   }
 }
+
+/* RETROALIMENTACION - GUIA VISUAL DE CAMPOS */
+
+.field-status {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 0.64rem;
+  font-weight: 800;
+  line-height: 1.35;
+  vertical-align: middle;
+}
+
+.field-status--required {
+  color: #9a3412;
+  background: #ffedd5;
+  border: 1px solid #fdba74;
+}
+
+.field-status--optional {
+  color: #475569;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+}
+
+.field-status--automatic {
+  color: #0f766e;
+  background: #ccfbf1;
+  border: 1px solid #5eead4;
+}
+
+:host ::ng-deep .operation-form--feedback {
+
+  /* Valor ya seleccionado */
+  .mat-mdc-select-value,
+  .mat-mdc-select-value-text,
+  .mat-mdc-select-min-line {
+    color: #1565c0 !important;
+    font-weight: 600 !important;
+  }
+
+  /* Texto ingresado */
+  input.mat-mdc-input-element:not([readonly]),
+  textarea.mat-mdc-input-element {
+    color: #1565c0 !important;
+    -webkit-text-fill-color: #1565c0 !important;
+    font-weight: 600 !important;
+  }
+
+  /* Texto guía / placeholder */
+  .mat-mdc-select-placeholder,
+  input.mat-mdc-input-element::placeholder,
+  textarea.mat-mdc-input-element::placeholder {
+    color: #71859a !important;
+    -webkit-text-fill-color: #71859a !important;
+    opacity: 1 !important;
+    font-weight: 600 !important;
+  }
+
+  /* Campo automático si se incorpora posteriormente */
+  input[readonly].mat-mdc-input-element {
+    color: #00838f !important;
+    -webkit-text-fill-color: #00838f !important;
+    font-weight: 600 !important;
+    pointer-events: none;
+    cursor: default;
+  }
+}
+
+/* RETROALIMENTACION - DISTRIBUCION 24H */
+
+/*
+ * Con hora en formato 24h ya no existe el selector AM/PM.
+ * Redistribuimos los cinco campos principales en una sola fila.
+ */
+.feedback-field--date {
+  grid-column: span 2;
+}
+
+.feedback-field--time {
+  grid-column: span 2;
+}
+
+.feedback-field--professional {
+  grid-column: span 3;
+}
+
+.feedback-field--commitment {
+  grid-column: span 2;
+}
+
+.feedback-field--result {
+  grid-column: span 3;
+}
+
+/* La hora ahora contiene un solo campo */
+.time-period-grid {
+  display: block;
+  min-width: 0;
+}
+
+.time-period-grid > mat-form-field {
+  width: 100%;
+}
+
+/* Pantallas intermedias */
+@media (max-width: 1200px) {
+  .feedback-field--date,
+  .feedback-field--time {
+    grid-column: span 3;
+  }
+
+  .feedback-field--professional,
+  .feedback-field--commitment,
+  .feedback-field--result {
+    grid-column: span 6;
+  }
+}
+
+/* Tablets */
+@media (max-width: 900px) {
+  .feedback-field--date,
+  .feedback-field--time,
+  .feedback-field--professional,
+  .feedback-field--commitment,
+  .feedback-field--result {
+    grid-column: span 6;
+  }
+}
+
+/* Móvil */
+@media (max-width: 700px) {
+  .feedback-field--date,
+  .feedback-field--time,
+  .feedback-field--professional,
+  .feedback-field--commitment,
+  .feedback-field--result {
+    grid-column: 1;
+  }
+}

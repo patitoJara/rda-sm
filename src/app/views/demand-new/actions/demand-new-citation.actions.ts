@@ -1,16 +1,14 @@
-import {
+﻿import {
   formatDateForBackend,
   toStringOrNull,
 } from '../utils/demand-new-format.utils';
-import { buildEventTime } from '../utils/demand-new-event.utils';
-
+import { buildEventTime24 } from '../utils/demand-new-event.utils';
 export interface CitationSuccessResult {
   successMessage: string;
   resetValue: {
     citationTypeCode: null;
     eventDate: Date;
     eventHour: string;
-    eventPeriod: string;
     programProfessionalId: null;
     professionName: string;
     citationComment: string;
@@ -44,6 +42,8 @@ export type CitationContextResult =
       errorMessage: string;
     };
 
+
+
 export function buildCitationContext(
   input: CitationContextInput,
 ): CitationContextResult {
@@ -51,10 +51,7 @@ export function buildCitationContext(
 
   const citationTypeCode = toStringOrNull(raw.citationTypeCode);
   const citationDate = formatDateForBackend(raw.eventDate);
-  const citationTime = buildEventTime(
-    raw.eventHour,
-    raw.eventPeriod,
-  );
+  const citationTime = buildEventTime24(raw.eventHour);
 
   if (!citationTypeCode) {
     return {
@@ -75,7 +72,7 @@ export function buildCitationContext(
     return {
       valid: false,
       errorMessage:
-        'Debe ingresar una hora válida y seleccionar AM o PM.',
+        'Debe ingresar una hora válida en formato de 24 horas (HH:mm).',
     };
   }
 
@@ -122,7 +119,6 @@ export function handleCitationSuccess(
       citationTypeCode: null,
       eventDate: new Date(),
       eventHour: '',
-      eventPeriod: 'AM',
       programProfessionalId: null,
       professionName: '',
       citationComment: '',

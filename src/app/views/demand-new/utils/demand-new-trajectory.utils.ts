@@ -1,10 +1,11 @@
-export interface CompactProgramTrajectoryItem {
+﻿export interface CompactProgramTrajectoryItem {
   kind: 'stage' | 'reference';
   id: number;
   stageOrder?: number;
   programName?: string;
   stageLabel?: string;
   daysInStage?: number | null;
+  entryDate?: string | null;
   current?: boolean;
   originStageId?: number;
   destinationStageId?: number;
@@ -87,6 +88,10 @@ export function buildCompactProgramTrajectory(
         'Programa sin información',
       stageLabel,
       daysInStage: toNumericValue(stage?.daysInStage),
+      entryDate:
+        stage?.receivedAt ??
+        stage?.createdAt ??
+        null,
       current,
     });
 

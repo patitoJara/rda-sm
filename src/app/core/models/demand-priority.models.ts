@@ -152,5 +152,7 @@ export interface PrioritizedEpisodeQuery {
   stateCode?: string | null;
   resultCode?: string | null;
 
+
+  search?: string | null;
   sort?: string | null;
 }

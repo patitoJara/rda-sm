@@ -211,3 +211,109 @@ export function resolveStageEntryContext(
       null,
   };
 }
+
+export interface StageReceptionContext {
+  kind: 'INITIAL_RECEPTION' | 'REFERENCE_RECEPTION';
+  label: string;
+  date: string | null;
+}
+
+export function resolveStageReceptionContext(
+  stage: any,
+  references: any[] | null | undefined,
+): StageReceptionContext {
+  const stageId = resolveStageId(stage);
+
+  const safeReferences = Array.isArray(references)
+    ? references
+    : [];
+
+  const incomingReference =
+    safeReferences.find(
+      (reference: any) =>
+        Number(reference?.destinationStageId) === stageId,
+    ) ?? null;
+
+  if (incomingReference) {
+    return {
+      kind: 'REFERENCE_RECEPTION',
+      label: 'Recepción por referencia',
+      date:
+        incomingReference?.referenceDate ??
+        incomingReference?.eventDate ??
+        stage?.receivedAt ??
+        null,
+    };
+  }
+
+  return {
+    kind: 'INITIAL_RECEPTION',
+    label: 'Ingreso al programa',
+    date:
+      stage?.receivedAt ??
+      stage?.createdAt ??
+      null,
+  };
+}
+
+export function resolveStageDays(
+  stage: any,
+  references: any[] | null | undefined,
+  originalRequestDate: string | null | undefined,
+): number {
+  const backendDays = Number(stage?.daysInStage);
+
+  if (Number.isFinite(backendDays) && backendDays >= 0) {
+    return Math.trunc(backendDays);
+  }
+
+  const entryContext = resolveStageEntryContext(
+    stage,
+    references,
+    originalRequestDate,
+  );
+
+  if (!entryContext.date) {
+    return 0;
+  }
+
+  const startDate = new Date(entryContext.date);
+
+  if (Number.isNaN(startDate.getTime())) {
+    return 0;
+  }
+
+  const endDateValue =
+    stage?.closureDate ??
+    stage?.closedAt ??
+    stage?.closureAt ??
+    null;
+
+  const endDate = endDateValue
+    ? new Date(endDateValue)
+    : new Date();
+
+  if (Number.isNaN(endDate.getTime())) {
+    return 0;
+  }
+
+  const startUtc = Date.UTC(
+    startDate.getFullYear(),
+    startDate.getMonth(),
+    startDate.getDate(),
+  );
+
+  const endUtc = Date.UTC(
+    endDate.getFullYear(),
+    endDate.getMonth(),
+    endDate.getDate(),
+  );
+
+  const diffMs = endUtc - startUtc;
+
+  if (diffMs <= 0) {
+    return 0;
+  }
+
+  return Math.floor(diffMs / 86400000);
+}

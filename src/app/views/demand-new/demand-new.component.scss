@@ -36,3 +36,78 @@
   color: #263238;
   font-weight: 500;
 }
+
+/* =========================================================
+   FORMULARIOS OPERATIVOS - JERARQUIA VISUAL DE CONTENIDO
+   Aplica a Citacion, Asistencia, Observacion, Referencia y Cierre
+   ========================================================= */
+
+:host ::ng-deep .operation-panel-shell .operation-form {
+
+  /* Valor seleccionado en listas */
+  .mat-mdc-select-value,
+  .mat-mdc-select-value-text,
+  .mat-mdc-select-min-line {
+    color: #1565c0 !important;
+    font-weight: 600 !important;
+  }
+
+  /* Texto ingresado manualmente */
+  input.mat-mdc-input-element:not([readonly]),
+  textarea.mat-mdc-input-element {
+    color: #1565c0 !important;
+    -webkit-text-fill-color: #1565c0 !important;
+    font-weight: 600 !important;
+  }
+
+  /* Texto guia antes de completar */
+  .mat-mdc-select-placeholder,
+  input.mat-mdc-input-element::placeholder,
+  textarea.mat-mdc-input-element::placeholder {
+    color: #71859a !important;
+    -webkit-text-fill-color: #71859a !important;
+    opacity: 1 !important;
+    font-weight: 600 !important;
+  }
+
+  /* Campo automatico / solo lectura */
+  input[readonly].mat-mdc-input-element {
+    color: #00838f !important;
+    -webkit-text-fill-color: #00838f !important;
+    font-weight: 600 !important;
+    pointer-events: none;
+    cursor: default;
+  }
+}
+
+/* ESTADO VISUAL DE CAMPOS */
+.field-status {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 0.64rem;
+  font-weight: 800;
+  line-height: 1.35;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.field-status--required {
+  color: #9a3412;
+  background: #ffedd5;
+  border: 1px solid #fdba74;
+}
+
+.field-status--optional {
+  color: #475569;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+}
+
+.field-status--automatic {
+  color: #0f766e;
+  background: #ccfbf1;
+  border: 1px solid #5eead4;
+}

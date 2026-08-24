@@ -264,6 +264,9 @@ export class DemandService {
     if (query.resultCode) {
       params = params.set('resultCode', query.resultCode);
     }
+    if (query.search?.trim()) {
+      params = params.set('search', query.search.trim());
+    }
 
     if (query.sort) {
       params = params.set('sort', query.sort);

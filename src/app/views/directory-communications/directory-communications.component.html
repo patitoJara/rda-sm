@@ -72,7 +72,7 @@
     <mat-card>
       <mat-icon>groups</mat-icon>
       <div>
-        <span>Contactos asociados</span>
+        <span>Personas asociadas</span>
         <strong>{{ contactCount }}</strong>
       </div>
     </mat-card>
@@ -280,7 +280,7 @@
     <div class="section-heading">
       <div>
         <span>DIRECTORIO POR PROGRAMA</span>
-        <h2>Programas y personas asociadas</h2>
+        <h2>Equipo y accesos del programa</h2>
       </div>
 
       <small>
@@ -350,7 +350,7 @@
           </div>
 
           <div>
-            <span>Asociaciones</span>
+            <span>Equipo y accesos</span>
             <strong>
               {{ item.userCount }} usuario(s) ·
               {{ item.professionalCount }} facultativo(s)
@@ -380,92 +380,88 @@
           </button>
         </div>        <ng-container *ngIf="item.contacts.length; else noProgramContacts">
           <section
-            class="directory-contact-group"
+            class="directory-contact-group directory-contact-group--users"
             *ngIf="getProgramUsers(item).length"
           >
             <div class="directory-contact-group__heading">
               <span class="directory-contact-group__icon">
-                <mat-icon>badge</mat-icon>
+                <mat-icon>manage_accounts</mat-icon>
               </span>
 
               <div>
-                <strong>Usuarios con acceso al sistema</strong>
+                <strong>Usuarios con acceso al programa</strong>
                 <small>
-                  {{ getProgramUsers(item).length }} usuario(s) asociado(s)
+                  Personas habilitadas para operar en este programa ·
+                  {{ getProgramUsers(item).length }} usuario(s)
                 </small>
               </div>
             </div>
 
-            <div class="contacts-grid">
-<article
-            class="contact-card"
-            *ngFor="
-              let contact of getProgramUsers(item);
-              trackBy: trackByContact
-            "
-          >
-            <span class="contact-card__avatar">
-              <mat-icon>
-                {{
-                  contact.source === "PROFESSIONAL"
-                    ? "medical_services"
-                    : "person"
-                }}
-              </mat-icon>
-            </span>
+            <div class="directory-people-table-wrap">
+              <table class="directory-people-table">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Rol</th>
+                    <th>Correo</th>
+                    <th class="directory-people-table__selection">
+                      Seleccionar
+                    </th>
+                  </tr>
+                </thead>
 
-            <div class="contact-card__body">
-              <div class="contact-card__heading">
-                <strong>{{ contact.name }}</strong>
+                <tbody>
+                  <tr
+                    *ngFor="
+                      let contact of getProgramUsers(item);
+                      trackBy: trackByContact
+                    "
+                  >
+                    <td>
+                      <strong>{{ contact.name }}</strong>
+                    </td>
 
-                <mat-chip>
-                  {{
-                    contact.source === "PROFESSIONAL"
-                      ? "Facultativo"
-                      : "Usuario"
-                  }}
-                </mat-chip>
-              </div>
+                    <td>
+                      <span class="directory-person-role">
+                        {{ contact.detail }}
+                      </span>
+                    </td>
 
-              <span>{{ contact.detail }}</span>
+                    <td>
+                      <button
+                        *ngIf="contact.email; else missingUserEmail"
+                        mat-button
+                        type="button"
+                        class="directory-email-button"
+                        (click)="copyEmail(contact.email)"
+                      >
+                        <mat-icon>alternate_email</mat-icon>
+                        {{ contact.email }}
+                      </button>
 
-              <div class="contact-card__meta">
-                <button
-                  *ngIf="contact.email; else missingContactEmail"
-                  mat-button
-                  type="button"
-                  (click)="copyEmail(contact.email)"
-                >
-                  <mat-icon>alternate_email</mat-icon>
-                  {{ contact.email }}
-                </button>
+                      <ng-template #missingUserEmail>
+                        <span class="missing-email">
+                          <mat-icon>mail_off</mat-icon>
+                          Sin correo registrado
+                        </span>
+                      </ng-template>
+                    </td>
 
-                <ng-template #missingContactEmail>
-                  <small class="missing-email">
-                    <mat-icon>mail_off</mat-icon>
-                    Sin correo registrado
-                  </small>
-                </ng-template>
-
-                <span *ngIf="contact.phone">
-                  <mat-icon>phone</mat-icon>
-                  {{ contact.phone }}
-                </span>
-              </div>
-            </div>
-
-            <mat-checkbox
-              *ngIf="contact.email"
-              [checked]="isEmailSelected(contact.email)"
-              (change)="toggleEmail(contact.email)"
-              aria-label="Seleccionar correo"
-            ></mat-checkbox>
-          </article>
+                    <td class="directory-people-table__selection">
+                      <mat-checkbox
+                        *ngIf="contact.email"
+                        [checked]="isEmailSelected(contact.email)"
+                        (change)="toggleEmail(contact.email)"
+                        aria-label="Seleccionar correo"
+                      ></mat-checkbox>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </section>
-
-          <section
-            class="directory-contact-group"
+<section
+            class="directory-contact-group directory-contact-group--clinical"
             *ngIf="getProgramProfessionals(item).length"
           >
             <div class="directory-contact-group__heading">
@@ -474,82 +470,92 @@
               </span>
 
               <div>
-                <strong>Facultativos del programa</strong>
+                <strong>Equipo clínico del programa</strong>
                 <small>
-                  {{ getProgramProfessionals(item).length }}
-                  facultativo(s) asociado(s)
+                  Facultativos asociados para atención ·
+                  {{ getProgramProfessionals(item).length }} facultativo(s)
                 </small>
               </div>
             </div>
 
-            <div class="contacts-grid">
-<article
-            class="contact-card"
-            *ngFor="
-              let contact of getProgramProfessionals(item);
-              trackBy: trackByContact
-            "
-          >
-            <span class="contact-card__avatar">
-              <mat-icon>
-                {{
-                  contact.source === "PROFESSIONAL"
-                    ? "medical_services"
-                    : "person"
-                }}
-              </mat-icon>
-            </span>
+            <div class="directory-people-table-wrap">
+              <table class="directory-people-table">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Profesión</th>
+                    <th>Correo</th>
+                    <th>Teléfono</th>
+                    <th class="directory-people-table__selection">
+                      Seleccionar
+                    </th>
+                  </tr>
+                </thead>
 
-            <div class="contact-card__body">
-              <div class="contact-card__heading">
-                <strong>{{ contact.name }}</strong>
+                <tbody>
+                  <tr
+                    *ngFor="
+                      let contact of getProgramProfessionals(item);
+                      trackBy: trackByContact
+                    "
+                  >
+                    <td>
+                      <strong>{{ contact.name }}</strong>
+                    </td>
 
-                <mat-chip>
-                  {{
-                    contact.source === "PROFESSIONAL"
-                      ? "Facultativo"
-                      : "Usuario"
-                  }}
-                </mat-chip>
-              </div>
+                    <td>
+                      <span class="directory-person-role">
+                        {{ contact.detail }}
+                      </span>
+                    </td>
 
-              <span>{{ contact.detail }}</span>
+                    <td>
+                      <button
+                        *ngIf="contact.email; else missingProfessionalEmail"
+                        mat-button
+                        type="button"
+                        class="directory-email-button"
+                        (click)="copyEmail(contact.email)"
+                      >
+                        <mat-icon>alternate_email</mat-icon>
+                        {{ contact.email }}
+                      </button>
 
-              <div class="contact-card__meta">
-                <button
-                  *ngIf="contact.email; else missingContactEmail"
-                  mat-button
-                  type="button"
-                  (click)="copyEmail(contact.email)"
-                >
-                  <mat-icon>alternate_email</mat-icon>
-                  {{ contact.email }}
-                </button>
+                      <ng-template #missingProfessionalEmail>
+                        <span class="missing-email">
+                          <mat-icon>mail_off</mat-icon>
+                          Sin correo registrado
+                        </span>
+                      </ng-template>
+                    </td>
 
-                <ng-template #missingContactEmail>
-                  <small class="missing-email">
-                    <mat-icon>mail_off</mat-icon>
-                    Sin correo registrado
-                  </small>
-                </ng-template>
+                    <td>
+                      <span
+                        class="directory-phone"
+                        *ngIf="contact.phone; else noProfessionalPhone"
+                      >
+                        <mat-icon>phone</mat-icon>
+                        {{ contact.phone }}
+                      </span>
 
-                <span *ngIf="contact.phone">
-                  <mat-icon>phone</mat-icon>
-                  {{ contact.phone }}
-                </span>
-              </div>
+                      <ng-template #noProfessionalPhone>
+                        <span class="directory-muted">—</span>
+                      </ng-template>
+                    </td>
+
+                    <td class="directory-people-table__selection">
+                      <mat-checkbox
+                        *ngIf="contact.email"
+                        [checked]="isEmailSelected(contact.email)"
+                        (change)="toggleEmail(contact.email)"
+                        aria-label="Seleccionar correo"
+                      ></mat-checkbox>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-
-            <mat-checkbox
-              *ngIf="contact.email"
-              [checked]="isEmailSelected(contact.email)"
-              (change)="toggleEmail(contact.email)"
-              aria-label="Seleccionar correo"
-            ></mat-checkbox>
-          </article>
-            </div>
-          </section>
-        </ng-container>
+          </section></ng-container>
 
         <ng-template #noProgramContacts>
           <div class="empty-program">

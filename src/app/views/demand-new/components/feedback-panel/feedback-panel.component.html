@@ -65,8 +65,8 @@
     </div>
   </section>
 
-  <mat-form-field appearance="outline" floatLabel="always" class="feedback-field feedback-field--date">
-    <mat-label>Fecha de retroalimentación</mat-label>
+  <mat-form-field appearance="outline" floatLabel="always" class="feedback-field feedback-field--date" hideRequiredMarker="true">
+    <mat-label>Fecha de retroalimentación <span class="field-status field-status--required">Obligatorio</span></mat-label>
     <mat-icon matPrefix>event</mat-icon>
 
     <input
@@ -99,15 +99,15 @@
       appearance="outline"
       floatLabel="always"
       class="time-hour-field"
-    >
-      <mat-label>Hora</mat-label>
+     hideRequiredMarker="true">
+      <mat-label>Hora <span class="field-status field-status--required">Obligatorio</span></mat-label>
       <mat-icon matPrefix>schedule</mat-icon>
 
       <input
         matInput
         type="text"
         formControlName="eventHour"
-        placeholder="Ej: 01:30"
+        placeholder="Ej: 16:30"
         maxlength="5"
         (blur)="hourBlur.emit()"
       />
@@ -117,34 +117,19 @@
       </mat-error>
 
       <mat-error *ngIf="form.get('eventHour')?.hasError('pattern')">
-        Use formato válido. Ej: 01:30.
+        Use formato válido de 24 horas. Ej: 16:30.
       </mat-error>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" floatLabel="always">
-      <mat-label>AM / PM</mat-label>
-      <mat-icon matPrefix>more_time</mat-icon>
-
-      <mat-select
-        formControlName="eventPeriod"
-        panelClass="person-editor-select-panel"
-      >
-        <mat-option value="AM">AM</mat-option>
-        <mat-option value="PM">PM</mat-option>
-      </mat-select>
-
-      <mat-error *ngIf="form.get('eventPeriod')?.hasError('required')">
-        Debe seleccionar AM o PM.
-      </mat-error>
-    </mat-form-field>
   </div>
 
-  <mat-form-field appearance="outline" floatLabel="always" class="feedback-field feedback-field--professional">
-    <mat-label>Profesional que la realizó</mat-label>
+  <mat-form-field appearance="outline" floatLabel="always" class="feedback-field feedback-field--professional" hideRequiredMarker="true">
+    <mat-label>Profesional que la realizó <span class="field-status field-status--required">Obligatorio</span></mat-label>
     <mat-icon matPrefix>person</mat-icon>
 
     <mat-select
       formControlName="programProfessionalId"
+      placeholder="Seleccione el profesional"
       panelClass="person-editor-select-panel"
       (selectionChange)="professionalChange.emit($event.value)"
     >
@@ -163,12 +148,13 @@
     </mat-error>
   </mat-form-field>
 
-  <mat-form-field appearance="outline" floatLabel="always" class="feedback-field feedback-field--commitment">
-    <mat-label>Compromiso biopsicosocial</mat-label>
+  <mat-form-field appearance="outline" floatLabel="always" class="feedback-field feedback-field--commitment" hideRequiredMarker="true">
+    <mat-label>Compromiso biopsicosocial <span class="field-status field-status--required">Obligatorio</span></mat-label>
     <mat-icon matPrefix>psychology</mat-icon>
 
     <mat-select
       formControlName="biopsychosocialCommitmentCode"
+      placeholder="Seleccione el nivel de compromiso"
       panelClass="person-editor-select-panel"
     >
       <mat-option
@@ -186,12 +172,13 @@
     </mat-error>
   </mat-form-field>
 
-  <mat-form-field appearance="outline" floatLabel="always" class="feedback-field feedback-field--result">
-    <mat-label>Resultado</mat-label>
+  <mat-form-field appearance="outline" floatLabel="always" class="feedback-field feedback-field--result" hideRequiredMarker="true">
+    <mat-label>Resultado <span class="field-status field-status--required">Obligatorio</span></mat-label>
     <mat-icon matPrefix>fact_check</mat-icon>
 
     <mat-select
       formControlName="resultCode"
+      placeholder="Seleccione el resultado"
       panelClass="person-editor-select-panel"
     >
       <mat-option *ngFor="let item of results" [value]="item.code">

@@ -228,6 +228,31 @@ function blockedMatrix(
  * MATRIZ CENTRAL
  * ============================================================ */
 
+export function resolveFeedbackSaveAction(
+  matrix: DemandActionMatrix,
+  resultCode: string | null | undefined,
+): DemandMatrixAction {
+  const normalizedResult = String(resultCode ?? '')
+    .trim()
+    .toUpperCase();
+
+  if (!matrix.feedback.enabled) {
+    return matrix.feedback;
+  }
+
+  if (
+    matrix.scenario === 'ACTIVE_PENDING_CITATIONS' &&
+    normalizedResult !== 'ABANDONO'
+  ) {
+    return action(
+      false,
+      DEMAND_ACTION_MATRIX_MESSAGES.feedbackPendingCitations,
+    );
+  }
+
+  return action(true);
+}
+
 export function resolveDemandActionMatrix(
   input: DemandActionMatrixInput,
 ): DemandActionMatrix {

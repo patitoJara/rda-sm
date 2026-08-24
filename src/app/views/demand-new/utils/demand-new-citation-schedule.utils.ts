@@ -1,4 +1,4 @@
-import {
+﻿import {
   getAttendanceForCitation,
 } from './demand-new-citation.utils';
 export interface CitationScheduleValidationInput {
@@ -185,23 +185,6 @@ export interface CitationTypeAvailabilityResult {
   kind: 'available' | 'registered' | 'not-applicable' | 'previous-required';
 }
 
-function attendanceIsPresent(status: string): boolean {
-  return (
-    status === 'SE_PRESENTO' ||
-    (
-      !status.includes('NO_SE_PRESENT') &&
-      status.includes('SE_PRESENT')
-    )
-  );
-}
-
-function attendanceIsAbsent(status: string): boolean {
-  return (
-    status === 'NO_SE_PRESENTO' ||
-    status.includes('NO_SE_PRESENT')
-  );
-}
-
 export function getCitationTypeAvailability(
   input: CitationTypeAvailabilityInput,
 ): CitationTypeAvailabilityResult {
@@ -212,7 +195,7 @@ export function getCitationTypeAvailability(
     citationTypes,
   } = input;
 
-  const findCitation = (code: string): any | null =>
+  const existingCitation =
     [...citationEvents]
       .reverse()
       .find(
@@ -221,11 +204,16 @@ export function getCitationTypeAvailability(
             event,
             citationEvents,
             citationTypes,
-          ) === code,
+          ) === citationTypeCode,
       ) ?? null;
 
-  const existingCitation = findCitation(citationTypeCode);
-
+  /*
+   * Las citaciones pueden programarse anticipadamente y no
+   * dependen de la asistencia ni del cierre de entrevistas previas.
+   *
+   * Solo se bloquea el mismo tipo cuando ya existe una citación
+   * vigente. Reprogramaciones/cancelaciones pueden volver a utilizarlo.
+   */
   if (
     existingCitation &&
     !allowsCitationTypeRetry(existingCitation, episodeEvents)
@@ -235,111 +223,6 @@ export function getCitationTypeAvailability(
       reason: 'registrada',
       kind: 'registered',
     };
-  }
-
-  const statusOf = (code: string): string => {
-    const citation = findCitation(code);
-
-    return citation
-      ? normalizeAttendanceStatus(citation, episodeEvents)
-      : '';
-  };
-
-  const interviewCompleted = (
-    firstCode: string,
-    secondCode: string,
-  ): boolean =>
-    attendanceIsPresent(statusOf(firstCode)) ||
-    attendanceIsPresent(statusOf(secondCode));
-
-  if (citationTypeCode === CITATION_CODES.c2e1) {
-    const firstStatus = statusOf(CITATION_CODES.c1e1);
-
-    if (attendanceIsPresent(firstStatus)) {
-      return {
-        available: false,
-        reason: 'no corresponde: primera entrevista completada',
-        kind: 'not-applicable',
-      };
-    }
-
-    if (!attendanceIsAbsent(firstStatus)) {
-      return {
-        available: false,
-        reason: 'requiere inasistencia en C1-E1',
-        kind: 'previous-required',
-      };
-    }
-  }
-
-  if (citationTypeCode === CITATION_CODES.c1e2) {
-    if (
-      !interviewCompleted(
-        CITATION_CODES.c1e1,
-        CITATION_CODES.c2e1,
-      )
-    ) {
-      return {
-        available: false,
-        reason: 'complete primero la primera entrevista',
-        kind: 'previous-required',
-      };
-    }
-  }
-
-  if (citationTypeCode === CITATION_CODES.c2e2) {
-    const firstStatus = statusOf(CITATION_CODES.c1e2);
-
-    if (attendanceIsPresent(firstStatus)) {
-      return {
-        available: false,
-        reason: 'no corresponde: segunda entrevista completada',
-        kind: 'not-applicable',
-      };
-    }
-
-    if (!attendanceIsAbsent(firstStatus)) {
-      return {
-        available: false,
-        reason: 'requiere inasistencia en C1-E2',
-        kind: 'previous-required',
-      };
-    }
-  }
-
-  if (citationTypeCode === CITATION_CODES.c1e3) {
-    if (
-      !interviewCompleted(
-        CITATION_CODES.c1e2,
-        CITATION_CODES.c2e2,
-      )
-    ) {
-      return {
-        available: false,
-        reason: 'complete primero la segunda entrevista',
-        kind: 'previous-required',
-      };
-    }
-  }
-
-  if (citationTypeCode === CITATION_CODES.c2e3) {
-    const firstStatus = statusOf(CITATION_CODES.c1e3);
-
-    if (attendanceIsPresent(firstStatus)) {
-      return {
-        available: false,
-        reason: 'no corresponde: tercera entrevista completada',
-        kind: 'not-applicable',
-      };
-    }
-
-    if (!attendanceIsAbsent(firstStatus)) {
-      return {
-        available: false,
-        reason: 'requiere inasistencia en C1-E3',
-        kind: 'previous-required',
-      };
-    }
   }
 
   return {

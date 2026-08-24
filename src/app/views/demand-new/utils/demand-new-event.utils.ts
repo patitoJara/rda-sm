@@ -59,6 +59,20 @@ export function buildEventTime(
   )}:00`;
 }
 
+export function buildEventTime24(
+  hourValue: string | null | undefined,
+): string | null {
+  const hourText = String(hourValue ?? '').trim();
+
+  const match = hourText.match(/^([01]\d|2[0-3]):([0-5]\d)$/);
+
+  if (!match) {
+    return null;
+  }
+
+  return `${match[1]}:${match[2]}:00`;
+}
+
 export function normalizeSemaphoreColor(
   value: string | null | undefined,
 ): string {
