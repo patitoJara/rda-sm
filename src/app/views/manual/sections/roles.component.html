@@ -1,34 +1,123 @@
-<mat-card class="manual-section" id="roles">
+﻿<mat-card class="manual-section" id="roles">
+
   <div class="section-header">
     <mat-icon>security</mat-icon>
     <h2>Roles y Permisos</h2>
   </div>
 
-  <!-- Caja informativa -->
+
+  <!-- =====================================================
+       DESCRIPCIÓN GENERAL
+  ====================================================== -->
+
   <div class="manual-box box-info">
     <mat-icon>info</mat-icon>
+
     <div>
-      El sistema implementa control de acceso basado en roles, determinando
-      qué módulos y acciones están disponibles para cada usuario.
+      Los <strong>roles</strong> determinan qué funciones y acciones
+      puede utilizar cada usuario dentro del sistema.
     </div>
   </div>
 
   <p>
-    Los roles definidos en el sistema son:
+    Dependiendo del rol asignado, algunas opciones pueden estar disponibles
+    y otras permanecer restringidas.
   </p>
 
-  <ul class="manual-list">
-    <li><strong>Administrador:</strong> acceso total al sistema.</li>
-    <li><strong>Supervisor:</strong> visualización y gestión de demandas.</li>
-    <li><strong>Administrativo:</strong> registro y edición de demandas.</li>
-  </ul>
 
-  <!-- Nota de gestión -->
-  <div class="manual-box box-success">
-    <mat-icon>check_circle</mat-icon>
+  <!-- =====================================================
+       ROLES DISPONIBLES
+  ====================================================== -->
+
+  <h3 class="manual-subtitle">Roles disponibles</h3>
+
+  <div class="manual-box box-rule">
+    <mat-icon>admin_panel_settings</mat-icon>
+
     <div>
-      Los roles se asignan al momento del inicio de sesión y pueden
-      modificarse posteriormente según las configuraciones del sistema.
+      <strong>Administrador</strong>
+
+      <p>
+        Tiene acceso amplio al sistema y puede realizar tareas de administración,
+        incluyendo la gestión de mantenedores y configuraciones disponibles.
+      </p>
     </div>
   </div>
+
+  <div class="manual-box box-success">
+    <mat-icon>supervisor_account</mat-icon>
+
+    <div>
+      <strong>Supervisor</strong>
+
+      <p>
+        Puede revisar y gestionar demandas de acuerdo con los permisos
+        asociados a su perfil.
+      </p>
+    </div>
+  </div>
+
+  <div class="manual-box box-info">
+    <mat-icon>badge</mat-icon>
+
+    <div>
+      <strong>Administrativo</strong>
+
+      <p>
+        Puede registrar y gestionar demandas según las funciones
+        habilitadas para su rol.
+      </p>
+    </div>
+  </div>
+
+
+  <!-- =====================================================
+       PROGRAMA ACTIVO
+  ====================================================== -->
+
+  <h3 class="manual-subtitle">Rol y programa activo</h3>
+
+  <p>
+    Además del rol, el sistema considera el
+    <strong>programa desde el cual está trabajando el usuario</strong>.
+  </p>
+
+  <div class="manual-box box-warning">
+    <mat-icon>account_tree</mat-icon>
+
+    <div>
+      Una demanda puede estar activa, pero eso no significa que todos los
+      programas puedan realizar acciones sobre ella.
+    </div>
+  </div>
+
+  <p>
+    Si el programa del usuario mantiene una etapa abierta, podrá realizar
+    las acciones correspondientes. Si la etapa de ese programa ya terminó,
+    la demanda podrá quedar disponible solo para consulta.
+  </p>
+
+
+  <!-- =====================================================
+       CAMBIO DE CONTEXTO
+  ====================================================== -->
+
+  <h3 class="manual-subtitle">Cambio de rol o programa</h3>
+
+  <p>
+    Cuando un usuario tiene más de un rol o programa disponible,
+    debe verificar cuál se encuentra seleccionado antes de comenzar
+    una gestión.
+  </p>
+
+  <div class="manual-box box-success">
+    <mat-icon>check_circle</mat-icon>
+
+    <div>
+      <strong>Antes de gestionar una demanda:</strong>
+      revise que el rol y el programa seleccionados correspondan
+      al contexto en el que necesita trabajar.
+    </div>
+  </div>
+
 </mat-card>

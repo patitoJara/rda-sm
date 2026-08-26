@@ -1,4 +1,4 @@
-<div class="manual-container" #manualScroll (scroll)="onScroll()">
+﻿<div class="manual-container" #manualScroll (scroll)="onScroll()">
   <div class="manual-content">
     <!-- CABECERA -->
     <mat-card class="manual-header" id="manual-top">
@@ -19,17 +19,10 @@
       </p>
       <ul class="manual-list">
         <li><a (click)="scrollTo('intro')">📘 Introducción</a></li>
-        <li><a (click)="scrollTo('persona')">👤 Persona</a></li>
         <li>
-          <a (click)="scrollTo('episodio')">📁 Episodio / Nueva demanda</a>
+          <a (click)="scrollTo('flujo-demanda')">🔄 Cómo funciona una demanda</a>
         </li>
-        <li><a (click)="scrollTo('etapa')">🌿 Etapa por programa</a></li>
-        <li><a (click)="scrollTo('eventos')">🗓️ Eventos del episodio</a></li>
-        <li>
-          <a (click)="scrollTo('referencia')">🔀 Referencia entre programas</a>
-        </li>
-        <li><a (click)="scrollTo('sustancias')">🧪 Sustancias</a></li>
-        <li>
+<li>
           <a (click)="scrollTo('listado')">📋 Listado de Demandas</a>
         </li>
         <li>
@@ -46,14 +39,8 @@
     <!-- SECCIONES -->
     <app-intro></app-intro>
 
-    <app-persona></app-persona>
-    <app-episodio></app-episodio>
-    <app-etapa></app-etapa>
-    <app-eventos></app-eventos>
-    <app-referencia></app-referencia>
-    <app-sustancias></app-sustancias>
-
-    <app-listado></app-listado>
+    <app-flujo-demanda></app-flujo-demanda>
+<app-listado></app-listado>
     <app-panel-estrategico></app-panel-estrategico>
     <app-mantenedores></app-mantenedores>
     <app-roles></app-roles>
@@ -72,3 +59,5 @@
 >
   <mat-icon>keyboard_arrow_up</mat-icon>
 </button>
+
+

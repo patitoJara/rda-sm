@@ -1,5 +1,5 @@
-﻿<section class="directory-page">
-  <header class="directory-hero">
+<section class="directory-page">
+  <div class="directory-fixed-header"><header class="directory-hero">
     <div>
       <span class="directory-hero__eyebrow">
         <mat-icon>contact_mail</mat-icon>
@@ -215,6 +215,8 @@
     </div>
   </mat-card>
 
+    </div>
+
   <div class="directory-workspace">
 
   <section
@@ -314,23 +316,6 @@
               </small>
             </span>
           </mat-panel-title>
-
-          <mat-panel-description>
-            <span
-              class="program-email"
-              *ngIf="item.program.email; else programWithoutEmail"
-            >
-              <mat-icon>mail</mat-icon>
-              {{ item.program.email }}
-            </span>
-
-            <ng-template #programWithoutEmail>
-              <span class="missing-email">
-                <mat-icon>mail_off</mat-icon>
-                Programa sin correo
-              </span>
-            </ng-template>
-          </mat-panel-description>
         </mat-expansion-panel-header>
 
         <div class="program-summary">
@@ -347,14 +332,6 @@
           <div>
             <span>Dirección</span>
             <strong>{{ item.program.address || "No registrada" }}</strong>
-          </div>
-
-          <div>
-            <span>Equipo y accesos</span>
-            <strong>
-              {{ item.userCount }} usuario(s) ·
-              {{ item.professionalCount }} facultativo(s)
-            </strong>
           </div>
         </div>
 

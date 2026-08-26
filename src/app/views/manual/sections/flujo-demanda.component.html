@@ -1,0 +1,527 @@
+﻿<mat-card class="manual-section demand-flow-section" id="flujo-demanda">
+
+  <div class="section-header">
+    <mat-icon class="icon-primary">account_tree</mat-icon>
+    <h2>¿Cómo funciona una demanda?</h2>
+  </div>
+
+  <p class="flow-intro">
+    Una demanda avanza mediante acciones sucesivas. Cada acción permite registrar
+    lo que ocurre con la persona y determinar cuál es el siguiente paso.
+  </p>
+
+  <div class="manual-box box-info">
+    <mat-icon>lightbulb</mat-icon>
+    <div>
+      <strong>Idea principal:</strong>
+      una demanda representa todo el proceso de atención de una persona.
+      Durante ese proceso puede pasar por uno o más programas sin perder su historia.
+    </div>
+  </div>
+
+
+  <!-- =====================================================
+       CONCEPTOS CLAVE
+  ====================================================== -->
+
+  <div class="manual-box box-neutral flow-concepts-box">
+    <mat-icon>menu_book</mat-icon>
+
+    <div>
+      <strong>Tres conceptos para entender el sistema</strong>
+
+      <p>
+        <strong>Demanda:</strong>
+        corresponde a todo el proceso que comienza con una solicitud de atención.
+      </p>
+
+      <p>
+        <strong>Episodio:</strong>
+        es el registro que reúne la historia completa de esa demanda.
+      </p>
+
+      <p>
+        <strong>Etapa:</strong>
+        corresponde al período durante el cual un programa participa
+        y gestiona la demanda.
+      </p>
+
+      <p>
+        Si la persona pasa a otro programa, continúa el mismo episodio
+        y comienza una nueva etapa para el programa receptor.
+      </p>
+    </div>
+  </div>
+
+
+  <!-- =====================================================
+       FLUJO PRINCIPAL
+  ====================================================== -->
+
+  <h3 class="subsection-title flow-title">
+    Flujo principal
+  </h3>
+
+  <div class="demand-flow">
+
+    <!-- 1 -->
+    <div class="flow-step">
+      <div class="flow-step-number">1</div>
+
+      <div class="flow-step-icon">
+        <mat-icon>person_add</mat-icon>
+      </div>
+
+      <div class="flow-step-content">
+        <span class="flow-step-label">Inicio</span>
+        <h3>Crear demanda</h3>
+
+        <p>
+          Se registra la solicitud de atención y se crea el episodio asociado
+          a la persona.
+        </p>
+
+        <div class="flow-step-tags">
+          <span>Persona</span>
+          <span>Solicitud</span>
+          <span>Antecedentes</span>
+          <span>Sustancias</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-context-note">
+      <mat-icon>info</mat-icon>
+
+      <div>
+        <strong>Al crear la demanda</strong>
+        <p>
+          Se incorporan los antecedentes necesarios para comprender la solicitud,
+          incluyendo la sustancia principal y, cuando corresponda, sustancias secundarias.
+        </p>
+      </div>
+    </div>
+
+    <div class="flow-arrow">
+      <mat-icon>south</mat-icon>
+    </div>
+
+
+    <!-- 2 -->
+    <div class="flow-step">
+      <div class="flow-step-number">2</div>
+
+      <div class="flow-step-icon">
+        <mat-icon>event</mat-icon>
+      </div>
+
+      <div class="flow-step-content">
+        <span class="flow-step-label">Contacto</span>
+        <h3>Crear citación</h3>
+        <p>
+          Se agenda una fecha para contactar, entrevistar o evaluar
+          a la persona.
+        </p>
+      </div>
+    </div>
+
+    <div class="flow-arrow">
+      <mat-icon>south</mat-icon>
+    </div>
+
+
+    <!-- 3 -->
+    <div class="flow-step">
+      <div class="flow-step-number">3</div>
+
+      <div class="flow-step-icon">
+        <mat-icon>how_to_reg</mat-icon>
+      </div>
+
+      <div class="flow-step-content">
+        <span class="flow-step-label">Resultado de la citación</span>
+        <h3>Registrar asistencia</h3>
+        <p>
+          Se registra si la persona asistió o no asistió a la citación.
+        </p>
+      </div>
+    </div>
+
+    <div class="flow-arrow">
+      <mat-icon>south</mat-icon>
+    </div>
+
+
+    <!-- 4 -->
+    <div class="flow-step">
+      <div class="flow-step-number">4</div>
+
+      <div class="flow-step-icon">
+        <mat-icon>fact_check</mat-icon>
+      </div>
+
+      <div class="flow-step-content">
+        <span class="flow-step-label">Evaluación</span>
+        <h3>Evaluar la demanda</h3>
+
+        <p>
+          Se realizan las citaciones y entrevistas necesarias hasta contar
+          con antecedentes suficientes para definir cómo continuará la demanda.
+        </p>
+
+        <div class="flow-evaluation-options">
+          <div class="evaluation-option">
+            <mat-icon>event_repeat</mat-icon>
+            <span>Nueva citación si es necesario</span>
+          </div>
+
+          <div class="evaluation-option">
+            <mat-icon>check_circle_outline</mat-icon>
+            <span>Antecedentes suficientes para decidir</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-arrow">
+      <mat-icon>south</mat-icon>
+    </div>
+
+
+    <!-- 5 -->
+    <div class="flow-step flow-step-decision">
+      <div class="flow-step-number">5</div>
+
+      <div class="flow-step-icon">
+        <mat-icon>alt_route</mat-icon>
+      </div>
+
+      <div class="flow-step-content">
+        <span class="flow-step-label">Decisión</span>
+        <h3>Registrar retroalimentación</h3>
+
+        <p>
+          Se registra la decisión tomada por el programa respecto de la demanda.
+        </p>
+
+        <div class="flow-feedback-tags">
+          <span>Decisión del programa</span>
+          <span>Resultado de la etapa</span>
+        </div>
+
+        <div class="flow-feedback-note">
+          <mat-icon>info</mat-icon>
+          <span>
+            La retroalimentación define cómo continúa la demanda desde este programa.
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- =====================================================
+       DOCUMENTOS Y REPORTES
+  ====================================================== -->
+
+  <h3 class="subsection-title">
+    Documentos y reportes
+  </h3>
+
+  <p>
+    Durante la gestión de una demanda, el sistema permite generar documentos
+    de apoyo asociados a la información registrada.
+  </p>
+
+  <div class="manual-box box-info">
+    <mat-icon>description</mat-icon>
+
+    <div>
+      <strong>Reporte de citación</strong>
+
+      <p>
+        Permite generar un documento con los antecedentes de la citación
+        registrada, para su entrega o respaldo cuando corresponda.
+      </p>
+    </div>
+  </div>
+
+  <div class="manual-box box-info">
+    <mat-icon>article</mat-icon>
+
+    <div>
+      <strong>Reporte SISTRAT</strong>
+
+      <p>
+        Permite generar el documento requerido para apoyar el registro
+        o continuidad de la información en SISTRAT, utilizando los antecedentes
+        disponibles en la demanda.
+      </p>
+    </div>
+  </div>
+
+  <div class="manual-box box-success">
+    <mat-icon>info</mat-icon>
+
+    <div>
+      Estos reportes apoyan la gestión, pero no modifican por sí solos
+      el estado de la demanda.
+    </div>
+  </div>
+
+
+  <!-- =====================================================
+       RESULTADOS
+  ====================================================== -->
+
+  <div class="flow-result-header">
+    <mat-icon>call_split</mat-icon>
+
+    <div>
+      <strong>¿Qué puede ocurrir después?</strong>
+      <span>El resultado determina cómo continúa la demanda.</span>
+    </div>
+  </div>
+
+
+  <div class="flow-results">
+
+    <!-- LISTA ESPERA -->
+    <article class="flow-result-card result-wait">
+      <div class="result-icon">
+        <mat-icon>schedule</mat-icon>
+      </div>
+
+      <h3>Lista de espera</h3>
+
+      <p>
+        La persona cumple las condiciones para continuar,
+        pero debe esperar disponibilidad.
+      </p>
+
+      <div class="result-state">
+        <mat-icon>play_circle</mat-icon>
+        <span>La demanda continúa abierta</span>
+      </div>
+    </article>
+
+
+    <!-- REFERENCIA -->
+    <article class="flow-result-card result-reference">
+      <div class="result-icon">
+        <mat-icon>sync_alt</mat-icon>
+      </div>
+
+      <h3>Referencia</h3>
+
+      <p>
+        La atención debe continuar en otro programa.
+      </p>
+
+      <div class="result-state">
+        <mat-icon>account_tree</mat-icon>
+        <span>El mismo episodio continúa</span>
+      </div>
+    </article>
+
+
+    <!-- TRATAMIENTO -->
+    <article class="flow-result-card result-treatment">
+      <div class="result-icon">
+        <mat-icon>check_circle</mat-icon>
+      </div>
+
+      <h3>Ingreso a tratamiento</h3>
+
+      <p>
+        La persona ingresa efectivamente al proceso de tratamiento.
+      </p>
+
+      <div class="result-state">
+        <mat-icon>task_alt</mat-icon>
+        <span>Finaliza el proceso de demanda</span>
+      </div>
+    </article>
+
+
+    <!-- ABANDONO -->
+    <article class="flow-result-card result-abandonment">
+      <div class="result-icon">
+        <mat-icon>cancel</mat-icon>
+      </div>
+
+      <h3>Abandono</h3>
+
+      <p>
+        El proceso termina debido al abandono de la gestión.
+      </p>
+
+      <div class="result-state">
+        <mat-icon>stop_circle</mat-icon>
+        <span>Finaliza la demanda</span>
+      </div>
+    </article>
+
+  </div>
+
+
+  <!-- =====================================================
+       CAMBIO DE PROGRAMA
+  ====================================================== -->
+
+  <div class="manual-box box-info flow-kpi-box">
+    <mat-icon>timelapse</mat-icon>
+
+    <div>
+      <strong>¿Qué significa KPI de espera?</strong>
+
+      <p>
+        KPI significa <strong>Indicador Clave de Desempeño</strong>.
+        En este sistema, el KPI de espera muestra cuántos días han transcurrido
+        desde la fecha original de solicitud de la demanda hasta el ingreso
+        efectivo a tratamiento.
+      </p>
+
+      <p>
+        Las citaciones, entrevistas o referencias entre programas no reinician
+        este conteo.
+      </p>
+    </div>
+  </div>
+
+  <h3 class="subsection-title program-flow-title">
+    ¿Qué ocurre cuando la demanda pasa a otro programa?
+  </h3>
+
+  <p>
+    La referencia cambia el programa que continúa la atención,
+    pero no crea una nueva demanda.
+  </p>
+
+
+  <div class="program-flow">
+
+    <div class="program-flow-card">
+      <div class="program-flow-icon">
+        <mat-icon>business</mat-icon>
+      </div>
+
+      <span class="program-flow-kicker">Programa de origen</span>
+
+      <h3>Gestiona su etapa</h3>
+
+      <p>
+        Realiza las acciones correspondientes mientras su etapa
+        se encuentre abierta.
+      </p>
+    </div>
+
+
+    <div class="program-flow-link">
+      <span>Referencia</span>
+      <mat-icon>east</mat-icon>
+    </div>
+
+
+    <div class="program-flow-card">
+      <div class="program-flow-icon">
+        <mat-icon>forward_to_inbox</mat-icon>
+      </div>
+
+      <span class="program-flow-kicker">Programa receptor</span>
+
+      <h3>Continúa la atención</h3>
+
+      <p>
+        Recibe la demanda y comienza su propia etapa dentro
+        del mismo episodio.
+      </p>
+    </div>
+
+  </div>
+
+
+  <div class="same-episode-box">
+    <mat-icon>history</mat-icon>
+
+    <div>
+      <strong>Mismo episodio, misma historia</strong>
+
+      <p>
+        Las citaciones, asistencias, resultados y referencias anteriores
+        permanecen asociadas a la demanda.
+      </p>
+    </div>
+  </div>
+
+
+  <!-- =====================================================
+       GESTIONAR / SOLO LECTURA
+  ====================================================== -->
+
+  <h3 class="subsection-title access-flow-title">
+    ¿Por qué algunas demandas se pueden gestionar y otras son solo lectura?
+  </h3>
+
+  <div class="access-flow">
+
+    <div class="access-card access-manage">
+      <div class="access-icon">
+        <mat-icon>edit</mat-icon>
+      </div>
+
+      <div>
+        <span class="access-label">GESTIONAR</span>
+
+        <h3>Mi programa mantiene una etapa abierta</h3>
+
+        <p>
+          El programa puede continuar realizando las acciones
+          que correspondan sobre esa demanda.
+        </p>
+      </div>
+    </div>
+
+
+    <div class="access-card access-readonly">
+      <div class="access-icon">
+        <mat-icon>visibility</mat-icon>
+      </div>
+
+      <div>
+        <span class="access-label">SOLO LECTURA</span>
+
+        <h3>La etapa de mi programa ya terminó</h3>
+
+        <p>
+          El usuario puede consultar la historia de la demanda,
+          pero no realizar nuevas acciones desde ese programa.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+
+  <div class="manual-box box-warning flow-final-rule">
+    <mat-icon>info</mat-icon>
+
+    <div>
+      <strong>Importante:</strong>
+      que una demanda continúe abierta no significa necesariamente que todos
+      los programas puedan gestionarla. La demanda puede seguir activa en otro
+      programa mientras la etapa del programa consultado ya se encuentra cerrada.
+    </div>
+  </div>
+
+</mat-card>
+
+
+
+
+
+
+
+
+
+

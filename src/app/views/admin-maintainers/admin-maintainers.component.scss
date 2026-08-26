@@ -221,14 +221,6 @@
   }
 }
 
-mat-chip {
-  background: #e8f2ff !important;
-  color: #155e75 !important;
-  font-weight: 700;
-  pointer-events: none;
-  cursor: default;
-}
-
 .card-action {
   display: inline-flex;
   align-items: center;
@@ -356,4 +348,369 @@ mat-chip {
 
 ::ng-deep .admin-page .admin-search-field input.mat-mdc-input-element {
   padding-left: 4px !important;
+}
+
+/* ===== Centro de mantenedores: vista compacta ===== */
+
+.admin-page {
+  padding: 20px 22px 72px;
+}
+
+.admin-hero {
+  gap: 18px;
+  padding: 20px 22px;
+  border-radius: 18px;
+
+  h1 {
+    margin: 4px 0 5px;
+    font-size: clamp(1.55rem, 2.4vw, 2.15rem);
+  }
+
+  p {
+    font-size: 0.92rem;
+    line-height: 1.4;
+  }
+}
+
+.eyebrow {
+  padding: 4px 10px;
+  font-size: 0.7rem;
+}
+
+.hero-badge {
+  min-width: 220px;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+
+  mat-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 32px;
+  }
+
+  span {
+    font-size: 0.8rem;
+  }
+}
+
+.toolbar-card {
+  margin: 14px 0 16px;
+  padding: 8px 10px;
+  border-radius: 14px;
+}
+
+.maintainer-group {
+  margin-top: 18px;
+}
+
+.group-header {
+  gap: 10px;
+  margin-bottom: 10px;
+
+  h2 {
+    font-size: 1.1rem;
+  }
+
+  p {
+    margin-top: 2px;
+    font-size: 0.84rem;
+  }
+}
+
+.group-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+
+  mat-icon {
+    font-size: 21px;
+    width: 21px;
+    height: 21px;
+  }
+}
+
+.cards-grid {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.maintainer-card {
+  min-height: 150px;
+  padding: 14px 15px;
+  border-radius: 15px;
+  box-shadow: 0 6px 16px rgba(22, 55, 65, 0.07);
+
+  h3 {
+    margin: 10px 0 5px;
+    font-size: 1rem;
+  }
+
+  p {
+    min-height: 36px;
+    font-size: 0.84rem;
+    line-height: 1.35;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(22, 55, 65, 0.11);
+  }
+}
+
+.maintainer-card.clickable {
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 3px solid rgba(15, 107, 117, 0.22);
+    outline-offset: 3px;
+  }
+}
+
+.card-top {
+  justify-content: flex-start;
+}
+
+.card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+
+  mat-icon {
+    width: 21px;
+    height: 21px;
+    font-size: 21px;
+  }
+}
+
+.card-action {
+  margin-top: 10px;
+  font-size: 0.84rem;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+/* ===== Acceso rápido a grupos ===== */
+
+.quick-groups {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  margin: -4px -22px 14px;
+  padding: 10px 22px;
+
+  background: rgba(244, 247, 248, 0.96);
+  backdrop-filter: blur(8px);
+
+  border-bottom: 1px solid #d8e4e7;
+  box-shadow: 0 4px 12px rgba(22, 55, 65, 0.06);
+}
+
+.quick-groups-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: 2px;
+  color: #60747b;
+  font-size: 0.82rem;
+  font-weight: 700;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    color: #0f6b75;
+  }
+}
+
+.quick-group-button {
+  padding: 6px 11px;
+  border: 1px solid #c9dcdf;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #0f5f69;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease,
+    transform 0.16s ease;
+
+  &:hover {
+    background: #eaf5f5;
+    border-color: #8fc5c9;
+    color: #0f4d56;
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba(15, 107, 117, 0.2);
+    outline-offset: 2px;
+  }
+}
+
+.maintainer-group {
+  scroll-margin-top: 82px;
+}
+
+@media (max-width: 760px) {
+  .quick-groups {
+    gap: 6px;
+  }
+
+  .quick-group-button {
+    padding: 6px 9px;
+    font-size: 0.78rem;
+  }
+}
+/* ===== Layout fijo superior + grupos scrollables ===== */
+
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+
+  /* El espacio inferior ahora pertenece al área que desplaza */
+  padding-bottom: 0;
+}
+
+.admin-fixed-header {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 30;
+  background: #f4f7f8;
+}
+
+.admin-fixed-header .quick-groups {
+  position: static;
+  top: auto;
+  z-index: auto;
+
+  margin: -4px -22px 0;
+  padding: 10px 22px;
+
+  border-bottom: 1px solid #d8e4e7;
+  box-shadow: 0 4px 12px rgba(22, 55, 65, 0.06);
+}
+
+.groups-scroll {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  padding: 0 0 72px;
+
+  scroll-behavior: smooth;
+}
+
+/*
+ * Espacio de desplazamiento adicional.
+ * Permite que incluso el último grupo pueda subir
+ * hasta la parte superior del área scrollable.
+ */
+.groups-scroll::after {
+  content: "";
+  display: block;
+  height: calc(100% - 90px);
+  min-height: 220px;
+  pointer-events: none;
+}
+
+.groups-scroll .maintainer-group {
+  scroll-margin-top: 12px;
+}
+
+.groups-scroll .maintainer-group:first-child {
+  margin-top: 18px;
+}
+
+@media (max-width: 760px) {
+  .admin-fixed-header .quick-groups {
+    margin-left: -18px;
+    margin-right: -18px;
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .groups-scroll::after {
+    min-height: 180px;
+  }
+}
+/* ===== Botón restablecer vista ===== */
+
+.toolbar-card {
+  gap: 10px;
+}
+
+.reset-view-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 0 0 auto;
+
+  min-height: 40px;
+  padding: 0 13px;
+
+  border: 1px solid #c9dcdf;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #0f5f69;
+
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+
+  &:hover:not(:disabled) {
+    background: #eaf5f5;
+    border-color: #8fc5c9;
+  }
+
+  &:disabled {
+    opacity: 0.42;
+    cursor: default;
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba(15, 107, 117, 0.2);
+    outline-offset: 2px;
+  }
+}
+
+@media (max-width: 760px) {
+  .toolbar-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .reset-view-button {
+    align-self: flex-start;
+  }
 }

@@ -1,48 +1,103 @@
-<mat-card class="manual-section" id="mantenedores">
+﻿<mat-card class="manual-section" id="mantenedores">
+
   <div class="section-header">
     <mat-icon>settings</mat-icon>
     <h2>Mantenedores del Sistema</h2>
   </div>
 
-  <!-- Caja informativa -->
+
+  <!-- =====================================================
+       DESCRIPCIÓN GENERAL
+  ====================================================== -->
+
   <div class="manual-box box-info">
     <mat-icon>info</mat-icon>
+
     <div>
-      Los mantenedores permiten administrar los catálogos base utilizados por
-      el sistema, los cuales son fundamentales para el correcto funcionamiento
-      de los registros clínicos y administrativos.
+      Los <strong>Mantenedores del Sistema</strong> permiten administrar
+      las listas y opciones utilizadas en los distintos formularios.
     </div>
   </div>
 
   <p>
-    Los catálogos disponibles incluyen:
+    Estos mantenedores ayudan a mantener la información ordenada y
+    estandarizada, evitando diferencias en la forma de registrar los datos.
   </p>
 
-  <ul class="manual-list">
-    <li>Usuarios</li>
-    <li>Roles</li>
-    <li>Comunas</li>
-    <li>Resultados</li>
-    <li>Profesionales</li>
-    <li>Programas</li>    
-    <li>Sustancias</li>    
-    <li>Estados</li>
-    <li>Quien Deriva</li>
-    <li>Cobertura de Salud</li>
-    <li>Quien Solicita</li>
-    <li>Tipos de contacto</li>
-    <li>No Relevante</li>
-    <li>Genero</li>
 
-  </ul>
+  <!-- =====================================================
+       QUIÉN PUEDE UTILIZARLOS
+  ====================================================== -->
 
-  <!-- Advertencia -->
+  <h3 class="manual-subtitle">¿Quién puede utilizar los mantenedores?</h3>
+
   <div class="manual-box box-warning">
-    <mat-icon>warning</mat-icon>
+    <mat-icon>admin_panel_settings</mat-icon>
+
     <div>
-      El acceso a los mantenedores está restringido a usuarios con rol
-      <strong>Administrador</strong>. La modificación incorrecta de estos
-      catálogos puede afectar la integridad de la información clínica.
+      El acceso está restringido a usuarios con rol
+      <strong>Administrador</strong>.
     </div>
   </div>
+
+  <p>
+    Antes de modificar un elemento, se debe verificar que el cambio sea
+    necesario, ya que puede afectar las opciones disponibles para otros
+    usuarios del sistema.
+  </p>
+
+
+  <!-- =====================================================
+       CATÁLOGOS DISPONIBLES
+  ====================================================== -->
+
+  <h3 class="manual-subtitle">Mantenedores disponibles</h3>
+
+  <ul class="manual-list">
+    <li><strong>Usuarios</strong></li>
+    <li><strong>Roles</strong></li>
+    <li><strong>Comunas</strong></li>
+    <li><strong>Resultados</strong></li>
+    <li><strong>Profesionales</strong></li>
+    <li><strong>Programas</strong></li>
+    <li><strong>Sustancias</strong></li>
+    <li><strong>Estados</strong></li>
+    <li><strong>Quién deriva</strong></li>
+    <li><strong>Cobertura de Salud</strong></li>
+    <li><strong>Quién solicita</strong></li>
+    <li><strong>Tipos de contacto</strong></li>
+    <li><strong>Motivos no relevantes</strong></li>
+    <li><strong>Género</strong></li>
+  </ul>
+
+
+  <!-- =====================================================
+       PRECAUCIÓN
+  ====================================================== -->
+
+  <div class="manual-box box-rule">
+    <mat-icon>warning</mat-icon>
+
+    <div>
+      <strong>Importante:</strong>
+      no elimine ni modifique elementos sin confirmar previamente su uso,
+      especialmente cuando ya existan demandas asociadas a ellos.
+    </div>
+  </div>
+
+
+  <!-- =====================================================
+       IDEA PRINCIPAL
+  ====================================================== -->
+
+  <div class="manual-box box-success">
+    <mat-icon>check_circle</mat-icon>
+
+    <div>
+      <strong>Idea principal:</strong>
+      los mantenedores permiten administrar las opciones comunes que utiliza
+      el sistema para registrar información de manera uniforme.
+    </div>
+  </div>
+
 </mat-card>

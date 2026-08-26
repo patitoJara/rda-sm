@@ -1,4 +1,4 @@
-<mat-card class="manual-section" id="listado">
+﻿<mat-card class="manual-section" id="listado">
 
   <div class="section-header">
     <mat-icon>format_list_bulleted</mat-icon>
@@ -7,233 +7,256 @@
 
   <div class="manual-box box-info">
     <mat-icon>list_alt</mat-icon>
+
     <div>
-      El Listado de Demandas permite consultar, filtrar y revisar las demandas
-      registradas en el sistema, entregando una vista operativa de las personas,
-      episodios, etapas, programas y estados asociados al proceso de atención.
+      El <strong>Listado de Demandas</strong> es la bandeja principal de trabajo.
+      Permite buscar demandas, conocer su situación actual y acceder a aquellas
+      que requieren gestión.
     </div>
   </div>
 
-  <div class="manual-box box-warning">
-    <mat-icon>warning</mat-icon>
-    <div>
-      <strong>Principio central:</strong>
-      el listado debe trabajar únicamente con información real proveniente del
-      backend, endpoints disponibles o modelo antiguo actualmente existente.
-      No se deben utilizar registros ficticios, datos de ejemplo, mocks ni
-      simulaciones visuales.
-    </div>
-  </div>
 
-  <h3 class="manual-subtitle">Lectura funcional del listado</h3>
+  <!-- =====================================================
+       CÓMO LEER EL LISTADO
+  ====================================================== -->
+
+  <h3 class="manual-subtitle">¿Cómo leer el listado?</h3>
+
+  <p>
+    Cada fila representa una demanda. La información mostrada permite reconocer
+    rápidamente a la persona, conocer el programa relacionado con la demanda,
+    revisar su estado y determinar qué acción corresponde realizar.
+  </p>
 
   <div class="manual-box box-neutral">
     <mat-icon>account_tree</mat-icon>
+
     <div>
-      <strong>Persona → Episodio → Etapa actual → Programa → Estado → Detalle</strong>
+      <strong>
+        Persona → Demanda → Programa → Situación actual → Acción
+      </strong>
     </div>
   </div>
 
-  <p>
-    El listado es la puerta de entrada operativa para revisar el estado de las
-    demandas. Desde esta vista el usuario debe poder identificar rápidamente a la
-    persona, su episodio, el programa responsable, la etapa vigente y la
-    situación actual del proceso.
-  </p>
 
-  <h3 class="manual-subtitle">Información mínima esperada</h3>
+  <!-- =====================================================
+       INFORMACIÓN PRINCIPAL
+  ====================================================== -->
+
+  <h3 class="manual-subtitle">¿Qué información puedo encontrar?</h3>
 
   <ul class="manual-list">
-    <li><strong>RUN o identificador:</strong> permite reconocer a la persona asociada a la demanda.</li>
-    <li><strong>Nombre completo:</strong> identificación visible de la persona.</li>
-    <li><strong>Identificador del episodio:</strong> relación con el episodio real de demanda.</li>
-    <li><strong>Fecha original de solicitud:</strong> fecha base para cálculo de espera.</li>
-    <li><strong>Programa actual:</strong> programa responsable vigente.</li>
-    <li><strong>Etapa vigente:</strong> etapa activa o última etapa disponible.</li>
-    <li><strong>Estado actual:</strong> situación funcional de la demanda.</li>
-    <li><strong>Días de espera acumulados:</strong> cálculo desde la fecha original de solicitud.</li>
-    <li><strong>Indicador de criticidad:</strong> visible cuando la espera supera 60 días.</li>
-    <li><strong>Resultado, cierre o egreso:</strong> información visible cuando exista registro real.</li>
+    <li>
+      <strong>RUN y nombre:</strong>
+      permiten identificar a la persona.
+    </li>
+
+    <li>
+      <strong>Fecha de solicitud:</strong>
+      indica cuándo comenzó la demanda.
+    </li>
+
+    <li>
+      <strong>Programa:</strong>
+      permite identificar el programa relacionado con la atención.
+    </li>
+
+    <li>
+      <strong>Situación actual:</strong>
+      muestra en qué condición se encuentra la demanda.
+    </li>
+
+    <li>
+      <strong>Días de espera:</strong>
+      permite conocer cuánto tiempo ha transcurrido desde la solicitud.
+    </li>
+
+    <li>
+      <strong>Última gestión:</strong>
+      permite reconocer la acción más reciente registrada.
+    </li>
+
+    <li>
+      <strong>Acción disponible:</strong>
+      indica si la demanda puede ser gestionada o consultada.
+    </li>
   </ul>
 
-  <h3 class="manual-subtitle">Filtros esperados</h3>
+
+  <!-- =====================================================
+       BUSCAR Y FILTRAR
+  ====================================================== -->
+
+  <h3 class="manual-subtitle">Buscar y filtrar demandas</h3>
 
   <p>
-    Los filtros permiten acotar el listado para facilitar la gestión operativa,
-    supervisión de casos críticos y revisión por programa o estado.
+    Los filtros ayudan a encontrar rápidamente las demandas que se necesitan
+    revisar, sin recorrer toda la bandeja.
   </p>
 
   <ul class="manual-list">
-    <li><strong>Búsqueda por RUN:</strong> localiza demandas asociadas a una persona específica.</li>
-    <li><strong>Búsqueda por nombre:</strong> permite ubicar registros por identificación textual.</li>
-    <li><strong>Filtro por programa:</strong> muestra demandas asociadas a un programa determinado.</li>
-    <li><strong>Filtro por estado:</strong> segmenta según estado real informado por backend.</li>
-    <li><strong>Filtro por etapa:</strong> permite revisar demandas según etapa vigente.</li>
-    <li><strong>Filtro por casos críticos:</strong> muestra demandas con espera mayor a 60 días.</li>
-    <li><strong>Filtro por fecha de solicitud:</strong> acota resultados por período.</li>
-    <li><strong>Filtro por personas en espera:</strong> identifica casos sin ingreso efectivo a tratamiento.</li>
-    <li><strong>Filtro por ingresos a tratamiento:</strong> identifica casos donde el KPI de espera se detuvo.</li>
-    <li><strong>Filtro por egresos o cierres:</strong> permite consultar demandas finalizadas formalmente.</li>
+    <li>
+      <strong>RUN:</strong>
+      permite buscar una persona específica.
+    </li>
+
+    <li>
+      <strong>Nombre o apellido:</strong>
+      permite localizar una persona por sus datos de identificación.
+    </li>
+
+    <li>
+      <strong>Estado o resultado:</strong>
+      permite revisar demandas según su situación.
+    </li>
+
+    <li>
+      <strong>Demandas activas o históricas:</strong>
+      permite distinguir los procesos vigentes de aquellos que ya finalizaron.
+    </li>
   </ul>
 
   <div class="manual-box box-success">
     <mat-icon>filter_alt</mat-icon>
+
     <div>
-      Los filtros deben operar sobre datos reales. Si un filtro no cuenta con
-      datos suficientes desde backend, debe mostrar un estado vacío controlado y
-      no completar resultados con información ficticia.
+      Utilice los filtros cuando necesite reducir la cantidad de resultados
+      y encontrar una demanda con mayor rapidez.
     </div>
   </div>
 
-  <h3 class="manual-subtitle">Acciones operativas</h3>
 
-  <ul class="manual-list">
-    <li><strong>Abrir detalle de la demanda:</strong> permite revisar información completa del proceso.</li>
-    <li><strong>Consultar datos de la persona:</strong> muestra identificación y antecedentes disponibles.</li>
-    <li><strong>Revisar episodio activo o histórico:</strong> permite distinguir demanda vigente e historial.</li>
-    <li><strong>Consultar etapa actual:</strong> muestra el programa responsable vigente.</li>
-    <li><strong>Revisar eventos registrados:</strong> permite consultar hitos reales del episodio.</li>
-    <li><strong>Consultar referencias:</strong> muestra movimientos reales entre programas cuando existan.</li>
-    <li><strong>Revisar sustancias asociadas:</strong> solo cuando exista información real en backend.</li>
-    <li><strong>Consultar documentos:</strong> cuando el backend y permisos lo permitan.</li>
-  </ul>
+  <!-- =====================================================
+       DEMANDAS ACTIVAS E HISTÓRICAS
+  ====================================================== -->
 
-  <h3 class="manual-subtitle">Estados visibles esperados</h3>
-
-  <ul class="manual-list">
-    <li><strong>Sin episodio activo:</strong> persona sin demanda vigente registrada.</li>
-    <li><strong>En espera:</strong> demanda pendiente de ingreso efectivo a tratamiento.</li>
-    <li><strong>En evaluación:</strong> caso en revisión técnica, clínica o administrativa.</li>
-    <li><strong>En tratamiento:</strong> persona con ingreso efectivo registrado.</li>
-    <li><strong>Referido a otro programa:</strong> continuidad mediante referencia entre programas.</li>
-    <li><strong>Cerrado por causal formal:</strong> término con motivo administrativo, técnico o clínico.</li>
-    <li><strong>Egresado:</strong> salida formal del proceso de atención.</li>
-    <li><strong>No corresponde:</strong> cierre con causal obligatoria.</li>
-    <li><strong>No es perfil:</strong> cierre inmediato cuando la regla institucional lo permita.</li>
-  </ul>
+  <h3 class="manual-subtitle">Demandas activas e históricas</h3>
 
   <div class="manual-box box-info">
-    <mat-icon>visibility</mat-icon>
+    <mat-icon>pending_actions</mat-icon>
+
     <div>
-      El listado debe permitir identificar visualmente el estado actual de la
-      demanda y abrir el detalle funcional cuando exista información real
-      disponible para esa persona o episodio.
+      <strong>Demandas activas</strong>
+      <p>
+        Corresponden a demandas cuyo proceso todavía continúa y que pueden
+        requerir nuevas acciones.
+      </p>
     </div>
   </div>
 
-  <h3 class="manual-subtitle">Criterio de criticidad</h3>
+  <div class="manual-box box-neutral">
+    <mat-icon>history</mat-icon>
 
-  <p>
-    Un caso se considera crítico cuando supera los
-    <strong>60 días de espera</strong>. Este criterio permite priorizar la
-    revisión de demandas que requieren gestión oportuna por parte de los equipos
-    responsables.
-  </p>
-
-  <p>
-    La espera debe calcularse desde la fecha original de solicitud del episodio
-    y no debe reiniciarse por cambios de programa o referencias.
-  </p>
-
-  <div class="manual-box box-warning">
-    <mat-icon>priority_high</mat-icon>
     <div>
-      La condición crítica debe calcularse sobre información real. No se deben
-      mostrar alertas críticas basadas en fechas inventadas, registros locales o
-      simulaciones.
+      <strong>Demandas históricas</strong>
+      <p>
+        Corresponden a demandas cuyo proceso ya finalizó. Se mantienen
+        disponibles para consultar sus antecedentes e historia.
+      </p>
     </div>
   </div>
 
-  <h3 class="manual-subtitle">Ingreso a tratamiento</h3>
+
+  <!-- =====================================================
+       GESTIONAR / SOLO LECTURA
+  ====================================================== -->
+
+  <h3 class="manual-subtitle">¿Qué acción puedo realizar?</h3>
 
   <p>
-    El KPI de espera se detiene cuando existe ingreso efectivo a tratamiento.
-    La sola referencia, derivación o cambio de etapa no debe detener el cálculo
-    si aún no existe ingreso real registrado.
+    La acción disponible depende de la relación de la demanda con el programa
+    desde el cual está trabajando el usuario.
   </p>
 
   <div class="manual-box box-success">
-    <mat-icon>play_circle</mat-icon>
+    <mat-icon>edit</mat-icon>
+
     <div>
-      El ingreso a tratamiento debe provenir de un evento, estado o dato real
-      entregado por backend. No debe marcarse desde frontend si no existe
-      persistencia confirmada.
+      <strong>Gestionar</strong>
+      <p>
+        Permite ingresar a la demanda y continuar realizando las acciones que
+        correspondan mientras el programa mantenga una etapa abierta.
+      </p>
     </div>
   </div>
-
-  <h3 class="manual-subtitle">Relación con el detalle de demanda</h3>
-
-  <p>
-    Desde el listado, el usuario debe poder acceder al detalle funcional de la
-    demanda, donde se visualiza la información de Persona, Episodio, Etapa,
-    Eventos, Referencias, Sustancias, Documentos, Alertas y Auditoría, siempre
-    que dichos datos existan realmente en backend.
-  </p>
-
-  <ul class="manual-list">
-    <li><strong>Persona:</strong> identificación y datos administrativos reales.</li>
-    <li><strong>Episodio:</strong> demanda activa o histórica asociada.</li>
-    <li><strong>Etapa:</strong> programa responsable vigente o historial de etapas.</li>
-    <li><strong>Eventos:</strong> hitos trazables registrados en el episodio.</li>
-    <li><strong>Referencias:</strong> movimientos reales entre programas.</li>
-    <li><strong>Sustancias:</strong> información disponible solo si existe registro real.</li>
-    <li><strong>Documentos:</strong> archivos asociados cuando exista módulo o endpoint disponible.</li>
-    <li><strong>Auditoría:</strong> trazabilidad de acciones relevantes.</li>
-  </ul>
-
-  <h3 class="manual-subtitle">Relación con el Panel Estratégico</h3>
-
-  <p>
-    Los indicadores del Panel Estratégico deben permitir navegar hacia el
-    Listado de Demandas con filtros aplicados. Por ejemplo, al seleccionar casos
-    críticos, el listado debe mostrar únicamente las demandas que superen los
-    60 días de espera, siempre que existan datos reales para calcularlo.
-  </p>
-
-  <div class="manual-box box-info">
-    <mat-icon>analytics</mat-icon>
-    <div>
-      El listado es la vista de detalle operativo que respalda los indicadores
-      estratégicos. Los totales del panel deben poder explicarse desde registros
-      reales visibles en el listado.
-    </div>
-  </div>
-
-  <h3 class="manual-subtitle">Restricción actual del desarrollo</h3>
-
-  <div class="manual-box box-warning">
-    <mat-icon>storage</mat-icon>
-    <div>
-      Mientras no se tenga acceso confirmado a las tablas nuevas del modelo
-      Persona, Episodio, Etapa, Eventos y Referencias, el listado debe operar
-      solo con datos reales disponibles en el modelo antiguo o endpoints reales
-      actualmente habilitados.
-    </div>
-  </div>
-
-  <p>
-    Si el backend no entrega datos para una columna, indicador o relación, el
-    sistema debe mostrar un estado vacío controlado y no debe inventar
-    información.
-  </p>
-
-  <h3 class="manual-subtitle">Regla contra datos ficticios</h3>
-
-  <div class="manual-box box-warning">
-    <mat-icon>block</mat-icon>
-    <div>
-      No se deben mostrar personas falsas, episodios de ejemplo, programas
-      simulados, fechas inventadas, estados ficticios ni totales calculados
-      sobre datos inexistentes.
-    </div>
-  </div>
-
-  <h3 class="manual-subtitle">Estado vacío esperado</h3>
 
   <div class="manual-box box-neutral">
-    <mat-icon>info</mat-icon>
+    <mat-icon>visibility</mat-icon>
+
     <div>
-      No existen demandas registradas para los filtros seleccionados.
+      <strong>Solo lectura</strong>
+      <p>
+        Permite consultar la información y la historia de la demanda, pero no
+        registrar nuevas acciones desde ese programa.
+      </p>
+    </div>
+  </div>
+
+
+  <!-- =====================================================
+       CASOS CRÍTICOS
+  ====================================================== -->
+
+  <h3 class="manual-subtitle">Casos críticos</h3>
+
+  <div class="manual-box box-warning">
+    <mat-icon>priority_high</mat-icon>
+
+    <div>
+      <strong>Más de 60 días de espera</strong>
+
+      <p>
+        Una demanda se considera crítica cuando supera los
+        <strong>60 días de espera</strong>.
+      </p>
+
+      <p>
+        Esta señal permite identificar situaciones que requieren especial
+        atención y priorizar su revisión.
+      </p>
+    </div>
+  </div>
+
+  <p>
+    Los días de espera se cuentan desde la fecha original de solicitud.
+    Si la demanda pasa a otro programa, este conteo no comienza nuevamente.
+  </p>
+
+
+  <!-- =====================================================
+       INGRESO A TRATAMIENTO
+  ====================================================== -->
+
+  <h3 class="manual-subtitle">Ingreso a tratamiento</h3>
+
+  <div class="manual-box box-success">
+    <mat-icon>play_circle</mat-icon>
+
+    <div>
+      Cuando se registra el <strong>ingreso efectivo a tratamiento</strong>,
+      se detiene el KPI de espera de la demanda.
+    </div>
+  </div>
+
+  <p>
+    Una citación, una entrevista o una referencia hacia otro programa
+    no detienen por sí solas el conteo de espera.
+  </p>
+
+
+  <!-- =====================================================
+       ACCESO AL DETALLE
+  ====================================================== -->
+
+  <h3 class="manual-subtitle">Abrir una demanda</h3>
+
+  <div class="manual-box box-info">
+    <mat-icon>open_in_new</mat-icon>
+
+    <div>
+      Desde el listado puede ingresar al detalle de una demanda para revisar
+      su situación actual, trayectoria, citaciones, antecedentes y las
+      gestiones registradas durante el proceso.
     </div>
   </div>
 

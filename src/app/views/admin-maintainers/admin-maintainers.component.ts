@@ -5,7 +5,6 @@ import { Route, Router, RouterModule } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -15,7 +14,6 @@ interface MaintainerItem {
   description: string;
   icon: string;
   route: string;
-  tag: string;
   group: string;
   order: number;
   disabled?: boolean;
@@ -39,7 +37,6 @@ interface MaintainerGroup {
     RouterModule,
     MatButtonModule,
     MatCardModule,
-    MatChipsModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -105,7 +102,6 @@ export class AdminMaintainersComponent implements OnInit {
       ),
       icon: String(data['icon'] ?? 'settings'),
       route: routePath,
-      tag: String(data['tag'] ?? 'Actual'),
       group: String(data['maintainerGroup'] ?? data['group'] ?? 'Mantenedores'),
       order: Number(data['order'] ?? 999),
       disabled: !route.path || !!data['disabled'],
@@ -153,11 +149,40 @@ export class AdminMaintainersComponent implements OnInit {
       .map((group) => ({
         ...group,
         items: group.items.filter((item) => {
-          const text = `${item.title} ${item.description} ${item.tag} ${item.group}`;
+          const text = `${item.title} ${item.description} ${item.group}`;
           return this.normalize(text).includes(value);
         }),
       }))
       .filter((group) => group.items.length > 0);
+  }
+
+  resetView(): void {
+    this.search = '';
+
+    requestAnimationFrame(() => {
+      const firstGroup = this.groups[0];
+
+      if (firstGroup) {
+        this.scrollToGroup(firstGroup.title);
+      }
+    });
+  }
+
+  groupId(title: string): string {
+    return `maintainer-group-${this.normalize(title).replace(/\s+/g, '-')}`;
+  }
+
+  scrollToGroup(title: string): void {
+    const element = document.getElementById(this.groupId(title));
+
+    if (!element) {
+      return;
+    }
+
+    element.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
   }
 
   openMaintainer(item: MaintainerItem, event?: Event): void {

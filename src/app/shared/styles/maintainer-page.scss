@@ -12,8 +12,9 @@
 }
 
 .maintainer-page {
-  height: 100%;
-  overflow: auto;
+  min-height: 100%;
+  height: auto;
+  overflow: visible;
   padding: 28px 28px 96px;
   background: #f4f7f8;
   color: #17343d;
@@ -25,9 +26,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  padding: 28px;
-  border-radius: 22px;
+  gap: 18px;
+  padding: 16px 22px;
+  border-radius: 18px;
   background:
     linear-gradient(135deg, rgba(15, 77, 86, 0.96), rgba(20, 113, 128, 0.94)),
     radial-gradient(
@@ -39,30 +40,30 @@
   box-shadow: 0 18px 40px rgba(15, 77, 86, 0.22);
 
   h1 {
-    margin: 8px 0;
-    font-size: clamp(1.8rem, 3vw, 2.55rem);
+    margin: 3px 0 5px;
+    font-size: clamp(1.4rem, 2vw, 1.8rem);
     font-weight: 900;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.025em;
   }
 
   p {
-    max-width: 720px;
+    max-width: 800px;
     margin: 0;
     color: rgba(255, 255, 255, 0.84);
-    font-size: 1rem;
-    line-height: 1.5;
+    font-size: 0.9rem;
+    line-height: 1.35;
   }
 }
 
 .eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
+  gap: 6px;
+  padding: 3px 9px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.14);
   color: #d8f3f1;
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -75,8 +76,8 @@
 }
 
 .primary-action {
-  height: 42px;
-  padding: 0 18px;
+  height: 36px;
+  padding: 0 14px;
   border-radius: 999px !important;
   background: #ffffff !important;
   color: #0f6b75 !important;
@@ -179,7 +180,8 @@
 
   table {
     width: 100%;
-    min-width: 980px;
+    min-width: 0;
+    table-layout: auto;
     border-collapse: collapse;
   }
 }
@@ -399,4 +401,28 @@ mat-paginator {
 
 ::ng-deep .maintainer-page .search-field .mat-mdc-select-value {
   padding-left: 4px;
+}
+
+/* ===== CABECERA FIJA COMPLETA DE MANTENEDORES ===== */
+
+.maintainer-sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding-top: 8px;
+  padding-bottom: 1px;
+  background: #f4f7f8;
+}
+
+/* Al estar dentro del bloque fijo reducimos el aire entre hero y filtros */
+.maintainer-sticky-top .toolbar-card {
+  margin-top: 12px;
+  margin-bottom: 14px;
+}
+
+/* Evita transparencias mientras el contenido pasa por debajo */
+.maintainer-sticky-top .maintainer-hero,
+.maintainer-sticky-top .toolbar-card {
+  position: relative;
+  z-index: 1;
 }

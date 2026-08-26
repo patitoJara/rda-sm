@@ -1,250 +1,285 @@
-<mat-card class="manual-section" id="seguridad">
+﻿<mat-card class="manual-section" id="seguridad">
+
   <div class="section-header">
     <mat-icon>lock</mat-icon>
     <h2>Seguridad y Sesión</h2>
   </div>
 
-  <!-- ===================================================== -->
-  <!-- DESCRIPCIÓN GENERAL -->
-  <!-- ===================================================== -->
+
+  <!-- =====================================================
+       DESCRIPCIÓN GENERAL
+  ====================================================== -->
 
   <div class="manual-box box-info">
-    <mat-icon>info</mat-icon>
+    <mat-icon>security</mat-icon>
+
     <div>
-      El sistema cuenta con mecanismos de seguridad orientados a proteger la
-      información clínica y administrativa, garantizando confidencialidad,
-      integridad y disponibilidad de los datos conforme a las normativas
-      institucionales del Servicio de Salud Magallanes.
+      El sistema protege la información mediante acceso con usuario y contraseña,
+      control de permisos y cierre automático de sesión.
     </div>
   </div>
 
-  <p>Las principales medidas de seguridad implementadas son:</p>
+  <p>
+    Para mantener la seguridad de la información, cada usuario debe utilizar
+    sus propias credenciales y cerrar la sesión cuando finalice su trabajo.
+  </p>
 
-  <ul class="manual-list">
-    <li>Autenticación mediante usuario y contraseña institucional.</li>
-    <li>Generación de token seguro de sesión.</li>
-    <li>Control de sesión con expiración automática.</li>
-    <li>Renovación manual antes del vencimiento.</li>
-    <li>Control de acceso basado en roles y programas.</li>
-    <li>Registro seguro de operaciones.</li>
-  </ul>
 
-  <!-- ===================================================== -->
-  <!-- 1. INGRESO AL SISTEMA -->
-  <!-- ===================================================== -->
+  <!-- =====================================================
+       INGRESO AL SISTEMA
+  ====================================================== -->
 
   <h3 class="subsection-title">1. Ingreso al Sistema</h3>
 
   <p>
-    Para acceder al sistema, el usuario debe ingresar su correo electrónico
-    institucional y contraseña en la pantalla de inicio de sesión.
+    Para ingresar, utilice su correo electrónico institucional y contraseña.
   </p>
 
   <ul class="manual-list">
     <li>Ingrese su correo electrónico institucional.</li>
     <li>Ingrese su contraseña.</li>
-    <li>Presione el botón <strong>Iniciar sesión</strong>.</li>
+    <li>Presione <strong>Iniciar sesión</strong>.</li>
   </ul>
 
-  <div class="manual-box box-rule">
-    <mat-icon>warning</mat-icon>
-    <div>
-      Después de 60 minutos de inactividad, la sesión expirará automáticamente
-      para proteger la información del usuario.
-    </div>
-  </div>
 
-  <!-- ===================================================== -->
-  <!-- 2. RECUPERAR CONTRASEÑA -->
-  <!-- ===================================================== -->
+  <!-- =====================================================
+       RECUPERAR CONTRASEÑA
+  ====================================================== -->
 
   <h3 class="subsection-title">2. Recuperar Contraseña</h3>
 
   <p>
-    Si el usuario ha olvidado su contraseña, puede utilizar la opción
-    <strong>“Recuperar contraseña”</strong> disponible en la pantalla de inicio.
+    Si olvidó su contraseña, utilice la opción
+    <strong>Recuperar contraseña</strong> disponible en la pantalla de acceso.
   </p>
 
   <ul class="manual-list">
     <li>Ingrese su correo electrónico institucional.</li>
     <li>Presione <strong>Enviar correo</strong>.</li>
     <li>
-      El sistema enviará una notificación al área de soporte con copia al
-      usuario.
+      El sistema enviará una solicitud de recuperación al área correspondiente.
     </li>
   </ul>
 
-  <!-- ===================================================== -->
-  <!-- 3. CAMBIO DE CONTRASEÑA DESDE RECUPERACIÓN -->
-  <!-- ===================================================== -->
 
-  <h3 class="subsection-title">
-    3. Cambio de Contraseña (desde recuperación)
-  </h3>
+  <!-- =====================================================
+       CAMBIO DE CONTRASEÑA
+  ====================================================== -->
+
+  <h3 class="subsection-title">3. Cambio de Contraseña</h3>
 
   <p>
-    Una vez autorizado el cambio, el usuario podrá ingresar una nueva
-    contraseña desde la pantalla habilitada para tal efecto.
+    La contraseña puede cambiarse después de una recuperación autorizada
+    o directamente desde <strong>Mi Perfil</strong>.
   </p>
 
-  <ul class="manual-list">
-    <li>Ingrese la nueva contraseña.</li>
-    <li>Confirme la nueva contraseña.</li>
-    <li>Presione <strong>Actualizar</strong>.</li>
-  </ul>
+  <div class="manual-box box-neutral">
+    <mat-icon>password</mat-icon>
+
+    <div>
+      <strong>Desde Mi Perfil</strong>
+
+      <p>
+        Seleccione su nombre en la barra superior, ingrese a
+        <strong>Mi Perfil</strong> y utilice la opción para actualizar
+        su contraseña.
+      </p>
+    </div>
+  </div>
 
   <div class="manual-box box-info">
     <mat-icon>info</mat-icon>
+
     <div>
-      La contraseña debe tener al menos 8 caracteres y se recomienda combinar
-      letras, números y símbolos para mayor seguridad.
+      La contraseña debe tener al menos <strong>8 caracteres</strong>.
+      Se recomienda combinar letras, números y símbolos.
     </div>
   </div>
 
-  <!-- ===================================================== -->
-  <!-- 4. CAMBIO DE CONTRASEÑA DESDE MI PERFIL -->
-  <!-- ===================================================== -->
 
-  <h3 class="subsection-title">
-    4. Cambio de Contraseña desde Mi Perfil
-  </h3>
+  <!-- =====================================================
+       RENOVACIÓN DE SESIÓN
+  ====================================================== -->
+
+  <h3 class="subsection-title">4. Renovación de Sesión</h3>
 
   <p>
-    El usuario puede cambiar su contraseña en cualquier momento desde el menú
-    superior del sistema.
+    Cuando la sesión esté próxima a finalizar, el sistema mostrará el tiempo
+    restante en la barra superior.
   </p>
 
   <ul class="manual-list">
-    <li>Seleccione su nombre en la barra superior.</li>
-    <li>Ingrese a <strong>Mi Perfil</strong>.</li>
-    <li>Complete los campos solicitados.</li>
-    <li>Presione <strong>Actualizar contraseña</strong>.</li>
+    <li>Revise el tiempo restante de sesión.</li>
+    <li>Utilice la opción de renovación antes de que el tiempo finalice.</li>
+    <li>Al renovar, podrá continuar trabajando normalmente.</li>
   </ul>
 
-  <!-- ===================================================== -->
-  <!-- 5. RENOVACIÓN DE SESIÓN -->
-  <!-- ===================================================== -->
-
-  <h3 class="subsection-title">5. Renovación de Sesión</h3>
-
-  <p>
-    Cuando la sesión esté próxima a expirar, el sistema mostrará un contador
-    visible en la barra superior indicando el tiempo restante.
-  </p>
-
-  <ul class="manual-list">
-    <li>El contador muestra los minutos restantes de sesión.</li>
-    <li>
-      Antes de expirar, el usuario podrá extender la sesión manualmente.
-    </li>
-    <li>
-      Al renovar la sesión, el sistema genera un nuevo token de seguridad.
-    </li>
-  </ul>
-
-  <div class="manual-box box-info">
+  <div class="manual-box box-success">
     <mat-icon>schedule</mat-icon>
+
     <div>
-      La renovación evita la pérdida de información en formularios que se
-      encuentren en proceso.
+      Renovar la sesión permite continuar trabajando y ayuda a evitar
+      interrupciones mientras completa una gestión.
     </div>
   </div>
 
-  <!-- ===================================================== -->
-  <!-- 6. FLUJO VISUAL DE AUTENTICACIÓN -->
-  <!-- ===================================================== -->
 
-  <div class="manual-box box-flow">
-    <div class="flow-title">
+  <!-- =====================================================
+       EXPIRACIÓN DE LA SESIÓN
+  ====================================================== -->
+
+  <h3 class="subsection-title">5. ¿Qué ocurre cuando vence la sesión?</h3>
+
+  <div class="manual-box box-warning">
+    <mat-icon>timer_off</mat-icon>
+
+    <div>
+      Si la sesión no se renueva dentro del tiempo disponible,
+      el sistema cerrará la sesión y será necesario ingresar nuevamente.
+    </div>
+  </div>
+
+
+  <!-- =====================================================
+       FLUJO VISUAL
+  ====================================================== -->
+
+  <div class="auth-flow-wrapper">
+
+    <div class="auth-flow-title">
       <mat-icon>account_circle</mat-icon>
-      <strong>Flujo de Autenticación del Sistema</strong>
+
+      <div>
+        <strong>Flujo de acceso y sesión</strong>
+        <span>Desde el ingreso hasta el cierre de la sesión.</span>
+      </div>
     </div>
 
-    <div class="flow-container">
-      <div class="flow-step">
-        <div class="step-icon">
+    <div class="auth-flow">
+
+      <!-- 1 -->
+      <div class="auth-flow-step">
+        <div class="auth-flow-number">1</div>
+
+        <div class="auth-flow-icon">
           <mat-icon>login</mat-icon>
         </div>
-        <div class="step-text">
-          <strong>1. Ingreso de Credenciales</strong>
-          <p>El usuario ingresa correo institucional y contraseña.</p>
-        </div>
-      </div>
 
-      <div class="flow-arrow">↓</div>
-
-      <div class="flow-step">
-        <div class="step-icon">
-          <mat-icon>security</mat-icon>
-        </div>
-        <div class="step-text">
-          <strong>2. Validación en Backend</strong>
-          <p>Las credenciales se validan en el servidor seguro.</p>
-        </div>
-      </div>
-
-      <div class="flow-arrow">↓</div>
-
-      <div class="flow-step">
-        <div class="step-icon">
-          <mat-icon>vpn_key</mat-icon>
-        </div>
-        <div class="step-text">
-          <strong>3. Generación de Token</strong>
-          <p>Se genera un token de sesión con tiempo de expiración.</p>
-        </div>
-      </div>
-
-      <div class="flow-arrow">↓</div>
-
-      <div class="flow-step">
-        <div class="step-icon">
-          <mat-icon>assignment_ind</mat-icon>
-        </div>
-        <div class="step-text">
-          <strong>4. Carga de Perfil</strong>
-          <p>Se cargan roles y programas asociados al usuario.</p>
-        </div>
-      </div>
-
-      <div class="flow-arrow">↓</div>
-
-      <div class="flow-step">
-        <div class="step-icon">
-          <mat-icon>schedule</mat-icon>
-        </div>
-        <div class="step-text">
-          <strong>5. Inicio de Temporizador</strong>
-          <p>Se activa el temporizador de sesión (60 minutos).</p>
-        </div>
-      </div>
-
-      <div class="flow-arrow">↓</div>
-
-      <div class="flow-step">
-        <div class="step-icon">
-          <mat-icon>logout</mat-icon>
-        </div>
-        <div class="step-text">
-          <strong>6. Expiración Automática</strong>
+        <div class="auth-flow-content">
+          <h4>Ingresar al sistema</h4>
           <p>
-            Si no hay actividad o renovación, la sesión se cierra
-            automáticamente y se solicita nuevo inicio.
+            El usuario ingresa su correo institucional y contraseña.
           </p>
         </div>
       </div>
+
+      <div class="auth-flow-arrow">
+        <mat-icon>south</mat-icon>
+      </div>
+
+
+      <!-- 2 -->
+      <div class="auth-flow-step">
+        <div class="auth-flow-number">2</div>
+
+        <div class="auth-flow-icon">
+          <mat-icon>verified_user</mat-icon>
+        </div>
+
+        <div class="auth-flow-content">
+          <h4>Acceso autorizado</h4>
+          <p>
+            El sistema permite el ingreso según los permisos del usuario.
+          </p>
+        </div>
+      </div>
+
+      <div class="auth-flow-arrow">
+        <mat-icon>south</mat-icon>
+      </div>
+
+
+      <!-- 3 -->
+      <div class="auth-flow-step">
+        <div class="auth-flow-number">3</div>
+
+        <div class="auth-flow-icon">
+          <mat-icon>assignment_ind</mat-icon>
+        </div>
+
+        <div class="auth-flow-content">
+          <h4>Carga de perfil</h4>
+          <p>
+            Se habilitan los roles y programas asociados al usuario.
+          </p>
+        </div>
+      </div>
+
+      <div class="auth-flow-arrow">
+        <mat-icon>south</mat-icon>
+      </div>
+
+
+      <!-- 4 -->
+      <div class="auth-flow-step">
+        <div class="auth-flow-number">4</div>
+
+        <div class="auth-flow-icon">
+          <mat-icon>schedule</mat-icon>
+        </div>
+
+        <div class="auth-flow-content">
+          <h4>Sesión activa</h4>
+          <p>
+            El usuario trabaja normalmente mientras la sesión permanezca vigente.
+          </p>
+        </div>
+      </div>
+
+      <div class="auth-flow-arrow">
+        <mat-icon>south</mat-icon>
+      </div>
+
+
+      <!-- 5 -->
+      <div class="auth-flow-step auth-flow-step-final">
+        <div class="auth-flow-number">5</div>
+
+        <div class="auth-flow-icon">
+          <mat-icon>logout</mat-icon>
+        </div>
+
+        <div class="auth-flow-content">
+          <h4>Cierre de sesión</h4>
+          <p>
+            El usuario puede cerrar su sesión o deberá ingresar nuevamente
+            cuando esta expire.
+          </p>
+        </div>
+      </div>
+
     </div>
+
   </div>
 
-  <!-- ===================================================== -->
-  <!-- ADVERTENCIA FINAL -->
-  <!-- ===================================================== -->
+
+  <!-- =====================================================
+       BUENAS PRÁCTICAS
+  ====================================================== -->
+
+  <h3 class="subsection-title">Buenas prácticas</h3>
 
   <div class="manual-box box-rule">
     <mat-icon>security</mat-icon>
+
     <div>
-      Se recomienda cambiar la contraseña periódicamente, no compartirla con
-      terceros y cerrar sesión al finalizar el uso del sistema.
+      <ul class="manual-list" style="margin: 0;">
+        <li>No comparta su contraseña con otras personas.</li>
+        <li>Cambie su contraseña periódicamente.</li>
+        <li>Cierre la sesión cuando termine de utilizar el sistema.</li>
+        <li>No deje una sesión abierta en un equipo desatendido.</li>
+      </ul>
     </div>
   </div>
+
 </mat-card>

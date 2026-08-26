@@ -1,28 +1,112 @@
-//src\app\views\users\users.component.scss
+﻿//src\app\views\users\users.component.scss
 
-@use '../../shared/styles/base-list.scss' as *;
+@use '../../shared/styles/maintainer-page.scss' as *;
 
 
-/* Forzar estilos en el título con icono */
-::ng-deep .titulo-genero,
-.titulo-genero {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
+/* ===== TABLA USUARIOS COMPACTA ===== */
 
-  font-size: 1.2rem !important;
-  font-weight: 600 !important;
-  color: #1565c0 !important;
+.table-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: visible;
 }
 
-/* Forzar color en el ícono M3 */
-::ng-deep .titulo-genero mat-icon svg {
-  fill: #1565c0 !important;
-  color: #1565c0 !important;
+.table-wrapper table {
+  width: 100%;
+  max-width: 100%;
+  table-layout: fixed;
 }
 
-/* Por si Material aplica stroke */
-::ng-deep .titulo-genero mat-icon svg * {
-  stroke: #1565c0 !important;
-  fill: #1565c0 !important;
+/* Distribución de las seis columnas visibles */
+.mat-column-rut {
+  width: 13%;
+}
+
+.mat-column-usuario {
+  width: 22%;
+}
+
+.mat-column-cuenta {
+  width: 23%;
+}
+
+.mat-column-acceso {
+  width: 24%;
+}
+
+.mat-column-estado {
+  width: 8%;
+}
+
+.mat-column-acciones {
+  width: 10%;
+}
+
+/* Celdas compuestas */
+.user-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 4px 0;
+}
+
+.user-cell strong,
+.user-name {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.user-secondary {
+  font-size: 11px;
+  line-height: 1.25;
+  opacity: 0.72;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Evitar que Material fuerce contenido ancho */
+.mat-mdc-cell,
+.mat-mdc-header-cell {
+  min-width: 0;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: anywhere;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.mat-column-rut,
+.mat-column-estado,
+.mat-column-acciones {
+  white-space: nowrap;
+}
+
+/* Acciones más compactas */
+.mat-column-acciones button[mat-icon-button] {
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+}
+
+/* Pantallas medianas */
+@media (max-width: 1100px) {
+  .mat-mdc-cell,
+  .mat-mdc-header-cell {
+    padding-left: 5px;
+    padding-right: 5px;
+    font-size: 12px;
+  }
+
+  .user-cell strong,
+  .user-name {
+    font-size: 12px;
+  }
+
+  .user-secondary {
+    font-size: 10px;
+  }
 }

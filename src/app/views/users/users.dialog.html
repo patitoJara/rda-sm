@@ -1,4 +1,4 @@
-<!-- src/app/views/users/users.dialog.html -->
+﻿<!-- src/app/views/users/users.dialog.html -->
 
 <h2 mat-dialog-title class="dialog-title">
   <mat-icon class="title-icon">
@@ -89,14 +89,14 @@
           required
           type="email"
           (blur)="completarCorreo()"
-          placeholder="ejemplo@redsalud.cl"
+          placeholder="ejemplo@redsalud.gob.cl"
           required
         />
         <mat-error *ngIf="form.get('email')?.hasError('required')">
           El email es obligatorio
         </mat-error>
         <mat-hint>
-          Si no se escribe dominio se completará con &#64;redsalud.gob.cl
+          Puede ingresar cualquier correo válido. Si no escribe dominio, se completará con &#64;redsalud.gob.cl
         </mat-hint>
       </mat-form-field>
       <!-- fin campo requerido -->

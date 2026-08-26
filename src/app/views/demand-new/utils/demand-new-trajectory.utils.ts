@@ -7,6 +7,8 @@
   daysInStage?: number | null;
   entryDate?: string | null;
   current?: boolean;
+  closureDate?: string | null;
+  reversalDate?: string | null;
   originStageId?: number;
   destinationStageId?: number;
   originProgramName?: string;
@@ -31,9 +33,11 @@ function toNumericValue(value: unknown): number | null {
 export function buildCompactProgramTrajectory(
   stages: any[],
   references: any[],
+  events: any[] = [],
 ): CompactProgramTrajectoryItem[] {
   const safeStages = Array.isArray(stages) ? stages : [];
   const safeReferences = Array.isArray(references) ? references : [];
+  const safeEvents = Array.isArray(events) ? events : [];
 
   const orderedStages = [...safeStages].sort(
     (left: any, right: any) =>
@@ -78,6 +82,47 @@ export function buildCompactProgramTrajectory(
       stageLabel = 'Programa de origen';
     }
 
+    const stageEvents = safeEvents.filter(
+      (event: any) =>
+        toNumericId(
+          event?.stageId ??
+          event?.stage?.id ??
+          event?.demandStageId,
+        ) === stageId,
+    );
+
+    const closureEvent = [...stageEvents]
+      .reverse()
+      .find((event: any) => {
+        const code = String(
+          event?.eventType?.code ??
+          event?.eventTypeCode ??
+          event?.typeCode ??
+          event?.code ??
+          '',
+        )
+          .trim()
+          .toUpperCase();
+
+        return code === 'CIERRE';
+      });
+
+    const reversalEvent = [...stageEvents]
+      .reverse()
+      .find((event: any) => {
+        const code = String(
+          event?.eventType?.code ??
+          event?.eventTypeCode ??
+          event?.typeCode ??
+          event?.code ??
+          '',
+        )
+          .trim()
+          .toUpperCase();
+
+        return code === 'REVERSION';
+      });
+
     trajectory.push({
       kind: 'stage',
       id: stageId,
@@ -93,6 +138,16 @@ export function buildCompactProgramTrajectory(
         stage?.createdAt ??
         null,
       current,
+
+      closureDate:
+        stage?.closedAt ??
+        closureEvent?.eventDate ??
+        null,
+
+      reversalDate:
+        reversalEvent?.eventDate ??
+        reversalEvent?.createdAt ??
+        null,
     });
 
     const nextStage = orderedStages[index + 1];

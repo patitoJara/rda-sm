@@ -302,3 +302,929 @@ $border-soft: #d8e5e8;
   width: 2px;
   background: rgba($color-primary, 0.15);
 }
+/* =====================================================
+   🔄 FLUJO VISUAL DE LA DEMANDA
+===================================================== */
+
+.demand-flow-section {
+  overflow: hidden;
+}
+
+.flow-intro {
+  max-width: 900px;
+}
+
+.flow-title,
+.program-flow-title,
+.access-flow-title {
+  margin-top: 34px;
+}
+
+
+/* =====================================================
+   PASOS PRINCIPALES
+===================================================== */
+
+.demand-flow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 24px 10px 12px;
+}
+
+.flow-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 48px 58px 1fr;
+  align-items: center;
+  gap: 16px;
+  width: min(100%, 760px);
+  padding: 18px 22px;
+  border: 1px solid $border-soft;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(22, 55, 65, 0.07);
+}
+
+.flow-step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: $color-primary;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.flow-step-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  background: rgba($color-primary, 0.08);
+  color: $color-primary;
+
+  mat-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 28px;
+  }
+}
+
+.flow-step-content h3 {
+  margin: 2px 0 4px;
+  color: $text-primary;
+  font-size: 16px;
+  font-weight: 750;
+}
+
+.flow-step-content p {
+  margin: 0;
+  font-size: 13.5px;
+}
+
+.flow-step-label {
+  display: block;
+  margin-bottom: 1px;
+  color: $text-muted;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.flow-step-decision {
+  border-color: rgba($color-rule, 0.22);
+  background: rgba($color-rule, 0.025);
+
+  .flow-step-number {
+    background: $color-rule;
+  }
+
+  .flow-step-icon {
+    background: rgba($color-rule, 0.09);
+    color: $color-rule;
+  }
+}
+
+.flow-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  color: rgba($color-primary, 0.5);
+
+  mat-icon {
+    font-size: 25px;
+  }
+}
+
+
+/* =====================================================
+   RESULTADOS DE RETROALIMENTACIÓN
+===================================================== */
+
+.flow-result-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 22px 10px 18px;
+  color: $text-primary;
+
+  > mat-icon {
+    color: $color-rule;
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+  }
+
+  strong {
+    font-size: 15px;
+  }
+
+  span {
+    margin-top: 2px;
+    color: $text-muted;
+    font-size: 13px;
+  }
+}
+
+.flow-results {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0 10px;
+}
+
+.flow-result-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 205px;
+  padding: 20px 18px;
+  border-radius: 18px;
+  border: 1px solid $border-soft;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(22, 55, 65, 0.06);
+}
+
+.result-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  margin-bottom: 14px;
+  border-radius: 14px;
+
+  mat-icon {
+    width: 25px;
+    height: 25px;
+    font-size: 25px;
+  }
+}
+
+.flow-result-card h3 {
+  margin: 0 0 8px;
+  color: $text-primary;
+  font-size: 15px;
+}
+
+.flow-result-card p {
+  flex: 1;
+  margin: 0 0 14px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.result-state {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding-top: 11px;
+  border-top: 1px solid rgba($border-soft, 0.8);
+  font-size: 12.5px;
+  font-weight: 700;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+}
+
+.result-wait {
+  border-top: 4px solid $color-warning;
+
+  .result-icon {
+    background: rgba($color-warning, 0.1);
+    color: $color-warning;
+  }
+
+  .result-state {
+    color: $color-warning;
+  }
+}
+
+.result-reference {
+  border-top: 4px solid $color-info;
+
+  .result-icon {
+    background: rgba($color-info, 0.09);
+    color: $color-info;
+  }
+
+  .result-state {
+    color: $color-info;
+  }
+}
+
+.result-treatment {
+  border-top: 4px solid $color-success;
+
+  .result-icon {
+    background: rgba($color-success, 0.09);
+    color: $color-success;
+  }
+
+  .result-state {
+    color: $color-success;
+  }
+}
+
+.result-abandonment {
+  border-top: 4px solid #a33a3a;
+
+  .result-icon {
+    background: rgba(163, 58, 58, 0.08);
+    color: #a33a3a;
+  }
+
+  .result-state {
+    color: #a33a3a;
+  }
+}
+
+
+/* =====================================================
+   REFERENCIA ENTRE PROGRAMAS
+===================================================== */
+
+.program-flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  margin: 22px 10px;
+}
+
+.program-flow-card {
+  min-height: 160px;
+  padding: 22px;
+  border: 1px solid $border-soft;
+  border-radius: 18px;
+  background: $bg-soft;
+}
+
+.program-flow-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  margin-bottom: 12px;
+  border-radius: 14px;
+  background: rgba($color-primary, 0.09);
+  color: $color-primary;
+}
+
+.program-flow-kicker {
+  display: block;
+  margin-bottom: 3px;
+  color: $color-primary;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.program-flow-card h3 {
+  margin: 0 0 7px;
+  color: $text-primary;
+  font-size: 15px;
+}
+
+.program-flow-card p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.program-flow-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: $color-info;
+
+  span {
+    margin-bottom: 4px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  mat-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 34px;
+  }
+}
+
+.same-episode-box {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 18px 10px;
+  padding: 18px 22px;
+  border-radius: 18px;
+  background: linear-gradient(
+    135deg,
+    rgba($color-primary, 0.08),
+    rgba($color-info, 0.04)
+  );
+  border: 1px solid rgba($color-primary, 0.15);
+
+  > mat-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 34px;
+    color: $color-primary;
+  }
+
+  strong {
+    display: block;
+    margin-bottom: 4px;
+    color: $text-primary;
+    font-size: 15px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 13px;
+  }
+}
+
+
+/* =====================================================
+   GESTIONAR / SOLO LECTURA
+===================================================== */
+
+.access-flow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 20px 10px;
+}
+
+.access-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 22px;
+  border-radius: 18px;
+  border: 1px solid $border-soft;
+}
+
+.access-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  border-radius: 14px;
+
+  mat-icon {
+    width: 25px;
+    height: 25px;
+    font-size: 25px;
+  }
+}
+
+.access-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+}
+
+.access-card h3 {
+  margin: 0 0 7px;
+  color: $text-primary;
+  font-size: 15px;
+}
+
+.access-card p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.access-manage {
+  background: rgba($color-success, 0.04);
+  border-color: rgba($color-success, 0.18);
+
+  .access-icon {
+    background: rgba($color-success, 0.1);
+    color: $color-success;
+  }
+
+  .access-label {
+    color: $color-success;
+  }
+}
+
+.access-readonly {
+  background: rgba($color-info, 0.04);
+  border-color: rgba($color-info, 0.18);
+
+  .access-icon {
+    background: rgba($color-info, 0.1);
+    color: $color-info;
+  }
+
+  .access-label {
+    color: $color-info;
+  }
+}
+
+.flow-final-rule {
+  margin-top: 22px;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 1050px) {
+  .flow-results {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .flow-step {
+    grid-template-columns: 40px 44px 1fr;
+    gap: 10px;
+    padding: 16px;
+  }
+
+  .flow-step-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .flow-results,
+  .access-flow {
+    grid-template-columns: 1fr;
+  }
+
+  .program-flow {
+    grid-template-columns: 1fr;
+  }
+
+  .program-flow-link {
+    flex-direction: row;
+    gap: 7px;
+
+    mat-icon {
+      transform: rotate(90deg);
+    }
+  }
+}
+
+/* =====================================================
+   DATOS ASOCIADOS A LA CREACIÓN DE DEMANDA
+===================================================== */
+
+.flow-step-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.flow-step-tags span {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba($color-primary, 0.07);
+  border: 1px solid rgba($color-primary, 0.14);
+  color: $color-primary-dark;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.flow-context-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: min(100%, 760px);
+  margin: 10px auto 4px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba($color-info, 0.05);
+  border: 1px dashed rgba($color-info, 0.22);
+}
+
+.flow-context-note > mat-icon {
+  color: $color-info;
+  flex-shrink: 0;
+}
+
+.flow-context-note strong {
+  color: $text-primary;
+  font-size: 13px;
+}
+
+.flow-context-note p {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+}
+
+
+/* =====================================================
+   EVALUACIÓN DE LA DEMANDA
+===================================================== */
+
+.flow-evaluation-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.evaluation-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: rgba($color-primary, 0.05);
+  border: 1px solid rgba($color-primary, 0.13);
+  color: $text-primary;
+  font-size: 11.5px;
+  font-weight: 650;
+}
+
+.evaluation-option mat-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  color: $color-primary;
+}
+
+
+/* =====================================================
+   RETROALIMENTACIÓN
+===================================================== */
+
+.flow-feedback-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.flow-feedback-tags span {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba($color-rule, 0.08);
+  border: 1px solid rgba($color-rule, 0.16);
+  color: $color-rule;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.flow-feedback-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 11px;
+  color: $text-muted;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.flow-feedback-note mat-icon {
+  width: 17px;
+  height: 17px;
+  font-size: 17px;
+  color: $color-rule;
+  flex-shrink: 0;
+}
+
+
+/* =====================================================
+   🔐 FLUJO DE AUTENTICACIÓN — AJUSTE VISUAL
+===================================================== */
+
+.auth-flow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  margin: 22px 10px 10px;
+}
+
+.auth-flow-step {
+  display: grid;
+  grid-template-columns: 42px 46px 1fr;
+  align-items: center;
+  gap: 14px;
+  width: min(100%, 760px);
+  padding: 16px 20px;
+  border-radius: 18px;
+  border: 1px solid $border-soft;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(22, 55, 65, 0.06);
+}
+
+.auth-flow-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: $color-primary;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.auth-flow-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: rgba($color-primary, 0.08);
+  color: $color-primary;
+}
+
+.auth-flow-icon mat-icon {
+  width: 23px;
+  height: 23px;
+  font-size: 23px;
+}
+
+.auth-flow-content h4 {
+  margin: 0 0 4px;
+  color: $text-primary;
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.auth-flow-content p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.auth-flow-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  color: rgba($color-primary, 0.45);
+}
+
+.auth-flow-arrow mat-icon {
+  width: 22px;
+  height: 22px;
+  font-size: 22px;
+}
+
+@media (max-width: 760px) {
+  .auth-flow-step {
+    grid-template-columns: 34px 40px 1fr;
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .auth-flow-icon {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+
+/* =====================================================
+   🔐 FLUJO DE AUTENTICACIÓN
+===================================================== */
+
+.auth-flow-wrapper {
+  margin: 28px 10px 8px;
+  padding: 22px;
+  border-radius: 18px;
+  border: 1px solid rgba($color-info, 0.16);
+  background: rgba($color-info, 0.025);
+}
+
+.auth-flow-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.auth-flow-title > mat-icon {
+  width: 28px;
+  height: 28px;
+  font-size: 28px;
+  color: $color-primary;
+}
+
+.auth-flow-title div {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-flow-title strong {
+  color: $text-primary;
+  font-size: 15px;
+}
+
+.auth-flow-title span {
+  margin-top: 2px;
+  color: $text-muted;
+  font-size: 12.5px;
+}
+
+.auth-flow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.auth-flow-step {
+  display: grid;
+  grid-template-columns: 42px 48px 1fr;
+  align-items: center;
+  gap: 14px;
+
+  width: min(100%, 760px);
+  padding: 16px 20px;
+
+  border: 1px solid $border-soft;
+  border-radius: 17px;
+
+  background: #ffffff;
+
+  box-shadow: 0 7px 20px rgba(22, 55, 65, 0.06);
+}
+
+.auth-flow-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+
+  border-radius: 50%;
+
+  background: $color-primary;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.auth-flow-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 44px;
+  height: 44px;
+
+  border-radius: 13px;
+
+  background: rgba($color-primary, 0.08);
+  color: $color-primary;
+}
+
+.auth-flow-icon mat-icon {
+  width: 24px;
+  height: 24px;
+  font-size: 24px;
+}
+
+.auth-flow-content h4 {
+  margin: 0 0 4px;
+
+  color: $text-primary;
+
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.auth-flow-content p {
+  margin: 0;
+
+  color: $text-body;
+
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.auth-flow-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 32px;
+
+  color: rgba($color-primary, 0.45);
+}
+
+.auth-flow-arrow mat-icon {
+  width: 22px;
+  height: 22px;
+  font-size: 22px;
+}
+
+.auth-flow-step-final {
+  border-color: rgba($color-rule, 0.18);
+}
+
+.auth-flow-step-final .auth-flow-number {
+  background: $color-rule;
+}
+
+.auth-flow-step-final .auth-flow-icon {
+  background: rgba($color-rule, 0.08);
+  color: $color-rule;
+}
+
+@media (max-width: 760px) {
+
+  .auth-flow-wrapper {
+    margin-left: 0;
+    margin-right: 0;
+    padding: 16px;
+  }
+
+  .auth-flow-step {
+    grid-template-columns: 34px 40px 1fr;
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .auth-flow-icon {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+
+/* =====================================================
+   KPI DE ESPERA
+===================================================== */
+
+.flow-kpi-box {
+  margin-top: 26px;
+}
+
+.flow-kpi-box p {
+  margin: 4px 0 0;
+}
+
+
+/* =====================================================
+   CONCEPTOS CLAVE DEL FLUJO
+===================================================== */
+
+.flow-concepts-box {
+  margin-top: 18px;
+  margin-bottom: 24px;
+}
+
+.flow-concepts-box p {
+  margin: 5px 0;
+  line-height: 1.5;
+}
+

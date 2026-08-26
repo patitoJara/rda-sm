@@ -90,7 +90,6 @@ import {
 import {
   buildEventTime,
   filterStageCitationEvents,
-  hasStageFormalClosure,
   hasStageReference,
   normalizeEventTime,
   normalizeSemaphoreColor,
@@ -178,7 +177,8 @@ import {
   handleCitationSuccess,
 } from './actions/demand-new-citation.actions';
 import {
-  canManageEpisode,
+  type EpisodeProgramContextAccess,
+  resolveEpisodeAccessModeFromProgramContext,
   hasOpenEpisode,
   isEpisodeClosed,
 } from './utils/demand-new-permission.utils';
@@ -275,6 +275,7 @@ export class DemandNewComponent
 
   activeProgramName: string | null = null;
   activeProgramId: number | null = null;
+  private currentProgramContext: EpisodeProgramContextAccess | null = null;
   episodeSubstances: EpisodeSubstance[] = [];
   episodeSubstancesLoaded = false;
   highlightedSummarySection: SummarySectionId | null = null;
@@ -871,10 +872,8 @@ export class DemandNewComponent
       this.workingStageId,
     );
 
-    const stageClosed = hasStageFormalClosure(
-      this.episodeEvents ?? [],
-      this.workingStageId,
-    );
+    const stageClosed =
+      this.currentProgramContext?.closed === true;
 
     return resolveDemandActionMatrix({
       episodeClosed: !!this.isHistoricalEpisode,
@@ -3747,6 +3746,14 @@ export class DemandNewComponent
 this.createdEpisode = activeEpisode;
       this.episodeSummary = activeEpisode;
       this.episodeLoaded = true;
+
+      const activeEpisodeId = Number(
+        activeEpisode?.id ?? activeEpisode?.episodeId ?? 0,
+      );
+
+      if (activeEpisodeId > 0) {
+        this.loadEpisodeProgramContext(activeEpisodeId);
+      }
       console.log('[DemandNew][DEBUG ACTIVO]', {
         requestedMode: this.requestedMode,
         activeProgramId: this.activeProgramId,
@@ -4047,11 +4054,55 @@ this.createdEpisode = activeEpisode;
     });
   }
 
+  private loadEpisodeProgramContext(episodeId: number): void {
+    const programId = Number(this.activeProgramId);
+
+    this.currentProgramContext = null;
+
+    if (
+      !Number.isFinite(programId) ||
+      programId <= 0 ||
+      !Number.isFinite(episodeId) ||
+      episodeId <= 0
+    ) {
+      return;
+    }
+
+    this.demandService
+      .getEpisodeProgramContexts({
+        programId,
+        episodeIds: [episodeId],
+      })
+      .subscribe({
+        next: (contexts) => {
+          this.currentProgramContext =
+            (contexts ?? []).find(
+              (context) => Number(context.episodeId) === Number(episodeId),
+            ) ?? null;
+
+          console.log(
+            '[DemandNew] Contexto del programa activo:',
+            this.currentProgramContext,
+          );
+        },
+        error: (error) => {
+          this.currentProgramContext = null;
+
+          console.error(
+            '[DemandNew] Error cargando contexto del programa activo:',
+            error,
+          );
+        },
+      });
+  }
+
   loadEpisodeLongitudinal(episodeId: number): void {
     console.log('[DemandNew] loadEpisodeLongitudinal ID:', episodeId);
     if (!episodeId) {
       return;
     }
+
+    this.loadEpisodeProgramContext(episodeId);
 
     this.isLoadingLongitudinal = true;
     this.longitudinalError = null;
@@ -5508,7 +5559,10 @@ this.createdEpisode = activeEpisode;
       currentStageEvents: this.workingStageEvents,
       citationTypes: this.citationTypes,
       feedbackEvents: this.feedbackEvents,
-      stageClosureDate: this.workingStageClosureDate,
+      stageClosureDate:
+        this.currentProgramContext?.closed === true
+          ? this.workingStageClosureDate
+          : null,
       resultCode,
       canManage: this.canManageCurrentEpisode,
       programName: program,
@@ -6000,6 +6054,27 @@ this.createdEpisode = activeEpisode;
     );
   }
 
+  get latestEpisodeReversalDate(): string | null {
+    const reversalEvents = (this.episodeEvents ?? [])
+      .filter(
+        (event: any) => this.getEventTypeCode(event) === 'REVERSION',
+      )
+      .sort((left: any, right: any) => {
+        const leftValue = String(left?.eventDate ?? '') + 'T' + String(left?.eventTime ?? '00:00:00');
+        const rightValue = String(right?.eventDate ?? '') + 'T' + String(right?.eventTime ?? '00:00:00');
+
+        return rightValue.localeCompare(leftValue);
+      });
+
+    const latestReversal = reversalEvents[0];
+
+    return (
+      latestReversal?.eventDate ??
+      latestReversal?.createdAt ??
+      null
+    );
+  }
+
   get episodeClosureDate(): string | null {
     return (
       this.episodeSummary?.closedAt ??
@@ -6184,6 +6259,48 @@ this.createdEpisode = activeEpisode;
         details: closureReason ? [`Motivo de cierre: ${closureReason}`] : [],
       });
     }
+
+    const reversalEvents = this.workingStageEvents.filter(
+      (event: any) => this.getEventTypeCode(event) === 'REVERSION',
+    );
+
+    reversalEvents.forEach((reversal: any, index: number) => {
+      const reversalReason =
+        reversal?.observation ??
+        reversal?.comment ??
+        null;
+
+      const reversalComment = reversal?.comment ?? null;
+
+      const details = [
+        reversalReason
+          ? `Motivo: ${reversalReason}`
+          : null,
+        reversalComment && reversalComment !== reversalReason
+          ? `Comentario: ${reversalComment}`
+          : null,
+      ].filter((value): value is string => !!value);
+
+      milestones.push({
+        code: 'Rev.',
+        title: 'Reversión de cierre',
+        icon: 'undo',
+        date:
+          reversal?.eventDate ??
+          reversal?.createdAt ??
+          null,
+        sortOrder: 950 + index,
+        status: 'Cierre revertido',
+        description: null,
+        registeredByName:
+          reversal?.registeredByName ??
+          reversal?.createdByUser?.name ??
+          reversal?.registeredByUser?.name ??
+          null,
+        createdAt: reversal?.createdAt ?? null,
+        details,
+      });
+    });
 
     const orderedMilestones = milestones
       .filter((milestone: any) => !!milestone.date)
@@ -6541,6 +6658,7 @@ this.createdEpisode = activeEpisode;
     return buildCompactProgramTrajectory(
       this.longitudinal?.stages ?? [],
       this.longitudinal?.references ?? [],
+      this.episodeEvents ?? [],
     );
   }
   formatDisplayDate(value: any): string {
@@ -6676,11 +6794,11 @@ this.createdEpisode = activeEpisode;
   get canManageCurrentEpisode(): boolean {
     if (
       this.requestedMode === 'view' ||
-      this.isHistoricalEpisode ||
-      this.demandActionMatrix.historical
+      this.isHistoricalEpisode
     ) {
       return false;
     }
+
     /*
      * Si la persona todavía no posee episodio, no existe una
      * responsabilidad programática que pueda bloquear la ficha.
@@ -6689,13 +6807,13 @@ this.createdEpisode = activeEpisode;
       return true;
     }
 
-    return canManageEpisode(
-      this.activeProgramId,
-      this.tokenService.getActiveProgramId(),
-      this.episodeSummary,
-      this.longitudinal,
-      this.episodeEvents,
-    );
+    const accessMode =
+      resolveEpisodeAccessModeFromProgramContext(
+        this.activeProgramId,
+        this.currentProgramContext,
+      );
+
+    return accessMode === 'MANAGE';
   }
 
   private ensureCanManageCurrentEpisode(): boolean {

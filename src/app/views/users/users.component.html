@@ -1,54 +1,91 @@
-<h3 class="titulo-genero">
-  <mat-icon>group</mat-icon>
-  <span>Usuario</span>
-</h3>
+<section class="maintainer-page">
+  <div class="maintainer-sticky-top">
+    <div class="maintainer-hero">
+      <div>
+        <span class="eyebrow">
+          <mat-icon>manage_accounts</mat-icon>
+          Usuarios y permisos
+        </span>
 
-<!-- === TOOLBAR superior: buscador + filtros + botón nuevo === -->
-<div class="list-toolbar">
-  <!-- 🔍 Filtros -->
-  <div class="filters">
-    <!-- Campo de búsqueda -->
-    <input
-      #search
-      type="text"
-      placeholder="Buscar usuario..."
-      [value]="q"
-      (keyup.enter)="applyFilter(search.value)"
-    />
+        <h1>Usuarios</h1>
 
-    <!-- Botones de filtro de estado -->
-    <button
-      [class.active]="filterUsers === 'active'"
-      (click)="setState('active')"
-    >
-      Activos
-    </button>
-    <button
-      [class.active]="filterUsers === 'deleted'"
-      (click)="setState('deleted')"
-    >
-      Eliminados
-    </button>
-    <button [class.active]="filterUsers === 'all'" (click)="setState('all')">
-      Todos
-    </button>
+        <p>
+          Administre usuarios, roles, programas y permisos de acceso al sistema.
+        </p>
+      </div>
+
+      <button
+        mat-flat-button
+        class="primary-action"
+        type="button"
+        (click)="openDialog()"
+      >
+        <mat-icon>person_add</mat-icon>
+        Nuevo usuario
+      </button>
+    </div>
+
+    <div class="toolbar-card">
+      <div class="filters">
+        <mat-form-field
+          appearance="outline"
+          floatLabel="always"
+          class="search-field"
+        >
+          <mat-label>Buscar usuario</mat-label>
+
+          <mat-icon matPrefix>search</mat-icon>
+
+          <input
+            #search
+            matInput
+            type="text"
+            placeholder="Ej: nombre, RUT, usuario o correo..."
+            [value]="q"
+            (keyup.enter)="applyFilter(search.value)"
+          />
+        </mat-form-field>
+
+        <div class="state-buttons">
+          <button
+            type="button"
+            [class.active]="filterUsers === 'active'"
+            (click)="setState('active')"
+          >
+            Activos
+          </button>
+
+          <button
+            type="button"
+            [class.active]="filterUsers === 'deleted'"
+            (click)="setState('deleted')"
+          >
+            Eliminados
+          </button>
+
+          <button
+            type="button"
+            [class.active]="filterUsers === 'all'"
+            (click)="setState('all')"
+          >
+            Todos
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
-
-  <!-- ➕ Botón principal -->
-  <div class="right-actions">
-    <button mat-flat-button color="primary" (click)="openDialog()">
-      <mat-icon>add</mat-icon>
-      Nuevo Usuario
-    </button>
-  </div>
-</div>
-
-<!-- === Indicador de carga === -->
 <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
 
 <!-- === TABLA de datos === -->
+<div class="table-card">
+  <div class="table-header">
+    <div>
+      <h2>Listado de usuarios</h2>
+      <p>Total registros encontrados: {{ total }}</p>
+    </div>
+  </div>
 <div class="table-wrapper">
-  <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z1">
+  <table mat-table [dataSource]="dataSource" matSort matSortDisableClear class="mat-elevation-z1">
     <!-- ID -->
     <ng-container matColumnDef="id">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Id</th>
@@ -61,67 +98,47 @@
       <td mat-cell *matCellDef="let row">{{ row.rut }}</td>
     </ng-container>
 
-    <!-- Nombre -->
-    <ng-container matColumnDef="firstName">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Primer Nombre</th>
-      <td mat-cell *matCellDef="let row">{{ row.firstName }}</td>
-    </ng-container>
-
-    <!-- Nombre 2 -->
-    <ng-container matColumnDef="secondName">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Segundo Nombre</th>
-      <td mat-cell *matCellDef="let row">{{ row.secondName }}</td>
-    </ng-container>
-
-    <!-- Apellido Paterno -->
-    <ng-container matColumnDef="firstLastName">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>
-        Apellido Paterno
-      </th>
-      <td mat-cell *matCellDef="let row">{{ row.firstLastName }}</td>
-    </ng-container>
-
-    <!-- Apellido Materno -->
-    <ng-container matColumnDef="secondLastName">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>
-        Apellido Materno
-      </th>
-      <td mat-cell *matCellDef="let row">{{ row.secondLastName }}</td>
-    </ng-container>
-
-    <!-- Email -->
-    <ng-container matColumnDef="email">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
-      <td mat-cell *matCellDef="let row">{{ row.email }}</td>
-    </ng-container>
-
     <!-- Usuario -->
-    <ng-container matColumnDef="username">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Usuario</th>
-      <td mat-cell *matCellDef="let row">{{ row.username }}</td>
-    </ng-container>
-
-    <!-- Clave -->
-    <ng-container matColumnDef="password">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Clave</th>
-      <td mat-cell *matCellDef="let row">{{ row.password }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="roles">
-      <th mat-header-cell *matHeaderCellDef>Rol(es)</th>
+    <ng-container matColumnDef="usuario">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="firstName">Usuario</th>
       <td mat-cell *matCellDef="let row">
-        {{ getUserRolesLabel(row) }}
+        <div class="user-cell">
+          <strong class="user-name">
+            {{ row.firstName }}
+            {{ row.secondName }}
+            {{ row.firstLastName }}
+            {{ row.secondLastName }}
+          </strong>
+          <span class="user-secondary">ID {{ row.id }}</span>
+        </div>
       </td>
     </ng-container>
 
-    <!-- Programa -->
-    <ng-container matColumnDef="program">
-      <th mat-header-cell *matHeaderCellDef>Programa</th>
+    <!-- Cuenta -->
+    <ng-container matColumnDef="cuenta">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="username">Cuenta</th>
       <td mat-cell *matCellDef="let row">
-        {{ getUserProgramsLabel(row) }}
+        <div class="user-cell">
+          <strong>{{ row.username || "Sin usuario" }}</strong>
+          <span class="user-secondary">
+            {{ row.email || "Sin correo" }}
+          </span>
+        </div>
       </td>
     </ng-container>
 
+    <!-- Acceso -->
+    <ng-container matColumnDef="acceso">
+      <th mat-header-cell *matHeaderCellDef>Acceso</th>
+      <td mat-cell *matCellDef="let row">
+        <div class="user-cell">
+          <strong>{{ getUserRolesLabel(row) }}</strong>
+          <span class="user-secondary">
+            {{ getUserProgramsLabel(row) }}
+          </span>
+        </div>
+      </td>
+    </ng-container>
     <!-- Creado -->
     <ng-container matColumnDef="createdAt">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Creado</th>
@@ -142,7 +159,7 @@
 
     <!-- Estado -->
     <ng-container matColumnDef="estado">
-      <th mat-header-cell *matHeaderCellDef>Estado</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="deletedAt">Estado</th>
       <td mat-cell *matCellDef="let row">
         <mat-chip
           [color]="row.deletedAt ? 'warn' : 'primary'"
@@ -204,3 +221,6 @@
   showFirstLastButtons
 >
 </mat-paginator>
+
+</div>
+</section>

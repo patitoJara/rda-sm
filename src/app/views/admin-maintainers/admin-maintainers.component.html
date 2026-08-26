@@ -1,5 +1,5 @@
 <section class="admin-page">
-  <div class="admin-hero">
+  <div class="admin-fixed-header"><div class="admin-hero">
     <div>
       <span class="eyebrow">Administración del sistema</span>
       <h1>Centro único de mantenedores</h1>
@@ -32,10 +32,50 @@
         placeholder="Ejemplo: programas, usuarios, estados"
       />
     </mat-form-field>
+
+    <button
+      type="button"
+      class="reset-view-button"
+      (click)="resetView()"
+      [disabled]="!search"
+      aria-label="Limpiar búsqueda y restablecer vista"
+    >
+      <mat-icon>restart_alt</mat-icon>
+      <span>Restablecer</span>
+    </button>
+
   </div>
 
-  <ng-container *ngIf="filteredGroups.length; else emptyState">
-    <section class="maintainer-group" *ngFor="let group of filteredGroups">
+  
+  <nav
+    class="quick-groups"
+    *ngIf="filteredGroups.length"
+    aria-label="Acceso rápido a grupos de mantenedores"
+  >
+    <span class="quick-groups-label">
+      <mat-icon>near_me</mat-icon>
+      Ir a
+    </span>
+
+    <button
+      type="button"
+      class="quick-group-button"
+      *ngFor="let group of filteredGroups"
+      (click)="scrollToGroup(group.title)"
+    >
+      {{ group.title }}
+    </button>
+  </nav>
+
+    </div>
+
+  <div class="groups-scroll">
+    <ng-container *ngIf="filteredGroups.length; else emptyState">
+    <section
+      class="maintainer-group"
+      *ngFor="let group of filteredGroups"
+      [attr.id]="groupId(group.title)"
+    >
       <div class="group-header">
         <div class="group-icon">
           <mat-icon>{{ group.icon }}</mat-icon>
@@ -52,13 +92,18 @@
           class="maintainer-card"
           *ngFor="let item of group.items"
           [class.disabled]="item.disabled"
+          [class.clickable]="!item.disabled"
+          [attr.role]="item.disabled ? null : 'button'"
+          [attr.tabindex]="item.disabled ? -1 : 0"
+          [attr.aria-label]="item.disabled ? null : 'Abrir mantenedor ' + item.title"
+          (click)="openMaintainer(item, $event)"
+          (keydown.enter)="openMaintainer(item, $event)"
+          (keydown.space)="openMaintainer(item, $event)"
         >
           <div class="card-top">
             <div class="card-icon">
               <mat-icon>{{ item.icon }}</mat-icon>
             </div>
-
-            <mat-chip>{{ item.tag }}</mat-chip>
           </div>
 
           <h3>{{ item.title }}</h3>
@@ -91,4 +136,5 @@
       <p>Pruebe con otro término de búsqueda.</p>
     </div>
   </ng-template>
+  </div>
 </section>

@@ -52,16 +52,10 @@ import { Router } from '@angular/router';
 })
 export class UsersComponent implements AfterViewInit {
   displayedColumns = [
-    'id',
     'rut',
-    'firstName',
-    'secondName',
-    'firstLastName',
-    'secondLastName',
-    'email',
-    'username',
-    'roles',
-    'program',
+    'usuario',
+    'cuenta',
+    'acceso',
     'estado',
     'acciones',
   ];
@@ -142,56 +136,136 @@ export class UsersComponent implements AfterViewInit {
     const active = this.sort?.active;
     const direction = (this.sort?.direction as '' | 'asc' | 'desc') || 'asc';
     const sortField = this.mapSortField(active);
+
+    const sort = `${sortField},${direction}`;
+
     this.api
-      .getAllPaginated({ page, size })
+      .getAllPaginated({
+        page,
+        size,
+        q: undefined,
+        state: undefined,
+        sort,
+      })
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (res: any) => {
+          console.log('[USERS PAGINATION]', {
+            pageIndex: this.paginator.pageIndex,
+            pageSize: this.paginator.pageSize,
+            response: res,
+          });
           const allRows: User[] = Array.isArray(res)
             ? res
             : (res?.content ?? []);
-          // Filtro por estado
-          let filtered = allRows;
-          if (this.filterUsers === 'active') {
-            filtered = allRows.filter((r) => !r.deletedAt);
-          } else if (this.filterUsers === 'deleted') {
-            filtered = allRows.filter((r) => !!r.deletedAt);
-          }
-          // Filtro por nombre
-          const term = (this.q || '').toLowerCase();
-          if (term) {
-            filtered = filtered.filter((r) =>
-              (r.firstName ?? '').toLowerCase().includes(term),
+
+          if (Array.isArray(res)) {
+
+            console.table(
+
+              allRows.map((user: any) => ({
+
+                id: user.id,
+
+                rut: user.rut,
+
+                firstName: user.firstName,
+
+                secondName: user.secondName,
+
+                firstLastName: user.firstLastName,
+
+                secondLastName: user.secondLastName,
+
+                username: user.username,
+
+                deletedAt: user.deletedAt,
+
+              })),
+
             );
+            let filteredRows = [...allRows];
+
+            if (this.filterUsers === 'active') {
+              filteredRows = filteredRows.filter((user) => !user.deletedAt);
+            } else if (this.filterUsers === 'deleted') {
+              filteredRows = filteredRows.filter((user) => !!user.deletedAt);
+            }
+
+            const normalize = (value: unknown): string =>
+              String(value ?? '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .replace(/[.\-\s]/g, '');
+
+            const search = normalize(this.q);
+
+            if (search) {
+              filteredRows = filteredRows.filter((user) => {
+                const searchableText = normalize([
+                  user.rut,
+                  user.firstName,
+                  user.secondName,
+                  user.firstLastName,
+                  user.secondLastName,
+                  user.username,
+                  user.email,
+                ].join(' '));
+
+                return searchableText.includes(search);
+              });
+            }
+
+            filteredRows.sort((a, b) => {
+              const aValue = this.getFieldValue(a, sortField);
+              const bValue = this.getFieldValue(b, sortField);
+
+              const aEmpty = aValue === null || aValue === undefined || aValue === '';
+              const bEmpty = bValue === null || bValue === undefined || bValue === '';
+
+              if (aEmpty && bEmpty) return 0;
+              if (aEmpty) return direction === 'asc' ? 1 : -1;
+              if (bEmpty) return direction === 'asc' ? -1 : 1;
+
+              let comparison = 0;
+
+              if (typeof aValue === 'number' && typeof bValue === 'number') {
+                comparison = aValue - bValue;
+              } else {
+                comparison = String(aValue).localeCompare(
+                  String(bValue),
+                  'es',
+                  {
+                    sensitivity: 'base',
+                    numeric: true,
+                  },
+                );
+              }
+
+              return direction === 'desc' ? -comparison : comparison;
+            });
+
+            this.total = filteredRows.length;
+
+            const start = page * size;
+            const end = start + size;
+            const pagedRows = filteredRows.slice(start, end);
+
+            this.enrichUsers(pagedRows);
+            return;
           }
 
-          // Orden
-          filtered.sort((a, b) => {
-            const va = this.getFieldValue(a, sortField);
-            const vb = this.getFieldValue(b, sortField);
-            let cmp = 0;
-            if (va == null && vb != null) cmp = -1;
-            else if (va != null && vb == null) cmp = 1;
-            else if (typeof va === 'number' && typeof vb === 'number')
-              cmp = va - vb;
-            else
-              cmp = String(va ?? '').localeCompare(String(vb ?? ''), 'es', {
-                numeric: true,
-                sensitivity: 'base',
-              });
-            return direction === 'asc' ? cmp : -cmp;
-          });
-          // Paginación cliente
-          const start = page * size;
-          const slice = filtered.slice(start, start + size);
-
-          this.total = filtered.length;
-          this.enrichUsers(slice);
+          this.total = Number(res?.totalElements ?? allRows.length);
+          this.enrichUsers(allRows);
         },
-        error: (err) => console.error('Error cargando estado:', err),
+        error: (err) => {
+          console.error('Error cargando usuarios:', err);
+          this.total = 0;
+          this.dataSource.data = [];
+        },
       });
   }
-
   private enrichUsers(users: User[]): void {
     if (!users.length) {
       this.dataSource.data = [];

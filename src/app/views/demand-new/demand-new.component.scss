@@ -111,3 +111,57 @@
   background: #ccfbf1;
   border: 1px solid #5eead4;
 }
+
+.trajectory-reversal {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 7px 10px;
+  border: 1px solid #5eead4;
+  border-radius: 10px;
+  background: #ccfbf1;
+  color: #0f766e;
+
+  mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  strong {
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  span {
+    font-size: 0.74rem;
+    font-weight: 600;
+  }
+}
+.operational-milestone--reverted {
+  border-color: #5eead4;
+  background: #ccfbf1;
+
+  > mat-icon {
+    color: #0f766e;
+  }
+
+  strong {
+    color: #0f766e;
+    font-weight: 800;
+  }
+
+  small {
+    color: #115e59;
+    font-weight: 600;
+  }
+}

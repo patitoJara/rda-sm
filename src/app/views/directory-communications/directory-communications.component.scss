@@ -1,4 +1,4 @@
-﻿:host {
+:host {
   display: block;
 }
 
@@ -2105,4 +2105,402 @@ mat-panel-description {
   .directory-people-table {
     min-width: 760px;
   }
+}
+
+/* ===== Directorio programa: jerarquía interior final ===== */
+
+/* Datos principales del programa */
+.directory-workspace .program-summary {
+  grid-template-columns:
+    minmax(220px, 1.15fr)
+    minmax(150px, 0.7fr)
+    minmax(240px, 1.3fr);
+
+  gap: 8px;
+  margin-bottom: 7px;
+}
+
+.directory-workspace .program-summary > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  min-height: 48px;
+  padding: 8px 10px;
+
+  border: 1px solid #dce8ea;
+  border-radius: 9px;
+  background: #f8fbfb;
+}
+
+.directory-workspace .program-summary span {
+  margin-bottom: 2px;
+  font-size: 0.62rem;
+  line-height: 1.1;
+}
+
+.directory-workspace .program-summary strong {
+  margin-top: 0;
+  font-size: 0.72rem;
+  line-height: 1.2;
+}
+
+/* Barra operativa del programa */
+.directory-workspace .program-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  gap: 6px;
+  margin: 0 0 10px;
+  padding-bottom: 9px;
+
+  border-bottom: 1px solid #dce7e9;
+}
+
+/* Secciones de personas */
+.directory-workspace .directory-contact-group {
+  margin-top: 0;
+  padding: 10px 8px 6px;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.directory-workspace
+  .directory-contact-group
+  + .directory-contact-group {
+  margin-top: 10px;
+  padding-top: 11px;
+  border-top: 1px solid #d5e4e7;
+}
+
+.directory-workspace .directory-contact-group__heading {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: center;
+
+  gap: 8px;
+  margin-bottom: 7px;
+}
+
+.directory-workspace .directory-contact-group__heading strong {
+  display: block;
+  color: #153f49;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.directory-workspace .directory-contact-group__heading small {
+  display: block;
+  margin-top: 2px;
+  color: #647c82;
+  font-size: 0.62rem;
+  line-height: 1.2;
+}
+
+/* Tablas */
+.directory-workspace .directory-people-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.directory-workspace .directory-people-table th {
+  padding: 5px 8px;
+  color: #536b72;
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+
+  border-bottom: 1px solid #dbe6e8;
+}
+
+.directory-workspace .directory-people-table td {
+  padding: 7px 8px;
+  vertical-align: middle;
+  border-bottom: 1px solid #edf2f3;
+}
+
+.directory-workspace .directory-people-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.directory-workspace .directory-people-table__selection {
+  width: 74px;
+  text-align: center;
+}
+
+/* Usuarios: nombre / rol / correo / selección */
+.directory-workspace
+.directory-contact-group--users
+.directory-people-table th:nth-child(1),
+.directory-workspace
+.directory-contact-group--users
+.directory-people-table td:nth-child(1) {
+  width: 29%;
+}
+
+.directory-workspace
+.directory-contact-group--users
+.directory-people-table th:nth-child(2),
+.directory-workspace
+.directory-contact-group--users
+.directory-people-table td:nth-child(2) {
+  width: 23%;
+}
+
+.directory-workspace
+.directory-contact-group--users
+.directory-people-table th:nth-child(3),
+.directory-workspace
+.directory-contact-group--users
+.directory-people-table td:nth-child(3) {
+  width: auto;
+}
+
+/* Equipo clínico: nombre / profesión / correo / teléfono / selección */
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table th:nth-child(1),
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table td:nth-child(1) {
+  width: 27%;
+}
+
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table th:nth-child(2),
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table td:nth-child(2) {
+  width: 18%;
+}
+
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table th:nth-child(3),
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table td:nth-child(3) {
+  width: 30%;
+}
+
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table th:nth-child(4),
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table td:nth-child(4) {
+  width: 17%;
+  white-space: nowrap;
+}
+
+/* Correo y teléfono más contenidos */
+.directory-workspace .directory-email-button {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.directory-workspace .directory-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+@media (max-width: 1100px) {
+  .directory-workspace .program-summary {
+    grid-template-columns: 1fr;
+  }
+}
+/* ===== Directorio programa: compactación vertical final ===== */
+
+.directory-workspace .directory-contact-group {
+  padding-top: 7px;
+  padding-bottom: 3px;
+}
+
+.directory-workspace
+  .directory-contact-group
+  + .directory-contact-group {
+  margin-top: 7px;
+  padding-top: 8px;
+}
+
+.directory-workspace .directory-contact-group__heading {
+  margin-bottom: 4px;
+}
+
+.directory-workspace .directory-people-table th {
+  padding: 4px 7px;
+}
+
+.directory-workspace .directory-people-table td {
+  padding: 4px 7px;
+  line-height: 1.15;
+}
+
+.directory-workspace .directory-people-table td > strong {
+  line-height: 1.15;
+}
+
+.directory-workspace .directory-person-role {
+  line-height: 1.15;
+}
+
+.directory-workspace .directory-email-button {
+  min-height: 24px !important;
+  line-height: 1 !important;
+}
+
+.directory-workspace .directory-phone {
+  min-height: 24px;
+}
+/* ===== Directorio programa: tipografía legible final ===== */
+
+.directory-workspace .directory-contact-group__heading strong {
+  font-size: 0.92rem;
+  line-height: 1.2;
+}
+
+.directory-workspace .directory-contact-group__heading small {
+  font-size: 0.72rem;
+  line-height: 1.25;
+}
+
+.directory-workspace .directory-people-table th {
+  font-size: 0.72rem;
+  line-height: 1.2;
+}
+
+.directory-workspace .directory-people-table td {
+  font-size: 0.82rem;
+  line-height: 1.25;
+}
+
+.directory-workspace .directory-people-table td > strong {
+  font-size: 0.84rem;
+  line-height: 1.25;
+}
+
+.directory-workspace .directory-person-role {
+  font-size: 0.8rem;
+  line-height: 1.25;
+}
+
+.directory-workspace .directory-email-button {
+  font-size: 0.78rem !important;
+  line-height: 1.15 !important;
+}
+
+.directory-workspace .directory-phone {
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+
+.directory-workspace .program-summary span {
+  font-size: 0.7rem;
+}
+
+.directory-workspace .program-summary strong {
+  font-size: 0.82rem;
+}
+/* ===== Directorio: cabecera operativa fija ===== */
+
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
+.directory-page {
+  display: flex;
+  flex-direction: column;
+
+  height: 100%;
+  min-height: 0;
+
+  overflow: hidden;
+}
+
+.directory-fixed-header {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 30;
+
+  display: grid;
+  gap: 12px;
+
+  background: #f4f7f8;
+}
+
+/* Solo esta zona se desplaza */
+.directory-workspace {
+  flex: 1 1 auto;
+  min-height: 0;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  padding-top: 10px;
+  padding-bottom: 72px;
+
+  scroll-behavior: smooth;
+}
+
+/* Mantener visibles los títulos de ambas columnas */
+.directory-workspace .section-heading {
+  position: sticky;
+  top: 0;
+  z-index: 12;
+
+  margin: 0;
+  padding: 6px 0 8px;
+
+  background: rgba(244, 247, 248, 0.97);
+  backdrop-filter: blur(6px);
+
+  border-bottom: 1px solid #dce7e9;
+}
+
+/* Evita que el contenido se vea pegado al encabezado fijo */
+.directory-workspace .institutional-grid,
+.directory-workspace .program-directory {
+  margin-top: 8px;
+}
+/* ===== Directorio: corrección separación cabecera y contenido ===== */
+
+.directory-fixed-header {
+  flex-shrink: 0;
+}
+
+.directory-workspace {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+
+  margin-top: 0;
+  padding-top: 0;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  background: #f4f7f8;
+}
+
+/* Encabezados internos visibles, pero sin tapar contenido */
+.directory-workspace .section-heading {
+  top: 0;
+  padding-top: 10px;
+  background: #f4f7f8;
+}
+
+/* Evitar que los primeros bloques queden pegados al encabezado */
+.directory-workspace .institutional-section,
+.directory-workspace .programs-section {
+  padding-top: 10px;
 }
