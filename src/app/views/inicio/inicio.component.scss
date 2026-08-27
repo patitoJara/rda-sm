@@ -1,4 +1,4 @@
-﻿:host {
+:host {
   display: block;
   min-height: 100%;
   background: #f4f7f9;
@@ -2444,4 +2444,110 @@ mat-paginator {
 
 .person-detail-fields strong {
   line-height: 1.2;
+}
+
+/* ===== BANDEJA - REDISTRIBUCION COLUMNAS DD/MM/YY ===== */
+/*
+ * La bandeja utiliza fechas compactas dd/mm/yy.
+ * Redistribuye el ancho disponible sin reducir la tipografía.
+ */
+@media (min-width: 901px) {
+
+  .mat-column-semaphore {
+    width: 2.5% !important;
+  }
+
+  .mat-column-days {
+    width: 3% !important;
+  }
+
+  .mat-column-person {
+    width: 9% !important;
+  }
+
+  .mat-column-rut {
+    width: 5.5% !important;
+  }
+
+  .mat-column-requestDate {
+    width: 3.5% !important;
+  }
+
+  .mat-column-citationFirstFirst,
+  .mat-column-citationSecondFirst,
+  .mat-column-citationFirstSecond,
+  .mat-column-citationSecondSecond,
+  .mat-column-citationFirstThird,
+  .mat-column-citationSecondThird,
+  .mat-column-optionalInterview,
+  .mat-column-feedback,
+  .mat-column-closure {
+    width: 2.95% !important;
+  }
+
+  .mat-column-program {
+    width: 9.5% !important;
+  }
+
+  .mat-column-result {
+    width: 7.5% !important;
+  }
+
+  .mat-column-commitment {
+    width: 6% !important;
+  }
+
+  .mat-column-lastManagement {
+    width: 9% !important;
+  }
+
+  .mat-column-suggestedAction {
+    width: 12% !important;
+  }
+
+  .mat-column-actions {
+    width: 6% !important;
+  }
+
+  .mat-column-program,
+  .mat-column-result,
+  .mat-column-lastManagement,
+  .mat-column-suggestedAction {
+    white-space: normal !important;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .program-value,
+  .result-cell,
+  .management-value,
+  .suggested-action {
+    max-width: none !important;
+    min-width: 0 !important;
+    line-height: 1.25;
+  }
+}
+
+/* ===== HISTORICO - MICROAJUSTE ANCHOS FINALES ===== */
+/*
+ * Ajuste exclusivo para demandas cerradas.
+ * Aprovecha el espacio liberado al ocultar la columna Resultado.
+ */
+@media (min-width: 901px) {
+
+  .priority-table-card--historical .mat-column-person {
+    width: 10% !important;
+  }
+
+  .priority-table-card--historical .mat-column-requestDate {
+    width: 4.2% !important;
+  }
+
+  .priority-table-card--historical .mat-column-program {
+    width: 10.5% !important;
+  }
+
+  .priority-table-card--historical .mat-column-suggestedAction {
+    width: 10.5% !important;
+  }
 }

@@ -3,6 +3,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
+import {
+  DateAdapter,
+  MAT_DATE_FORMATS,
+  MAT_DATE_LOCALE,
+  MatNativeDateModule,
+} from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -23,6 +30,8 @@ import { ProgramProfessionalService } from '@app/services/program-professional.s
 import { normalizeProfessionalForCitation } from '../demand-new/utils/demand-new-professional.utils';
 import { resolveCitationTypeCode } from '../demand-new/utils/demand-new-citation-schedule.utils';
 import { DEMAND_CITATION_CODES } from '../../shared/utils/demand-workflow.utils';
+import { DemandNewDateAdapter, DEMAND_NEW_DATE_FORMATS } from '../demand-new/utils/demand-new-date-adapter';
+import { parseBackendDate } from '../demand-new/utils/demand-new-format.utils';
 
 @Component({
   standalone: true,
@@ -37,9 +46,16 @@ import { DEMAND_CITATION_CODES } from '../../shared/utils/demand-workflow.utils'
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     MatSelectModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
+  ],
+  providers: [
+    { provide: MAT_DATE_LOCALE, useValue: 'es-CL' },
+    { provide: MAT_DATE_FORMATS, useValue: DEMAND_NEW_DATE_FORMATS },
+    { provide: DateAdapter, useClass: DemandNewDateAdapter },
   ],
 })
 export class EpisodePurgeComponent {
@@ -95,6 +111,40 @@ export class EpisodePurgeComponent {
     const value = Number(this.episodeIdInput);
 
     return Number.isInteger(value) && value > 0 ? value : null;
+  }
+
+  normalizeCorrectionDate(target: any, field: string): void {
+    if (!target || !field) {
+      return;
+    }
+
+    const raw = String(target[field] ?? '').trim();
+
+    if (!raw) {
+      target[field] = null;
+      return;
+    }
+
+    const displayMatch =
+      /^(\d{2})-(\d{2})-(\d{4})$/.exec(raw);
+
+    if (displayMatch) {
+      target[field] =
+        displayMatch[3] +
+        '-' +
+        displayMatch[2] +
+        '-' +
+        displayMatch[1];
+
+      return;
+    }
+
+    const isoMatch =
+      /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+
+    if (isoMatch) {
+      return;
+    }
   }
 
   formatCorrectionDate(value: unknown): string {
@@ -782,6 +832,7 @@ export class EpisodePurgeComponent {
     };
 
     this.correctionEvents.push(feedback);
+
     this.feedbackDraft = feedback;
   }
 
@@ -898,6 +949,14 @@ export class EpisodePurgeComponent {
         feedbackResultCode;
     }
 
+    if (
+      feedback?.eventDate &&
+      !(feedback.eventDate instanceof Date)
+    ) {
+      feedback.eventDate =
+        parseBackendDate(String(feedback.eventDate));
+    }
+
     this.feedbackDraft = feedback;
   }
 
@@ -999,7 +1058,7 @@ export class EpisodePurgeComponent {
 
       closureDate:
         closedAt
-          ? String(closedAt).slice(0, 10)
+          ? parseBackendDate(String(closedAt).slice(0, 10))
           : null,
 
       closureComment:
@@ -1096,6 +1155,14 @@ export class EpisodePurgeComponent {
       });
 
       const attempts = citations.map((citation: any) => {
+        if (
+          citation?.eventDate &&
+          !(citation.eventDate instanceof Date)
+        ) {
+          citation.eventDate =
+            parseBackendDate(String(citation.eventDate));
+        }
+
         const citationId = Number(citation?.id);
 
         const attendance =
@@ -1272,9 +1339,11 @@ export class EpisodePurgeComponent {
         '',
 
       originalRequestDate:
-        this.episode?.originalRequestDate ??
-        this.episode?.requestDate ??
-        null,
+        parseBackendDate(
+          this.episode?.originalRequestDate ??
+          this.episode?.requestDate ??
+          null,
+        ),
 
       episodeTypeId:
         this.episode?.episodeType?.id ??
@@ -1313,6 +1382,15 @@ export class EpisodePurgeComponent {
         this.episode?.resultCode ??
         null,
     };
+
+    console.log('[EpisodePurge] fecha correctionDraft', {
+      episodeOriginalRequestDate: this.episode?.originalRequestDate,
+      episodeRequestDate: this.episode?.requestDate,
+      correctionOriginalRequestDate:
+        this.correctionDraft?.originalRequestDate,
+      isDate:
+        this.correctionDraft?.originalRequestDate instanceof Date,
+    });
 
     const selectedEpisodeId = Number(this.episodeId);
 

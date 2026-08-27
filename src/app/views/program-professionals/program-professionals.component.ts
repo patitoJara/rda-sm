@@ -14,6 +14,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatSortModule, Sort, SortDirection } from '@angular/material/sort';
 import { firstValueFrom } from 'rxjs';
 
 import { ProgramProfessional } from '../../models/program-professional.model';
@@ -70,6 +72,8 @@ interface DeletedProgramRelation {
     MatInputModule,
     MatSelectModule,
     MatTooltipModule,
+    MatPaginatorModule,
+    MatSortModule,
     MatDialogModule,
   ],
   templateUrl: './program-professionals.component.html',
@@ -87,6 +91,13 @@ export class ProgramProfessionalsComponent implements OnInit {
 
   professionals: ProgramProfessional[] = [];
   filteredProfessionals: ProgramProfessional[] = [];
+
+  pageIndex = 0;
+  pageSize = 8;
+  readonly pageSizeOptions = [8, 10, 20, 50, 100];
+
+  sortActive = 'name';
+  sortDirection: SortDirection = 'asc';
 
   programs: CatalogOption[] = [];
   professions: CatalogOption[] = [];
@@ -110,7 +121,7 @@ export class ProgramProfessionalsComponent implements OnInit {
       validators: [Validators.required],
     }),
     email: ['', [Validators.email, Validators.maxLength(180)]],
-    phone: ['', [Validators.maxLength(60)]],
+    phone: [''],
     programIds: this.fb.control<number[]>([], {
       validators: [Validators.required],
     }),
@@ -582,7 +593,134 @@ export class ProgramProfessionalsComponent implements OnInit {
     }
   }
 
+  get sortedProfessionals(): ProgramProfessional[] {
+    const rows = [...this.filteredProfessionals];
+    const direction = this.sortDirection === 'desc' ? -1 : 1;
+
+    rows.sort((left, right) => {
+      const leftValue = this.getProfessionalSortValue(
+        left,
+        this.sortActive,
+      );
+
+      const rightValue = this.getProfessionalSortValue(
+        right,
+        this.sortActive,
+      );
+
+      const leftEmpty =
+        leftValue === null ||
+        leftValue === undefined ||
+        leftValue === '';
+
+      const rightEmpty =
+        rightValue === null ||
+        rightValue === undefined ||
+        rightValue === '';
+
+      if (leftEmpty && rightEmpty) {
+        return 0;
+      }
+
+      if (leftEmpty) {
+        return 1;
+      }
+
+      if (rightEmpty) {
+        return -1;
+      }
+
+      const comparison = String(leftValue).localeCompare(
+        String(rightValue),
+        'es',
+        {
+          sensitivity: 'base',
+          numeric: true,
+        },
+      );
+
+      return comparison * direction;
+    });
+
+    return rows;
+  }
+
+  get pagedProfessionals(): ProgramProfessional[] {
+    const start = this.pageIndex * this.pageSize;
+    const end = start + this.pageSize;
+
+    return this.sortedProfessionals.slice(start, end);
+  }
+
+  get paginationSummary(): string {
+    const total = this.filteredProfessionals.length;
+
+    if (!total) {
+      return '0 registros';
+    }
+
+    const from = this.pageIndex * this.pageSize + 1;
+    const to = Math.min(
+      (this.pageIndex + 1) * this.pageSize,
+      total,
+    );
+
+    return `${from}-${to} de ${total}`;
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+  }
+
+  onSortChange(sort: Sort): void {
+    this.sortActive = sort.active || 'name';
+    this.sortDirection = sort.direction || 'asc';
+    this.pageIndex = 0;
+  }
+
+  resetFilters(): void {
+    this.filtersForm.reset({
+      search: '',
+      programId: null,
+      status: 'ACTIVE',
+    });
+
+    this.pageIndex = 0;
+  }
+
+  private getProfessionalSortValue(
+    professional: ProgramProfessional,
+    field: string,
+  ): unknown {
+    switch (field) {
+      case 'name':
+        return professional.name ?? '';
+
+      case 'profession':
+        return (
+          professional.professionName ||
+          this.getProfessionName(professional.professionId)
+        );
+
+      case 'program':
+        return professional.programIds?.length
+          ? this.getProgramName(professional.programIds[0])
+          : '';
+
+      case 'contact':
+        return professional.email || professional.phone || '';
+
+      case 'status':
+        return professional.deletedAt ? 'Eliminado' : 'Activo';
+
+      default:
+        return professional.name ?? '';
+    }
+  }
+
   applyFilters(): void {
+    this.pageIndex = 0;
     const search = this.normalizeText(this.filtersForm.controls.search.value);
     const selectedProgramId = this.filtersForm.controls.programId.value;
     const status = this.filtersForm.controls.status.value;
@@ -626,13 +764,7 @@ export class ProgramProfessionalsComponent implements OnInit {
       return null;
     }
 
-    const lastEightDigits = digits.slice(-8);
-
-    if (lastEightDigits.length !== 8) {
-      return null;
-    }
-
-    return `+56 9 ${lastEightDigits}`;
+    return `+56 9 ${digits}`;
   }
 
   getProgramName(programId: number | null | undefined): string {

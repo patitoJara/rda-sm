@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { SistraReportData } from '@app/views/demand-new/models/sistra-report.types';
 
 @Injectable({
@@ -10,10 +10,51 @@ export class SistraReportService {
       const result = String(value ?? '').trim();
       return result || fallback;
     };
+    const citationBlock = (
+      title: string,
+      citation: SistraReportData['firstCitationFirstInterview'],
+    ): string => `
+      <div class="section-title citation-title">${title}</div>
+
+      <table class="citation-table">
+        <colgroup>
+          <col style="width: 7%;" />
+          <col style="width: 11%;" />
+          <col style="width: 25%;" />
+          <col style="width: 17%;" />
+          <col style="width: 6%;" />
+          <col style="width: 8%;" />
+          <col style="width: 12%;" />
+          <col style="width: 14%;" />
+        </colgroup>
+        <tr>
+          <th>FECHA</th>
+          <td>${text(citation.date, '')}</td>
+          <th>${text(citation.professional, '')}</th>
+          <td>${text(citation.profession, '')}</td>
+          <th>HORA</th>
+          <td>${text(citation.time, '')}</td>
+          <th>ASISTENCIA</th>
+          <td>${text(citation.attendance, '')}</td>
+        </tr>
+      </table>
+    `;
 
     return `
       <div class="sistra-report">
-        <h1>Registro de Demanda de Atención de Tratamiento de Drogas</h1>
+        <div class="report-header">
+          <div class="report-header-logo">
+            <img
+              class="report-logo"
+              src="/assets/logoSSM.png"
+              alt="Servicio de Salud Magallanes"
+            />
+          </div>
+
+          <h1>Registro de Demanda de Atención de Tratamiento de Drogas</h1>
+
+          <div class="report-header-spacer"></div>
+        </div>
 
         <table>
           <tr>
@@ -75,104 +116,108 @@ export class SistraReportService {
           </tr>
         </table>
 
-        <div class="section-title">PRIMERA CITACIÓN</div>
+        ${citationBlock(
+          'PRIMERA CITACIÓN A PRIMERA ENTREVISTA',
+          data.firstCitationFirstInterview,
+        )}
 
-        <table>
+        ${citationBlock(
+          'SEGUNDA CITACIÓN A PRIMERA ENTREVISTA',
+          data.secondCitationFirstInterview,
+        )}
+
+        ${citationBlock(
+          'PRIMERA CITACIÓN A SEGUNDA ENTREVISTA',
+          data.firstCitationSecondInterview,
+        )}
+
+        ${citationBlock(
+          'SEGUNDA CITACIÓN A SEGUNDA ENTREVISTA',
+          data.secondCitationSecondInterview,
+        )}
+
+        ${citationBlock(
+          'PRIMERA CITACIÓN A TERCERA ENTREVISTA',
+          data.firstCitationThirdInterview,
+        )}
+
+        ${citationBlock(
+          'SEGUNDA CITACIÓN A TERCERA ENTREVISTA',
+          data.secondCitationThirdInterview,
+        )}
+
+        ${citationBlock(
+          'ENTREVISTA OPCIONAL',
+          data.optionalInterview,
+        )}
+
+        <div class="section-title">RETROALIMENTACIÓN</div>
+
+        <table class="feedback-table">
+          <colgroup>
+            <col style="width: 7%;" />
+            <col style="width: 11%;" />
+            <col style="width: 6%;" />
+            <col style="width: 8%;" />
+            <col style="width: 11%;" />
+            <col style="width: 20%;" />
+            <col style="width: 18%;" />
+            <col style="width: 19%;" />
+          </colgroup>
           <tr>
             <th>FECHA</th>
-            <td>${text(data.firstCitation.date)}</td>
-            <th>PROFESIONAL</th>
-            <td>${text(data.firstCitation.professional)}</td>
+            <td>${text(data.feedback.date, '')}</td>
+
             <th>HORA</th>
-            <td>${text(data.firstCitation.time)}</td>
+            <td>${text(data.feedback.time, '')}</td>
+
+            <th>PROFESIONAL</th>
+            <td>${text(data.feedback.professional, '')}</td>
+
+            <th>COMPROMISO BIOPSICOSOCIAL</th>
+            <td>${text(data.feedback.commitment, '')}</td>
+          </tr>
+          <tr>
+            <th>RESULTADO</th>
+            <td colspan="7">${text(data.feedback.result, '')}</td>
           </tr>
         </table>
 
-        <div class="section-title">REGISTRO DE ATENCIONES</div>
+        <div class="section-title">CIERRE</div>
 
-        <div class="form-row">
-          <strong>FECHA DE 2da ATENCIÓN OFRECIDA EN EL CENTRO (1ª CITACIÓN):</strong>
-          <span class="box"></span> DÍA
-          <span class="box"></span> MES
-          <span class="box year"></span> AÑO
-          <span class="box"></span> HORA
-          <span class="nsp-field"><span class="check"></span> NSP</span>
-        </div>
+        <table class="closure-table">
+          <colgroup>
+            <col style="width: 9%;" />
+            <col style="width: 16%;" />
+            <col style="width: 12%;" />
+            <col style="width: 63%;" />
+          </colgroup>
+          <tr>
+            <th>FECHA</th>
+            <td>${text(data.closure.date, '')}</td>
+            <th>MOTIVO</th>
+            <td>${text(data.closure.reason, '')}</td>
+          </tr>
+        </table>
 
-        <div class="form-row citation-second-date-row">
-          <strong>FECHA DE ATENCIÓN OFRECIDA CENTRO 2ª CITACIÓN:</strong>
-          <span class="box"></span> DÍA
-          <span class="box"></span> MES
-          <span class="box year"></span> AÑO
-        </div>
+        <table class="responsible-table">
+          <colgroup>
+            <col style="width: 15%;" />
+            <col style="width: 85%;" />
+          </colgroup>
+          <tr>
+            <th>RESPONSABLE</th>
+            <td>${text(data.closure.responsible, '')}</td>
+          </tr>
+        </table>
 
-        <div class="form-row professional-row">
-          <strong>PROFESIONAL:</strong>
-          <span class="line wide"></span>
-          <strong>HORA:</strong>
-          <span class="box"></span>
-          <span class="nsp-field"><span class="check"></span> NSP</span>
-        </div>
+        <div class="section-title">OBSERVACIONES</div>
 
-        <div class="form-row citation-second-followup-row">
-          <strong>FECHA DE 2da ATENCIÓN OFRECIDA EN EL CENTRO (2ª CITACIÓN):</strong>
-          <span class="box"></span> DÍA
-          <span class="box"></span> MES
-          <span class="box year"></span> AÑO
-          <span class="box"></span> HORA
-          <span class="nsp-field"><span class="check"></span> NSP</span>
-        </div>
-
-        <div class="reason-block">
-          <strong>SI NO FUE POSIBLE DAR UNA HORA DE CITACIÓN</strong>
-
-          <div class="form-row">
-            MES:
-            <span class="box"></span>
-          </div>
-
-          <div class="reason-grid">
-            <div><span class="check"></span> No pertinente / no corresponde</div>
-            <div><span class="check"></span> Por Previsión de Salud</div>
-            <div><span class="check"></span> Jurisdicción</div>
-            <div><span class="check"></span> Diagnóstico</div>
-            <div>
-              <span class="check"></span> Otro:
-              <span class="line medium"></span>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-row feedback-date-row">
-          <strong>FECHA RETROALIMENTACIÓN:</strong>
-          <span class="box"></span> DÍA
-          <span class="box"></span> MES
-          <span class="box year"></span> AÑO
-        </div>
-
-        <div class="form-row feedback-professional-row">
-          <strong>PROFESIONAL:</strong>
-          <span class="line wide"></span>
-          <strong>HORA:</strong>
-          <span class="box"></span>
-        </div>
-
-        <div class="form-row closure-date-row">
-          <strong>FECHA CIERRE DEMANDA:</strong>
-          <span class="box"></span> DÍA
-          <span class="box"></span> MES
-          <span class="box year"></span> AÑO
-        </div>
-
-        <div class="form-row closure-responsible-row">
-          <strong>RESPONSABLE:</strong>
-          <span class="line wide"></span>
-        </div>
-
-        <div class="observations-block">
-          <div class="observations-title">OBSERVACIONES</div>
-          <div class="observations-area"></div>
-        </div>
+        <table class="observations-table">
+          <tr>
+            <td class="observations-cell">${text(data.observations, '')}</td>
+          </tr>
+        </table>
       </div>
     `;
   }
@@ -206,7 +251,7 @@ export class SistraReportService {
           <style>
             @page {
               size: Letter portrait;
-              margin: 1mm 10mm 8mm 20mm;
+              margin: 4mm 7mm 5mm 25mm;
             }
 
             * {
@@ -222,13 +267,42 @@ export class SistraReportService {
 
             .sistra-report {
               width: 100%;
+              break-inside: avoid-page;
+              page-break-inside: avoid;
+
+            }
+
+            .report-header {
+              display: grid;
+              grid-template-columns: 92px 1fr 92px;
+              align-items: center;
+              column-gap: 8px;
+              margin: 0 0 6px;
+            }
+
+            .report-header-logo {
+              display: flex;
+              align-items: center;
+              justify-content: flex-start;
+            }
+
+            .report-header-spacer {
+              width: 92px;
+            }
+
+            .report-logo {
+              max-width: 82px;
+              max-height: 42px;
+              object-fit: contain;
+              display: block;
             }
 
             h1 {
-              margin: 0 0 4px;
+              margin: 0;
               text-align: center;
-              font-size: 15px;
+              font-size: 16px;
               font-weight: 700;
+              line-height: 1.1;
             }
 
             table {
@@ -253,8 +327,8 @@ export class SistraReportService {
             }
 
             td {
-              font-size: 12px;
-              line-height: 1.25;
+              font-size: 10px;
+              line-height: 1.15;
             }
 
             .section-title {
@@ -269,14 +343,7 @@ export class SistraReportService {
             }
 
             .form-row {
-              min-height: 38px;
-              border: 1px solid #000;
-              border-top: 0;
-              display: flex;
-              align-items: center;
-              flex-wrap: wrap;
-              gap: 4px;
-              padding: 5px;
+              min-height: 32px;$24px;
             }
 
             .box {
@@ -404,7 +471,62 @@ export class SistraReportService {
             }
 
             .observations-area {
-              min-height: 105px;
+              min-height: 78px;
+            }
+
+            /* SISTRAT Gestión de Demanda */
+            .citation-title {
+              margin-top: 4px;
+              padding: 3px 4px;
+              font-size: 9px;
+              line-height: 1.08;
+            }
+
+            .citation-table th,
+            .citation-table td,
+            .feedback-table th,
+            .feedback-table td,
+            .closure-table th,
+            .closure-table td,
+            .responsible-table td,
+            .observations-table td {
+              padding: 4px 4px;
+              min-height: 0;
+              line-height: 1.12;
+            }
+
+            .citation-table th,
+            .feedback-table th,
+            .closure-table th {
+              font-size: 7.5px;
+            }
+
+            .citation-table td,
+            .feedback-table td,
+            .closure-table td,
+            .responsible-table td,
+            .observations-table td {
+              font-size: 9px;
+            }
+
+            .citation-table,
+            .feedback-table,
+            .closure-table,
+            .responsible-table,
+            .observations-table {
+              break-inside: avoid;
+              page-break-inside: avoid;
+            }
+
+            .observations-cell {
+              height: 42px;
+              vertical-align: top;
+            }
+
+            .sistra-report {
+              width: 100%;
+              break-inside: avoid-page;
+              page-break-inside: avoid;
             }
           </style>
         </head>

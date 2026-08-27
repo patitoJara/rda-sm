@@ -105,11 +105,11 @@
           matInput
           formControlName="phone"
           placeholder="12345678"
-          maxlength="8"
+
           inputmode="numeric"
         />
 
-        <mat-hint>Ingrese solo los 8 dígitos del número móvil.</mat-hint>
+        <mat-hint>Ingrese el número telefónico.</mat-hint>
       </mat-form-field>
 
       <!-- PROGRAMAS MÚLTIPLES -->
@@ -186,7 +186,7 @@
 
       <mat-form-field appearance="outline">
         <mat-label>Programa</mat-label>
-        <mat-select formControlName="programId">
+        <mat-select formControlName="programId" panelClass="facultativos-program-panel">
           <mat-option [value]="null">Todos los programas</mat-option>
 
           <mat-option *ngFor="let program of programs" [value]="program.id">
@@ -203,6 +203,16 @@
           <mat-option value="ALL">Todos</mat-option>
         </mat-select>
       </mat-form-field>
+
+      <button
+        mat-stroked-button
+        type="button"
+        class="reset-filters-btn"
+        (click)="resetFilters()"
+      >
+        <mat-icon>restart_alt</mat-icon>
+        Restablecer
+      </button>
     </form>
   </mat-card>
 
@@ -215,7 +225,7 @@
       </div>
 
       <span class="counter-chip">
-        {{ filteredProfessionals.length }} registros
+        {{ paginationSummary }}
       </span>
     </div>
 
@@ -237,20 +247,26 @@
       class="table-wrapper"
       *ngIf="!isLoading && filteredProfessionals.length"
     >
-      <table class="professionals-table">
+      <table
+        class="professionals-table"
+        matSort
+        [matSortActive]="sortActive"
+        [matSortDirection]="sortDirection"
+        (matSortChange)="onSortChange($event)"
+      >
         <thead>
           <tr>
-            <th>Facultativo</th>
-            <th>Profesión</th>
-            <th>Programas asociados</th>
-            <th>Contacto</th>
-            <th>Estado</th>
+            <th mat-sort-header="name">Facultativo</th>
+            <th mat-sort-header="profession">Profesión</th>
+            <th mat-sort-header="program">Programas asociados</th>
+            <th mat-sort-header="contact">Contacto</th>
+            <th mat-sort-header="status">Estado</th>
             <th class="actions-column">Acciones</th>
           </tr>
         </thead>
 
         <tbody>
-          <tr *ngFor="let professional of filteredProfessionals">
+          <tr *ngFor="let professional of pagedProfessionals">
             <td>
               <div class="person-cell">
                 <strong>{{ professional.name }}</strong>
@@ -349,5 +365,17 @@
         </tbody>
       </table>
     </div>
+
+    <mat-paginator
+      *ngIf="!isLoading && filteredProfessionals.length"
+      class="professionals-paginator"
+      [length]="filteredProfessionals.length"
+      [pageIndex]="pageIndex"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [showFirstLastButtons]="true"
+      (page)="onPageChange($event)"
+      aria-label="Paginación de facultativos"
+    ></mat-paginator>
   </mat-card>
 </section>

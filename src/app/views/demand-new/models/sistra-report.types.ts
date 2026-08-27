@@ -1,4 +1,4 @@
-﻿export interface SistraReportPersonData {
+export interface SistraReportPersonData {
   names: string;
   surnames: string;
   rut: string;
@@ -21,14 +21,42 @@ export interface SistraReportDemandData {
   diverter: string | null;
 }
 
-export interface SistraReportFirstCitationData {
+export interface SistraReportCitationData {
   date: string | null;
   time: string | null;
   professional: string | null;
+  profession: string | null;
+  attendance: string | null;
+}
+
+export interface SistraReportFeedbackData {
+  date: string | null;
+  time: string | null;
+  professional: string | null;
+  commitment: string | null;
+  result: string | null;
+}
+
+export interface SistraReportClosureData {
+  date: string | null;
+  reason: string | null;
+  responsible: string | null;
 }
 
 export interface SistraReportData {
   person: SistraReportPersonData;
   demand: SistraReportDemandData;
-  firstCitation: SistraReportFirstCitationData;
+
+  firstCitationFirstInterview: SistraReportCitationData;
+  secondCitationFirstInterview: SistraReportCitationData;
+  firstCitationSecondInterview: SistraReportCitationData;
+  secondCitationSecondInterview: SistraReportCitationData;
+  firstCitationThirdInterview: SistraReportCitationData;
+  secondCitationThirdInterview: SistraReportCitationData;
+  optionalInterview: SistraReportCitationData;
+
+  feedback: SistraReportFeedbackData;
+  closure: SistraReportClosureData;
+
+  observations: string;
 }

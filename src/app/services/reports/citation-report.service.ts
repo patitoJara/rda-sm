@@ -96,43 +96,63 @@ export class CitationReportService {
       <div id="print-citation">
         <style>
           @page {
-            size: Letter;
-            margin: 18mm;
+            size: Letter; margin: 8mm;
           }
 
           #print-citation {
             color: #173f49;
             font-family: Roboto, Arial, sans-serif;
+            width: 100%;
+            height: calc(5.5in - 8mm);
+            max-height: calc(5.5in - 8mm);
+            box-sizing: border-box;
+            overflow: hidden;
           }
 
           .citation-title {
-            margin: 0 0 20px;
-            padding: 14px 16px;
-            text-align: center;
-            border-top: 2px solid #1565c0;
+            margin: 0 0 6px;
+            padding: 4px 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 58px;
             border-bottom: 2px solid #1565c0;
+            box-sizing: border-box;
+          }
+
+          .citation-logo {
+            flex: 0 0 auto;
+            width: auto;
+            height: 54px;
+            object-fit: contain;
+          }
+
+          .citation-title-text {
+            flex: 1 1 auto;
+            min-width: 0;
+            text-align: center;
           }
 
           .citation-title h2 {
             margin: 0;
             color: #1565c0;
-            font-size: 22px;
+            font-size: 18px;
           }
 
           .citation-title p {
-            margin: 5px 0 0;
-            font-size: 15px;
+            margin: 2px 0 0;
+            font-size: 13px;
             font-weight: 700;
           }
 
           .citation-data {
             width: 100%;
-            margin-top: 16px;
+            margin-top: 8px;
             border-collapse: collapse;
           }
 
           .citation-data td {
-            padding: 9px 8px;
+            padding: 5px 6px;
             border-bottom: 1px solid #d9e6e9;
             vertical-align: top;
           }
@@ -144,22 +164,29 @@ export class CitationReportService {
           }
 
           .citation-notice {
-            margin-top: 24px;
-            padding: 12px 14px;
+            margin-top: 10px;
+            padding: 7px 10px;
             border-left: 4px solid #1565c0;
             background: #eef6ff;
-            line-height: 1.5;
+            line-height: 1.3;
           }
 
           .citation-signature {
-            margin-top: 90px;
+            margin-top: 22px;
             text-align: center;
           }
         </style>
 
         <div class="citation-title">
-          <h2>Comprobante de citación</h2>
-          <p>${escapeHtml(citationTypeName || 'Citación')}</p>
+          <img
+            src="${window.location.origin}/assets/logoSSM.png"
+            class="citation-logo"
+            alt="Servicio de Salud Magallanes"
+          />
+          <div class="citation-title-text">
+            <h2>Comprobante de citación</h2>
+            <p>${escapeHtml(citationTypeName || 'Citación')}</p>
+          </div>
         </div>
 
         <table class="citation-data">
@@ -286,7 +313,7 @@ export class CitationReportService {
     return `
     <div id="print-citation">
       <style>
-        @page { size: Letter; margin: 20mm; }
+        @page { size: Letter; margin: 8mm; }
         body { font-family: Roboto, Arial, sans-serif; font-size: 13px; }
         .header { 
             text-align: center; 
@@ -372,7 +399,7 @@ export class CitationReportService {
       <head>
         <title>Citación</title>
         <style>
-          @page { size: Letter; margin: 20mm; }
+          @page { size: Letter; margin: 8mm; }
 
           body {
             font-family: Roboto, Arial, sans-serif;
@@ -403,7 +430,10 @@ export class CitationReportService {
       </head>
       <body>
 
-        <div class="logo-container">
+        <div
+          class="logo-container"
+          style="${html.includes('class="citation-logo"') ? 'display:none;' : ''}"
+        >
           <img src="${logoUrl}" class="logo" />
         </div>
         ${html}

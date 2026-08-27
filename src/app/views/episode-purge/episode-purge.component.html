@@ -1,4 +1,4 @@
-<section class="purge-page">
+﻿<section class="purge-page">
   <header class="purge-hero">
     <div>
       <span class="eyebrow">
@@ -268,10 +268,20 @@
 
             <input
               matInput
-              type="date"
+              [matDatepicker]="correctionOriginalRequestDatePicker"
               [(ngModel)]="correctionDraft.originalRequestDate"
               name="correctionOriginalRequestDate"
+              placeholder="dd/mm/aaaa"
             />
+
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="correctionOriginalRequestDatePicker"
+            ></mat-datepicker-toggle>
+
+            <mat-datepicker
+              #correctionOriginalRequestDatePicker
+            ></mat-datepicker>
           </mat-form-field>
 
           <mat-form-field appearance="outline" floatLabel="always">
@@ -586,13 +596,23 @@
 
                     <input
                       matInput
-                      type="date"
+                      [matDatepicker]="correctionCitationDatePicker"
                       [(ngModel)]="attempt.citation.eventDate"
                       [name]="
                         'correctionCitationDate_' +
                         attempt.citation.id
                       "
+                      placeholder="dd/mm/aaaa"
                     />
+
+                    <mat-datepicker-toggle
+                      matIconSuffix
+                      [for]="correctionCitationDatePicker"
+                    ></mat-datepicker-toggle>
+
+                    <mat-datepicker
+                      #correctionCitationDatePicker
+                    ></mat-datepicker>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline">
@@ -752,10 +772,20 @@
 
           <input
             matInput
-            type="date"
+            [matDatepicker]="correctionFeedbackDatePicker"
             [(ngModel)]="feedbackDraft.eventDate"
             [name]="'correctionFeedbackDate_' + feedbackDraft.id"
+            placeholder="dd/mm/aaaa"
           />
+
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="correctionFeedbackDatePicker"
+          ></mat-datepicker-toggle>
+
+          <mat-datepicker
+            #correctionFeedbackDatePicker
+          ></mat-datepicker>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
@@ -900,10 +930,21 @@
 
           <input
             matInput
-            type="date"
+            [matDatepicker]="correctionClosureDatePicker"
             [(ngModel)]="closureDraft.closureDate"
             name="correctionClosureDate"
+            placeholder="dd/mm/aaaa"
           />
+
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="correctionClosureDatePicker"
+          ></mat-datepicker-toggle>
+
+          <mat-datepicker
+            #correctionClosureDatePicker
+          ></mat-datepicker>
+
         </mat-form-field>
 
         <mat-form-field

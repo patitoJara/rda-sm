@@ -1,4 +1,4 @@
-﻿import {
+import {
   resolveStageEntryContext,
   resolveStageReceptionContext,
   resolveStageDays,
@@ -4159,6 +4159,27 @@ this.createdEpisode = activeEpisode;
                 event?.attendanceStatusName ??
                 '',
 
+              citationTypeCode:
+                event?.citationType?.code ??
+                event?.citationTypeCode ??
+                event?.citation?.type?.code ??
+                '',
+
+              programProfessionalId:
+                event?.programProfessionalId ??
+                event?.programProfessional?.id ??
+                '',
+
+              programProfessionalName:
+                event?.programProfessionalName ??
+                event?.programProfessional?.name ??
+                '',
+
+              professionName:
+                event?.professionName ??
+                event?.profession?.name ??
+                '',
+
               comment: event?.comment,
             })),
           );
@@ -4484,8 +4505,100 @@ this.createdEpisode = activeEpisode;
   get sistraReportData(): SistraReportData {
     const person: any = this.selectedPerson ?? {};
     const personFormValue = this.personForm.getRawValue();
-    const firstCitation = this.firstCitationCurrentEpisode;
     const demand = this.episodeDemandBackground;
+
+    const resolveSistraCitation = (citationTypeCode: string) => {
+      const citation =
+        this.citationEvents.find(
+          (item: any) =>
+            resolveCitationTypeCode(
+              item,
+              this.citationEvents,
+              this.citationTypes,
+            ) === citationTypeCode,
+        ) ?? null;
+
+      if (!citation) {
+        return {
+          date: null,
+          time: null,
+          professional: null,
+          profession: null,
+          attendance: null,
+        };
+      }
+
+      const rawTime =
+        citation?.eventTime ??
+        citation?.citationTime ??
+        null;
+
+      return {
+        date: formatDisplayDateValue(
+          citation?.eventDate ??
+          citation?.citationDate ??
+          null,
+        ),
+        time: rawTime ? String(rawTime).slice(0, 5) : null,
+        professional: this.getEventProfessionalName(citation),
+        profession: this.getEventProfessionName(citation),
+        attendance: this.getCitationAttendanceLabel(citation),
+      };
+    };
+
+    const feedbackEvent =
+      this.feedbackEvents.length > 0
+        ? this.feedbackEvents[this.feedbackEvents.length - 1]
+        : null;
+
+    const feedbackRawTime =
+      feedbackEvent?.eventTime ??
+      feedbackEvent?.eventHour ??
+      null;
+
+    const feedbackResult =
+      feedbackEvent
+        ? this.formatResultLabel(
+            feedbackEvent?.result?.name ??
+            feedbackEvent?.resultName ??
+            feedbackEvent?.resultCode ??
+            null,
+            '',
+          )
+        : null;
+
+    const feedbackCommitment =
+      feedbackEvent
+        ? this.getFeedbackCommitmentLabel(feedbackEvent)
+        : null;
+
+    const closureEvent = this.workingStageClosureEvent;
+
+    const closureReason =
+      this.workingStage?.closureReason?.name ??
+      this.workingStage?.closureReasonName ??
+      closureEvent?.closureReason?.name ??
+      closureEvent?.closureReasonName ??
+      null;
+
+    const closureResponsible =
+      closureEvent?.registeredByName ??
+      closureEvent?.createdByUser?.name ??
+      closureEvent?.registeredByUser?.name ??
+      null;
+
+    const observations = this.observationEvents
+      .map((event: any) =>
+        String(
+          event?.comment ??
+          event?.observation ??
+          event?.comments ??
+          event?.description ??
+          '',
+        ).trim(),
+      )
+      .filter((value: string) => value.length > 0)
+      .join(' · ');
 
 
 
@@ -4600,11 +4713,57 @@ this.createdEpisode = activeEpisode;
             ? null
             : demand.diverter,
       },
-      firstCitation: {
-        date: formatDisplayDateValue(firstCitation.date),
-        time: firstCitation.time,
-        professional: firstCitation.professional,
+      firstCitationFirstInterview: resolveSistraCitation(
+        DEMAND_CITATION_CODES.firstCitationFirstInterview,
+      ),
+
+      secondCitationFirstInterview: resolveSistraCitation(
+        DEMAND_CITATION_CODES.secondCitationFirstInterview,
+      ),
+
+      firstCitationSecondInterview: resolveSistraCitation(
+        DEMAND_CITATION_CODES.firstCitationSecondInterview,
+      ),
+
+      secondCitationSecondInterview: resolveSistraCitation(
+        DEMAND_CITATION_CODES.secondCitationSecondInterview,
+      ),
+
+      firstCitationThirdInterview: resolveSistraCitation(
+        DEMAND_CITATION_CODES.firstCitationThirdInterview,
+      ),
+
+      secondCitationThirdInterview: resolveSistraCitation(
+        DEMAND_CITATION_CODES.secondCitationThirdInterview,
+      ),
+
+      optionalInterview: resolveSistraCitation(
+        DEMAND_CITATION_CODES.optionalInterview,
+      ),
+
+      feedback: {
+        date: formatDisplayDateValue(
+          feedbackEvent?.eventDate ?? null,
+        ),
+        time: feedbackRawTime
+          ? String(feedbackRawTime).slice(0, 5)
+          : null,
+        professional: feedbackEvent
+          ? this.getEventProfessionalName(feedbackEvent)
+          : null,
+        commitment: feedbackCommitment,
+        result: feedbackResult,
       },
+
+      closure: {
+        date: formatDisplayDateValue(
+          this.workingStageClosureDate,
+        ),
+        reason: closureReason,
+        responsible: closureResponsible,
+      },
+
+      observations,
     };
   }
   get sistraPendingFields(): string[] {
@@ -6421,6 +6580,7 @@ this.createdEpisode = activeEpisode;
     date: string | null;
     time: string | null;
     professional: string | null;
+    profession: string | null;
   } {
     const citations = this.allCitationEvents.filter((citation: any) => {
       const code = resolveCitationTypeCode(
@@ -6440,6 +6600,7 @@ this.createdEpisode = activeEpisode;
         date: null,
         time: null,
         professional: null,
+        profession: null,
       };
     }
 
@@ -6460,12 +6621,23 @@ this.createdEpisode = activeEpisode;
       : null;
 
     const professional =
-      citation?.professionName ??
-      citation?.programProfessional?.professional?.name ??
+      citation?.programProfessionalName ??
       citation?.programProfessional?.name ??
+      citation?.programProfessional?.professional?.name ??
       citation?.professional?.name ??
-      professionalFromCatalog?.professional?.name ??
       professionalFromCatalog?.name ??
+      professionalFromCatalog?.professional?.name ??
+      null;
+
+    const profession =
+      citation?.professionName ??
+      citation?.profession?.name ??
+      citation?.programProfessional?.professionName ??
+      citation?.programProfessional?.profession?.name ??
+      professionalFromCatalog?.professionName ??
+      professionalFromCatalog?.profession?.name ??
+      professionalFromCatalog?.professional?.professionName ??
+      professionalFromCatalog?.professional?.profession?.name ??
       null;
 
     const rawTime =
@@ -6481,6 +6653,7 @@ this.createdEpisode = activeEpisode;
         null,
       time: rawTime ? String(rawTime).slice(0, 5) : null,
       professional,
+      profession,
     };
   }
   get demandCitationMilestones() {

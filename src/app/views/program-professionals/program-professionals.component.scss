@@ -515,3 +515,930 @@
   font-weight: 800;
   padding-left: 2px;
 }
+/* ===== FACULTATIVOS - LAYOUT OPERATIVO FIJO ===== */
+
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.program-professionals-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  gap: 8px;
+  padding: 10px 14px 8px;
+}
+
+/* ---------------------------------------------------------
+   CABECERA COMPACTA Y FIJA
+--------------------------------------------------------- */
+
+.page-hero {
+  flex: 0 0 auto;
+  min-height: unset;
+  padding: 10px 16px;
+  border-radius: 12px;
+  gap: 16px;
+}
+
+.page-hero .eyebrow {
+  margin: 0 0 4px;
+  padding: 4px 9px;
+  font-size: 0.62rem;
+}
+
+.page-hero h1 {
+  font-size: 1.25rem;
+  line-height: 1.1;
+}
+
+.page-hero .hero-description {
+  max-width: 900px;
+  margin: 4px 0 0;
+  font-size: 0.72rem;
+  line-height: 1.25;
+}
+
+.page-hero .primary-btn {
+  min-width: 160px;
+  height: 34px;
+  padding: 0 13px;
+  font-size: 0.72rem;
+}
+
+/* ---------------------------------------------------------
+   FORMULARIO
+--------------------------------------------------------- */
+
+.form-card {
+  flex: 0 0 auto;
+  margin-top: 0;
+  padding: 12px 14px;
+  border-radius: 11px;
+  max-height: 42vh;
+  overflow-y: auto;
+}
+
+.form-card .section-header h2 {
+  font-size: 1rem;
+}
+
+.form-card .section-kicker {
+  font-size: 0.68rem;
+}
+
+.professional-form {
+  gap: 8px 12px;
+  margin-top: 10px;
+}
+
+.form-actions {
+  margin-top: 2px;
+  padding-top: 8px;
+}
+
+/* ---------------------------------------------------------
+   FILTROS FIJOS
+--------------------------------------------------------- */
+
+.filters-card {
+  flex: 0 0 auto;
+  margin-top: 0;
+  padding: 7px 10px;
+  border-radius: 11px;
+  overflow: visible;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(260px, 1fr)
+    minmax(180px, 230px)
+    minmax(140px, 180px)
+    auto;
+  align-items: start;
+  gap: 7px;
+}
+
+.filters-grid mat-form-field:first-child,
+.filters-grid mat-form-field:not(:first-child) {
+  width: 100%;
+  min-width: 0;
+  flex: unset;
+}
+
+.reset-filters-btn {
+  height: 40px;
+  min-width: 118px;
+  margin-top: 0;
+  border-radius: 9px;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.reset-filters-btn mat-icon {
+  width: 17px;
+  height: 17px;
+  font-size: 17px;
+}
+
+/* ---------------------------------------------------------
+   LISTADO OCUPA EL RESTO DE LA PANTALLA
+--------------------------------------------------------- */
+
+.list-card {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  margin-top: 0;
+  border-radius: 11px;
+  overflow: hidden;
+}
+
+.list-card > .section-header {
+  flex: 0 0 auto;
+  align-items: center;
+  padding: 8px 12px 6px;
+  border-bottom: 1px solid #dce8ea;
+}
+
+.list-card > .section-header h2 {
+  margin-top: 1px;
+  font-size: 0.9rem;
+  line-height: 1.15;
+}
+
+.list-card > .section-header .section-kicker {
+  font-size: 0.62rem;
+}
+
+.counter-chip {
+  min-height: 24px;
+  padding: 3px 9px;
+  font-size: 0.7rem;
+}
+
+/* ---------------------------------------------------------
+   SCROLL SOLO EN LA TABLA
+--------------------------------------------------------- */
+
+.table-wrapper {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  overflow: auto;
+}
+
+.professionals-table {
+  min-width: 980px;
+}
+
+.professionals-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.professionals-table th {
+  padding: 9px 12px;
+  font-size: 0.74rem;
+  white-space: nowrap;
+}
+
+.professionals-table td {
+  padding: 8px 12px;
+  font-size: 0.78rem;
+}
+
+.professionals-table .person-cell {
+  gap: 1px;
+}
+
+.professionals-table .person-cell span {
+  font-size: 0.68rem;
+}
+
+.professionals-table .program-chip {
+  min-height: 22px;
+  padding: 2px 7px;
+  font-size: 0.67rem;
+}
+
+.professionals-table .contact-cell {
+  gap: 3px;
+}
+
+.professionals-table .contact-cell mat-icon {
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+}
+
+.professionals-table .status-badge {
+  min-width: 65px;
+  padding: 3px 8px;
+  font-size: 0.68rem;
+}
+
+.professionals-table .actions-column {
+  width: 112px;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------
+   PAGINADOR SIEMPRE VISIBLE
+--------------------------------------------------------- */
+
+.professionals-paginator {
+  flex: 0 0 auto;
+  min-height: 46px;
+  border-top: 1px solid #dce8ea;
+  background: #ffffff;
+}
+
+/* ---------------------------------------------------------
+   MATERIAL COMPACTO SOLO EN FILTROS
+--------------------------------------------------------- */
+
+::ng-deep .program-professionals-page .filters-card {
+  .mat-mdc-text-field-wrapper {
+    min-height: 40px !important;
+  }
+
+  .mat-mdc-form-field-flex {
+    min-height: 40px !important;
+  }
+
+  .mat-mdc-form-field-infix {
+    min-height: 40px !important;
+    padding-top: 8px !important;
+    padding-bottom: 5px !important;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  .mat-mdc-form-field-icon-prefix {
+    width: 36px !important;
+    min-width: 36px !important;
+  }
+
+  .mat-mdc-form-field-icon-prefix .mat-icon {
+    width: 19px !important;
+    height: 19px !important;
+    font-size: 19px !important;
+    line-height: 19px !important;
+  }
+}
+
+/* ---------------------------------------------------------
+   ORDENAMIENTO
+--------------------------------------------------------- */
+
+::ng-deep .professionals-table {
+  .mat-sort-header-container {
+    gap: 4px;
+  }
+
+  .mat-sort-header-arrow {
+    opacity: 0.65;
+  }
+}
+
+/* ---------------------------------------------------------
+   RESPONSIVE
+--------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  .filters-grid {
+    grid-template-columns:
+      minmax(220px, 1fr)
+      minmax(160px, 200px)
+      minmax(130px, 160px)
+      auto;
+  }
+}
+
+@media (max-width: 900px) {
+  :host {
+    overflow: auto;
+  }
+
+  .program-professionals-page {
+    height: auto;
+    min-height: 100%;
+    overflow: visible;
+    padding: 8px;
+  }
+
+  .page-hero {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .page-hero .primary-btn {
+    width: auto;
+  }
+
+  .filters-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .filters-grid mat-form-field,
+  .filters-grid mat-form-field:first-child,
+  .filters-grid mat-form-field:not(:first-child) {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .reset-filters-btn {
+    width: 100%;
+  }
+
+  .list-card {
+    min-height: 520px;
+  }
+}
+
+@media (max-width: 620px) {
+  .page-hero {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-hero .primary-btn {
+    width: 100%;
+  }
+
+  .filters-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== FACULTATIVOS - AJUSTE FINAL FILTROS ===== */
+
+.filters-card {
+  padding: 9px 12px;
+  border: 1px solid #cbdfe3;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 63, 74, 0.06);
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns:
+    230px
+    230px
+    230px
+    auto;
+  justify-content: start;
+  align-items: center;
+  gap: 8px;
+}
+
+.filters-grid mat-form-field,
+.filters-grid mat-form-field:first-child,
+.filters-grid mat-form-field:not(:first-child) {
+  width: 230px;
+  min-width: 230px;
+  max-width: 230px;
+}
+
+.reset-filters-btn {
+  height: 40px;
+  min-width: 125px;
+  margin: 0;
+  padding: 0 14px;
+  align-self: center;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+::ng-deep .program-professionals-page .filters-card {
+  .mat-mdc-text-field-wrapper {
+    height: 40px !important;
+    min-height: 40px !important;
+    border-radius: 8px !important;
+  }
+
+  .mat-mdc-form-field-flex {
+    height: 40px !important;
+    min-height: 40px !important;
+    align-items: center !important;
+  }
+
+  .mat-mdc-form-field-infix {
+    min-height: 40px !important;
+    padding-top: 8px !important;
+    padding-bottom: 6px !important;
+  }
+
+  .mat-mdc-floating-label {
+    font-size: 0.76rem;
+  }
+
+  .mat-mdc-input-element,
+  .mat-mdc-select-value {
+    font-size: 0.78rem;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+}
+
+@media (max-width: 1050px) {
+  .filters-grid {
+    grid-template-columns:
+      repeat(3, minmax(170px, 1fr))
+      auto;
+  }
+
+  .filters-grid mat-form-field,
+  .filters-grid mat-form-field:first-child,
+  .filters-grid mat-form-field:not(:first-child) {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .filters-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .reset-filters-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .filters-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== FACULTATIVOS - ANCHO PROGRAMA ===== */
+
+.filters-grid {
+  grid-template-columns:
+    230px
+    460px
+    230px
+    auto;
+}
+
+/* Buscar */
+.filters-grid mat-form-field:nth-child(1) {
+  width: 230px;
+  min-width: 230px;
+  max-width: 230px;
+}
+
+/* Programa */
+.filters-grid mat-form-field:nth-child(2) {
+  width: 460px;
+  min-width: 460px;
+  max-width: 460px;
+}
+
+/* Estado */
+.filters-grid mat-form-field:nth-child(3) {
+  width: 230px;
+  min-width: 230px;
+  max-width: 230px;
+}
+
+/* Panel desplegable del select Programa */
+::ng-deep .program-professionals-page
+  .filters-grid
+  mat-form-field:nth-child(2)
+  .mat-mdc-select-panel {
+  min-width: 460px !important;
+  max-width: 560px !important;
+}
+
+::ng-deep .program-professionals-page
+  .filters-grid
+  mat-form-field:nth-child(2)
+  .mat-mdc-option {
+  min-height: 36px;
+  line-height: 1.2;
+}
+
+/* Responsive */
+@media (max-width: 1250px) {
+  .filters-grid {
+    grid-template-columns:
+      210px
+      minmax(360px, 1fr)
+      210px
+      auto;
+  }
+
+  .filters-grid mat-form-field:nth-child(1),
+  .filters-grid mat-form-field:nth-child(3) {
+    width: 210px;
+    min-width: 210px;
+    max-width: 210px;
+  }
+
+  .filters-grid mat-form-field:nth-child(2) {
+    width: 100%;
+    min-width: 360px;
+    max-width: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .filters-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .filters-grid mat-form-field:nth-child(1),
+  .filters-grid mat-form-field:nth-child(2),
+  .filters-grid mat-form-field:nth-child(3) {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+}
+
+/* ===== FACULTATIVOS - ACCIONES FORMULARIO VISIBLES ===== */
+
+.form-card {
+  position: relative;
+}
+
+.form-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+
+  margin: 4px -14px -12px;
+  padding: 9px 14px;
+
+  background: #ffffff;
+  border-top: 1px solid #d7e4e7;
+
+  box-shadow: 0 -5px 12px rgba(0, 63, 74, 0.06);
+}
+
+.form-actions button {
+  height: 38px;
+  min-width: 130px;
+}
+
+/* ===== FACULTATIVOS - FORMULARIO OPERATIVO COMPACTO ===== */
+
+.form-card {
+  padding: 8px 12px 0;
+  border: 1px solid #cbdfe3;
+  border-radius: 12px;
+  background: #f8fbfc;
+  box-shadow: 0 4px 14px rgba(0, 63, 74, 0.06);
+}
+
+/* Cabecera del formulario */
+.form-card > .section-header {
+  align-items: center;
+  min-height: 32px;
+  margin-bottom: 5px;
+  padding: 0 2px;
+}
+
+.form-card > .section-header .section-kicker {
+  margin: 0 0 1px;
+  font-size: 0.6rem;
+  line-height: 1;
+  color: #58757b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 800;
+}
+
+.form-card > .section-header h2 {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.1;
+  color: #004b58;
+}
+
+.form-card > .section-header > button {
+  width: 30px;
+  height: 30px;
+}
+
+/* ---------------------------------------------------------
+   GRID COMPACTO
+--------------------------------------------------------- */
+
+.professional-form {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.35fr)
+    minmax(0, 1.35fr)
+    minmax(260px, 1fr);
+
+  gap: 7px 10px;
+  margin-top: 4px;
+  align-items: start;
+}
+
+/* Nombre */
+.professional-form > mat-form-field:nth-child(1) {
+  grid-column: span 2;
+}
+
+/* Profesión */
+.professional-form > mat-form-field:nth-child(2) {
+  grid-column: span 1;
+}
+
+/* Correo */
+.professional-form > mat-form-field:nth-child(3) {
+  grid-column: span 2;
+}
+
+/* Teléfono */
+.professional-form > mat-form-field:nth-child(4) {
+  grid-column: span 1;
+}
+
+/* Programas */
+.professional-form > mat-form-field:nth-child(5) {
+  grid-column: span 2;
+}
+
+/* Observación */
+.professional-form > mat-form-field:nth-child(6) {
+  grid-column: span 1;
+}
+
+/* ---------------------------------------------------------
+   CAMPOS CON JERARQUÍA VISUAL
+--------------------------------------------------------- */
+
+::ng-deep .program-professionals-page .form-card {
+
+  .mat-mdc-form-field {
+    width: 100%;
+    margin: 0;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    min-height: 42px !important;
+    background: #ffffff !important;
+    border-radius: 8px !important;
+  }
+
+  .mat-mdc-form-field-flex {
+    min-height: 42px !important;
+    align-items: center !important;
+  }
+
+  .mat-mdc-form-field-infix {
+    min-height: 42px !important;
+    padding-top: 9px !important;
+    padding-bottom: 5px !important;
+  }
+
+  .mat-mdc-floating-label {
+    font-size: 0.72rem !important;
+    font-weight: 600;
+    color: #315f67;
+  }
+
+  input.mat-mdc-input-element,
+  textarea.mat-mdc-input-element,
+  .mat-mdc-select-value {
+    font-size: 0.78rem;
+    color: #063f49;
+  }
+
+  textarea.mat-mdc-input-element {
+    min-height: 32px;
+    max-height: 54px;
+  }
+
+  .mat-mdc-form-field-hint {
+    font-size: 0.61rem;
+    line-height: 1.05;
+    color: #56777e;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper {
+    min-height: 15px;
+    margin-top: 0;
+  }
+
+  .mat-mdc-form-field-bottom-align::before {
+    height: 15px;
+  }
+}
+
+/* ---------------------------------------------------------
+   PROGRAMAS Y OBSERVACIÓN
+--------------------------------------------------------- */
+
+.professional-form > mat-form-field:nth-child(5),
+.professional-form > mat-form-field:nth-child(6) {
+  margin-top: 0;
+}
+
+/* ---------------------------------------------------------
+   BOTONERA MÁS INTEGRADA
+--------------------------------------------------------- */
+
+.form-actions {
+  grid-column: 1 / -1;
+
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+
+  margin: 0 -12px;
+  padding: 7px 14px;
+
+  background: rgba(255, 255, 255, 0.98);
+  border-top: 1px solid #d7e5e8;
+  box-shadow: 0 -3px 10px rgba(0, 63, 74, 0.04);
+}
+
+.form-actions button {
+  min-width: 125px;
+  height: 34px;
+  border-radius: 18px;
+  font-size: 0.7rem;
+}
+
+/* ---------------------------------------------------------
+   RESPONSIVE
+--------------------------------------------------------- */
+
+@media (max-width: 1050px) {
+  .professional-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .professional-form > mat-form-field:nth-child(1),
+  .professional-form > mat-form-field:nth-child(3),
+  .professional-form > mat-form-field:nth-child(5),
+  .professional-form > mat-form-field:nth-child(6) {
+    grid-column: 1 / -1;
+  }
+
+  .professional-form > mat-form-field:nth-child(2),
+  .professional-form > mat-form-field:nth-child(4) {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 720px) {
+  .professional-form {
+    grid-template-columns: 1fr;
+  }
+
+  .professional-form > mat-form-field:nth-child(n) {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ===== FACULTATIVOS - PANEL SELECT PROGRAMA ===== */
+
+::ng-deep .facultativos-program-panel {
+  min-width: 460px !important;
+  max-width: 560px !important;
+  max-height: 280px !important;
+
+  padding: 5px !important;
+
+  border: 1px solid #c9dde1;
+  border-radius: 10px !important;
+
+  background: #ffffff !important;
+
+  box-shadow:
+    0 10px 24px rgba(0, 63, 74, 0.14) !important;
+}
+
+::ng-deep .facultativos-program-panel .mat-mdc-option {
+  min-height: 34px !important;
+  height: auto !important;
+
+  margin: 2px 0;
+  padding: 6px 10px !important;
+
+  border-radius: 7px;
+
+  font-size: 0.75rem !important;
+  line-height: 1.18 !important;
+
+  color: #164b54 !important;
+}
+
+::ng-deep
+  .facultativos-program-panel
+  .mat-mdc-option:hover:not(.mdc-list-item--disabled) {
+  background: #eef8f9 !important;
+}
+
+::ng-deep
+  .facultativos-program-panel
+  .mat-mdc-option.mdc-list-item--selected {
+  background: #dff2f4 !important;
+}
+
+::ng-deep
+  .facultativos-program-panel
+  .mat-mdc-option.mdc-list-item--selected
+  .mdc-list-item__primary-text {
+  color: #006b78 !important;
+  font-weight: 800;
+}
+
+::ng-deep
+  .facultativos-program-panel
+  .mdc-list-item__primary-text {
+  white-space: normal !important;
+  overflow-wrap: break-word;
+}
+
+/* Scroll del panel */
+::ng-deep .facultativos-program-panel::-webkit-scrollbar {
+  width: 7px;
+}
+
+::ng-deep .facultativos-program-panel::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #9ebcc1;
+}
+
+::ng-deep .facultativos-program-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ===== FACULTATIVOS - RESTAURAR MATERIAL ICONS ===== */
+
+.program-professionals-page mat-icon,
+::ng-deep .program-professionals-page .mat-icon {
+  font-family: "Material Icons" !important;
+  font-weight: normal !important;
+  font-style: normal !important;
+  line-height: 1 !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  white-space: nowrap !important;
+  word-wrap: normal !important;
+  direction: ltr;
+  font-feature-settings: "liga" !important;
+  -webkit-font-feature-settings: "liga" !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Nuevo profesional */
+.page-hero .primary-btn mat-icon {
+  width: 18px !important;
+  height: 18px !important;
+  font-size: 18px !important;
+  overflow: visible !important;
+}
+
+/* Buscar / Restablecer */
+.filters-card mat-icon {
+  width: 18px !important;
+  height: 18px !important;
+  font-size: 18px !important;
+  overflow: visible !important;
+}
+
+/* Editar / Eliminar / Restaurar */
+.actions-column mat-icon {
+  width: 20px !important;
+  height: 20px !important;
+  font-size: 20px !important;
+  overflow: visible !important;
+}
+
+/* Correo / teléfono */
+.contact-cell mat-icon {
+  width: 15px !important;
+  height: 15px !important;
+  font-size: 15px !important;
+  overflow: visible !important;
+}

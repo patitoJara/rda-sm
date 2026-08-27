@@ -1,4 +1,4 @@
-﻿<section class="priority-page">
+<section class="priority-page">
   <!-- ENCABEZADO -->
   <header class="priority-hero">
     <div class="priority-hero__content">
@@ -724,15 +724,25 @@
         <!-- ACCIÓN SUGERIDA -->
         <ng-container matColumnDef="suggestedAction">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>
-            Acción sugerida
+            {{
+              isHistoricalMode
+                ? "Resultado del cierre"
+                : "Acción sugerida"
+            }}
           </th>
 
           <td mat-cell *matCellDef="let row">
             <div class="suggested-action">
-              <mat-icon>assistant_direction</mat-icon>
+              <mat-icon>
+                {{ isHistoricalMode ? "task_alt" : "assistant_direction" }}
+              </mat-icon>
 
               <span>
-                {{ getEpisodeSuggestedActionLabel(row) }}
+                {{
+                  isHistoricalMode
+                    ? formatResultLabel(row.resultCode)
+                    : getEpisodeSuggestedActionLabel(row)
+                }}
               </span>
             </div>
           </td>

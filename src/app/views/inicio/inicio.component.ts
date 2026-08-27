@@ -1,4 +1,4 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
   Component,
   OnDestroy,
@@ -151,7 +151,7 @@ export class InicioComponent implements OnInit, OnDestroy {
 
   readonly pageSizeOptions = [20, 50, 100];
 
-  readonly displayedColumns = [
+  readonly activeDisplayedColumns = [
     'semaphore',
     'days',
     'person',
@@ -174,8 +174,18 @@ export class InicioComponent implements OnInit, OnDestroy {
     'actions',
   ];
 
+  readonly historicalDisplayedColumns =
+    this.activeDisplayedColumns.filter(
+      (column) => column !== 'result',
+    );
+
+  get displayedColumns(): string[] {
+    return this.isHistoricalMode
+      ? this.historicalDisplayedColumns
+      : this.activeDisplayedColumns;
+  }
   readonly sortFieldMap: Record<string, string> = {
-    semaphore: 'semaphoreColor',
+    semaphore: 'accumulatedDays',
     days: 'accumulatedDays',
     person: 'personName',
     rut: 'rut',
@@ -328,7 +338,10 @@ export class InicioComponent implements OnInit, OnDestroy {
   }
 
   onSortChange(sort: Sort): void {
-    const backendField = this.sortFieldMap[sort.active];
+    const backendField =
+      this.isHistoricalMode && sort.active === 'suggestedAction'
+        ? 'resultCode'
+        : this.sortFieldMap[sort.active];
 
     this.currentSort =
       backendField && sort.direction
@@ -504,7 +517,9 @@ export class InicioComponent implements OnInit, OnDestroy {
       return text;
     }
 
-    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    const shortYear = parts[0].slice(-2);
+
+    return `${parts[2]}/${parts[1]}/${shortYear}`;
   }
 
   formatCompactTime(value: string | null | undefined): string {
