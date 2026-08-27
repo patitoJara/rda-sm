@@ -202,7 +202,7 @@ export class InicioComponent implements OnInit, OnDestroy {
     program: 'currentProgram.name',
     result: 'resultCode',
     commitment: 'biopsychosocialCommitmentCode',
-    lastManagement: 'lastManagementDate',
+    lastManagement: 'lastManagement',
     suggestedAction: 'suggestedAction',
   };
 
