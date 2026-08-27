@@ -2,6 +2,7 @@ import {
   resolveStageEntryContext,
   resolveStageReceptionContext,
   resolveStageDays,
+  resolveOperationalEventDate,
   resolveWorkingStage,
   resolveWorkingStageId,
 } from './utils/demand-new-stage.utils';
@@ -911,9 +912,15 @@ export class DemandNewComponent
       ),
     );
 
-    return this.closureReasons.filter((item) =>
-      allowedCodes.has(normalizeText(item.code)),
-    );
+    return this.closureReasons
+      .filter((item) =>
+        allowedCodes.has(normalizeText(item.code)),
+      )
+      .sort((a: any, b: any) =>
+        String(a?.name ?? '').localeCompare(String(b?.name ?? ''), 'es', {
+          sensitivity: 'base',
+        }),
+      );
   }
 
   getOperativeActionDisabledReason(action: {
@@ -1471,8 +1478,45 @@ export class DemandNewComponent
         this.eventTypes = catalogs.eventTypes ?? [];
         this.attendanceStatuses = catalogs.attendanceStatuses ?? [];
         this.citationTypes = catalogs.citationTypes ?? [];
-        this.biopsychosocialCommitmentLevels =
-          catalogs.biopsychosocialCommitmentLevels ?? [];
+        const commitmentRank = (item: any): number => {
+          const value = normalizeText(
+            item?.code ?? item?.name ?? '',
+          );
+
+          if (value.includes('EVALU')) {
+            return 0;
+          }
+
+          if (value.includes('LEVE')) {
+            return 1;
+          }
+
+          if (value.includes('MODERADO')) {
+            return 2;
+          }
+
+          if (value.includes('SEVERO')) {
+            return 3;
+          }
+
+          return 99;
+        };
+
+        this.biopsychosocialCommitmentLevels = [
+          ...(catalogs.biopsychosocialCommitmentLevels ?? []),
+        ].sort((a: any, b: any) => {
+          const rankDifference = commitmentRank(a) - commitmentRank(b);
+
+          if (rankDifference !== 0) {
+            return rankDifference;
+          }
+
+          return String(a?.name ?? '').localeCompare(
+            String(b?.name ?? ''),
+            'es',
+            { sensitivity: 'base' },
+          );
+        });
         this.closureReasons = catalogs.closureReasons ?? [];
         this.programPopulations = catalogs.programPopulations ?? [];
         this.programModalities = catalogs.programModalities ?? [];
@@ -1509,13 +1553,19 @@ export class DemandNewComponent
 
         const loadedResults = data.results?.content ?? data.results ?? [];
 
-        this.results = loadedResults.filter((item: any) =>
-          this.allowedFeedbackResultCodes.has(
-            String(item?.code ?? '')
-              .trim()
-              .toUpperCase(),
-          ),
-        );
+        this.results = loadedResults
+          .filter((item: any) =>
+            this.allowedFeedbackResultCodes.has(
+              String(item?.code ?? '')
+                .trim()
+                .toUpperCase(),
+            ),
+          )
+          .sort((a: any, b: any) =>
+            String(a?.name ?? '').localeCompare(String(b?.name ?? ''), 'es', {
+              sensitivity: 'base',
+            }),
+          );
       },
       error: () => {
         this.sexes = [];
@@ -5699,9 +5749,17 @@ this.createdEpisode = activeEpisode;
         ))
       : 'Sin gestiones registradas';
 
+    const lastManagementDate =
+      lastEvent && this.getEventTypeCode(lastEvent) === 'CIERRE'
+        ? this.workingStageClosureDate ??
+          lastEvent?.eventDate ??
+          lastEvent?.createdAt
+        : lastEvent?.eventDate ??
+          lastEvent?.createdAt;
+
     const lastManagementDetail = lastEvent
       ? `${formatDisplayDateValue(
-          lastEvent?.eventDate ?? lastEvent?.createdAt,
+          lastManagementDate,
         )}${
           lastEvent?.eventTime
             ? ` · ${formatDisplayTimeValue(lastEvent.eventTime)}`
@@ -6832,10 +6890,20 @@ this.createdEpisode = activeEpisode;
       this.longitudinal?.stages ?? [],
       this.longitudinal?.references ?? [],
       this.episodeEvents ?? [],
+      this.episodeSummary?.originalRequestDate ??
+        this.createdEpisode?.originalRequestDate ??
+        this.longitudinal?.activeEpisode?.originalRequestDate ??
+        this.episodeOriginDate,
     );
   }
   formatDisplayDate(value: any): string {
     return formatDisplayDateValue(value);
+  }
+  getOperationalEventDate(event: any): string | null {
+    return resolveOperationalEventDate(
+      event,
+      this.longitudinal?.stages ?? [],
+    );
   }
 
   formatDisplayTime(value: any): string {

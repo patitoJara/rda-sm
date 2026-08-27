@@ -2467,7 +2467,7 @@
                 " · " +
                 getEventProgramContext(lastEpisodeEvent).displayLabel +
                 " · " +
-                formatDisplayDate(lastEpisodeEvent.eventDate)
+                formatDisplayDate(getOperationalEventDate(lastEpisodeEvent))
               : "Sin gestión registrada"
           }}
         </strong>
@@ -4265,7 +4265,7 @@
               <mat-icon>schedule</mat-icon>
 
               <div>
-                <strong>{{ formatDisplayDate(event.eventDate) }}</strong>
+                <strong>{{ formatDisplayDate(getOperationalEventDate(event)) }}</strong>
 
                 <span *ngIf="event.eventTime">
                   {{ formatDisplayTime(event.eventTime) }}

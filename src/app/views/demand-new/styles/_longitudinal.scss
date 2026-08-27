@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    FICHA LONGITUDINAL MODERNA
    ============================================================ */
 
@@ -206,7 +206,7 @@
   border: 1px solid #e1ecee;
 
   &.wide {
-    grid-column: span 1;
+    grid-column: span 2;
   }
 
   mat-icon {
@@ -232,9 +232,11 @@
     color: #153f49;
     font-size: 0.9rem;
     font-weight: 900;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+    line-height: 1.2;
   }
 }
 

@@ -1,4 +1,8 @@
-﻿export interface CompactProgramTrajectoryItem {
+import {
+  resolveStageDays,
+  resolveStageEntryContext,
+} from './demand-new-stage.utils';
+export interface CompactProgramTrajectoryItem {
   kind: 'stage' | 'reference';
   id: number;
   stageOrder?: number;
@@ -34,6 +38,7 @@ export function buildCompactProgramTrajectory(
   stages: any[],
   references: any[],
   events: any[] = [],
+  originalRequestDate: string | null | undefined = null,
 ): CompactProgramTrajectoryItem[] {
   const safeStages = Array.isArray(stages) ? stages : [];
   const safeReferences = Array.isArray(references) ? references : [];
@@ -122,6 +127,17 @@ export function buildCompactProgramTrajectory(
 
         return code === 'REVERSION';
       });
+    const entryContext = resolveStageEntryContext(
+      stage,
+      safeReferences,
+      originalRequestDate,
+    );
+
+    const resolvedDaysInStage = resolveStageDays(
+      stage,
+      safeReferences,
+      originalRequestDate,
+    );
 
     trajectory.push({
       kind: 'stage',
@@ -132,11 +148,8 @@ export function buildCompactProgramTrajectory(
         stage?.programName ??
         'Programa sin información',
       stageLabel,
-      daysInStage: toNumericValue(stage?.daysInStage),
-      entryDate:
-        stage?.receivedAt ??
-        stage?.createdAt ??
-        null,
+      daysInStage: resolvedDaysInStage,
+      entryDate: entryContext.date,
       current,
 
       closureDate:

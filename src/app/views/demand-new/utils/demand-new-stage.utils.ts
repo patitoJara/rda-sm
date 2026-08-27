@@ -1,4 +1,4 @@
-﻿export function resolveStageProgramId(
+export function resolveStageProgramId(
   stage: any,
 ): number | null {
   const programId = Number(
@@ -56,6 +56,46 @@ export function resolveStageById(
   );
 }
 
+export function resolveOperationalEventDate(
+  event: any,
+  stages: any[] | null | undefined,
+): string | null {
+  if (!event) {
+    return null;
+  }
+
+  const eventTypeCode = String(
+    event?.eventType?.code ??
+      event?.eventTypeCode ??
+      event?.event_type_code ??
+      event?.typeCode ??
+      event?.code ??
+      '',
+  )
+    .trim()
+    .toUpperCase();
+
+  if (eventTypeCode !== 'CIERRE') {
+    return event?.eventDate ?? event?.createdAt ?? null;
+  }
+
+  const eventStageId =
+    event?.stageId ??
+    event?.stage?.id ??
+    event?.demandStageId ??
+    null;
+
+  const stage = resolveStageById(stages, eventStageId);
+
+  return (
+    stage?.closureDate ??
+    stage?.closedAt ??
+    stage?.closureAt ??
+    event?.eventDate ??
+    event?.createdAt ??
+    null
+  );
+}
 export function resolveStagesForProgram(
   stages: any[] | null | undefined,
   programId: number | string | null | undefined,
