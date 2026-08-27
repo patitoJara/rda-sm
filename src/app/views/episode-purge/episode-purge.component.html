@@ -1,4 +1,4 @@
-﻿<section class="purge-page">
+<section class="purge-page">
   <header class="purge-hero">
     <div>
       <span class="eyebrow">
@@ -167,7 +167,7 @@
           adminMode === 'reversal'
         "
       >
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" floatLabel="always">
           <mat-label>Programa a intervenir</mat-label>
 
           <mat-select
@@ -365,7 +365,11 @@
             />
           </mat-form-field>
 
-          <mat-form-field appearance="outline" floatLabel="always">
+
+
+          <div class="secondary-substances">
+            <div class="secondary-substances__primary">
+              <mat-form-field appearance="outline" floatLabel="always">
             <mat-label>Sustancia principal</mat-label>
 
             <mat-select
@@ -380,8 +384,8 @@
               </mat-option>
             </mat-select>
           </mat-form-field>
+            </div>
 
-          <div class="secondary-substances">
             <div class="secondary-substances__header">
               <div>
                 <strong>Sustancias secundarias</strong>
@@ -889,6 +893,143 @@
           ></textarea>
         </mat-form-field>
       </div>
+    </div>
+
+    <div class="correction-section">
+      <div class="correction-section__title">
+        <mat-icon>notes</mat-icon>
+
+        <div>
+          <strong>Observaciones del programa</strong>
+          <span>
+            Registro de observaciones asociadas a la etapa del programa seleccionado.
+            Puede existir más de una observación.
+          </span>
+        </div>
+      </div>
+
+      <div
+        class="citation-correction-card__empty"
+        *ngIf="observationDrafts.length === 0"
+      >
+        No existen observaciones registradas para este programa.
+      </div>
+
+      <div
+        class="citation-correction-card"
+        *ngFor="
+          let observation of observationDrafts;
+          let observationIndex = index
+        "
+      >
+        <div class="correction-section__title">
+          <mat-icon>sticky_note_2</mat-icon>
+
+          <div>
+            <strong>
+              Observación {{ observationIndex + 1 }}
+            </strong>
+          </div>
+
+          <button
+            mat-stroked-button
+            type="button"
+            color="warn"
+            (click)="removeCorrectionObservation(observation)"
+          >
+            <mat-icon>delete</mat-icon>
+            Eliminar
+          </button>
+        </div>
+
+        <div class="correction-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha</mat-label>
+
+            <input
+              matInput
+              [matDatepicker]="correctionObservationDatePicker"
+              [(ngModel)]="observation.eventDate"
+              [name]="
+                'correctionObservationDate_' +
+                observation.id
+              "
+              placeholder="dd/mm/aaaa"
+            />
+
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="correctionObservationDatePicker"
+            ></mat-datepicker-toggle>
+
+            <mat-datepicker
+              #correctionObservationDatePicker
+            ></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Hora</mat-label>
+
+            <input
+              matInput
+              type="text"
+              inputmode="numeric"
+              maxlength="5"
+              placeholder="HH:mm"
+              pattern="(?:[01]\d|2[0-3]):[0-5]\d"
+              [(ngModel)]="observation.eventTime"
+              [name]="
+                'correctionObservationTime_' +
+                observation.id
+              "
+            />
+          </mat-form-field>
+
+          <mat-form-field
+            appearance="outline"
+            class="event-timeline__full-field"
+          >
+            <mat-label>Comentario</mat-label>
+
+            <textarea
+              matInput
+              rows="3"
+              [(ngModel)]="observation.comment"
+              [name]="
+                'correctionObservationComment_' +
+                observation.id
+              "
+            ></textarea>
+          </mat-form-field>
+
+          <mat-form-field
+            appearance="outline"
+            class="event-timeline__full-field"
+          >
+            <mat-label>Observación adicional</mat-label>
+
+            <textarea
+              matInput
+              rows="3"
+              [(ngModel)]="observation.observation"
+              [name]="
+                'correctionObservationText_' +
+                observation.id
+              "
+            ></textarea>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <button
+        mat-stroked-button
+        color="primary"
+        type="button"
+        (click)="addCorrectionObservation()"
+      >
+        <mat-icon>add</mat-icon>
+        Agregar observación
+      </button>
     </div>
 
     <div class="correction-section" *ngIf="closureDraft">

@@ -265,7 +265,7 @@ button mat-progress-spinner {
 
 .correction-workspace {
   display: grid;
-  gap: 1.5rem;
+  gap: 0.8rem;
   margin-top: 1.5rem;
   padding: 1.5rem;
   border: 1px solid #dbe4e8;
@@ -275,14 +275,14 @@ button mat-progress-spinner {
 
 .correction-section {
   display: grid;
-  gap: 1rem;
+  gap: 0.65rem;
 }
 
 .correction-section__title {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  padding-bottom: 0.85rem;
+  gap: 0.55rem;
+  padding-bottom: 0.55rem;
   border-bottom: 1px solid #dde5e9;
 
   mat-icon {
@@ -305,7 +305,7 @@ button mat-progress-spinner {
 .correction-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(180px, 1fr));
-  gap: 1rem;
+  gap: 0.65rem 0.75rem;
 
   mat-form-field {
     width: 100%;
@@ -315,10 +315,10 @@ button mat-progress-spinner {
 .secondary-substances {
   grid-column: 1 / -1;
   display: grid;
-  gap: 0.85rem;
-  padding: 1rem;
+  gap: 0.55rem;
+  padding: 0.7rem 0.8rem;
   border: 1px solid #e0e7ea;
-  border-radius: 0.85rem;
+  border-radius: 0.75rem;
   background: #ffffff;
 }
 
@@ -601,7 +601,7 @@ button mat-progress-spinner {
 }
 
 .citation-correction-attempt {
-  padding: 1rem;
+  padding: 0.7rem 0.8rem;
 }
 
 .citation-correction-attempt + .citation-correction-attempt {
@@ -626,9 +626,9 @@ button mat-progress-spinner {
 
 .citation-correction-card {
   min-width: 0;
-  padding: 1rem;
+  padding: 0.75rem;
   border: 1px solid rgba(25, 118, 210, 0.16);
-  border-radius: 12px;
+  border-radius: 11px;
   background: rgba(248, 251, 255, 0.8);
 }
 
@@ -640,8 +640,8 @@ button mat-progress-spinner {
 .citation-correction-card > header {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  margin-bottom: 1rem;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
 }
 
 .citation-correction-card > header mat-icon {
@@ -667,7 +667,7 @@ button mat-progress-spinner {
 .citation-correction-card__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem 0.9rem;
+  gap: 0.55rem 0.7rem;
   align-items: start;
 }
 
@@ -681,7 +681,7 @@ button mat-progress-spinner {
 }
 
 .citation-correction-card__empty {
-  min-height: 128px;
+  min-height: 76px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1050,6 +1050,204 @@ button mat-progress-spinner {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* =========================================================
+   Corrección administrativa · controles compactos
+   ========================================================= */
+
+:host ::ng-deep
+  .correction-workspace
+  .mat-mdc-text-field-wrapper {
+  min-height: 46px;
+}
+
+:host ::ng-deep
+  .correction-workspace
+  .mat-mdc-form-field-infix {
+  min-height: 46px;
+  padding-top: 11px;
+  padding-bottom: 9px;
+}
+
+:host ::ng-deep
+  .correction-workspace
+  .mat-mdc-select-trigger {
+  min-height: 24px;
+  font-size: 0.82rem;
+}
+
+:host ::ng-deep
+  .correction-workspace
+  input.mat-mdc-input-element {
+  font-size: 0.82rem;
+}
+
+:host ::ng-deep
+  .correction-workspace
+  .mat-mdc-form-field-subscript-wrapper {
+  min-height: 16px;
+}
+
+.correction-workspace textarea {
+  min-height: 54px;
+}
+
+.citation-correction-card textarea {
+  min-height: 54px;
+}
+
+
+
+.secondary-substances__primary {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 420px;
+}
+
+.secondary-substances__primary mat-form-field {
+  width: 100%;
+  margin: 0;
+}
+/* =========================================================
+   Corrección administrativa · sustancias secundarias
+   ========================================================= */
+
+.secondary-substances__add {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto;
+  align-items: start;
+  gap: 8px;
+}
+
+.secondary-substances__add mat-form-field {
+  width: 100%;
+  margin: 0;
+}
+
+.secondary-substances__add button {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-size: 0.76rem;
+  font-weight: 650;
+}
+
+.secondary-substances__list {
+  display: grid;
+  gap: 6px;
+}
+
+.secondary-substances__item {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  min-height: 38px;
+  padding: 5px 8px;
+  border: 1px solid #e1e8eb;
+  border-radius: 9px;
+  background: #fafcfd;
+}
+
+.secondary-substances__order {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  color: #08778a;
+  border-radius: 50%;
+  background: #e7f5f7;
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.secondary-substances__data {
+  min-width: 0;
+}
+
+.secondary-substances__data strong {
+  display: block;
+  color: #2f434b;
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+.secondary-substances__data span {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  color: #71828a;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.secondary-substances__item button[mat-icon-button] {
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+}
+
+.secondary-substances__item button[mat-icon-button] mat-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
+@media (max-width: 700px) {
+  .secondary-substances__add {
+    grid-template-columns: 1fr;
+  }
+
+  .secondary-substances__add button {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   Selector superior de programa · compacto
+   ========================================================= */
+
+.admin-program-selector {
+  display: flex;
+  align-items: flex-start;
+}
+
+:host ::ng-deep
+  .admin-program-selector
+  .mat-mdc-text-field-wrapper {
+  min-height: 40px;
+}
+
+:host ::ng-deep
+  .admin-program-selector
+  .mat-mdc-form-field-infix {
+  min-height: 40px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+:host ::ng-deep
+  .admin-program-selector
+  .mat-mdc-select-trigger {
+  min-height: 22px;
+  font-size: 0.8rem;
+}
+
+:host ::ng-deep
+  .admin-program-selector
+  .mdc-floating-label {
+  font-size: 0.76rem;
+}
+
+:host ::ng-deep
+  .admin-program-selector
+  .mat-mdc-form-field-subscript-wrapper {
+  min-height: 0;
+  height: 0;
+}
 /* ===== EPISODE PURGE - LAYOUT OPERATIVO FIJO DEFINITIVO ===== */
 
 :host {
@@ -1289,14 +1487,26 @@ button mat-progress-spinner {
 }
 
 .admin-action-selector__buttons button {
-  min-height: 28px;
+  min-height: 34px;
 
-  padding: 0 8px;
+  padding: 0 12px;
 
-  border-radius: 7px;
+  border-radius: 10px;
 
-  font-size: 0.67rem;
+  font-size: 0.74rem;
+  font-weight: 650;
   line-height: 1;
+
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+
+.admin-action-selector__buttons button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(34, 59, 70, 0.12);
 }
 
 .admin-action-selector__buttons mat-icon {
@@ -1318,8 +1528,8 @@ button mat-progress-spinner {
 }
 
 .admin-program-selector mat-form-field {
-  width: 220px;
-  max-width: 220px;
+  width: 320px;
+  max-width: 360px;
 
   margin: 0;
 }
@@ -1357,27 +1567,28 @@ button mat-progress-spinner {
 
 /* Overlay del select */
 ::ng-deep .admin-program-select-panel {
-  min-width: 220px !important;
-  max-width: 300px !important;
+  min-width: 320px !important;
+  max-width: 440px !important;
 }
 
 ::ng-deep
   .admin-program-select-panel
   .mat-mdc-option {
-  min-height: 30px !important;
+  min-height: 36px !important;
 
-  padding: 0 9px !important;
+  padding: 0 12px !important;
 
-  font-size: 0.72rem !important;
-  line-height: 1.1 !important;
+  font-size: 0.8rem !important;
+  line-height: 1.2 !important;
 }
 
 ::ng-deep
   .admin-program-select-panel
   .mdc-list-item__primary-text {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  line-height: 1.2;
 }
 
 /* ============================================================

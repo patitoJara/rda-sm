@@ -83,6 +83,7 @@ export class EpisodePurgeComponent {
   professionalsError = '';
   citationRows: any[] = [];
   feedbackDraft: any = null;
+  observationDrafts: any[] = [];
   closureDraft: any = null;
   feedbackResults: any[] = [];
   private nextTemporaryEventId = -1;
@@ -769,6 +770,89 @@ export class EpisodePurgeComponent {
     this.buildCitationRows();
   }
 
+  addCorrectionObservation(): void {
+    const episodeId = Number(this.episodeId);
+    const programId = Number(
+      this.selectedProgramForAdminAction,
+    );
+    const stageId = this.resolveSelectedProgramStageId();
+
+    if (!episodeId || !programId || !stageId) {
+      this.snackBar.open(
+        'No fue posible identificar de forma segura la etapa del programa seleccionado.',
+        'Cerrar',
+        {
+          duration: 5000,
+        },
+      );
+      return;
+    }
+
+    const program =
+      this.episodePrograms.find(
+        (item: any) => Number(item?.id) === programId,
+      ) ?? null;
+
+    const temporaryId = this.nextTemporaryEventId--;
+
+    const observation = {
+      id: temporaryId,
+      temporary: true,
+
+      episodeId,
+      stageId,
+
+      programId,
+      program: program
+        ? {
+            id: programId,
+            name: program.name,
+          }
+        : {
+            id: programId,
+            name: 'Programa ' + programId,
+          },
+
+      eventTypeCode: 'OBSERVACION',
+
+      eventDate: new Date(),
+      eventTime: '',
+
+      comment: '',
+      observation: '',
+    };
+
+    this.correctionEvents.push(observation);
+    this.buildObservationDrafts();
+  }
+
+  removeCorrectionObservation(observation: any): void {
+    const observationId = Number(observation?.id);
+
+    if (!Number.isFinite(observationId)) {
+      return;
+    }
+
+    const eventIndex = this.correctionEvents.findIndex(
+      (event: any) =>
+        Number(event?.id) === observationId,
+    );
+
+    if (eventIndex < 0) {
+      return;
+    }
+
+    const event = this.correctionEvents[eventIndex];
+
+    if (event?.temporary === true || observationId < 0) {
+      this.correctionEvents.splice(eventIndex, 1);
+    } else {
+      event.markedForDeletion = true;
+    }
+
+    this.buildObservationDrafts();
+  }
+
   addCorrectionFeedback(): void {
     const episodeId = Number(this.episodeId);
     const programId = Number(
@@ -880,6 +964,34 @@ export class EpisodePurgeComponent {
 
     this.feedbackDraft.biopsychosocialCommitmentCode =
       level?.code ?? null;
+  }
+
+  private buildObservationDrafts(): void {
+    const observationEvents = this.correctionEvents.filter(
+      (event: any) =>
+        !event?.markedForDeletion &&
+        String(
+          event?.eventType?.code ??
+          event?.eventTypeCode ??
+          '',
+        )
+          .trim()
+          .toUpperCase() === 'OBSERVACION',
+    );
+
+    this.observationDrafts = observationEvents.map(
+      (event: any) => ({
+        ...event,
+        eventDate:
+          event?.eventDate instanceof Date
+            ? event.eventDate
+            : parseBackendDate(
+                String(event?.eventDate ?? ''),
+              ),
+        eventTime:
+          String(event?.eventTime ?? '').slice(0, 5),
+      }),
+    );
   }
 
   private buildFeedbackDraft(): void {
@@ -1438,6 +1550,7 @@ export class EpisodePurgeComponent {
     });
 
     this.buildCitationRows();
+    this.buildObservationDrafts();
     this.buildFeedbackDraft();
     this.buildClosureDraft();
   }
