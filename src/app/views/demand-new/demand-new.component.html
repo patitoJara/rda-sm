@@ -1826,6 +1826,34 @@
         class="operation-form operation-form--observation"
       >
         <mat-form-field appearance="outline" floatLabel="always" class="span-2" hideRequiredMarker="true">
+          <mat-label>Fecha de observación <span class="field-status field-status--required">Obligatorio</span></mat-label>
+          <mat-icon matPrefix>event</mat-icon>
+
+          <input
+            matInput
+            [matDatepicker]="observationDatePicker"
+            formControlName="eventDate"
+            placeholder="dd/mm/aaaa"
+          />
+
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="observationDatePicker"
+          ></mat-datepicker-toggle>
+
+          <mat-datepicker #observationDatePicker></mat-datepicker>
+
+          <mat-hint>DD/MM/AAAA o DDMMAAAA · también puede usar el calendario.</mat-hint>
+
+          <mat-error
+            *ngIf="observationForm.controls.eventDate.hasError('required')"
+          >
+            La fecha de observación es obligatoria.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" floatLabel="always" class="span-2" hideRequiredMarker="true">
+
           <mat-label>Comentario breve <span class="field-status field-status--required">Obligatorio</span></mat-label>
 
           <mat-icon matPrefix>subject</mat-icon>
@@ -3465,9 +3493,9 @@
 
           <mat-datepicker #originalRequestDatePicker></mat-datepicker>
 
-          <mat-hint
-            >DD/MM/AAAA o DDMMAAAA · también puede usar el calendario.</mat-hint
-          >
+          <mat-hint>
+            Fecha en que la persona realizó la solicitud original.
+          </mat-hint>
 
           <mat-error
             *ngIf="

@@ -1,4 +1,4 @@
-﻿import {
+import {
   formatDateForBackend,
   toStringOrNull,
 } from '../utils/demand-new-format.utils';
@@ -7,7 +7,7 @@ export interface CitationSuccessResult {
   successMessage: string;
   resetValue: {
     citationTypeCode: null;
-    eventDate: Date;
+    eventDate: Date | null;
     eventHour: string;
     programProfessionalId: null;
     professionName: string;
@@ -117,7 +117,7 @@ export function handleCitationSuccess(
     successMessage: 'Citación registrada correctamente.',
     resetValue: {
       citationTypeCode: null,
-      eventDate: new Date(),
+      eventDate: null,
       eventHour: '',
       programProfessionalId: null,
       professionName: '',

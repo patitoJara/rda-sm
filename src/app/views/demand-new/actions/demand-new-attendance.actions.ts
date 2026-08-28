@@ -98,6 +98,18 @@ export function validateAttendanceContext({
     };
   }
 
+  const selectedCitationDate = String(
+    selectedCitation?.eventDate ?? '',
+  ).trim();
+
+  if (!selectedCitationDate) {
+    return {
+      valid: false,
+      errorMessage:
+        'La citación seleccionada no tiene una fecha válida para registrar asistencia.',
+    };
+  }
+
   return {
     valid: true,
     errorMessage: null,

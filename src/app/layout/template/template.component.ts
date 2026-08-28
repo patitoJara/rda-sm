@@ -1,4 +1,4 @@
-﻿import {
+import {
   Component,
   OnInit,
   OnDestroy,
@@ -352,13 +352,6 @@ export class TemplateComponent implements OnInit, OnDestroy {
     }
   }
   private handleSessionTimeout(): void {
-    this.snackBar.open('⏰ Sesión expirada. Ingrese nuevamente.', '', {
-      duration: 3000,
-      horizontalPosition: 'end',
-      verticalPosition: 'top',
-      panelClass: ['mat-mdc-snack-bar-error'],
-    });
-
     this.sessionService.logout('timeout');
   }
 

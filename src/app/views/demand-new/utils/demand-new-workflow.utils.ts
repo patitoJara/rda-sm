@@ -1,4 +1,4 @@
-﻿import {
+import {
   DEMAND_CITATION_CODES,
   resolveAttendanceKind,
   resolveDemandWorkflowNextAction,
@@ -122,12 +122,29 @@ export function resolveDemandNewNextAction(
       ),
   );
 
+  const feedbackEvents = input.feedbackEvents ?? [];
+
+  const latestFeedback =
+    feedbackEvents.length > 0
+      ? feedbackEvents[feedbackEvents.length - 1]
+      : null;
+
+  const feedbackResultCode = String(
+    latestFeedback?.resultCode ??
+      latestFeedback?.result?.code ??
+      latestFeedback?.result ??
+      '',
+  ).trim();
+
+  const effectiveResultCode =
+    feedbackResultCode || input.resultCode;
+
   return resolveDemandWorkflowNextAction({
     citations,
     feedbackRegistered:
       (input.feedbackEvents ?? []).length > 0,
     closureRegistered: !!input.stageClosureDate,
-    resultCode: input.resultCode,
+    resultCode: effectiveResultCode,
     canManage: input.canManage,
     programName: input.programName,
     currentDate: input.currentDate,

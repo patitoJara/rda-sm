@@ -1,4 +1,4 @@
-﻿import {
+import {
   formatDateForBackend,
   toStringOrNull,
 } from '../utils/demand-new-format.utils';
@@ -7,7 +7,7 @@ import { buildEventTime24 } from '../utils/demand-new-event.utils';
 export interface FeedbackSuccessResult {
   successMessage: string;
   resetValue: {
-    eventDate: Date;
+    eventDate: Date | null;
     eventHour: string;
     programProfessionalId: null;
     professionName: string;
@@ -190,7 +190,7 @@ export function handleFeedbackSuccess(
   return {
     successMessage: 'Retroalimentación registrada correctamente.',
     resetValue: {
-      eventDate: new Date(),
+      eventDate: null,
       eventHour: '',
       programProfessionalId: null,
       professionName: '',

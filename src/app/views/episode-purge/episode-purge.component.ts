@@ -1,4 +1,4 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -73,6 +73,9 @@ export class EpisodePurgeComponent {
 
   loading = false;
   purging = false;
+  reversing = false;
+  reversalReason = '';
+  reversalObservation = '';
   errorMessage = '';
 
   adminMode: 'correction' | 'reversal' | 'purge' | null = null;
@@ -1785,6 +1788,57 @@ export class EpisodePurgeComponent {
       });
   }
 
+  reverseEpisode(): void {
+    const episodeId = this.episodeId;
+    const programId = Number(this.selectedProgramForAdminAction);
+    const reason = String(this.reversalReason ?? '').trim();
+    const observation = String(this.reversalObservation ?? '').trim();
+
+    if (!episodeId || !this.episode) {
+      this.errorMessage = 'No hay un episodio válido para reversar.';
+      return;
+    }
+
+    if (!programId) {
+      this.errorMessage = 'Seleccione el programa que desea intervenir.';
+      return;
+    }
+
+    if (!reason) {
+      this.errorMessage = 'Ingrese el motivo de la reversión.';
+      return;
+    }
+
+    this.reversing = true;
+    this.errorMessage = '';
+
+    this.demandService
+      .reverseEpisode(episodeId, {
+        reason,
+        observation: observation || undefined,
+      })
+      .pipe(finalize(() => (this.reversing = false)))
+      .subscribe({
+        next: () => {
+          this.snackBar.open(
+            'Reversión realizada correctamente.',
+            'Cerrar',
+            { duration: 5000 },
+          );
+
+          this.reversalReason = '';
+          this.reversalObservation = '';
+
+          this.searchEpisode();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage = this.resolveErrorMessage(
+            error,
+            'No fue posible reversar el episodio.',
+          );
+        },
+      });
+  }
   purgeEpisode(): void {
     const episodeId = this.episodeId;
 

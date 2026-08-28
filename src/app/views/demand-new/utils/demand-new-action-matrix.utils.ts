@@ -1,4 +1,4 @@
-﻿/**
+/**
  * MATRIZ CENTRAL DE ACCIONES - GESTIÓN DE DEMANDA
  *
  * FUENTE ÚNICA DE VERDAD PARA:
@@ -357,9 +357,12 @@ export function resolveDemandActionMatrix(
 
       reference: action(true),
 
-      closure: action(true),
+      closure: action(
+        false,
+        'Debe registrar la referencia al programa de destino antes de cerrar la atención de este programa.',
+      ),
 
-      allowedClosureOptions: ['REFERENCIA', 'ABANDONO'],
+      allowedClosureOptions: [],
 
       historical: false,
       readonly: false,
@@ -388,7 +391,7 @@ export function resolveDemandActionMatrix(
 
       observation: action(true),
 
-      reference: action(true),
+      reference: action(false, 'La referencia solo se habilita cuando la retroalimentación define Referencia.'),
 
       closure: action(true),
 
@@ -421,7 +424,7 @@ export function resolveDemandActionMatrix(
 
       observation: action(true),
 
-      reference: action(true),
+      reference: action(false, 'La referencia solo se habilita cuando la retroalimentación define Referencia.'),
 
       closure: action(true),
 
@@ -454,7 +457,7 @@ export function resolveDemandActionMatrix(
 
       observation: action(true),
 
-      reference: action(true),
+      reference: action(false, 'La referencia solo se habilita cuando la retroalimentación define Referencia.'),
 
       closure: action(true),
 
@@ -493,11 +496,11 @@ export function resolveDemandActionMatrix(
 
       observation: action(true),
 
-      reference: action(true),
+      reference: action(false, 'La referencia solo se habilita cuando la retroalimentación define Referencia.'),
 
-      closure: action(true),
+      closure: action(false, 'El cierre solo se habilita después de registrar una retroalimentación.'),
 
-      allowedClosureOptions: ['ABANDONO'],
+      allowedClosureOptions: [],
 
       historical: false,
       readonly: false,
@@ -523,11 +526,11 @@ export function resolveDemandActionMatrix(
 
       observation: action(true),
 
-      reference: action(true),
+      reference: action(false, 'La referencia solo se habilita cuando la retroalimentación define Referencia.'),
 
-      closure: action(true),
+      closure: action(false, 'El cierre solo se habilita después de registrar una retroalimentación.'),
 
-      allowedClosureOptions: ['ABANDONO'],
+      allowedClosureOptions: [],
 
       historical: false,
       readonly: false,
@@ -554,11 +557,11 @@ export function resolveDemandActionMatrix(
 
     observation: action(true),
 
-    reference: action(true),
+    reference: action(false, 'La referencia solo se habilita cuando la retroalimentación define Referencia.'),
 
-    closure: action(true),
+    closure: action(false, 'El cierre solo se habilita después de registrar una retroalimentación.'),
 
-    allowedClosureOptions: ['ABANDONO'],
+    allowedClosureOptions: [],
 
     historical: false,
     readonly: false,

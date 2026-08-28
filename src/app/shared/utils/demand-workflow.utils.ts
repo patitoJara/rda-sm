@@ -317,13 +317,33 @@ export function resolveDemandWorkflowNextAction(
       };
     }
 
+    if (resultCode === 'LISTA_ESPERA') {
+      return {
+        code: 'WAITING_LIST_FOLLOWUP',
+        title: 'Mantener seguimiento en lista de espera',
+        detail:
+          'La atención continúa abierta mientras la persona permanece en lista de espera.',
+        tone: 'info',
+        icon: 'schedule',
+      };
+    }
+
+    if (resultCode === 'REFERENCIA') {
+      return {
+        code: 'REGISTER_REFERENCE',
+        title: 'Referir a otro programa',
+        detail:
+          'La retroalimentación definió una referencia. Debe registrar el programa de destino antes de cerrar la atención del programa actual.',
+        tone: 'warning',
+        icon: 'sync_alt',
+      };
+    }
+
     return {
       code: 'REGISTER_CLOSURE',
       title: 'Registrar cierre cuando corresponda',
       detail:
-        resultCode === 'REFERENCIA'
-          ? 'La referencia permanece disponible como acción opcional. El cierre formal sigue siendo obligatorio.'
-          : 'La retroalimentación ya fue registrada. El episodio debe cerrarse formalmente cuando corresponda.',
+        'La retroalimentación ya fue registrada. El episodio debe cerrarse formalmente cuando corresponda.',
       tone: 'warning',
       icon: 'event_busy',
     };

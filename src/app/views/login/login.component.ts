@@ -1,4 +1,4 @@
-﻿import {
+import {
   Component,
   inject,
   AfterViewInit,
@@ -80,9 +80,25 @@ export class LoginComponent implements AfterViewInit {
 
   ngOnInit(): void {
     void this.appCache.clearBeforeLoginIfNeeded();
+
+    const sessionExpired =
+      this.route.snapshot.queryParamMap.get('sessionExpired') === '1';
+
+    if (sessionExpired) {
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { sessionExpired: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+
+      this.mostrarSesionExpirada();
+    }
   }
 
   login(): void {
+    if (this.loading) return;
+
     (document.activeElement as HTMLElement)?.blur();
     this.error = '';
 
@@ -184,6 +200,22 @@ export class LoginComponent implements AfterViewInit {
   }
 
   @ViewChild('loginButton') loginButton!: ElementRef<HTMLButtonElement>;
+
+  private mostrarSesionExpirada(): void {
+    this.dialog.open(ErrorConfirmDialogComponent, {
+      width: '420px',
+      disableClose: true,
+      data: {
+        title: 'Sesión expirada',
+        message:
+          'Su sesión ha finalizado. Por seguridad, debe iniciar sesión nuevamente para continuar.',
+        confirmText: 'Aceptar',
+        color: 'warn',
+        icon: 'schedule',
+        dense: true,
+      },
+    });
+  }
 
   private mostrarErrorLogin(mensaje: string): void {
     this.dialog.open(ErrorConfirmDialogComponent, {

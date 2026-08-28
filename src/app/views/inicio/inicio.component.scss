@@ -2551,3 +2551,161 @@ mat-paginator {
     width: 10.5% !important;
   }
 }
+
+/* ==========================================================
+ * INDICADORES HISTÓRICOS DE BANDEJA
+ * Diferenciación visual entre gestión activa e histórico.
+ * ========================================================== */
+
+.priority-hero--historical {
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(255, 255, 255, 0.14),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      #435b64 0%,
+      #58717a 55%,
+      #68828b 100%
+    );
+  box-shadow: 0 12px 30px rgba(55, 77, 86, 0.18);
+}
+
+.metric-card--closed .metric-card__icon {
+  color: #526f79;
+  background: #e7eef0;
+}
+
+.metric-card--treatment .metric-card__icon {
+  color: #24734f;
+  background: #e3f3e9;
+}
+
+.metric-card--reference .metric-card__icon {
+  color: #356d9f;
+  background: #e5eef7;
+}
+
+.metric-card--abandonment .metric-card__icon {
+  color: #a95732;
+  background: #f8e9e2;
+}
+
+.metric-card--predominant .metric-card__icon {
+  color: #70528d;
+  background: #eee8f4;
+}
+
+.metric-card--closed,
+.metric-card--treatment,
+.metric-card--reference,
+.metric-card--abandonment,
+.metric-card--predominant {
+  border-color: #d5e0e3;
+}
+
+.metric-card__text-value {
+  font-size: 1.05rem !important;
+  line-height: 1.18 !important;
+  overflow-wrap: anywhere;
+}
+
+/* ==========================================================
+ * ALCANCE DE INFORMACIÓN DE LA BANDEJA
+ * ========================================================== */
+
+.scope-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 20px 10px;
+  padding: 10px 14px;
+  box-sizing: border-box;
+
+  color: #244c57;
+  border: 1px solid #bddbe1;
+  border-radius: 11px;
+  background: #f0f8fa;
+}
+
+.scope-banner__icon {
+  display: flex;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+
+  color: #08788b;
+  border-radius: 50%;
+  background: #dceff3;
+}
+
+.scope-banner__icon mat-icon {
+  width: 21px;
+  height: 21px;
+  font-size: 21px;
+}
+
+.scope-banner__content {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.scope-banner__content strong {
+  color: #173e49;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.scope-banner__content span {
+  color: #506970;
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.scope-banner--filtered {
+  border-color: #a9cfda;
+  background: #eaf6f8;
+}
+
+.scope-banner--filtered .scope-banner__icon {
+  background: #d2ebf0;
+}
+
+.scope-banner--historical {
+  color: #435d66;
+  border-color: #c2d1d5;
+  background: #f1f5f6;
+}
+
+.scope-banner--historical .scope-banner__icon {
+  color: #526f79;
+  background: #e2eaec;
+}
+
+@media (max-width: 900px) {
+  .scope-banner {
+    margin: 0 14px 9px;
+  }
+}
+
+@media (max-width: 600px) {
+  .scope-banner {
+    align-items: flex-start;
+    margin: 0 10px 8px;
+    padding: 9px 11px;
+  }
+}
+
+@media (min-width: 901px) {
+  .scope-banner {
+    flex: 0 0 auto;
+    min-height: 48px;
+  }
+}

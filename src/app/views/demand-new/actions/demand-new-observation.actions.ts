@@ -1,6 +1,7 @@
 export interface ObservationSuccessResult {
   successMessage: string;
   resetValue: {
+    eventDate: Date | null;
     comment: string;
     observation: string;
   };
@@ -14,6 +15,7 @@ export function handleObservationSuccess(
   return {
     successMessage: 'Observación registrada correctamente.',
     resetValue: {
+      eventDate: null,
       comment: '',
       observation: '',
     },

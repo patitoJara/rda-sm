@@ -134,7 +134,7 @@ import {
 import {
   filterEventsByStage,
   resolveCurrentEpisodeStage,
-  resolveLatestEvent,
+  resolveLatestOperationalStageEvent,
   resolveCurrentStageId,
   resolveCurrentStageResultCode,
   resolveCurrentStageResultValue,
@@ -289,7 +289,7 @@ export class DemandNewComponent
 
   citationForm = this.fb.group({
     citationTypeCode: ['', Validators.required],
-    eventDate: new FormControl<Date | null>(new Date(), Validators.required),
+    eventDate: new FormControl<Date | null>(null, Validators.required),
     eventHour: [
       '',
       [
@@ -325,7 +325,7 @@ export class DemandNewComponent
   ]);
 
   interviewForm = this.fb.group({
-    eventDate: [new Date(), Validators.required],
+    eventDate: new FormControl<Date | null>(null, Validators.required),
     eventHour: [
       '',
       [
@@ -344,7 +344,7 @@ export class DemandNewComponent
 
   referenceForm = this.fb.group({
     targetProgramId: new FormControl<number | null>(null, Validators.required),
-    referenceDate: [new Date(), Validators.required],
+    referenceDate: [null, Validators.required],
     reason: ['', [Validators.required, Validators.maxLength(500)]],
     observation: ['', Validators.maxLength(1000)],
   });
@@ -354,10 +354,11 @@ export class DemandNewComponent
       null,
       Validators.required,
     ),
-    closureDate: [new Date(), Validators.required],
+    closureDate: [null, Validators.required],
     observation: ['', Validators.maxLength(1000)],
   });
   observationForm = this.fb.group({
+    eventDate: new FormControl<Date | null>(null, Validators.required),
     comment: ['', Validators.required],
     observation: [''],
   });
@@ -509,7 +510,7 @@ export class DemandNewComponent
   episodeForm = this.fb.group({
     episodeTypeId: [null as number | null, Validators.required],
 
-    originalRequestDate: [getTodayForDateInput(), Validators.required],
+    originalRequestDate: [null, Validators.required],
 
     initialProgramId: [null as number | null, Validators.required],
     initialProgramName: [{ value: '', disabled: true }],
@@ -1863,7 +1864,7 @@ export class DemandNewComponent
 
     this.episodeForm.reset({
       episodeTypeId: null,
-      originalRequestDate: '',
+      originalRequestDate: null,
 
       initialProgramId: null,
       initialProgramName: '',
@@ -2211,6 +2212,10 @@ export class DemandNewComponent
       missingFields.push('Tipo de episodio');
     }
 
+    if (this.episodeForm.controls.originalRequestDate.hasError('required')) {
+      missingFields.push('Fecha solicitud original');
+    }
+
     if (this.episodeForm.controls.contactType.hasError('required')) {
       missingFields.push('Vía de ingreso');
     }
@@ -2271,8 +2276,7 @@ export class DemandNewComponent
         Math.trunc(Number(raw.previousTreatmentNumber ?? 0)),
       ),
 
-      originalRequestDate:
-        formatDateForBackend(raw.originalRequestDate) ?? getTodayForDateInput(),
+      originalRequestDate: formatDateForBackend(raw.originalRequestDate),
 
       responsibleUserId,
 
@@ -2577,7 +2581,7 @@ export class DemandNewComponent
 
     this.episodeForm.reset({
       episodeTypeId: null,
-      originalRequestDate: getTodayForDateInput(),
+      originalRequestDate: null,
 
       initialProgramId: activeProgramId,
       initialProgramName: this.activeProgramName ?? '',
@@ -3733,7 +3737,7 @@ export class DemandNewComponent
 
     const payload = {
       eventTypeCode: 'OBSERVACION',
-      eventDate: new Date().toISOString().slice(0, 10),
+      eventDate: toBackendDate(raw.eventDate),
       programId: Number(programId),
       comment: toStringOrNull(raw.comment),
       observation: toStringOrNull(raw.observation),
@@ -3828,7 +3832,7 @@ this.createdEpisode = activeEpisode;
             null,
 
           originalRequestDate:
-            activeEpisode?.originalRequestDate ?? getTodayForDateInput(),
+            activeEpisode?.originalRequestDate ?? null,
 
           initialProgramId:
             activeEpisode?.initialProgram?.id ??
@@ -5076,7 +5080,7 @@ this.createdEpisode = activeEpisode;
     if (panel === 'citation') {
       this.citationForm.reset({
         citationTypeCode: null,
-        eventDate: new Date(),
+        eventDate: null,
         eventHour: '',
         programProfessionalId: null,
         professionName: '',
@@ -5094,7 +5098,7 @@ this.createdEpisode = activeEpisode;
 
     if (panel === 'interview') {
       this.interviewForm.reset({
-        eventDate: new Date(),
+        eventDate: null,
         eventHour: '',
         programProfessionalId: null,
         professionName: '',
@@ -5106,7 +5110,7 @@ this.createdEpisode = activeEpisode;
     if (panel === 'reference') {
       this.referenceForm.reset({
         targetProgramId: null,
-        referenceDate: new Date(),
+        referenceDate: null,
         reason: '',
         observation: '',
       });
@@ -5117,12 +5121,13 @@ this.createdEpisode = activeEpisode;
 
       this.closureForm.reset({
     closureReasonId: null,
-    closureDate: new Date(),
+    closureDate: null,
     observation: '',
   });
     }
     if (panel === 'observation') {
       this.observationForm.reset({
+        eventDate: null,
         comment: '',
         observation: '',
       });
@@ -5628,20 +5633,14 @@ this.createdEpisode = activeEpisode;
   }
 
   get lastEpisodeEvent(): any | null {
-    const events = this.episodeEvents ?? [];
-
-    if (!events.length) return null;
-
-    return [...events].sort((a: any, b: any) => {
-      const dateA = `${a.eventDate ?? ''}T${a.eventTime ?? '00:00:00'}`;
-      const dateB = `${b.eventDate ?? ''}T${b.eventTime ?? '00:00:00'}`;
-
-      return dateB.localeCompare(dateA);
-    })[0];
+    return resolveLatestOperationalStageEvent(
+      this.currentStageEvents,
+      this.currentEpisodeStage,
+    );
   }
 
   get lastCurrentStageEvent(): any | null {
-    return resolveLatestEvent(this.workingStageEvents);
+    return resolveLatestOperationalStageEvent(this.workingStageEvents, this.workingStage);
   }
   get episodeOperationalSummary(): {
     days: number;
@@ -6313,6 +6312,20 @@ this.createdEpisode = activeEpisode;
   }
 
   get workingStageClosureDate(): string | null {
+    const stageStateCode = String(
+      this.workingStage?.stateCode ??
+      this.workingStage?.state?.code ??
+      '',
+    ).toUpperCase();
+
+    const stageIsClosed =
+      Boolean(this.workingStage?.closedAt) ||
+      stageStateCode === 'CERRADO';
+
+    if (!stageIsClosed) {
+      return null;
+    }
+
     return (
       this.workingStage?.closedAt ??
       this.workingStageClosureEvent?.eventDate ??

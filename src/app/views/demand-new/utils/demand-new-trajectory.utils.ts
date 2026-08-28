@@ -153,9 +153,11 @@ export function buildCompactProgramTrajectory(
       current,
 
       closureDate:
-        stage?.closedAt ??
-        closureEvent?.eventDate ??
-        null,
+        current
+          ? stage?.closedAt ?? null
+          : stage?.closedAt ??
+            closureEvent?.eventDate ??
+            null,
 
       reversalDate:
         reversalEvent?.eventDate ??

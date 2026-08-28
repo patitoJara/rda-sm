@@ -1,34 +1,18 @@
 <section class="priority-page">
   <!-- ENCABEZADO -->
-  <header class="priority-hero">
+  <header
+    class="priority-hero"
+    [class.priority-hero--historical]="isHistoricalMode"
+  >
     <div class="priority-hero__content">
       <span class="priority-hero__eyebrow">
-        <mat-icon>
-          {{ isHistoricalMode ? "history" : "format_list_numbered" }}
-        </mat-icon>
-
-        {{
-          isHistoricalMode
-            ? "Consulta histórica"
-            : "Gestión operativa"
-        }}
+        <mat-icon>{{ viewPresentation.icon }}</mat-icon>
+        {{ viewPresentation.eyebrow }}
       </span>
 
-      <h1>
-        {{
-          isHistoricalMode
-            ? "Historial de demandas cerradas"
-            : "Bandeja priorizada de demanda"
-        }}
-      </h1>
+      <h1>{{ viewPresentation.title }}</h1>
 
-      <p>
-        {{
-          isHistoricalMode
-            ? "Episodios cerrados disponibles para consulta y revisión de su trayectoria."
-            : "Episodios activos ordenados por días acumulados, nivel de alerta, antigüedad de la solicitud y necesidad de gestión."
-        }}
-      </p>
+      <p>{{ viewPresentation.subtitle }}</p>
 
       <div class="priority-hero__meta">
         <span>
@@ -79,22 +63,20 @@
           )
         "
       >
-        <mat-icon>
-          {{ isHistoricalMode ? "format_list_numbered" : "history" }}
-        </mat-icon>
-
-        {{
-          isHistoricalMode
-            ? "Volver a demandas activas"
-            : "Ver demandas cerradas"
-        }}
+        <mat-icon>{{ viewPresentation.toggleIcon }}</mat-icon>
+        {{ viewPresentation.toggleLabel }}
       </button>
 
       <button
         mat-stroked-button
         type="button"
         class="hero-action hero-action--utility"
-        [disabled]="loadingDashboard || loadingEpisodes"
+        [disabled]="
+          loadingDashboard ||
+          loadingActiveMetrics ||
+          loadingClosedMetrics ||
+          loadingEpisodes
+        "
         (click)="refresh()"
       >
         <mat-icon>refresh</mat-icon>
@@ -111,67 +93,143 @@
   <!-- INDICADORES -->
   <section
     class="metrics-grid"
-    aria-label="Indicadores operativos de demanda"
+    [attr.aria-label]="
+      isHistoricalMode
+        ? 'Indicadores históricos de demandas cerradas'
+        : 'Indicadores operativos de demanda'
+    "
   >
-    <mat-card class="metric-card metric-card--active">
-      <div class="metric-card__icon">
-        <mat-icon>folder_open</mat-icon>
-      </div>
+    <ng-container *ngIf="!isHistoricalMode; else closedMetricsTemplate">
+      <mat-card class="metric-card metric-card--active">
+        <div class="metric-card__icon">
+          <mat-icon>folder_open</mat-icon>
+        </div>
 
-      <div>
-        <span>Demandas activas</span>
-        <strong>{{ dashboard?.activeDemands ?? 0 }}</strong>
-        <small>Episodios actualmente en gestión</small>
-      </div>
-    </mat-card>
+        <div>
+          <span>Demandas activas</span>
+          <strong>{{ activeMetrics.activeDemands }}</strong>
+          <small>Episodios actualmente en gestión</small>
+        </div>
+      </mat-card>
 
-    <mat-card class="metric-card metric-card--waiting">
-      <div class="metric-card__icon">
-        <mat-icon>hourglass_top</mat-icon>
-      </div>
+      <mat-card class="metric-card metric-card--waiting">
+        <div class="metric-card__icon">
+          <mat-icon>hourglass_top</mat-icon>
+        </div>
 
-      <div>
-        <span>Lista de espera</span>
-        <strong>{{ dashboard?.waitingList ?? 0 }}</strong>
-        <small>Personas con espera activa</small>
-      </div>
-    </mat-card>
+        <div>
+          <span>Lista de espera</span>
+          <strong>{{ activeMetrics.waitingList }}</strong>
+          <small>Personas con espera activa</small>
+        </div>
+      </mat-card>
 
-    <mat-card class="metric-card metric-card--critical">
-      <div class="metric-card__icon">
-        <mat-icon>warning</mat-icon>
-      </div>
+      <mat-card class="metric-card metric-card--critical">
+        <div class="metric-card__icon">
+          <mat-icon>warning</mat-icon>
+        </div>
 
-      <div>
-        <span>Casos en rojo</span>
-        <strong>{{ dashboard?.redCases ?? 0 }}</strong>
-        <small>Requieren atención prioritaria</small>
-      </div>
-    </mat-card>
+        <div>
+          <span>Casos en rojo</span>
+          <strong>{{ activeMetrics.redCases }}</strong>
+          <small>Requieren atención prioritaria</small>
+        </div>
+      </mat-card>
 
-    <mat-card class="metric-card metric-card--citation">
-      <div class="metric-card__icon">
-        <mat-icon>event_busy</mat-icon>
-      </div>
+      <mat-card class="metric-card metric-card--citation">
+        <div class="metric-card__icon">
+          <mat-icon>event_busy</mat-icon>
+        </div>
 
-      <div>
-        <span>Sin primera citación</span>
-        <strong>{{ dashboard?.withoutFirstCitation ?? 0 }}</strong>
-        <small>Casos aún sin citación registrada</small>
-      </div>
-    </mat-card>
+        <div>
+          <span>Sin primera citación</span>
+          <strong>{{ activeMetrics.withoutFirstCitation }}</strong>
+          <small>Casos aún sin citación registrada</small>
+        </div>
+      </mat-card>
 
-    <mat-card class="metric-card metric-card--average">
-      <div class="metric-card__icon">
-        <mat-icon>query_stats</mat-icon>
-      </div>
+      <mat-card class="metric-card metric-card--average">
+        <div class="metric-card__icon">
+          <mat-icon>query_stats</mat-icon>
+        </div>
 
-      <div>
-        <span>Promedio de espera</span>
-        <strong>{{ averageDaysLabel }} días</strong>
-        <small>Promedio de días acumulados</small>
-      </div>
-    </mat-card>
+        <div>
+          <span>Promedio de espera</span>
+          <strong>
+            {{
+              activeMetrics.averageWaitingDays
+                | number: "1.0-1":"es-CL"
+            }}
+            días
+          </strong>
+          <small>Promedio de días acumulados</small>
+        </div>
+      </mat-card>
+    </ng-container>
+
+    <ng-template #closedMetricsTemplate>
+      <mat-card class="metric-card metric-card--closed">
+        <div class="metric-card__icon">
+          <mat-icon>lock</mat-icon>
+        </div>
+
+        <div>
+          <span>Demandas cerradas</span>
+          <strong>{{ closedMetrics?.closedDemands ?? 0 }}</strong>
+          <small>Episodios finalizados según alcance de la vista</small>
+        </div>
+      </mat-card>
+
+      <mat-card class="metric-card metric-card--treatment">
+        <div class="metric-card__icon">
+          <mat-icon>medical_services</mat-icon>
+        </div>
+
+        <div>
+          <span>Ingreso a tratamiento</span>
+          <strong>{{ closedMetrics?.treatmentAdmissions ?? 0 }}</strong>
+          <small>Cierres con ingreso a tratamiento</small>
+        </div>
+      </mat-card>
+
+      <mat-card class="metric-card metric-card--reference">
+        <div class="metric-card__icon">
+          <mat-icon>swap_horiz</mat-icon>
+        </div>
+
+        <div>
+          <span>Referencia</span>
+          <strong>{{ closedMetrics?.references ?? 0 }}</strong>
+          <small>Cierres asociados a referencia</small>
+        </div>
+      </mat-card>
+
+      <mat-card class="metric-card metric-card--abandonment">
+        <div class="metric-card__icon">
+          <mat-icon>person_off</mat-icon>
+        </div>
+
+        <div>
+          <span>Abandono</span>
+          <strong>{{ closedMetrics?.abandonments ?? 0 }}</strong>
+          <small>Cierres por abandono</small>
+        </div>
+      </mat-card>
+
+      <mat-card class="metric-card metric-card--predominant">
+        <div class="metric-card__icon">
+          <mat-icon>insights</mat-icon>
+        </div>
+
+        <div>
+          <span>Resultado predominante</span>
+          <strong class="metric-card__text-value">
+            {{ closedMetrics?.predominantResultLabel || "Sin resultados" }}
+          </strong>
+          <small>Resultado de cierre más frecuente</small>
+        </div>
+      </mat-card>
+    </ng-template>
   </section>
 
   <div
@@ -190,9 +248,7 @@
         <h2>Acotar demandas visibles</h2>
       </div>
 
-      <small>
-        Los filtros se aplican sobre el conjunto completo desde backend.
-      </small>
+
     </div>
 
     <form
@@ -342,6 +398,25 @@
         <span>
           {{ totalElements === 1 ? "demanda" : "demandas" }}
         </span>
+      </div>
+    </div>
+
+    <div
+      class="scope-banner"
+      [class.scope-banner--filtered]="hasAppliedFilters"
+      [class.scope-banner--historical]="isHistoricalMode"
+      role="status"
+      aria-live="polite"
+    >
+      <div class="scope-banner__icon">
+        <mat-icon>
+          {{ hasAppliedFilters ? "filter_alt" : "info" }}
+        </mat-icon>
+      </div>
+
+      <div class="scope-banner__content">
+        <strong>{{ metricsScopeTitle }}</strong>
+        <span>{{ metricsScopeMessage }}</span>
       </div>
     </div>
 
@@ -617,7 +692,7 @@
             <span matTooltip="Fecha de cierre">Cierre</span>
           </th>
           <td mat-cell *matCellDef="let row" class="compact-date-cell">
-            {{ formatCompactDate(row.closureDate) }}
+            {{ formatCompactDate(getEpisodeStageClosureDate(row)) }}
           </td>
         </ng-container>
         <!-- PROGRAMA -->
@@ -672,11 +747,11 @@
           <td mat-cell *matCellDef="let row">
             <div class="result-cell">
               <strong>
-                {{ formatResultLabel(row.resultCode) }}
+                {{ formatResultLabel(getEpisodeStageResultCode(row)) }}
               </strong>
 
               <span>
-                {{ formatStateLabel(row.stateCode) }}
+                {{ formatStateLabel(getEpisodeStageStateCode(row)) }}
               </span>
             </div>
           </td>
@@ -1011,12 +1086,5 @@
     </div>
   </mat-card>
 
-  <div class="privacy-note">
-    <mat-icon>shield</mat-icon>
 
-    <span>
-      La bandeja muestra únicamente información necesaria para priorizar la
-      gestión. Los demás antecedentes se consultan en la ficha longitudinal.
-    </span>
-  </div>
 </section>

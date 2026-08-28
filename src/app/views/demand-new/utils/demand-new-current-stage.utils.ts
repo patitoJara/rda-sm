@@ -1,4 +1,4 @@
-﻿function toPositiveId(value: unknown): number | null {
+function toPositiveId(value: unknown): number | null {
   const numericValue = Number(value);
 
   return Number.isFinite(numericValue) && numericValue > 0
@@ -72,19 +72,49 @@ export function filterEventsByStage(
   );
 }
 
-export function resolveLatestEvent(events: any[]): any | null {
+export function resolveLatestOperationalStageEvent(
+  events: any[],
+  currentStage: any = null,
+): any | null {
   const safeEvents = Array.isArray(events) ? events : [];
 
-  if (!safeEvents.length) {
+  const stageStateCode = String(
+    currentStage?.stateCode ??
+      currentStage?.state?.code ??
+      '',
+  ).toUpperCase();
+
+  const stageIsClosed =
+    Boolean(currentStage?.closedAt) ||
+    stageStateCode === 'CERRADO';
+
+  const operationalEvents = stageIsClosed
+    ? safeEvents
+    : safeEvents.filter((event: any) => {
+        const eventTypeCode = String(
+          event?.eventType?.code ??
+            event?.eventTypeCode ??
+            event?.event_type_code ??
+            '',
+        ).toUpperCase();
+
+        return eventTypeCode !== 'CIERRE';
+      });
+
+  if (!operationalEvents.length) {
     return null;
   }
 
-  return [...safeEvents].sort((left: any, right: any) => {
+  return [...operationalEvents].sort((left: any, right: any) => {
     const leftTimestamp =
-      `${left?.eventDate ?? ''}T${left?.eventTime ?? '00:00:00'}`;
+      String(left?.eventDate ?? '') +
+      'T' +
+      String(left?.eventTime ?? '00:00:00');
 
     const rightTimestamp =
-      `${right?.eventDate ?? ''}T${right?.eventTime ?? '00:00:00'}`;
+      String(right?.eventDate ?? '') +
+      'T' +
+      String(right?.eventTime ?? '00:00:00');
 
     const operationalComparison =
       rightTimestamp.localeCompare(leftTimestamp);
@@ -99,6 +129,7 @@ export function resolveLatestEvent(events: any[]): any | null {
     return rightCreatedAt.localeCompare(leftCreatedAt);
   })[0];
 }
+
 export function resolveCurrentStageResultCode(
   currentStage: any,
   fallbackEpisode: any = null,

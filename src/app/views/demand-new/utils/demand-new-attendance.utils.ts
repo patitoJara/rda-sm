@@ -21,8 +21,7 @@ export function buildAttendancePayload({
     eventTypeCode: 'ASISTENCIA',
 
     eventDate:
-      toStringOrNull(selectedCitation?.eventDate) ??
-      new Date().toISOString().slice(0, 10),
+      toStringOrNull(selectedCitation?.eventDate),
 
     eventTime: selectedCitation?.eventTime ?? null,
 

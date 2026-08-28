@@ -60,6 +60,31 @@ import {
   ProgramTrajectoryDialogComponent,
 } from './program-trajectory-dialog/program-trajectory-dialog.component';
 
+import {
+  buildInicioActiveMetrics,
+  InicioActiveMetrics,
+} from './utils/inicio-active-metrics.utils';
+import {
+  InicioClosedMetrics,
+} from './utils/inicio-closed-metrics.utils';
+import {
+  resolveInicioViewPresentation,
+  InicioViewPresentation,
+} from './utils/inicio-view-mode.utils';
+import {
+  InicioClosedMetricsService,
+} from './services/inicio-closed-metrics.service';
+import {
+  InicioActiveMetricsService,
+} from './services/inicio-active-metrics.service';
+import {
+  buildInicioMetricsScopeMessage,
+  buildInicioMetricsScopeTitle,
+  hasInicioMetricsFilter,
+  InicioMetricsFilter,
+  normalizeInicioMetricsFilter,
+} from './utils/inicio-metrics-filter.utils';
+
 interface ProgramOption {
   id: number;
   name: string;
@@ -100,6 +125,11 @@ export class InicioComponent implements OnInit, OnDestroy {
   private readonly demandListState = inject(DemandListStateService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
+  private readonly closedMetricsService =
+    inject(InicioClosedMetricsService);
+
+  private readonly activeMetricsService =
+    inject(InicioActiveMetricsService);
 
   private clockInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -111,8 +141,18 @@ export class InicioComponent implements OnInit, OnDestroy {
   programs: ProgramOption[] = [];
 
   currentDate = new Date();
-
   dashboard: SupervisorDashboardDTO | null = null;
+
+  closedMetrics: InicioClosedMetrics | null = null;
+  loadingClosedMetrics = false;
+  closedMetricsError: string | null = null;
+
+  filteredActiveMetrics: InicioActiveMetrics | null = null;
+  loadingActiveMetrics = false;
+  activeMetricsError: string | null = null;
+
+  appliedFilters: InicioMetricsFilter =
+    normalizeInicioMetricsFilter({});
   episodes: PrioritizedEpisodeDTO[] = [];
 
   readonly programContextsByEpisodeId =
@@ -144,9 +184,46 @@ export class InicioComponent implements OnInit, OnDestroy {
   totalElements = 0;
 
   episodeListMode: 'active' | 'closed' = 'active';
-
   get isHistoricalMode(): boolean {
     return this.episodeListMode === 'closed';
+  }
+
+  get viewPresentation(): InicioViewPresentation {
+    return resolveInicioViewPresentation(
+      this.episodeListMode,
+    );
+  }
+
+  get activeMetrics(): InicioActiveMetrics {
+    if (this.hasAppliedFilters) {
+      return (
+        this.filteredActiveMetrics ??
+        buildInicioActiveMetrics(null)
+      );
+    }
+
+    return buildInicioActiveMetrics(
+      this.dashboard,
+    );
+  }
+
+  get hasAppliedFilters(): boolean {
+    return hasInicioMetricsFilter(
+      this.appliedFilters,
+    );
+  }
+
+  get metricsScopeMessage(): string {
+    return buildInicioMetricsScopeMessage(
+      this.appliedFilters,
+      this.isHistoricalMode,
+    );
+  }
+  get metricsScopeTitle(): string {
+    return buildInicioMetricsScopeTitle(
+      this.appliedFilters,
+      this.isHistoricalMode,
+    );
   }
 
   readonly pageSizeOptions = [20, 50, 100];
@@ -276,9 +353,8 @@ export class InicioComponent implements OnInit, OnDestroy {
       restoreFocus: true,
     });
   }
-
   refresh(): void {
-    this.loadDashboard();
+    this.loadCurrentMetrics();
     this.loadEpisodes();
   }
 
@@ -305,18 +381,29 @@ export class InicioComponent implements OnInit, OnDestroy {
       },
     );
 
+    this.appliedFilters =
+      normalizeInicioMetricsFilter({});
+
     this.pageIndex = 0;
     this.episodes = [];
     this.totalElements = 0;
 
     this.saveListState();
 
+    this.loadCurrentMetrics();
     this.loadEpisodes();
   }
 
-  applyFilters(): void {
+    applyFilters(): void {
+    this.appliedFilters =
+      normalizeInicioMetricsFilter(
+        this.filtersForm.getRawValue(),
+      );
+
     this.pageIndex = 0;
     this.saveListState();
+
+    this.loadCurrentMetrics();
     this.loadEpisodes();
   }
 
@@ -332,8 +419,13 @@ export class InicioComponent implements OnInit, OnDestroy {
       },
     );
 
+    this.appliedFilters =
+      normalizeInicioMetricsFilter({});
+
     this.pageIndex = 0;
     this.saveListState();
+
+    this.loadCurrentMetrics();
     this.loadEpisodes();
   }
 
@@ -443,6 +535,55 @@ export class InicioComponent implements OnInit, OnDestroy {
       episode.suggestedAction,
     );
   }
+  getEpisodeStageStateCode(
+    episode: PrioritizedEpisodeDTO,
+  ): string {
+    const context =
+      this.programContextsByEpisodeId.get(
+        episode.episodeId,
+      );
+
+    return String(
+      context?.stageStateCode ??
+        episode.currentStageStateCode ??
+        episode.stateCode ??
+        '',
+    ).trim();
+  }
+
+  getEpisodeStageResultCode(
+    episode: PrioritizedEpisodeDTO,
+  ): string {
+    const context =
+      this.programContextsByEpisodeId.get(
+        episode.episodeId,
+      );
+
+    return String(
+      context?.stageResultCode ??
+        episode.currentStageResultCode ??
+        episode.resultCode ??
+        '',
+    ).trim();
+  }
+
+  getEpisodeStageClosureDate(
+    episode: PrioritizedEpisodeDTO,
+  ): string | null {
+    const context =
+      this.programContextsByEpisodeId.get(
+        episode.episodeId,
+      );
+
+    if (context) {
+      return context.closed === true
+        ? context.closureDate ?? null
+        : null;
+    }
+
+    return episode.closureDate ?? null;
+  }
+
   openEpisode(
     episode: PrioritizedEpisodeDTO,
     mode: 'view' | 'manage',
@@ -716,6 +857,85 @@ export class InicioComponent implements OnInit, OnDestroy {
   ): number {
     return item.episodeId;
   }
+  private loadClosedMetrics(): void {
+    this.loadingClosedMetrics = true;
+    this.closedMetricsError = null;
+
+    this.closedMetricsService
+      .load(this.appliedFilters)
+      .pipe(
+        finalize(() => {
+          this.loadingClosedMetrics = false;
+        }),
+      )
+      .subscribe({
+        next: (metrics) => {
+          this.closedMetrics = metrics;
+        },
+
+        error: (error: HttpErrorResponse) => {
+          console.error(
+            '[Inicio] Error cargando indicadores históricos:',
+            error,
+          );
+
+          this.closedMetrics = null;
+
+          this.closedMetricsError =
+            error.status === 403
+              ? 'No tiene permisos para consultar los indicadores históricos.'
+              : 'No fue posible cargar los indicadores de demandas cerradas.';
+        },
+      });
+  }
+  private loadCurrentMetrics(): void {
+    if (this.isHistoricalMode) {
+      this.loadClosedMetrics();
+      return;
+    }
+
+    if (this.hasAppliedFilters) {
+      this.loadActiveFilteredMetrics();
+      return;
+    }
+
+    this.filteredActiveMetrics = null;
+    this.activeMetricsError = null;
+
+    this.loadDashboard();
+  }
+
+  private loadActiveFilteredMetrics(): void {
+    this.loadingActiveMetrics = true;
+    this.activeMetricsError = null;
+
+    this.activeMetricsService
+      .load(this.appliedFilters)
+      .pipe(
+        finalize(() => {
+          this.loadingActiveMetrics = false;
+        }),
+      )
+      .subscribe({
+        next: (metrics) => {
+          this.filteredActiveMetrics = metrics;
+        },
+
+        error: (error: HttpErrorResponse) => {
+          console.error(
+            '[Inicio] Error cargando indicadores activos filtrados:',
+            error,
+          );
+
+          this.filteredActiveMetrics = null;
+
+          this.activeMetricsError =
+            error.status === 403
+              ? 'No tiene permisos para consultar los indicadores filtrados.'
+              : 'No fue posible calcular los indicadores para los filtros aplicados.';
+        },
+      });
+  }
 
   private loadDashboard(): void {
     this.loadingDashboard = true;
@@ -848,7 +1068,7 @@ export class InicioComponent implements OnInit, OnDestroy {
     this.loadingEpisodes = true;
     this.episodesError = null;
 
-    const filters = this.filtersForm.getRawValue();
+    const filters = this.appliedFilters;
 
     this.demandService
       .getPrioritizedEpisodes({
@@ -859,7 +1079,7 @@ export class InicioComponent implements OnInit, OnDestroy {
           ? 'CERRADO'
           : 'EN_TRAMITE',
         resultCode: filters.resultCode || null,
-        search: filters.search.trim() || null,
+        search: filters.search?.trim() || null,
         sort: this.currentSort,
       })
       .pipe(
@@ -986,15 +1206,15 @@ export class InicioComponent implements OnInit, OnDestroy {
       });
   }
   private saveListState(): void {
-    const filters = this.filtersForm.getRawValue();
+    const filters = this.appliedFilters;
 
     this.demandListState.save({
       mode: this.episodeListMode,
       pageIndex: this.pageIndex,
       pageSize: this.pageSize,
       programId: filters.programId,
-      resultCode: filters.resultCode,
-      search: filters.search,
+      resultCode: filters.resultCode ?? '',
+      search: filters.search ?? '',
       sort: this.currentSort,
     });
   }
@@ -1020,7 +1240,14 @@ export class InicioComponent implements OnInit, OnDestroy {
         emitEvent: false,
       },
     );
-  }
+
+    this.appliedFilters =
+      normalizeInicioMetricsFilter({
+        programId: state.programId,
+        resultCode: state.resultCode,
+        search: state.search,
+      });
+}
   private loadSessionContext(): void {
     const profile = this.tokenService.getUserProfile();
 

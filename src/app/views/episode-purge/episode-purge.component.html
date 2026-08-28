@@ -1106,6 +1106,71 @@
 
     </div>
 
+    <div
+      class="confirmation-panel"
+      *ngIf="adminMode === 'reversal' && selectedProgramForAdminAction"
+    >
+      <div>
+        <h3>Reversión del episodio</h3>
+
+        <p>
+          Esta operación revertirá el último cierre aplicable del episodio.
+          Indique obligatoriamente el motivo antes de continuar.
+        </p>
+      </div>
+
+      <mat-form-field appearance="outline" floatLabel="always">
+        <mat-label>Motivo de la reversión</mat-label>
+
+        <mat-icon matPrefix>assignment</mat-icon>
+
+        <textarea
+          matInput
+          rows="3"
+          name="reversalReason"
+          [(ngModel)]="reversalReason"
+          placeholder="Indique el motivo de la reversión"
+        ></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" floatLabel="always">
+        <mat-label>Observación adicional</mat-label>
+
+        <mat-icon matPrefix>notes</mat-icon>
+
+        <textarea
+          matInput
+          rows="3"
+          name="reversalObservation"
+          [(ngModel)]="reversalObservation"
+          placeholder="Observación opcional"
+        ></textarea>
+      </mat-form-field>
+
+      <button
+        mat-flat-button
+        color="warn"
+        type="button"
+        [disabled]="
+          reversing ||
+          !selectedProgramForAdminAction ||
+          !reversalReason
+        "
+        (click)="reverseEpisode()"
+      >
+        <mat-progress-spinner
+          *ngIf="reversing"
+          diameter="20"
+          mode="indeterminate"
+        ></mat-progress-spinner>
+
+        <mat-icon *ngIf="!reversing">undo</mat-icon>
+
+        <span>
+          {{ reversing ? "Reversando..." : "Reversar episodio" }}
+        </span>
+      </button>
+    </div>
     <div class="danger-notice" *ngIf="adminMode === 'purge'">
       <mat-icon>delete_forever</mat-icon>
 

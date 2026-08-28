@@ -1,4 +1,4 @@
-﻿// src/app/core/services/session.service.ts
+// src/app/core/services/session.service.ts
 
 import { Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
@@ -185,10 +185,16 @@ export class SessionService implements OnDestroy {
     this.clearSession();
     this.tokenService.clear();
 
-    this.router.navigate(
-      ['/auth/login'],
-      { replaceUrl: true },
-    );
+    this.router.navigate(['/auth/login'], {
+      queryParams:
+        reason === 'timeout'
+          ? {
+              sessionExpired: '1',
+              returnUrl: this.router.url,
+            }
+          : undefined,
+      replaceUrl: true,
+    });
   }
 
   /**
@@ -199,13 +205,19 @@ export class SessionService implements OnDestroy {
   invalidateSession(returnUrl?: string): void {
     console.warn('[SessionService] Sesión inválida.');
 
+    const hadSession = Boolean(
+      this.tokenService.getAccessToken() ||
+      this.tokenService.getRefreshToken(),
+    );
+
     this.clearSession();
     this.tokenService.clear();
 
     this.router.navigate(['/auth/login'], {
-      queryParams: returnUrl
-        ? { returnUrl }
-        : undefined,
+      queryParams: {
+        ...(hadSession ? { sessionExpired: '1' } : {}),
+        ...(returnUrl ? { returnUrl } : {}),
+      },
       replaceUrl: true,
     });
   }
