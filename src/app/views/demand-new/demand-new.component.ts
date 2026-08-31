@@ -122,10 +122,15 @@ import {
   isTodayCitation as checkTodayCitation,
 } from './utils/demand-new-citation.utils';
 import {
+  buildOriginalCitationChronologyPoints,
   getCitationTypeAvailability as resolveCitationTypeAvailability,
   resolveCitationTypeCode,
   validateCitationSchedule,
 } from './utils/demand-new-citation-schedule.utils';
+
+import {
+  validateDemandChronology,
+} from './utils/demand-new-datetime-validation.utils';
 import {
   filterFeedbackEvents,
   filterPresentedCitations,
@@ -323,6 +328,22 @@ export class DemandNewComponent
     'REFERENCIA',
     'ABANDONO',
   ]);
+
+  get availableFeedbackResults(): any[] {
+    if (
+      this.demandActionMatrix.scenario ===
+      'ACTIVE_PENDING_CITATIONS'
+    ) {
+      return this.results.filter(
+        (item: any) =>
+          String(item?.code ?? '')
+            .trim()
+            .toUpperCase() === 'ABANDONO',
+      );
+    }
+
+    return this.results;
+  }
 
   interviewForm = this.fb.group({
     eventDate: new FormControl<Date | null>(null, Validators.required),
@@ -3169,6 +3190,41 @@ export class DemandNewComponent
       return;
     }
 
+    const feedbackChronologyPreviousPoints = [
+      ...(this.workingStage?.receivedAt
+        ? [
+            {
+              type: 'STAGE_RECEPTION' as const,
+              label: 'el ingreso a la etapa',
+              date: this.workingStage.receivedAt,
+            },
+          ]
+        : []),
+      ...buildOriginalCitationChronologyPoints(
+        this.citationEvents,
+        this.citationTypes,
+      ),
+    ];
+
+    const feedbackChronologyValidation = validateDemandChronology({
+      current: {
+        type: 'FEEDBACK',
+        label: 'Retroalimentación',
+        date: feedbackContext.payload.eventDate,
+        time: feedbackContext.payload.eventTime,
+      },
+      previousPoints: feedbackChronologyPreviousPoints,
+    });
+
+    if (!feedbackChronologyValidation.valid) {
+      this.interviewError =
+        feedbackChronologyValidation.errorMessage ??
+        'La fecha y hora de la retroalimentación no respetan la cronología del episodio.';
+      return;
+    }
+
+    
+
     const feedbackSaveAction = resolveFeedbackSaveAction(
       this.demandActionMatrix,
       feedbackContext.payload.resultCode,
@@ -3228,14 +3284,8 @@ export class DemandNewComponent
           this.showOperationSuccess(this.interviewSuccess);
           this.interviewForm.reset(feedbackResult.resetValue);
 
+          this.closeActionPanel();
           this.loadEpisodeLongitudinal(episodeId);
-
-          // Cerrar el panel después de mostrar la confirmación.
-          setTimeout(() => {
-            if (this.activeActionPanel === 'interview') {
-              this.closeActionPanel();
-            }
-          }, 2200);
         },
 
         error: (error: HttpErrorResponse) => {
@@ -3492,13 +3542,8 @@ export class DemandNewComponent
             next: () => {
               this.referenceSuccess = getReferenceSuccessMessage();
               this.showOperationSuccess(this.referenceSuccess);
+              this.closeActionPanel();
               this.loadEpisodeLongitudinal(episodeId);
-
-              setTimeout(() => {
-                if (this.activeActionPanel === 'reference') {
-                  this.closeActionPanel();
-                }
-              }, 1800);
             },
             error: (error: HttpErrorResponse) => {
               console.error(
@@ -3553,6 +3598,53 @@ export class DemandNewComponent
       this.closureError = closureContext.errorMessage;
       return;
     }
+
+    const closureChronologyPreviousPoints = [
+      ...(this.workingStage?.receivedAt
+        ? [
+            {
+              type: 'STAGE_RECEPTION' as const,
+              label: 'el ingreso a la etapa',
+              date: this.workingStage.receivedAt,
+            },
+          ]
+        : []),
+
+      ...buildOriginalCitationChronologyPoints(
+        this.citationEvents,
+        this.citationTypes,
+      ),
+
+      ...this.feedbackEvents.map((event: any) => ({
+        type: 'FEEDBACK' as const,
+        label: 'Retroalimentación',
+        date:
+          event?.eventDate ??
+          null,
+        time:
+          event?.eventTime ??
+          event?.eventHour ??
+          null,
+      })),
+    ];
+
+    const closureChronologyValidation = validateDemandChronology({
+      current: {
+        type: 'EPISODE_CLOSURE',
+        label: 'Cierre',
+        date: closureContext.payload.closureDate,
+      },
+      previousPoints: closureChronologyPreviousPoints,
+    });
+
+    if (!closureChronologyValidation.valid) {
+      this.closureError =
+        closureChronologyValidation.errorMessage ??
+        'La fecha de cierre no respeta la cronología del episodio.';
+      return;
+    }
+
+    
 
     const selectedClosureReason = this.closureReasons.find(
       (item) => item.id === closureContext.payload.closureReasonId,
@@ -3628,14 +3720,8 @@ export class DemandNewComponent
           next: () => {
             this.closureSuccess = getClosureSuccessMessage();
             this.showOperationSuccess(this.closureSuccess);
-
-            setTimeout(() => {
-              if (this.activeActionPanel === 'egressClosure') {
-                this.closeActionPanel();
-              }
-
-              this.loadEpisodeLongitudinal(episodeId);
-            }, 2200);
+            this.closeActionPanel();
+            this.loadEpisodeLongitudinal(episodeId);
           },
 
           error: (error: HttpErrorResponse) => {
@@ -3758,6 +3844,7 @@ export class DemandNewComponent
           this.showOperationSuccess(this.observationSuccess);
           this.observationForm.reset(observationResult.resetValue);
 
+          this.closeActionPanel();
           this.loadEpisodeLongitudinal(episodeId);
         },
         error: (error) => {
@@ -5413,6 +5500,8 @@ this.createdEpisode = activeEpisode;
       citationTypeCode: payload.citationTypeCode,
       citationDate: payload.citationDate,
       citationTime: payload.citationTime,
+      stageReceivedAt: this.workingStage?.receivedAt ?? null,
+
       citationEvents: this.citationEvents,
       episodeEvents: this.workingStageEvents,
       citationTypes: this.citationTypes,
@@ -5445,8 +5534,8 @@ this.createdEpisode = activeEpisode;
 
           this.citationForm.reset(citationResult.resetValue);
 
+          this.closeActionPanel();
           this.loadEpisodeLongitudinal(episodeId);
-          this.activeActionPanel = null;
         },
 
         error: (error: HttpErrorResponse) => {
@@ -5559,7 +5648,7 @@ this.createdEpisode = activeEpisode;
             },
 
             closePanel: () => {
-              this.activeActionPanel = null;
+              this.closeActionPanel();
             },
 
             reloadLongitudinal: () => {
@@ -6386,8 +6475,9 @@ this.createdEpisode = activeEpisode;
           status: milestone.attendance,
           description: milestone.description,
           registeredByName: milestone.registeredByName,
-          createdAt: milestone.createdAt,
-          details: [],
+          createdAt: milestone.createdAt,          details: milestone.attemptLabel
+            ? [milestone.attemptLabel]
+            : [],
         });
       });
 

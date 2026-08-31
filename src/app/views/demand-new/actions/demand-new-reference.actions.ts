@@ -1,4 +1,4 @@
-﻿import { formatDateForBackend } from '../utils/demand-new-format.utils';
+import { formatDateForBackend } from '../utils/demand-new-format.utils';
 
 export interface ReferencePayload {
   originStageId: number;
@@ -92,31 +92,6 @@ export function buildReferenceContext(input: {
     return {
       valid: false,
       errorMessage: 'Debe registrar el motivo de la referencia.',
-    };
-  }
-
-  const registeredDates = [
-    input.originalRequestDate,
-    ...(input.episodeEvents ?? []).map(
-      (event: any) => event?.eventDate ?? event?.createdAt,
-    ),
-  ]
-    .map((value: any) => String(value ?? '').slice(0, 10))
-    .filter((value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value))
-    .sort((left: string, right: string) =>
-      right.localeCompare(left),
-    );
-
-  const latestRegisteredDate = registeredDates[0] ?? null;
-
-  if (
-    latestRegisteredDate &&
-    referenceDate < latestRegisteredDate
-  ) {
-    return {
-      valid: false,
-      errorMessage:
-        'La fecha de referencia no puede ser anterior a la última gestión registrada.',
     };
   }
 

@@ -1,4 +1,4 @@
-﻿import { Injectable, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -196,6 +196,57 @@ export interface ReverseEpisodeRequest {
   [key: string]: any;
 }
 
+
+export interface AdministrativeCorrectionRequest {
+  programId: number;
+  correctionReason: string;
+  stageId?: number | null;
+  episode?: Record<string, any> | null;
+  closure?: Record<string, any> | null;
+  substances?: Record<string, any>[];
+  citations?: Record<string, any>[];
+  attendances?: Record<string, any>[];
+  feedbacks?: Record<string, any>[];
+  observations?: Record<string, any>[];
+  closeEpisode?: boolean;
+  [key: string]: any;
+}
+
+export interface AdministrativeCorrectionResponse {
+  episodeId: number;
+  episodeCode?: string;
+  programId: number;
+  programName?: string;
+  stageId?: number;
+  correctionReason?: string;
+  performedBy?: string;
+  performedAt?: string;
+  counters?: Record<string, number>;
+  episodeUpdated?: boolean;
+  closureUpdated?: boolean;
+  auditRecords?: number;
+  [key: string]: any;
+}
+
+export interface ProgramReceivedAtCorrectionRequest {
+  receivedAt: string;
+  correctionReason: string;
+  stageId?: number | null;
+}
+
+export interface ProgramReceivedAtCorrectionResponse {
+  episodeId: number;
+  episodeCode?: string;
+  programId: number;
+  programName?: string;
+  stageId: number;
+  previousReceivedAt?: string | null;
+  receivedAt?: string | null;
+  correctionReason?: string;
+  performedBy?: string;
+  performedAt?: string;
+  [key: string]: any;
+}
 @Injectable({
   providedIn: 'root',
 })
@@ -370,6 +421,26 @@ export class DemandService {
     );
   }
 
+  administrativeCorrection(
+    episodeId: number,
+    payload: AdministrativeCorrectionRequest
+  ): Observable<AdministrativeCorrectionResponse> {
+    return this.http.put<AdministrativeCorrectionResponse>(
+      `${this.demandUrl}/episodes/${episodeId}/administrative-correction`,
+      payload
+    );
+  }
+
+  correctProgramReceivedAt(
+    episodeId: number,
+    programId: number,
+    payload: ProgramReceivedAtCorrectionRequest
+  ): Observable<ProgramReceivedAtCorrectionResponse> {
+    return this.http.put<ProgramReceivedAtCorrectionResponse>(
+      `${this.demandUrl}/episodes/${episodeId}/programs/${programId}/received-at`,
+      payload
+    );
+  }
   reverseEpisode(
     episodeId: number,
     payload: ReverseEpisodeRequest

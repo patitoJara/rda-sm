@@ -32,6 +32,10 @@ import { resolveCitationTypeCode } from '../demand-new/utils/demand-new-citation
 import { DEMAND_CITATION_CODES } from '../../shared/utils/demand-workflow.utils';
 import { DemandNewDateAdapter, DEMAND_NEW_DATE_FORMATS } from '../demand-new/utils/demand-new-date-adapter';
 import { parseBackendDate } from '../demand-new/utils/demand-new-format.utils';
+import {
+  buildAdministrativeObservationCorrections,
+  syncAdministrativeObservationDrafts,
+} from './utils/administrative-observation-correction.utils';
 
 @Component({
   standalone: true,
@@ -111,6 +115,8 @@ export class EpisodePurgeComponent {
   correctionCatalogsLoading = false;
   correctionCatalogsError = '';
 
+  correctionReason = '';
+  correcting = false;
   get episodeId(): number | null {
     const value = Number(this.episodeIdInput);
 
@@ -1086,6 +1092,453 @@ export class EpisodePurgeComponent {
       null;
   }
 
+  private toAdministrativeDate(value: unknown): string | null {
+    if (!value) {
+      return null;
+    }
+
+    if (value instanceof Date) {
+      const year = value.getFullYear();
+      const month = String(value.getMonth() + 1).padStart(2, '0');
+      const day = String(value.getDate()).padStart(2, '0');
+
+      return `${year}-${month}-${day}`;
+    }
+
+    const raw = String(value).trim();
+
+    if (!raw) {
+      return null;
+    }
+
+    const isoMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw);
+
+    if (isoMatch) {
+      return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
+    }
+
+    const displayMatch = /^(\d{2})-(\d{2})-(\d{4})$/.exec(raw);
+
+    if (displayMatch) {
+      return `${displayMatch[3]}-${displayMatch[2]}-${displayMatch[1]}`;
+    }
+
+    return null;
+  }
+
+  private toAdministrativeTime(value: unknown): any {
+    const raw = String(value ?? '').trim();
+
+    if (!raw) {
+      return null;
+    }
+
+    const match = /^(\d{1,2}):(\d{2})/.exec(raw);
+
+    if (!match) {
+      return null;
+    }
+
+    const hour = Number(match[1]);
+    const minute = Number(match[2]);
+
+    if (
+      !Number.isInteger(hour) ||
+      !Number.isInteger(minute) ||
+      hour < 0 ||
+      hour > 23 ||
+      minute < 0 ||
+      minute > 59
+    ) {
+      return null;
+    }
+
+    return {
+      hour,
+      minute,
+      second: 0,
+      nano: 0,
+    };
+  }
+
+  private toAdministrativeEvent(event: any): any {
+    const id = Number(event?.id);
+
+    const action =
+      event?.markedForDeletion === true
+        ? 'DELETE'
+        : event?.temporary === true || id < 0
+          ? 'CREATE'
+          : 'UPDATE';
+
+    const attendanceStatus =
+      event?.attendanceStatus ??
+      event?.attendanceStatusId ??
+      null;
+
+    const attendanceStatusId =
+      typeof attendanceStatus === 'object'
+        ? attendanceStatus?.id ?? null
+        : event?.attendanceStatusId ?? null;
+
+    const attendanceStatusCode =
+      typeof attendanceStatus === 'object'
+        ? attendanceStatus?.code ?? null
+        : event?.attendanceStatusCode ?? null;
+
+    return {
+      action,
+      id: action === 'CREATE' ? null : id || null,
+      eventId: action === 'CREATE' ? null : id || null,
+
+      stageId:
+        event?.stageId ??
+        event?.stage?.id ??
+        this.resolveSelectedProgramStageId(),
+
+      relatedEventId:
+        event?.relatedEventId ??
+        event?.citationId ??
+        null,
+
+      eventTypeId:
+        event?.eventType?.id ??
+        event?.eventTypeId ??
+        null,
+
+      eventTypeCode:
+        event?.eventType?.code ??
+        event?.eventTypeCode ??
+        null,
+
+      citationTypeCode:
+        event?.citationType?.code ??
+        event?.citationTypeCode ??
+        null,
+
+      biopsychosocialCommitmentCode:
+        event?.biopsychosocialCommitmentLevel?.code ??
+        event?.biopsychosocialCommitmentCode ??
+        null,
+
+      eventDate:
+        this.toAdministrativeDate(event?.eventDate),
+
+      eventTime:
+        this.toAdministrativeTime(event?.eventTime),
+
+      attendanceStatusId,
+      attendanceStatusCode,
+
+      professionName:
+        event?.professionName ??
+        null,
+
+      professionalUserId:
+        event?.professionalUserId ??
+        event?.professionalId ??
+        null,
+
+      programProfessionalId:
+        event?.programProfessionalId ??
+        null,
+
+      programId:
+        event?.program?.id ??
+        event?.programId ??
+        this.selectedProgramForAdminAction,
+
+      comment:
+        event?.comment ??
+        null,
+
+      citationComment:
+        event?.citationComment ??
+        null,
+
+      observation:
+        event?.observation ??
+        null,
+
+      nextAction:
+        event?.nextAction ??
+        null,
+
+      nextActionDate:
+        this.toAdministrativeDate(event?.nextActionDate),
+
+      resultCode:
+        event?.result?.code ??
+        event?.resultCode ??
+        null,
+
+      stateCode:
+        event?.state?.code ??
+        event?.stateCode ??
+        null,
+    };
+  }
+
+  private buildAdministrativeSubstances(): any[] {
+    const original = Array.isArray(this.episodeSubstances)
+      ? this.episodeSubstances
+      : [];
+
+    const desired: any[] = [];
+
+    const primarySubstanceId =
+      Number(this.correctionDraft?.primarySubstanceId);
+
+    if (primarySubstanceId > 0) {
+      const existingPrimary =
+        original.find(
+          (item: any) => item?.primarySubstance === true,
+        ) ?? null;
+
+      desired.push({
+        existing: existingPrimary,
+        substanceId: primarySubstanceId,
+        primarySubstance: true,
+        useOrder: 1,
+        observation:
+          existingPrimary?.observation ??
+          '',
+      });
+    }
+
+    const secondary =
+      Array.isArray(this.correctionDraft?.secondarySubstances)
+        ? this.correctionDraft.secondarySubstances
+        : [];
+
+    secondary.forEach((item: any, index: number) => {
+      const existing =
+        original.find(
+          (current: any) =>
+            Number(current?.id) === Number(item?.id),
+        ) ?? null;
+
+      desired.push({
+        existing,
+        substanceId: Number(item?.substanceId),
+        primarySubstance: false,
+        useOrder: index + 1,
+        observation: item?.observation ?? '',
+      });
+    });
+
+    const payload: any[] = [];
+
+    desired.forEach((item: any) => {
+      const existing = item.existing;
+
+      payload.push({
+        action: existing ? 'UPDATE' : 'CREATE',
+        id: existing?.id ?? null,
+        substanceAssociationId:
+          existing?.id ??
+          null,
+        substanceId: item.substanceId,
+        level:
+          existing?.level ??
+          null,
+        primarySubstance: item.primarySubstance,
+        useOrder: item.useOrder,
+        observation: item.observation,
+      });
+    });
+
+    original.forEach((existing: any) => {
+      const stillExists = desired.some(
+        (item: any) =>
+          Number(item?.existing?.id) === Number(existing?.id),
+      );
+
+      if (!stillExists && existing?.id) {
+        payload.push({
+          action: 'DELETE',
+          id: existing.id,
+          substanceAssociationId: existing.id,
+          substanceId: existing.substanceId ?? null,
+        });
+      }
+    });
+
+    return payload;
+  }
+
+  submitAdministrativeCorrection(): void {
+    const episodeId = Number(this.episodeId);
+    const programId = Number(
+      this.selectedProgramForAdminAction,
+    );
+
+    const stageId =
+      this.resolveSelectedProgramStageId() ??
+      Number(this.closureDraft?.stageId) ??
+      null;
+
+    const correctionReason =
+      String(this.correctionReason ?? '').trim();
+
+    if (!episodeId || !programId) {
+      this.snackBar.open(
+        'No fue posible identificar el episodio o programa.',
+        'Cerrar',
+        {
+          duration: 5000,
+        },
+      );
+      return;
+    }
+
+    if (!stageId) {
+      this.snackBar.open(
+        'No fue posible identificar de forma segura la etapa del programa seleccionado.',
+        'Cerrar',
+        {
+          duration: 5000,
+        },
+      );
+      return;
+    }
+
+    if (!correctionReason) {
+      this.snackBar.open(
+        'Debe indicar el motivo de la corrección administrativa.',
+        'Cerrar',
+        {
+          duration: 5000,
+        },
+      );
+      return;
+    }
+
+    const allEvents =
+      Array.isArray(this.correctionEvents)
+        ? this.correctionEvents.map((event: any) =>
+            this.toAdministrativeEvent(event),
+          )
+        : [];
+
+    const citations = allEvents.filter(
+      (event: any) =>
+        String(event?.eventTypeCode ?? '')
+          .trim()
+          .toUpperCase() === 'CITACION',
+    );
+
+    const attendances = allEvents.filter(
+      (event: any) =>
+        String(event?.eventTypeCode ?? '')
+          .trim()
+          .toUpperCase() === 'ASISTENCIA',
+    );
+
+    const feedbacks = allEvents.filter(
+      (event: any) =>
+        String(event?.eventTypeCode ?? '')
+          .trim()
+          .toUpperCase() === 'RETROALIMENTACION',
+    );
+
+    const originalEvents = Array.isArray(this.longitudinal?.events)
+      ? this.longitudinal.events
+      : [];
+
+    syncAdministrativeObservationDrafts(
+      this.correctionEvents,
+      this.observationDrafts,
+    );
+
+    const observations =
+      buildAdministrativeObservationCorrections(
+        this.correctionEvents,
+        originalEvents,
+        stageId,
+      );
+
+    const closureReasonId =
+      this.closureDraft?.closureReason?.id ??
+      null;
+
+    const closureReasonCode =
+      this.closureDraft?.closureReason?.code ??
+      this.closureDraft?.closureReasonCode ??
+      null;
+
+    const closureDate =
+      this.toAdministrativeDate(
+        this.closureDraft?.closureDate,
+      );
+
+    const stageWasClosed = !!closureDate;
+
+    const payload: any = {
+      programId,
+      stageId,
+      correctionReason,
+      observations,
+    };
+
+    console.log(
+      '[EpisodePurge] Administrative correction payload:',
+      payload,
+    );
+
+    this.correcting = true;
+
+    this.demandService
+      .administrativeCorrection(
+        episodeId,
+        payload,
+      )
+      .pipe(
+        finalize(() => {
+          this.correcting = false;
+        }),
+      )
+      .subscribe({
+        next: (response) => {
+          console.log(
+            '[EpisodePurge] Administrative correction response:',
+            response,
+          );
+
+          this.snackBar.open(
+            'Corrección administrativa aplicada correctamente.',
+            'Cerrar',
+            {
+              duration: 5000,
+            },
+          );
+
+          this.correctionReason = '';
+
+          this.searchEpisode();
+        },
+
+        error: (error) => {
+          console.error(
+            '[EpisodePurge] Error aplicando corrección administrativa:',
+            error,
+          );
+
+          const message =
+            error?.error?.message ??
+            error?.error?.error ??
+            'No fue posible aplicar la corrección administrativa.';
+
+          this.snackBar.open(
+            String(message),
+            'Cerrar',
+            {
+              duration: 7000,
+            },
+          );
+        },
+      });
+  }
   private buildClosureDraft(): void {
     const episodeId = Number(this.episodeId);
     const programId = Number(this.selectedProgramForAdminAction);
@@ -1616,6 +2069,13 @@ export class EpisodePurgeComponent {
           this.longitudinal = response;
           this.episode = episode;
           this.loadEpisodePrograms();
+
+          if (
+            this.adminMode === 'correction' &&
+            this.selectedProgramForAdminAction
+          ) {
+            this.startCorrection();
+          }
 
           const selectedEpisodeEvents = Array.isArray(response?.events)
             ? response.events.filter(

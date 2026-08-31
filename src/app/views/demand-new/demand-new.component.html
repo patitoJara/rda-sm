@@ -1292,7 +1292,7 @@
                 <mat-option
                   *ngFor="let item of citationTypes"
                   [value]="item.code"
-                  [disabled]="isCitationTypeRegistered(item.code)"
+                  [disabled]="isCitationTypeDisabled(item.code)"
                 >
                   {{ item.name }}
                 </mat-option>
@@ -1814,7 +1814,7 @@
         [error]="interviewError"
         [professionals]="professionals"
         [commitmentLevels]="biopsychosocialCommitmentLevels"
-        [results]="results"
+        [results]="availableFeedbackResults"
         (professionalChange)="onInterviewProfessionalChange($event)"
         (hourBlur)="formatInterviewHourInput()"
       ></app-feedback-panel>
@@ -3986,14 +3986,44 @@
       </div>
 
       <ng-container *ngIf="observationEvents.length; else noRecentObservations">
-        <article class="recent-observation" *ngFor="let event of episodeEvents">
-          <ng-container *ngIf="event.eventType?.code === 'OBSERVACION'">
-            <strong>{{ formatDisplayDate(event.eventDate) }}</strong>
-            <p>{{ event.observation || event.comment }}</p>
-            <span>
-              {{ event.registeredByUser?.name || "No informado" }}
+        <article
+          class="recent-observation"
+          *ngFor="let event of observationEvents"
+        >
+          <strong>
+              {{ formatDisplayDate(event.eventDate) }}
+              <span *ngIf="event.eventTime">
+                · {{ formatDisplayTime(event.eventTime) }}
+              </span>
+            </strong>
+
+          <div
+            class="event-content-block"
+            *ngIf="event.comment"
+          >
+            <span class="event-content-block__label">
+              <mat-icon>comment</mat-icon>
+              Comentario
             </span>
-          </ng-container>
+
+            <p>{{ event.comment }}</p>
+          </div>
+
+          <div
+            class="event-content-block"
+            *ngIf="event.observation"
+          >
+            <span class="event-content-block__label">
+              <mat-icon>visibility</mat-icon>
+              Observación adicional
+            </span>
+
+            <p>{{ event.observation }}</p>
+          </div>
+
+          <span>
+            {{ event.registeredByUser?.name || "No informado" }}
+          </span>
         </article>
       </ng-container>
 

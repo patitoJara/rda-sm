@@ -1105,6 +1105,62 @@
     </div>
 
     </div>
+    <div
+      class="confirmation-panel"
+      *ngIf="adminMode === 'correction' && selectedProgramForAdminAction"
+    >
+      <div>
+        <h3>Aplicar corrección administrativa</h3>
+
+        <p>
+          Revise los antecedentes modificados e indique obligatoriamente
+          el motivo de la corrección. La operación quedará registrada en
+          auditoría.
+        </p>
+      </div>
+
+      <mat-form-field appearance="outline" floatLabel="always">
+        <mat-label>Motivo de la corrección</mat-label>
+
+        <mat-icon matPrefix>assignment</mat-icon>
+
+        <textarea
+          matInput
+          rows="3"
+          name="correctionReason"
+          [(ngModel)]="correctionReason"
+          placeholder="Indique el motivo de la corrección administrativa"
+        ></textarea>
+      </mat-form-field>
+
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        [disabled]="
+          correcting ||
+          !selectedProgramForAdminAction ||
+          !correctionReason.trim()
+        "
+        (click)="submitAdministrativeCorrection()"
+      >
+        <mat-progress-spinner
+          *ngIf="correcting"
+          diameter="20"
+          mode="indeterminate"
+        ></mat-progress-spinner>
+
+        <mat-icon *ngIf="!correcting">save</mat-icon>
+
+        <span>
+          {{
+            correcting
+              ? "Aplicando..."
+              : "Aplicar corrección administrativa"
+          }}
+        </span>
+      </button>
+    </div>
 
     <div
       class="confirmation-panel"

@@ -19,6 +19,7 @@ import {
 
 interface DemandNewWorkflowCitation extends DemandWorkflowCitation {
   registeredByName: string | null;
+  attendanceReason: string | null;
 }
 
 export interface DemandNewWorkflowInput {
@@ -104,6 +105,11 @@ function buildWorkflowCitation(
       attendance?.attendanceStatusName ??
       citation?.attendanceStatus?.name ??
       citation?.attendanceStatusName ??
+      null,    attendanceReason:
+      attendance?.comment ??
+      attendance?.observation ??
+      attendance?.comments ??
+      attendance?.description ??
       null,
     professionalId: resolveProfessionalId(citation),
   };
@@ -162,6 +168,7 @@ export interface DemandNewCitationMilestone {
   registeredByName: string | null;
   createdAt: string | null;
 
+  attemptLabel: string | null;
 }
 
 function getLatestWorkflowCitation(
@@ -360,19 +367,57 @@ export function buildDemandNewCitationMilestones(
     },
   ];
 
-  return definitions.map((definition) => ({
-    code: definition.code,
-    label: definition.label,
-    title: definition.title,
-    description: definition.description,
-    date: definition.citation?.date ?? null,
-    attendance: definition.citation
-      ? getAttendanceText(definition.citation)
-      : definition.missingStatus,
-    registered: !!definition.citation,
-    registeredByName:
-      definition.citation?.registeredByName ?? null,
-    createdAt:
-      definition.citation?.createdAt ?? null,
-  }));
+  return definitions.flatMap(
+    (definition): DemandNewCitationMilestone[] => {
+    const attempts = workflowCitations
+      .filter((citation) => citation.typeCode === definition.code)
+      .sort((left, right) => {
+        const leftDate =
+          `${left.date ?? ''}T${left.time ?? '00:00:00'}`;
+
+        const rightDate =
+          `${right.date ?? ''}T${right.time ?? '00:00:00'}`;
+
+        return leftDate.localeCompare(rightDate);
+      });
+
+    if (attempts.length === 0) {
+      return [
+        {
+          code: definition.code,
+          label: definition.label,
+          title: definition.title,
+          description: definition.description,
+          date: null,
+          attendance: definition.missingStatus,
+          registered: false,
+          registeredByName: null,
+          createdAt: null,
+          attemptLabel: null,
+        },
+      ];
+    }
+
+    return attempts.map((citation, attemptIndex) => ({
+      code: definition.code,
+      label: definition.label,
+      title: definition.title,      description:
+        ['REPROGRAMADA', 'CANCELA_PROGRAMA'].includes(
+          String(citation.attendanceCode ?? '').toUpperCase(),
+        ) && citation.attendanceReason
+          ? `Motivo: ${citation.attendanceReason}`
+          : definition.description,
+      date: citation.date ?? null,
+      attendance: getAttendanceText(citation),
+      registered: true,
+      registeredByName: citation.registeredByName ?? null,
+      createdAt: citation.createdAt ?? null,
+      attemptLabel:
+        attempts.length <= 1
+          ? null
+          : attemptIndex === 0
+            ? 'Original'
+            : `Reprogramación ${attemptIndex}`,
+    }));
+  });
 }

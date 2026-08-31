@@ -1,10 +1,18 @@
-﻿import {
+import {
   getAttendanceForCitation,
 } from './demand-new-citation.utils';
+
+import {
+  DemandChronologyMilestoneType,
+  DemandChronologyPoint,
+  validateDemandChronology,
+} from './demand-new-datetime-validation.utils';
 export interface CitationScheduleValidationInput {
   citationTypeCode: string;
   citationDate: string;
   citationTime: string;
+  stageReceivedAt?: string | null;
+
   citationEvents: any[];
 
   episodeEvents: any[];
@@ -172,6 +180,157 @@ const CITATION_CODES = {
   c2e3: 'SEGUNDA_CITACION_TERCERA_ENTREVISTA',
 } as const;
 
+function resolveCitationChronologyType(
+  citationTypeCode: string,
+): DemandChronologyMilestoneType | null {
+  const milestoneByCitationCode: Record<
+    string,
+    DemandChronologyMilestoneType
+  > = {
+    [CITATION_CODES.c1e1]: 'C1_E1',
+    [CITATION_CODES.c2e1]: 'C2_E1',
+    [CITATION_CODES.c1e2]: 'C1_E2',
+    [CITATION_CODES.c2e2]: 'C2_E2',
+    [CITATION_CODES.c1e3]: 'C1_E3',
+    [CITATION_CODES.c2e3]: 'C2_E3',
+    ENTREVISTA_OPCIONAL: 'OPTIONAL_INTERVIEW',
+  };
+
+  return milestoneByCitationCode[citationTypeCode] ?? null;
+}
+
+const CITATION_CHRONOLOGY_SEQUENCE: ReadonlyArray<{
+  code: string;
+  type: DemandChronologyMilestoneType;
+  label: string;
+}> = [
+  {
+    code: CITATION_CODES.c1e1,
+    type: 'C1_E1',
+    label: 'C1-E1',
+  },
+  {
+    code: CITATION_CODES.c2e1,
+    type: 'C2_E1',
+    label: 'C2-E1',
+  },
+  {
+    code: CITATION_CODES.c1e2,
+    type: 'C1_E2',
+    label: 'C1-E2',
+  },
+  {
+    code: CITATION_CODES.c2e2,
+    type: 'C2_E2',
+    label: 'C2-E2',
+  },
+  {
+    code: CITATION_CODES.c1e3,
+    type: 'C1_E3',
+    label: 'C1-E3',
+  },
+  {
+    code: CITATION_CODES.c2e3,
+    type: 'C2_E3',
+    label: 'C2-E3',
+  },
+  {
+    code: 'ENTREVISTA_OPCIONAL',
+    type: 'OPTIONAL_INTERVIEW',
+    label: 'Entrevista opcional',
+  },
+];
+
+function resolveOriginalCitationByCode(
+  citationTypeCode: string,
+  citationEvents: any[],
+  citationTypes: any[],
+): any | null {
+  const matchingEvents = citationEvents
+    .filter(
+      (event: any) =>
+        resolveCitationTypeCode(
+          event,
+          citationEvents,
+          citationTypes,
+        ) === citationTypeCode,
+    )
+    .sort((left: any, right: any) => {
+      const leftDateTime = getCitationDateTime(left) ?? '';
+      const rightDateTime = getCitationDateTime(right) ?? '';
+
+      if (leftDateTime !== rightDateTime) {
+        return leftDateTime.localeCompare(rightDateTime);
+      }
+
+      return Number(left?.id ?? 0) - Number(right?.id ?? 0);
+    });
+
+  return matchingEvents[0] ?? null;
+}
+
+export function buildOriginalCitationChronologyPoints(
+  citationEvents: any[],
+  citationTypes: any[],
+): DemandChronologyPoint[] {
+  return CITATION_CHRONOLOGY_SEQUENCE
+    .map((item): DemandChronologyPoint | null => {
+      const originalCitation = resolveOriginalCitationByCode(
+        item.code,
+        citationEvents,
+        citationTypes,
+      );
+
+      if (!originalCitation) {
+        return null;
+      }
+
+      return {
+        type: item.type,
+        label: item.label,
+        date:
+          originalCitation?.eventDate ??
+          originalCitation?.citationDate ??
+          null,
+        time:
+          originalCitation?.eventTime ??
+          originalCitation?.citationTime ??
+          null,
+      };
+    })
+    .filter(
+      (
+        point,
+      ): point is DemandChronologyPoint =>
+        point !== null,
+    );
+}
+
+function buildPreviousCitationChronologyPoints(
+  citationTypeCode: string,
+  citationEvents: any[],
+  citationTypes: any[],
+): DemandChronologyPoint[] {
+  const currentIndex = CITATION_CHRONOLOGY_SEQUENCE.findIndex(
+    (item) => item.code === citationTypeCode,
+  );
+
+  if (currentIndex <= 0) {
+    return [];
+  }
+
+  const previousTypes = new Set(
+    CITATION_CHRONOLOGY_SEQUENCE
+      .slice(0, currentIndex)
+      .map((item) => item.type),
+  );
+
+  return buildOriginalCitationChronologyPoints(
+    citationEvents,
+    citationTypes,
+  ).filter((point) => previousTypes.has(point.type));
+}
+
 export interface CitationTypeAvailabilityInput {
   citationTypeCode: string;
   citationEvents: any[];
@@ -194,6 +353,55 @@ export function getCitationTypeAvailability(
     episodeEvents,
     citationTypes,
   } = input;
+
+  const firstCitationCodeBySecondCitation: Partial<
+    Record<string, string>
+  > = {
+    [CITATION_CODES.c2e1]: CITATION_CODES.c1e1,
+    [CITATION_CODES.c2e2]: CITATION_CODES.c1e2,
+    [CITATION_CODES.c2e3]: CITATION_CODES.c1e3,
+  };
+
+  const firstCitationCode =
+    firstCitationCodeBySecondCitation[citationTypeCode] ?? null;
+
+  if (firstCitationCode) {
+    const firstCitation =
+      [...citationEvents]
+        .reverse()
+        .find(
+          (event: any) =>
+            resolveCitationTypeCode(
+              event,
+              citationEvents,
+              citationTypes,
+            ) === firstCitationCode,
+        ) ?? null;
+
+    if (!firstCitation) {
+      return {
+        available: false,
+        reason:
+          'la primera citación de esta entrevista aún no ha sido registrada',
+        kind: 'previous-required',
+      };
+    }
+
+    const firstCitationAttendanceStatus =
+      normalizeAttendanceStatus(
+        firstCitation,
+        episodeEvents,
+      );
+
+    if (firstCitationAttendanceStatus !== 'NO_SE_PRESENTO') {
+      return {
+        available: false,
+        reason:
+          'la segunda citación solo corresponde cuando la primera registra NO SE PRESENTÓ',
+        kind: 'not-applicable',
+      };
+    }
+  }
 
   const existingCitation =
     [...citationEvents]
@@ -239,6 +447,7 @@ export function validateCitationSchedule(
     citationTypeCode,
     citationDate,
     citationTime,
+    stageReceivedAt,
     citationEvents,
     episodeEvents,
     citationTypes,
@@ -272,9 +481,67 @@ export function validateCitationSchedule(
           : `No es posible registrar esta citación: ${availability.reason}.`,
     };
   }
+  const chronologyType =
+    resolveCitationChronologyType(citationTypeCode);
 
-  const selectedTime = normalizeTime(citationTime);
+  const isCitationRetry = citationEvents.some(
+    (event: any) =>
+      resolveCitationTypeCode(
+        event,
+        citationEvents,
+        citationTypes,
+      ) === citationTypeCode,
+  );
 
+  /*
+   * Solo las citaciones originales participan en la cronología.
+   * Las reprogramaciones/repeticiones quedan expresamente excluidas.
+   */
+  if (chronologyType && !isCitationRetry) {
+    const previousPoints: DemandChronologyPoint[] = [];
+
+    if (stageReceivedAt) {
+      previousPoints.push({
+        type: 'STAGE_RECEPTION',
+        label: 'el ingreso a la etapa',
+        date: stageReceivedAt,
+      });
+    }
+
+    previousPoints.push(
+      ...buildPreviousCitationChronologyPoints(
+        citationTypeCode,
+        citationEvents,
+        citationTypes,
+      ),
+    );
+
+    const chronologyValidation = validateDemandChronology({
+      current: {
+        type: chronologyType,
+        label: 'Citación',
+        date: citationDate,
+        time: citationTime,
+      },
+      previousPoints,
+    });
+
+    if (!chronologyValidation.valid) {
+      return {
+        valid: false,
+        errorMessage:
+          chronologyValidation.errorMessage ??
+          'La fecha y hora de la citación no respetan la cronología del episodio.',
+      };
+    }
+  }
+/*
+   * Aquí permanecen únicamente las reglas funcionales propias
+   * de citaciones.
+   *
+   * La cronología de fecha/hora será resuelta por el util
+   * central de cronología del episodio.
+   */
   for (const event of citationEvents) {
     const existingCode = resolveCitationTypeCode(
       event,
@@ -282,98 +549,22 @@ export function validateCitationSchedule(
       citationTypes,
     );
 
-    const existingOrder = citationTypes.findIndex(
-      (item: any) => item?.code === existingCode,
-    );
-
-    if (existingOrder < 0) {
+    if (existingCode !== citationTypeCode) {
       continue;
     }
 
-    if (existingCode === citationTypeCode) {
-      if (
-        !allowsCitationTypeRetry(
-          event,
-          episodeEvents,
-        )
-      ) {
-        return {
-          valid: false,
-          errorMessage:
-            'Este tipo de citación ya fue registrado y continúa vigente.',
-        };
-      }
-
-      continue;
-    }
-
-    const existingDateTime = getCitationDateTime(event);
-
-    if (!existingDateTime) {
-      continue;
-    }
-
-    const existingName = getCitationName(
-      citationTypes[existingOrder],
-    );
-
-    const existingDate = existingDateTime.slice(0, 10);
-    const existingTime = existingDateTime.slice(11, 19);
-
-    const selectedDateLabel =
-      citationDate.split('-').reverse().join('/');
-
-    const existingDateLabel =
-      existingDate.split('-').reverse().join('/');
-
-    if (existingOrder < selectedOrder) {
-      if (citationDate < existingDate) {
-        return {
-          valid: false,
-          errorMessage:
-            `La fecha seleccionada (${selectedDateLabel}) no puede ser anterior ` +
-            `a ${existingName} (${existingDateLabel}).`,
-        };
-      }
-
-      if (
-        citationDate === existingDate &&
-        selectedTime <= existingTime
-      ) {
-        return {
-          valid: false,
-          errorMessage:
-            `Para el ${selectedDateLabel}, la hora seleccionada ` +
-            `(${selectedTime.slice(0, 5)}) debe ser posterior a ` +
-            `${existingName} (${existingTime.slice(0, 5)}).`,
-        };
-      }
-    }
-
-    if (existingOrder > selectedOrder) {
-      if (citationDate > existingDate) {
-        return {
-          valid: false,
-          errorMessage:
-            `La fecha seleccionada (${selectedDateLabel}) no puede ser posterior ` +
-            `a ${existingName} (${existingDateLabel}).`,
-        };
-      }
-
-      if (
-        citationDate === existingDate &&
-        selectedTime >= existingTime
-      ) {
-        return {
-          valid: false,
-          errorMessage:
-            `Para el ${selectedDateLabel}, la hora seleccionada ` +
-            `(${selectedTime.slice(0, 5)}) debe ser anterior a ` +
-            `${existingName} (${existingTime.slice(0, 5)}).`,
-        };
-      }
+    if (
+      !allowsCitationTypeRetry(
+        event,
+        episodeEvents,
+      )
+    ) {
+      return {
+        valid: false,
+        errorMessage:
+          'Este tipo de citación ya fue registrado y continúa vigente.',
+      };
     }
   }
-
   return { valid: true };
 }
