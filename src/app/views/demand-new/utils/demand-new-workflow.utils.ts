@@ -17,9 +17,32 @@ import {
   resolveCitationTypeCode,
 } from './demand-new-citation-schedule.utils';
 
+import {
+  formatDisplayDate,
+  formatResultLabel,
+} from './demand-new-display.utils';
+
 interface DemandNewWorkflowCitation extends DemandWorkflowCitation {
   registeredByName: string | null;
   attendanceReason: string | null;
+
+  professionalName: string | null;
+  professionName: string | null;
+
+  comment: string | null;
+  citationComment: string | null;
+  observation: string | null;
+
+  stateCode: string | null;
+  resultCode: string | null;
+
+  nextAction: string | null;
+  nextActionDate: string | null;
+
+  attendanceRegisteredByName: string | null;
+  attendanceCreatedAt: string | null;
+  attendanceObservation: string | null;
+
 }
 
 export interface DemandNewWorkflowInput {
@@ -52,6 +75,51 @@ function resolveProfessionalId(
     : null;
 }
 
+function formatMilestoneState(value: string | null): string {
+  const code = String(value ?? '').trim().toUpperCase();
+
+  const labels: Record<string, string> = {
+    EN_TRAMITE: 'En trámite',
+    CERRADO: 'Cerrado',
+    CERRADA: 'Cerrada',
+    ABIERTO: 'Abierto',
+    ABIERTA: 'Abierta',
+  };
+
+  if (labels[code]) {
+    return labels[code];
+  }
+
+  const normalized = code
+    .toLowerCase()
+    .replace(/_/g, ' ')
+    .trim();
+
+  return normalized
+    ? normalized.charAt(0).toUpperCase() + normalized.slice(1)
+    : 'Sin estado';
+}
+
+function formatMilestoneDateTime(value: string | null): string {
+  if (!value) {
+    return '';
+  }
+
+  const text = String(value).trim();
+  const date = formatDisplayDate(text);
+
+  const separatorIndex = text.indexOf('T');
+
+  if (separatorIndex < 0) {
+    return date;
+  }
+
+  const time = text.slice(separatorIndex + 1, separatorIndex + 6);
+
+  return time
+    ? `${date} ${time}`
+    : date;
+}
 function buildWorkflowCitation(
   citation: any,
   citationEvents: any[],
@@ -111,6 +179,44 @@ function buildWorkflowCitation(
       attendance?.comments ??
       attendance?.description ??
       null,
+    professionalName:
+      citation?.programProfessionalName ??
+      citation?.programProfessional?.name ??
+      citation?.professional?.name ??
+      null,
+
+    professionName:
+      citation?.professionName ??
+      citation?.profession?.name ??
+      citation?.programProfessional?.professionName ??
+      citation?.programProfessional?.profession?.name ??
+      null,
+
+    comment: citation?.comment ?? null,
+    citationComment: citation?.citationComment ?? null,
+    observation: citation?.observation ?? null,
+
+    stateCode:
+      citation?.stateCode ??
+      citation?.state?.code ??
+      null,
+
+    resultCode:
+      citation?.resultCode ??
+      citation?.result?.code ??
+      null,
+
+    nextAction: citation?.nextAction ?? null,
+    nextActionDate: citation?.nextActionDate ?? null,
+
+    attendanceRegisteredByName:
+      attendance?.registeredByUser?.name ??
+      attendance?.createdByUser?.name ??
+      null,
+
+    attendanceCreatedAt: attendance?.createdAt ?? null,
+    attendanceObservation: attendance?.observation ?? null,
+
     professionalId: resolveProfessionalId(citation),
   };
 }
@@ -169,6 +275,7 @@ export interface DemandNewCitationMilestone {
   createdAt: string | null;
 
   attemptLabel: string | null;
+  details: string[];
 }
 
 function getLatestWorkflowCitation(
@@ -394,6 +501,7 @@ export function buildDemandNewCitationMilestones(
           registeredByName: null,
           createdAt: null,
           attemptLabel: null,
+          details: [],
         },
       ];
     }
@@ -412,6 +520,69 @@ export function buildDemandNewCitationMilestones(
       registered: true,
       registeredByName: citation.registeredByName ?? null,
       createdAt: citation.createdAt ?? null,
+      details: [
+        citation.time
+          ? `Hora: ${String(citation.time).slice(0, 5)}`
+          : null,
+
+        citation.professionalName
+          ? `Profesional: ${citation.professionalName}`
+          : null,
+
+        citation.professionName
+          ? `Profesión: ${citation.professionName}`
+          : null,
+
+        citation.comment
+          ? `Comentario: ${citation.comment}`
+          : null,
+
+        citation.citationComment
+          ? `Comentario de citación: ${citation.citationComment}`
+          : null,
+
+        citation.observation
+          ? `Observación: ${citation.observation}`
+          : null,
+
+        citation.attendanceName
+          ? `Asistencia: ${citation.attendanceName}`
+          : null,
+
+        citation.attendanceReason
+          ? `Comentario de asistencia: ${citation.attendanceReason}`
+          : null,
+
+        citation.attendanceObservation &&
+        citation.attendanceObservation !== citation.attendanceReason
+          ? `Observación de asistencia: ${citation.attendanceObservation}`
+          : null,
+
+        citation.stateCode
+          ? `Estado del evento: ${formatMilestoneState(citation.stateCode)}`
+          : null,
+
+        citation.resultCode
+          ? `Resultado del evento: ${formatResultLabel(citation.resultCode)}`
+          : null,
+
+        citation.nextAction
+          ? `Próxima acción: ${citation.nextAction}`
+          : null,
+
+        citation.nextActionDate
+          ? `Fecha próxima acción: ${citation.nextActionDate}`
+          : null,
+
+        citation.attendanceRegisteredByName
+          ? `Asistencia registrada por: ${citation.attendanceRegisteredByName}`
+          : null,
+
+        citation.attendanceCreatedAt
+          ? `Registro de asistencia: ${formatMilestoneDateTime(citation.attendanceCreatedAt)}`
+          : null,
+      ].filter((value): value is string => !!value),
+
       attemptLabel:
         attempts.length <= 1
           ? null

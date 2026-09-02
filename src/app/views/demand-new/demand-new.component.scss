@@ -1,4 +1,4 @@
-﻿@use './styles/base';
+@use './styles/base';
 @use './styles/hero-search';
 @use './styles/person-editor';
 @use './styles/demandant-details';
@@ -163,5 +163,35 @@
   small {
     color: #115e59;
     font-weight: 600;
+  }
+}
+/* HITOS - DETALLE OPERATIVO */
+.episode-milestone__performed-data {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 6px 24px;
+  align-items: start;
+}
+
+.episode-milestone__performed-data > strong,
+.episode-milestone__performed-data > span:not(.episode-milestone__detail),
+.episode-milestone__performed-data > small {
+  grid-column: 1 / -1;
+}
+
+.episode-milestone__detail {
+  display: block;
+  min-width: 0;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.episode-milestone__performed-data > small {
+  margin-top: 6px;
+}
+
+@media (max-width: 900px) {
+  .episode-milestone__performed-data {
+    grid-template-columns: 1fr;
   }
 }

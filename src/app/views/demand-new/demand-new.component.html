@@ -2382,6 +2382,12 @@
           }}
         </strong>
       </div>
+
+      <div class="summary-row" *ngIf="hasCurrentEpisode">
+        <span>Tipo de episodio</span>
+        <strong>{{ currentEpisodeTypeName }}</strong>
+      </div>
+
       <div class="summary-row" *ngIf="hasCurrentEpisode">
         <span>Programa responsable de la demanda</span>
         <strong>{{

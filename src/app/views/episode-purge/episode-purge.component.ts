@@ -16,6 +16,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatRadioModule } from '@angular/material/radio';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
@@ -30,13 +31,18 @@ import { ProgramProfessionalService } from '@app/services/program-professional.s
 import { normalizeProfessionalForCitation } from '../demand-new/utils/demand-new-professional.utils';
 import { resolveCitationTypeCode } from '../demand-new/utils/demand-new-citation-schedule.utils';
 import { DEMAND_CITATION_CODES } from '../../shared/utils/demand-workflow.utils';
-import { DemandNewDateAdapter, DEMAND_NEW_DATE_FORMATS } from '../demand-new/utils/demand-new-date-adapter';
+import {
+  DemandNewDateAdapter,
+  DEMAND_NEW_DATE_FORMATS,
+} from '../demand-new/utils/demand-new-date-adapter';
 import { parseBackendDate } from '../demand-new/utils/demand-new-format.utils';
 import {
   buildAdministrativeObservationCorrections,
   syncAdministrativeObservationDrafts,
 } from './utils/administrative-observation-correction.utils';
+import { buildAdministrativeCitationAttendanceCorrections } from './utils/administrative-citation-attendance-correction.utils';
 
+import { buildAdministrativeFeedbackCorrections } from './utils/administrative-feedback-correction.utils';
 @Component({
   standalone: true,
   selector: 'app-episode-purge',
@@ -53,6 +59,7 @@ import {
     MatDatepickerModule,
     MatNativeDateModule,
     MatSelectModule,
+    MatRadioModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
   ],
@@ -65,7 +72,9 @@ import {
 export class EpisodePurgeComponent {
   private readonly demandService = inject(DemandService);
   private readonly preloadCatalogs = inject(PreloadCatalogsService);
-  private readonly programProfessionalService = inject(ProgramProfessionalService);
+  private readonly programProfessionalService = inject(
+    ProgramProfessionalService,
+  );
   private readonly snackBar = inject(MatSnackBar);
 
   episodeIdInput: number | null = null;
@@ -97,7 +106,6 @@ export class EpisodePurgeComponent {
   correctionDraft: any = null;
   correctionEvents: any[] = [];
   episodeSubstances: any[] = [];
-  selectedSecondarySubstanceId: number | null = null;
 
   episodeTypes: any[] = [];
   eventTypes: any[] = [];
@@ -135,22 +143,16 @@ export class EpisodePurgeComponent {
       return;
     }
 
-    const displayMatch =
-      /^(\d{2})-(\d{2})-(\d{4})$/.exec(raw);
+    const displayMatch = /^(\d{2})-(\d{2})-(\d{4})$/.exec(raw);
 
     if (displayMatch) {
       target[field] =
-        displayMatch[3] +
-        '-' +
-        displayMatch[2] +
-        '-' +
-        displayMatch[1];
+        displayMatch[3] + '-' + displayMatch[2] + '-' + displayMatch[1];
 
       return;
     }
 
-    const isoMatch =
-      /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+    const isoMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
 
     if (isoMatch) {
       return;
@@ -206,13 +208,15 @@ export class EpisodePurgeComponent {
       return String(explicitName);
     }
 
-    return [
-      person.firstName,
-      person.firstLastName ?? person.lastName,
-      person.secondLastName,
-    ]
-      .filter(Boolean)
-      .join(' ') || 'Persona no informada';
+    return (
+      [
+        person.firstName,
+        person.firstLastName ?? person.lastName,
+        person.secondLastName,
+      ]
+        .filter(Boolean)
+        .join(' ') || 'Persona no informada'
+    );
   }
 
   get personRut(): string {
@@ -271,9 +275,7 @@ export class EpisodePurgeComponent {
   }
 
   get deletedRows(): Array<[string, number]> {
-    return Object.entries(
-      this.purgeResult?.deletedRows ?? {},
-    );
+    return Object.entries(this.purgeResult?.deletedRows ?? {});
   }
 
   private loadCorrectionCatalogs(): void {
@@ -354,127 +356,119 @@ export class EpisodePurgeComponent {
       return;
     }
 
-    this.demandService
-      .getEpisodeSubstances(episodeId)
-      .subscribe({
-        next: (items) => {
-          this.episodeSubstances = Array.isArray(items)
-            ? items
-            : [];
+    this.demandService.getEpisodeSubstances(episodeId).subscribe({
+      next: (items) => {
+        this.episodeSubstances = Array.isArray(items) ? items : [];
 
-          const primarySubstance =
-            this.episodeSubstances.find(
-              (item: any) => item?.primarySubstance === true,
-            ) ?? null;
+        const primarySubstance =
+          this.episodeSubstances.find(
+            (item: any) => item?.primarySubstance === true,
+          ) ?? null;
 
-          const secondarySubstances =
-            this.episodeSubstances
-              .filter(
-                (item: any) => item?.primarySubstance !== true,
-              )
-              .sort(
-                (left: any, right: any) =>
-                  Number(left?.useOrder ?? 0) -
-                  Number(right?.useOrder ?? 0),
-              )
-              .map((item: any) => ({
-                id: item?.id ?? null,
-                substanceId: item?.substanceId ?? null,
-                substanceName: item?.substanceName ?? '',
-                useOrder: item?.useOrder ?? null,
-                observation: item?.observation ?? '',
-              }));
+        const secondarySubstances = this.episodeSubstances
+          .filter((item: any) => item?.primarySubstance !== true)
+          .sort(
+            (left: any, right: any) =>
+              Number(left?.useOrder ?? 0) - Number(right?.useOrder ?? 0),
+          )
+          .map((item: any) => ({
+            id: item?.id ?? null,
+            substanceId: item?.substanceId ?? null,
+            substanceName: item?.substanceName ?? '',
+            useOrder: item?.useOrder ?? null,
+            observation: item?.observation ?? '',
+          }));
 
-          if (this.correctionDraft) {
-            this.correctionDraft.primarySubstanceId =
-              primarySubstance?.substanceId ?? null;
+        if (this.correctionDraft) {
+          this.correctionDraft.primarySubstanceId =
+            primarySubstance?.substanceId ?? null;
 
-            this.correctionDraft.secondarySubstances =
-              secondarySubstances;
-          }
+          this.correctionDraft.secondarySubstances = secondarySubstances;
+        }
 
-          console.log(
-            '[EpisodePurge] Sustancias del episodio:',
-            this.episodeSubstances,
-          );
-        },
-        error: (error) => {
-          console.error(
-            '[EpisodePurge] Error cargando sustancias:',
-            error,
-          );
+        console.log(
+          '[EpisodePurge] Sustancias del episodio:',
+          this.episodeSubstances,
+        );
+      },
+      error: (error) => {
+        console.error('[EpisodePurge] Error cargando sustancias:', error);
 
-          this.episodeSubstances = [];
-        },
-      });
+        this.episodeSubstances = [];
+      },
+    });
   }
 
-  addSecondarySubstance(): void {
-    const substanceId = Number(this.selectedSecondarySubstanceId);
+  selectAdministrativeSubstancePrincipal(id: number): void {
+    if (!this.correctionDraft) return;
 
-    if (
-      !this.correctionDraft ||
-      !Number.isFinite(substanceId) ||
-      substanceId <= 0
-    ) {
-      return;
-    }
+    this.correctionDraft.primarySubstanceId = id;
 
-    if (
-      Number(this.correctionDraft.primarySubstanceId) === substanceId
-    ) {
-      return;
-    }
-
-    const current = Array.isArray(
-      this.correctionDraft.secondarySubstances,
-    )
+    const current = Array.isArray(this.correctionDraft.secondarySubstances)
       ? this.correctionDraft.secondarySubstances
       : [];
 
-    const alreadyExists = current.some(
-      (item: any) =>
-        Number(item?.substanceId) === substanceId,
+    this.correctionDraft.secondarySubstances = current
+      .filter((item: any) => Number(item?.substanceId) !== Number(id))
+      .map((item: any, index: number) => ({
+        ...item,
+        useOrder: index + 1,
+      }));
+  }
+
+  getAdministrativeSubstanceOrder(id: number): number | null {
+    const current = Array.isArray(this.correctionDraft?.secondarySubstances)
+      ? this.correctionDraft.secondarySubstances
+      : [];
+
+    const index = current.findIndex(
+      (item: any) => Number(item?.substanceId) === Number(id),
     );
 
-    if (alreadyExists) {
+    return index >= 0 ? index + 1 : null;
+  }
+
+  toggleAdministrativeSubstanceSecondary(id: number): void {
+    if (!this.correctionDraft) return;
+
+    if (Number(this.correctionDraft.primarySubstanceId) === Number(id)) {
+      return;
+    }
+
+    const current = Array.isArray(this.correctionDraft.secondarySubstances)
+      ? this.correctionDraft.secondarySubstances
+      : [];
+
+    const existingIndex = current.findIndex(
+      (item: any) => Number(item?.substanceId) === Number(id),
+    );
+
+    if (existingIndex >= 0) {
+      this.correctionDraft.secondarySubstances = current
+        .filter((_: any, index: number) => index !== existingIndex)
+        .map((item: any, index: number) => ({
+          ...item,
+          useOrder: index + 1,
+        }));
+
       return;
     }
 
     const catalogItem = this.substances.find(
-      (item: any) =>
-        Number(item?.id) === substanceId,
+      (item: any) => Number(item?.id) === Number(id),
     );
 
     this.correctionDraft.secondarySubstances = [
       ...current,
       {
         id: null,
-        substanceId,
+        substanceId: id,
         substanceName: catalogItem?.name ?? '',
         useOrder: current.length + 1,
         observation: '',
+        level: 'Secundaria',
       },
     ];
-
-    this.selectedSecondarySubstanceId = null;
-  }
-
-  removeSecondarySubstance(index: number): void {
-    if (
-      !this.correctionDraft ||
-      !Array.isArray(this.correctionDraft.secondarySubstances)
-    ) {
-      return;
-    }
-
-    this.correctionDraft.secondarySubstances =
-      this.correctionDraft.secondarySubstances
-        .filter((_: any, itemIndex: number) => itemIndex !== index)
-        .map((item: any, itemIndex: number) => ({
-          ...item,
-          useOrder: itemIndex + 1,
-        }));
   }
 
   compareCorrectionCatalogItems(left: any, right: any): boolean {
@@ -489,10 +483,7 @@ export class EpisodePurgeComponent {
     const leftId = Number(left?.id);
     const rightId = Number(right?.id);
 
-    if (
-      Number.isFinite(leftId) &&
-      Number.isFinite(rightId)
-    ) {
+    if (Number.isFinite(leftId) && Number.isFinite(rightId)) {
       return leftId === rightId;
     }
 
@@ -531,19 +522,14 @@ export class EpisodePurgeComponent {
     const stages = Array.isArray(this.longitudinal?.stages)
       ? this.longitudinal.stages.filter(
           (stage: any) =>
-            !stage?.episodeId ||
-            Number(stage?.episodeId) === selectedEpisodeId,
+            !stage?.episodeId || Number(stage?.episodeId) === selectedEpisodeId,
         )
       : [];
 
     const uniquePrograms = new Map<number, any>();
 
     stages.forEach((stage: any) => {
-      const programId = Number(
-        stage?.program?.id ??
-        stage?.programId ??
-        0
-      );
+      const programId = Number(stage?.program?.id ?? stage?.programId ?? 0);
 
       if (!programId) {
         return;
@@ -563,9 +549,7 @@ export class EpisodePurgeComponent {
     this.episodePrograms = Array.from(uniquePrograms.values());
   }
 
-  selectAdminAction(
-    mode: 'correction' | 'reversal' | 'purge',
-  ): void {
+  selectAdminAction(mode: 'correction' | 'reversal' | 'purge'): void {
     this.adminMode = mode;
 
     this.selectedProgramForAdminAction = null;
@@ -591,40 +575,47 @@ export class EpisodePurgeComponent {
     const normalizedProfessionalId = Number(professionalId);
 
     const professional = this.professionals.find(
-      (item: any) =>
-        Number(item?.id) === normalizedProfessionalId,
+      (item: any) => Number(item?.id) === normalizedProfessionalId,
     );
 
-    citation.programProfessionalId =
-      normalizedProfessionalId || null;
+    citation.programProfessionalId = normalizedProfessionalId || null;
 
-    citation.programProfessionalName =
-      professional?.name ?? null;
+    citation.programProfessionalName = professional?.name ?? null;
 
-    citation.professionName =
-      professional?.professionName ?? null;
+    citation.professionName = professional?.professionName ?? null;
   }
 
   private resolveSelectedProgramStageId(): number | null {
+    const programId = Number(this.selectedProgramForAdminAction);
+
+    if (!programId) {
+      return null;
+    }
+
+    const programStages = Array.isArray(this.longitudinal?.stages)
+      ? this.longitudinal.stages.filter(
+          (stage: any) =>
+            Number(stage?.program?.id ?? stage?.programId ?? 0) === programId,
+        )
+      : [];
+
+    if (programStages.length === 1) {
+      const stageId = Number(
+        programStages[0]?.id ?? programStages[0]?.stageId ?? 0,
+      );
+
+      return stageId > 0 ? stageId : null;
+    }
+
     const stageIds = Array.from(
       new Set(
         this.correctionEvents
-          .map((event: any) =>
-            Number(
-              event?.stageId ??
-              event?.stage?.id ??
-              0,
-            ),
-          )
+          .map((event: any) => Number(event?.stageId ?? event?.stage?.id ?? 0))
           .filter((stageId: number) => stageId > 0),
       ),
     );
 
-    if (stageIds.length !== 1) {
-      return null;
-    }
-
-    return stageIds[0];
+    return stageIds.length === 1 ? stageIds[0] : null;
   }
 
   addCorrectionCitation(row: any): void {
@@ -633,9 +624,7 @@ export class EpisodePurgeComponent {
     }
 
     const episodeId = Number(this.episodeId);
-    const programId = Number(
-      this.selectedProgramForAdminAction,
-    );
+    const programId = Number(this.selectedProgramForAdminAction);
     const stageId = this.resolveSelectedProgramStageId();
 
     if (!episodeId || !programId || !stageId) {
@@ -655,9 +644,7 @@ export class EpisodePurgeComponent {
       ) ?? null;
 
     const citationType =
-      this.citationTypes.find(
-        (item: any) => item?.code === row.code,
-      ) ?? null;
+      this.citationTypes.find((item: any) => item?.code === row.code) ?? null;
 
     const temporaryId = this.nextTemporaryEventId--;
 
@@ -718,16 +705,11 @@ export class EpisodePurgeComponent {
     const stageId = Number(citation?.stageId);
     const programId = Number(
       citation?.program?.id ??
-      citation?.programId ??
-      this.selectedProgramForAdminAction,
+        citation?.programId ??
+        this.selectedProgramForAdminAction,
     );
 
-    if (
-      !citationId ||
-      !episodeId ||
-      !stageId ||
-      !programId
-    ) {
+    if (!citationId || !episodeId || !stageId || !programId) {
       this.snackBar.open(
         'No fue posible identificar la citación o su etapa.',
         'Cerrar',
@@ -762,14 +744,11 @@ export class EpisodePurgeComponent {
 
       attendanceStatus: null,
 
-      programProfessionalId:
-        citation?.programProfessionalId ?? null,
+      programProfessionalId: citation?.programProfessionalId ?? null,
 
-      programProfessionalName:
-        citation?.programProfessionalName ?? null,
+      programProfessionalName: citation?.programProfessionalName ?? null,
 
-      professionName:
-        citation?.professionName ?? null,
+      professionName: citation?.professionName ?? null,
 
       comment: '',
       observation: null,
@@ -779,11 +758,137 @@ export class EpisodePurgeComponent {
     this.buildCitationRows();
   }
 
+  removeCorrectionCitation(attempt: any): void {
+    const citation = attempt?.citation;
+
+    if (!citation) {
+      return;
+    }
+
+    const citationId = Number(citation?.id);
+
+    const relatedAttendances = Array.isArray(this.correctionEvents)
+      ? this.correctionEvents.filter((event: any) => {
+          const eventTypeCode = String(
+            event?.eventType?.code ?? event?.eventTypeCode ?? '',
+          )
+            .trim()
+            .toUpperCase();
+
+          if (eventTypeCode !== 'ASISTENCIA') {
+            return false;
+          }
+
+          const relatedEventId = Number(
+            event?.relatedEventId ??
+              event?.relatedEvent?.id ??
+              event?.citationEventId ??
+              event?.citationId ??
+              0,
+          );
+
+          return citationId !== 0 && relatedEventId === citationId;
+        })
+      : [];
+
+    if (citation?.temporary === true || citationId < 0) {
+      this.correctionEvents = this.correctionEvents.filter(
+        (event: any) =>
+          event !== citation && !relatedAttendances.includes(event),
+      );
+    } else {
+      citation.markedForDeletion = true;
+
+      relatedAttendances.forEach((attendance: any) => {
+        if (attendance?.temporary === true || Number(attendance?.id) < 0) {
+          const index = this.correctionEvents.indexOf(attendance);
+
+          if (index >= 0) {
+            this.correctionEvents.splice(index, 1);
+          }
+        } else {
+          attendance.markedForDeletion = true;
+        }
+      });
+    }
+
+    this.buildCitationRows();
+  }
+
+  restoreCorrectionCitation(attempt: any): void {
+    const citation = attempt?.citation;
+
+    if (!citation) {
+      return;
+    }
+
+    citation.markedForDeletion = false;
+
+    const citationId = Number(citation?.id);
+
+    this.correctionEvents.forEach((event: any) => {
+      const eventTypeCode = String(
+        event?.eventType?.code ?? event?.eventTypeCode ?? '',
+      )
+        .trim()
+        .toUpperCase();
+
+      if (eventTypeCode !== 'ASISTENCIA') {
+        return;
+      }
+
+      const relatedEventId = Number(
+        event?.relatedEventId ??
+          event?.relatedEvent?.id ??
+          event?.citationEventId ??
+          event?.citationId ??
+          0,
+      );
+
+      if (citationId !== 0 && relatedEventId === citationId) {
+        event.markedForDeletion = false;
+      }
+    });
+
+    this.buildCitationRows();
+  }
+
+  removeCorrectionAttendance(attempt: any): void {
+    const attendance = attempt?.attendance;
+
+    if (!attendance) {
+      return;
+    }
+
+    const attendanceId = Number(attendance?.id);
+
+    if (attendance?.temporary === true || attendanceId < 0) {
+      const index = this.correctionEvents.indexOf(attendance);
+
+      if (index >= 0) {
+        this.correctionEvents.splice(index, 1);
+      }
+    } else {
+      attendance.markedForDeletion = true;
+    }
+
+    this.buildCitationRows();
+  }
+
+  restoreCorrectionAttendance(attempt: any): void {
+    const attendance = attempt?.attendance;
+
+    if (!attendance) {
+      return;
+    }
+
+    attendance.markedForDeletion = false;
+
+    this.buildCitationRows();
+  }
   addCorrectionObservation(): void {
     const episodeId = Number(this.episodeId);
-    const programId = Number(
-      this.selectedProgramForAdminAction,
-    );
+    const programId = Number(this.selectedProgramForAdminAction);
     const stageId = this.resolveSelectedProgramStageId();
 
     if (!episodeId || !programId || !stageId) {
@@ -843,8 +948,7 @@ export class EpisodePurgeComponent {
     }
 
     const eventIndex = this.correctionEvents.findIndex(
-      (event: any) =>
-        Number(event?.id) === observationId,
+      (event: any) => Number(event?.id) === observationId,
     );
 
     if (eventIndex < 0) {
@@ -864,9 +968,7 @@ export class EpisodePurgeComponent {
 
   addCorrectionFeedback(): void {
     const episodeId = Number(this.episodeId);
-    const programId = Number(
-      this.selectedProgramForAdminAction,
-    );
+    const programId = Number(this.selectedProgramForAdminAction);
     const stageId = this.resolveSelectedProgramStageId();
 
     if (!episodeId || !programId || !stageId) {
@@ -929,9 +1031,48 @@ export class EpisodePurgeComponent {
     this.feedbackDraft = feedback;
   }
 
-  onCorrectionFeedbackProfessionalChange(
-    professionalId: number,
-  ): void {
+  removeCorrectionFeedback(): void {
+    const feedback = this.feedbackDraft;
+
+    if (!feedback) {
+      return;
+    }
+
+    const feedbackId = Number(feedback?.id);
+
+    const eventIndex = this.correctionEvents.findIndex(
+      (event: any) =>
+        event === feedback ||
+        (Number.isFinite(feedbackId) && Number(event?.id) === feedbackId),
+    );
+
+    if (eventIndex < 0) {
+      return;
+    }
+
+    const event = this.correctionEvents[eventIndex];
+
+    if (event?.temporary === true || feedbackId < 0) {
+      this.correctionEvents.splice(eventIndex, 1);
+
+      this.feedbackDraft = null;
+      return;
+    }
+
+    event.markedForDeletion = true;
+    this.feedbackDraft = event;
+  }
+
+  restoreCorrectionFeedback(): void {
+    const feedback = this.feedbackDraft;
+
+    if (!feedback) {
+      return;
+    }
+
+    feedback.markedForDeletion = false;
+  }
+  onCorrectionFeedbackProfessionalChange(professionalId: number): void {
     if (!this.feedbackDraft) {
       return;
     }
@@ -939,18 +1080,14 @@ export class EpisodePurgeComponent {
     const normalizedProfessionalId = Number(professionalId);
 
     const professional = this.professionals.find(
-      (item: any) =>
-        Number(item?.id) === normalizedProfessionalId,
+      (item: any) => Number(item?.id) === normalizedProfessionalId,
     );
 
-    this.feedbackDraft.programProfessionalId =
-      normalizedProfessionalId || null;
+    this.feedbackDraft.programProfessionalId = normalizedProfessionalId || null;
 
-    this.feedbackDraft.programProfessionalName =
-      professional?.name ?? null;
+    this.feedbackDraft.programProfessionalName = professional?.name ?? null;
 
-    this.feedbackDraft.professionName =
-      professional?.professionName ?? null;
+    this.feedbackDraft.professionName = professional?.professionName ?? null;
   }
 
   onCorrectionFeedbackResultChange(result: any): void {
@@ -959,8 +1096,7 @@ export class EpisodePurgeComponent {
     }
 
     this.feedbackDraft.result = result ?? null;
-    this.feedbackDraft.resultCode =
-      result?.code ?? null;
+    this.feedbackDraft.resultCode = result?.code ?? null;
   }
 
   onCorrectionFeedbackCommitmentChange(level: any): void {
@@ -968,67 +1104,46 @@ export class EpisodePurgeComponent {
       return;
     }
 
-    this.feedbackDraft.biopsychosocialCommitmentLevel =
-      level ?? null;
+    this.feedbackDraft.biopsychosocialCommitmentLevel = level ?? null;
 
-    this.feedbackDraft.biopsychosocialCommitmentCode =
-      level?.code ?? null;
+    this.feedbackDraft.biopsychosocialCommitmentCode = level?.code ?? null;
   }
 
   private buildObservationDrafts(): void {
     const observationEvents = this.correctionEvents.filter(
       (event: any) =>
         !event?.markedForDeletion &&
-        String(
-          event?.eventType?.code ??
-          event?.eventTypeCode ??
-          '',
-        )
+        String(event?.eventType?.code ?? event?.eventTypeCode ?? '')
           .trim()
           .toUpperCase() === 'OBSERVACION',
     );
 
-    this.observationDrafts = observationEvents.map(
-      (event: any) => ({
-        ...event,
-        eventDate:
-          event?.eventDate instanceof Date
-            ? event.eventDate
-            : parseBackendDate(
-                String(event?.eventDate ?? ''),
-              ),
-        eventTime:
-          String(event?.eventTime ?? '').slice(0, 5),
-      }),
-    );
+    this.observationDrafts = observationEvents.map((event: any) => ({
+      ...event,
+      eventDate:
+        event?.eventDate instanceof Date
+          ? event.eventDate
+          : parseBackendDate(String(event?.eventDate ?? '')),
+      eventTime: String(event?.eventTime ?? '').slice(0, 5),
+    }));
   }
 
   private buildFeedbackDraft(): void {
-    this.feedbackResults = (this.results ?? []).filter(
-      (item: any) => {
-        const code = String(
-          item?.code ??
-          item?.resultCode ??
-          '',
-        )
-          .trim()
-          .toUpperCase();
+    this.feedbackResults = (this.results ?? []).filter((item: any) => {
+      const code = String(item?.code ?? item?.resultCode ?? '')
+        .trim()
+        .toUpperCase();
 
-        return (
-          code === 'LISTA_ESPERA' ||
-          code === 'INGRESO_TRATAMIENTO' ||
-          code === 'ABANDONO'
-        );
-      },
-    );
+      return (
+        code === 'LISTA_ESPERA' ||
+        code === 'INGRESO_TRATAMIENTO' ||
+        code === 'ABANDONO'
+      );
+    });
 
     const feedbackEvents = this.correctionEvents.filter(
       (event: any) =>
-        String(
-          event?.eventType?.code ??
-          event?.eventTypeCode ??
-          '',
-        )
+        String(event?.eventType?.code ?? event?.eventTypeCode ?? '')
           .trim()
           .toUpperCase() === 'RETROALIMENTACION',
     );
@@ -1044,9 +1159,7 @@ export class EpisodePurgeComponent {
     }
 
     const feedbackResultCode = String(
-      feedback?.result?.code ??
-      feedback?.resultCode ??
-      '',
+      feedback?.result?.code ?? feedback?.resultCode ?? '',
     )
       .trim()
       .toUpperCase();
@@ -1054,28 +1167,18 @@ export class EpisodePurgeComponent {
     const feedbackResult =
       this.feedbackResults.find(
         (item: any) =>
-          String(
-            item?.code ??
-            item?.resultCode ??
-            '',
-          )
+          String(item?.code ?? item?.resultCode ?? '')
             .trim()
             .toUpperCase() === feedbackResultCode,
       ) ?? null;
 
     if (feedbackResult) {
       feedback.result = feedbackResult;
-      feedback.resultCode =
-        feedbackResult?.code ??
-        feedbackResultCode;
+      feedback.resultCode = feedbackResult?.code ?? feedbackResultCode;
     }
 
-    if (
-      feedback?.eventDate &&
-      !(feedback.eventDate instanceof Date)
-    ) {
-      feedback.eventDate =
-        parseBackendDate(String(feedback.eventDate));
+    if (feedback?.eventDate && !(feedback.eventDate instanceof Date)) {
+      feedback.eventDate = parseBackendDate(String(feedback.eventDate));
     }
 
     this.feedbackDraft = feedback;
@@ -1087,9 +1190,7 @@ export class EpisodePurgeComponent {
     }
 
     this.closureDraft.closureReason = reason ?? null;
-    this.closureDraft.closureReasonCode =
-      reason?.code ??
-      null;
+    this.closureDraft.closureReasonCode = reason?.code ?? null;
   }
 
   private toAdministrativeDate(value: unknown): string | null {
@@ -1172,19 +1273,17 @@ export class EpisodePurgeComponent {
           : 'UPDATE';
 
     const attendanceStatus =
-      event?.attendanceStatus ??
-      event?.attendanceStatusId ??
-      null;
+      event?.attendanceStatus ?? event?.attendanceStatusId ?? null;
 
     const attendanceStatusId =
       typeof attendanceStatus === 'object'
-        ? attendanceStatus?.id ?? null
-        : event?.attendanceStatusId ?? null;
+        ? (attendanceStatus?.id ?? null)
+        : (event?.attendanceStatusId ?? null);
 
     const attendanceStatusCode =
       typeof attendanceStatus === 'object'
-        ? attendanceStatus?.code ?? null
-        : event?.attendanceStatusCode ?? null;
+        ? (attendanceStatus?.code ?? null)
+        : (event?.attendanceStatusCode ?? null);
 
     return {
       action,
@@ -1196,86 +1295,52 @@ export class EpisodePurgeComponent {
         event?.stage?.id ??
         this.resolveSelectedProgramStageId(),
 
-      relatedEventId:
-        event?.relatedEventId ??
-        event?.citationId ??
-        null,
+      relatedEventId: event?.relatedEventId ?? event?.citationId ?? null,
 
-      eventTypeId:
-        event?.eventType?.id ??
-        event?.eventTypeId ??
-        null,
+      eventTypeId: event?.eventType?.id ?? event?.eventTypeId ?? null,
 
-      eventTypeCode:
-        event?.eventType?.code ??
-        event?.eventTypeCode ??
-        null,
+      eventTypeCode: event?.eventType?.code ?? event?.eventTypeCode ?? null,
 
       citationTypeCode:
-        event?.citationType?.code ??
-        event?.citationTypeCode ??
-        null,
+        event?.citationType?.code ?? event?.citationTypeCode ?? null,
 
       biopsychosocialCommitmentCode:
         event?.biopsychosocialCommitmentLevel?.code ??
         event?.biopsychosocialCommitmentCode ??
         null,
 
-      eventDate:
-        this.toAdministrativeDate(event?.eventDate),
+      eventDate: this.toAdministrativeDate(event?.eventDate),
 
-      eventTime:
-        this.toAdministrativeTime(event?.eventTime),
+      eventTime: this.toAdministrativeTime(event?.eventTime),
 
       attendanceStatusId,
       attendanceStatusCode,
 
-      professionName:
-        event?.professionName ??
-        null,
+      professionName: event?.professionName ?? null,
 
       professionalUserId:
-        event?.professionalUserId ??
-        event?.professionalId ??
-        null,
+        event?.professionalUserId ?? event?.professionalId ?? null,
 
-      programProfessionalId:
-        event?.programProfessionalId ??
-        null,
+      programProfessionalId: event?.programProfessionalId ?? null,
 
       programId:
         event?.program?.id ??
         event?.programId ??
         this.selectedProgramForAdminAction,
 
-      comment:
-        event?.comment ??
-        null,
+      comment: event?.comment ?? null,
 
-      citationComment:
-        event?.citationComment ??
-        null,
+      citationComment: event?.citationComment ?? null,
 
-      observation:
-        event?.observation ??
-        null,
+      observation: event?.observation ?? null,
 
-      nextAction:
-        event?.nextAction ??
-        null,
+      nextAction: event?.nextAction ?? null,
 
-      nextActionDate:
-        this.toAdministrativeDate(event?.nextActionDate),
+      nextActionDate: this.toAdministrativeDate(event?.nextActionDate),
 
-      resultCode:
-        event?.result?.code ??
-        event?.resultCode ??
-        null,
+      resultCode: event?.result?.code ?? event?.resultCode ?? null,
 
-      stateCode:
-        event?.state?.code ??
-        event?.stateCode ??
-        null,
+      stateCode: event?.state?.code ?? event?.stateCode ?? null,
     };
   }
 
@@ -1286,36 +1351,29 @@ export class EpisodePurgeComponent {
 
     const desired: any[] = [];
 
-    const primarySubstanceId =
-      Number(this.correctionDraft?.primarySubstanceId);
+    const primarySubstanceId = Number(this.correctionDraft?.primarySubstanceId);
 
     if (primarySubstanceId > 0) {
       const existingPrimary =
-        original.find(
-          (item: any) => item?.primarySubstance === true,
-        ) ?? null;
+        original.find((item: any) => item?.primarySubstance === true) ?? null;
 
       desired.push({
         existing: existingPrimary,
         substanceId: primarySubstanceId,
         primarySubstance: true,
         useOrder: 1,
-        observation:
-          existingPrimary?.observation ??
-          '',
+        observation: existingPrimary?.observation ?? '',
       });
     }
 
-    const secondary =
-      Array.isArray(this.correctionDraft?.secondarySubstances)
-        ? this.correctionDraft.secondarySubstances
-        : [];
+    const secondary = Array.isArray(this.correctionDraft?.secondarySubstances)
+      ? this.correctionDraft.secondarySubstances
+      : [];
 
     secondary.forEach((item: any, index: number) => {
       const existing =
         original.find(
-          (current: any) =>
-            Number(current?.id) === Number(item?.id),
+          (current: any) => Number(current?.id) === Number(item?.id),
         ) ?? null;
 
       desired.push({
@@ -1335,13 +1393,9 @@ export class EpisodePurgeComponent {
       payload.push({
         action: existing ? 'UPDATE' : 'CREATE',
         id: existing?.id ?? null,
-        substanceAssociationId:
-          existing?.id ??
-          null,
+        substanceAssociationId: existing?.id ?? null,
         substanceId: item.substanceId,
-        level:
-          existing?.level ??
-          null,
+        level: existing?.level ?? null,
         primarySubstance: item.primarySubstance,
         useOrder: item.useOrder,
         observation: item.observation,
@@ -1350,8 +1404,7 @@ export class EpisodePurgeComponent {
 
     original.forEach((existing: any) => {
       const stillExists = desired.some(
-        (item: any) =>
-          Number(item?.existing?.id) === Number(existing?.id),
+        (item: any) => Number(item?.existing?.id) === Number(existing?.id),
       );
 
       if (!stillExists && existing?.id) {
@@ -1369,17 +1422,14 @@ export class EpisodePurgeComponent {
 
   submitAdministrativeCorrection(): void {
     const episodeId = Number(this.episodeId);
-    const programId = Number(
-      this.selectedProgramForAdminAction,
-    );
+    const programId = Number(this.selectedProgramForAdminAction);
 
     const stageId =
       this.resolveSelectedProgramStageId() ??
       Number(this.closureDraft?.stageId) ??
       null;
 
-    const correctionReason =
-      String(this.correctionReason ?? '').trim();
+    const correctionReason = String(this.correctionReason ?? '').trim();
 
     if (!episodeId || !programId) {
       this.snackBar.open(
@@ -1414,65 +1464,146 @@ export class EpisodePurgeComponent {
       return;
     }
 
-    const allEvents =
-      Array.isArray(this.correctionEvents)
-        ? this.correctionEvents.map((event: any) =>
-            this.toAdministrativeEvent(event),
-          )
-        : [];
-
-    const citations = allEvents.filter(
-      (event: any) =>
-        String(event?.eventTypeCode ?? '')
-          .trim()
-          .toUpperCase() === 'CITACION',
-    );
-
-    const attendances = allEvents.filter(
-      (event: any) =>
-        String(event?.eventTypeCode ?? '')
-          .trim()
-          .toUpperCase() === 'ASISTENCIA',
-    );
-
-    const feedbacks = allEvents.filter(
-      (event: any) =>
-        String(event?.eventTypeCode ?? '')
-          .trim()
-          .toUpperCase() === 'RETROALIMENTACION',
-    );
-
     const originalEvents = Array.isArray(this.longitudinal?.events)
       ? this.longitudinal.events
       : [];
 
+    const { citations, attendances } =
+      buildAdministrativeCitationAttendanceCorrections(
+        this.correctionEvents,
+        originalEvents,
+        (event: any) => this.toAdministrativeEvent(event),
+      );
+
+    const feedbacks = buildAdministrativeFeedbackCorrections(
+      this.correctionEvents,
+      originalEvents,
+      (event: any) => this.toAdministrativeEvent(event),
+    );
     syncAdministrativeObservationDrafts(
       this.correctionEvents,
       this.observationDrafts,
     );
 
-    const observations =
-      buildAdministrativeObservationCorrections(
-        this.correctionEvents,
-        originalEvents,
-        stageId,
-      );
+    const observations = buildAdministrativeObservationCorrections(
+      this.correctionEvents,
+      originalEvents,
+      stageId,
+    );
 
-    const closureReasonId =
-      this.closureDraft?.closureReason?.id ??
-      null;
+    const closureReasonId = this.closureDraft?.closureReason?.id ?? null;
 
     const closureReasonCode =
       this.closureDraft?.closureReason?.code ??
       this.closureDraft?.closureReasonCode ??
       null;
 
-    const closureDate =
-      this.toAdministrativeDate(
-        this.closureDraft?.closureDate,
-      );
+    const closureDate = this.toAdministrativeDate(
+      this.closureDraft?.closureDate,
+    );
 
     const stageWasClosed = !!closureDate;
+
+    const originalStage =
+      Array.isArray(this.longitudinal?.stages)
+        ? this.longitudinal.stages.find(
+            (stage: any) =>
+              Number(stage?.id ?? stage?.stageId) === Number(stageId),
+          )
+        : null;
+
+    const originalClosureDate = this.toAdministrativeDate(
+      originalStage?.closedAt ?? null,
+    );
+
+    const originalClosureReasonCode = String(
+      originalStage?.closureReason?.code ??
+        originalStage?.closureReasonCode ??
+        originalStage?.resultCode ??
+        '',
+    )
+      .trim()
+      .toUpperCase();
+
+    const correctedClosureReasonCode = String(
+      closureReasonCode ?? '',
+    )
+      .trim()
+      .toUpperCase();
+
+    const originalClosureComment = String(
+      originalStage?.closureComment ?? '',
+    ).trim();
+
+    const correctedClosureComment = String(
+      this.closureDraft?.closureComment ?? '',
+    ).trim();
+
+    const closureChanged =
+      closureDate !== originalClosureDate ||
+      correctedClosureReasonCode !== originalClosureReasonCode ||
+      correctedClosureComment !== originalClosureComment;
+
+    const originalEpisodeTypeId =
+      this.episode?.episodeType?.id ?? this.episode?.episodeTypeId ?? null;
+
+    const correctedEpisodeTypeId = this.correctionDraft?.episodeTypeId ?? null;
+
+    const episodeTypeChanged = correctedEpisodeTypeId !== originalEpisodeTypeId;
+
+    const originalRequestDate = this.toAdministrativeDate(
+      this.episode?.originalRequestDate ?? this.episode?.requestDate ?? null,
+    );
+
+    const correctedOriginalRequestDate = this.toAdministrativeDate(
+      this.correctionDraft?.originalRequestDate,
+    );
+
+    const originalRequestDateChanged =
+      correctedOriginalRequestDate !== null &&
+      correctedOriginalRequestDate !== originalRequestDate;
+
+    const originalContactTypeId =
+      this.episode?.contactType?.id ?? this.episode?.contactTypeId ?? null;
+
+    const correctedContactTypeId = this.correctionDraft?.contactTypeId ?? null;
+
+    const contactTypeChanged = correctedContactTypeId !== originalContactTypeId;
+
+    const originalSenderId =
+      this.episode?.sender?.id ?? this.episode?.senderId ?? null;
+
+    const correctedSenderId = this.correctionDraft?.senderId ?? null;
+
+    const senderChanged = correctedSenderId !== originalSenderId;
+
+    const originalDiverterId =
+      this.episode?.diverter?.id ?? this.episode?.diverterId ?? null;
+
+    const correctedDiverterId = this.correctionDraft?.diverterId ?? null;
+
+    const diverterChanged = correctedDiverterId !== originalDiverterId;
+
+    const originalPreviousTreatmentNumber =
+      this.episode?.previousTreatmentNumber ?? null;
+
+    const correctedPreviousTreatmentNumber =
+      this.correctionDraft?.previousTreatmentNumber ?? null;
+
+    const previousTreatmentNumberChanged =
+      correctedPreviousTreatmentNumber !== originalPreviousTreatmentNumber;
+
+    const originalProgramReceivedAt = this.toAdministrativeDate(
+      this.correctionDraft?.originalProgramReceivedAt,
+    );
+
+    const correctedProgramReceivedAt = this.toAdministrativeDate(
+      this.correctionDraft?.programReceivedAt,
+    );
+
+    const programReceivedAtChanged =
+      correctedProgramReceivedAt !== null &&
+      correctedProgramReceivedAt !== originalProgramReceivedAt;
 
     const payload: any = {
       programId,
@@ -1481,18 +1612,100 @@ export class EpisodePurgeComponent {
       observations,
     };
 
-    console.log(
-      '[EpisodePurge] Administrative correction payload:',
-      payload,
-    );
+    if (
+      episodeTypeChanged ||
+      originalRequestDateChanged ||
+      contactTypeChanged ||
+      senderChanged ||
+      diverterChanged ||
+      previousTreatmentNumberChanged
+    ) {
+      payload.episode = {};
+
+      if (episodeTypeChanged) {
+        payload.episode.episodeTypeId = correctedEpisodeTypeId;
+      }
+
+      if (originalRequestDateChanged) {
+        payload.episode.originalRequestDate = correctedOriginalRequestDate;
+      }
+
+      if (contactTypeChanged) {
+        payload.episode.contactTypeId = correctedContactTypeId;
+      }
+
+      if (senderChanged) {
+        payload.episode.senderId = correctedSenderId;
+      }
+
+      if (diverterChanged) {
+        payload.episode.diverterId = correctedDiverterId;
+      }
+
+      if (previousTreatmentNumberChanged) {
+        payload.episode.previousTreatmentNumber =
+          correctedPreviousTreatmentNumber;
+      }
+    }
+
+    if (citations.length > 0) {
+      payload.citations = citations;
+    }
+
+    if (attendances.length > 0) {
+      payload.attendances = attendances;
+    }
+    if (feedbacks.length > 0) {
+      payload.feedbacks = feedbacks;
+    }
+    if (closureChanged) {
+      payload.closure = {
+        stageId,
+        closureReasonId,
+        closureReasonCode,
+        closureDate,
+        closedAt: stageWasClosed ? closureDate : null,
+        closureComment:
+          stageWasClosed ? correctedClosureComment || null : null,
+        stateCode:
+          stageWasClosed
+            ? this.correctionDraft?.stateCode ?? null
+            : 'EN_TRAMITE',
+        resultCode:
+          stageWasClosed
+            ? this.correctionDraft?.resultCode ?? null
+            : 'AUN_SIN_RESULTADO',
+        closed: stageWasClosed,
+        closeEpisode: false,
+      };
+    }
+    if (closureChanged) {
+      payload.closure = {
+        stageId,
+        closureReasonId,
+        closureReasonCode,
+        closureDate,
+        closedAt: stageWasClosed ? closureDate : null,
+        closureComment:
+          stageWasClosed ? correctedClosureComment || null : null,
+        stateCode:
+          stageWasClosed
+            ? this.correctionDraft?.stateCode ?? null
+            : 'EN_TRAMITE',
+        resultCode:
+          stageWasClosed
+            ? this.correctionDraft?.resultCode ?? null
+            : 'AUN_SIN_RESULTADO',
+        closed: stageWasClosed,
+        closeEpisode: false,
+      };
+    }
+    console.log('[EpisodePurge] Administrative correction payload:', payload);
 
     this.correcting = true;
 
     this.demandService
-      .administrativeCorrection(
-        episodeId,
-        payload,
-      )
+      .administrativeCorrection(episodeId, payload)
       .pipe(
         finalize(() => {
           this.correcting = false;
@@ -1504,6 +1717,55 @@ export class EpisodePurgeComponent {
             '[EpisodePurge] Administrative correction response:',
             response,
           );
+
+          if (
+            programReceivedAtChanged &&
+            correctedProgramReceivedAt &&
+            stageId
+          ) {
+            this.demandService
+              .correctProgramReceivedAt(episodeId, programId, {
+                stageId,
+                receivedAt: correctedProgramReceivedAt,
+                correctionReason,
+              })
+              .subscribe({
+                next: (receivedAtResponse) => {
+                  console.log(
+                    '[EpisodePurge] Program receivedAt correction response:',
+                    receivedAtResponse,
+                  );
+
+                  this.snackBar.open(
+                    'Corrección administrativa y fecha de ingreso al programa aplicadas correctamente.',
+                    'Cerrar',
+                    {
+                      duration: 5000,
+                    },
+                  );
+
+                  this.searchEpisode();
+                },
+                error: (error) => {
+                  console.error(
+                    '[EpisodePurge] Error corrigiendo fecha de ingreso al programa:',
+                    error,
+                  );
+
+                  this.snackBar.open(
+                    'La corrección administrativa fue aplicada, pero falló la corrección de la fecha de ingreso al programa.',
+                    'Cerrar',
+                    {
+                      duration: 7000,
+                    },
+                  );
+
+                  this.searchEpisode();
+                },
+              });
+
+            return;
+          }
 
           this.snackBar.open(
             'Corrección administrativa aplicada correctamente.',
@@ -1529,13 +1791,9 @@ export class EpisodePurgeComponent {
             error?.error?.error ??
             'No fue posible aplicar la corrección administrativa.';
 
-          this.snackBar.open(
-            String(message),
-            'Cerrar',
-            {
-              duration: 7000,
-            },
-          );
+          this.snackBar.open(String(message), 'Cerrar', {
+            duration: 7000,
+          });
         },
       });
   }
@@ -1551,34 +1809,21 @@ export class EpisodePurgeComponent {
     const selectedStages = Array.isArray(this.longitudinal?.stages)
       ? this.longitudinal.stages.filter(
           (stage: any) =>
-            Number(
-              stage?.program?.id ??
-              stage?.programId ??
-              0,
-            ) === programId,
+            Number(stage?.program?.id ?? stage?.programId ?? 0) === programId,
         )
       : [];
 
-    const stage =
-      selectedStages.length === 1
-        ? selectedStages[0]
-        : null;
+    const stage = selectedStages.length === 1 ? selectedStages[0] : null;
 
     const closureEvents = this.correctionEvents.filter(
       (event: any) =>
-        String(
-          event?.eventType?.code ??
-          event?.eventTypeCode ??
-          '',
-        )
+        String(event?.eventType?.code ?? event?.eventTypeCode ?? '')
           .trim()
           .toUpperCase() === 'CIERRE',
     );
 
     const closureEvent =
-      closureEvents.length > 0
-        ? closureEvents[closureEvents.length - 1]
-        : null;
+      closureEvents.length > 0 ? closureEvents[closureEvents.length - 1] : null;
 
     if (!stage && !closureEvent) {
       this.closureDraft = null;
@@ -1587,10 +1832,10 @@ export class EpisodePurgeComponent {
 
     const closureReasonCode = String(
       stage?.closureReason?.code ??
-      stage?.closureReasonCode ??
-      stage?.resultCode ??
-      closureEvent?.resultCode ??
-      '',
+        stage?.closureReasonCode ??
+        stage?.resultCode ??
+        closureEvent?.resultCode ??
+        '',
     )
       .trim()
       .toUpperCase();
@@ -1598,63 +1843,39 @@ export class EpisodePurgeComponent {
     const closureReason =
       this.closureReasons.find(
         (item: any) =>
-          String(
-            item?.code ??
-            item?.resultCode ??
-            '',
-          )
+          String(item?.code ?? item?.resultCode ?? '')
             .trim()
             .toUpperCase() === closureReasonCode,
       ) ?? null;
 
-    const closedAt =
-      stage?.closedAt ??
-      null;
+    const closedAt = stage?.closedAt ?? null;
 
     this.closureDraft = {
-      stageId:
-        stage?.id ??
-        stage?.stageId ??
-        closureEvent?.stageId ??
-        null,
+      stageId: stage?.id ?? stage?.stageId ?? closureEvent?.stageId ?? null,
 
       closureReason,
-      closureReasonCode:
-        closureReason?.code ??
-        closureReasonCode ??
-        null,
+      closureReasonCode: closureReason?.code ?? closureReasonCode ?? null,
 
-      closureDate:
-        closedAt
-          ? parseBackendDate(String(closedAt).slice(0, 10))
-          : null,
+      closureDate: closedAt
+        ? parseBackendDate(String(closedAt).slice(0, 10))
+        : null,
 
       closureComment:
-        stage?.closureComment ??
-        this.episode?.closureComment ??
-        '',
+        stage?.closureComment ?? this.episode?.closureComment ?? '',
     };
   }
 
   private buildCitationRows(): void {
     const citationEvents = this.correctionEvents.filter(
       (event: any) =>
-        String(
-          event?.eventType?.code ??
-          event?.eventTypeCode ??
-          '',
-        )
+        String(event?.eventType?.code ?? event?.eventTypeCode ?? '')
           .trim()
           .toUpperCase() === 'CITACION',
     );
 
     const attendanceEvents = this.correctionEvents.filter(
       (event: any) =>
-        String(
-          event?.eventType?.code ??
-          event?.eventTypeCode ??
-          '',
-        )
+        String(event?.eventType?.code ?? event?.eventTypeCode ?? '')
           .trim()
           .toUpperCase() === 'ASISTENCIA',
     );
@@ -1723,12 +1944,8 @@ export class EpisodePurgeComponent {
       });
 
       const attempts = citations.map((citation: any) => {
-        if (
-          citation?.eventDate &&
-          !(citation.eventDate instanceof Date)
-        ) {
-          citation.eventDate =
-            parseBackendDate(String(citation.eventDate));
+        if (citation?.eventDate && !(citation.eventDate instanceof Date)) {
+          citation.eventDate = parseBackendDate(String(citation.eventDate));
         }
 
         const citationId = Number(citation?.id);
@@ -1737,9 +1954,9 @@ export class EpisodePurgeComponent {
           attendanceEvents.find((event: any) => {
             const relatedEventId = Number(
               event?.relatedEventId ??
-              event?.relatedEvent?.id ??
-              event?.citationEventId ??
-              0,
+                event?.relatedEvent?.id ??
+                event?.citationEventId ??
+                0,
             );
 
             return citationId !== 0 && relatedEventId === citationId;
@@ -1759,9 +1976,7 @@ export class EpisodePurgeComponent {
   }
 
   private loadProfessionalsForSelectedProgram(): void {
-    const selectedProgramId = Number(
-      this.selectedProgramForAdminAction,
-    );
+    const selectedProgramId = Number(this.selectedProgramForAdminAction);
 
     this.professionals = [];
     this.professionalsError = '';
@@ -1774,11 +1989,7 @@ export class EpisodePurgeComponent {
 
     this.programProfessionalService
       .getActive()
-      .pipe(
-        finalize(
-          () => (this.isLoadingProfessionals = false),
-        ),
-      )
+      .pipe(finalize(() => (this.isLoadingProfessionals = false)))
       .subscribe({
         next: (response: any) => {
           const items = Array.isArray(response)
@@ -1790,14 +2001,10 @@ export class EpisodePurgeComponent {
                 : [];
 
           this.professionals = items
-            .map((item: any) =>
-              normalizeProfessionalForCitation(item),
-            )
+            .map((item: any) => normalizeProfessionalForCitation(item))
             .filter((item: any) => {
               const isActive =
-                !!item?.id &&
-                !item?.deletedAt &&
-                item?.active !== false;
+                !!item?.id && !item?.deletedAt && item?.active !== false;
 
               const belongsToSelectedProgram =
                 Array.isArray(item?.programIds) &&
@@ -1816,10 +2023,7 @@ export class EpisodePurgeComponent {
         },
 
         error: (error) => {
-          console.error(
-            '[EpisodePurge] Error cargando facultativos:',
-            error,
-          );
+          console.error('[EpisodePurge] Error cargando facultativos:', error);
 
           this.professionals = [];
           this.professionalsError =
@@ -1857,9 +2061,7 @@ export class EpisodePurgeComponent {
       return;
     }
 
-    const selectedProgramId = Number(
-      this.selectedProgramForAdminAction,
-    );
+    const selectedProgramId = Number(this.selectedProgramForAdminAction);
 
     if (!selectedProgramId) {
       this.correctionDraft = null;
@@ -1869,28 +2071,29 @@ export class EpisodePurgeComponent {
 
     this.adminMode = 'correction';
 
-    console.log(
-      '[EpisodePurge] Cronología disponible:',
-      {
-        longitudinalKeys: Object.keys(this.longitudinal ?? {}),
-        episodeKeys: Object.keys(this.episode ?? {}),
-        stages: Array.isArray(this.longitudinal?.stages)
-          ? this.longitudinal.stages.map((stage: any) => ({
-              stageId:
-                stage?.id ??
-                stage?.stageId ??
-                null,
-              program:
-                stage?.program?.name ??
-                stage?.programName ??
-                null,
-              keys: Object.keys(stage ?? {}),
-            }))
-          : [],
-      },
-    );
+    console.log('[EpisodePurge] Cronología disponible:', {
+      longitudinalKeys: Object.keys(this.longitudinal ?? {}),
+      episodeKeys: Object.keys(this.episode ?? {}),
+      stages: Array.isArray(this.longitudinal?.stages)
+        ? this.longitudinal.stages.map((stage: any) => ({
+            stageId: stage?.id ?? stage?.stageId ?? null,
+            program: stage?.program?.name ?? stage?.programName ?? null,
+            keys: Object.keys(stage ?? {}),
+          }))
+        : [],
+    });
     this.loadCorrectionCatalogs();
     this.loadCorrectionSubstances();
+
+    const selectedStageId = this.resolveSelectedProgramStageId();
+
+    const selectedProgramStage = Array.isArray(this.longitudinal?.stages)
+      ? (this.longitudinal.stages.find(
+          (stage: any) =>
+            Number(stage?.id ?? stage?.stageId ?? 0) ===
+            Number(selectedStageId),
+        ) ?? null)
+      : null;
 
     this.correctionDraft = {
       episodeId: this.episodeId,
@@ -1906,58 +2109,43 @@ export class EpisodePurgeComponent {
         this.episode?.initialProgramName ??
         '',
 
-      originalRequestDate:
-        parseBackendDate(
-          this.episode?.originalRequestDate ??
-          this.episode?.requestDate ??
-          null,
-        ),
+      originalRequestDate: parseBackendDate(
+        this.episode?.originalRequestDate ?? this.episode?.requestDate ?? null,
+      ),
+
+      programReceivedAt: parseBackendDate(
+        selectedProgramStage?.receivedAt ?? null,
+      ),
+
+      originalProgramReceivedAt: selectedProgramStage?.receivedAt ?? null,
 
       episodeTypeId:
-        this.episode?.episodeType?.id ??
-        this.episode?.episodeTypeId ??
-        null,
+        this.episode?.episodeType?.id ?? this.episode?.episodeTypeId ?? null,
 
-      previousTreatmentNumber:
-        this.episode?.previousTreatmentNumber ??
-        null,
+      previousTreatmentNumber: this.episode?.previousTreatmentNumber ?? null,
 
       primarySubstanceId: null,
       secondarySubstances: [],
 
       contactTypeId:
-        this.episode?.contactType?.id ??
-        this.episode?.contactTypeId ??
-        null,
+        this.episode?.contactType?.id ?? this.episode?.contactTypeId ?? null,
 
-      senderId:
-        this.episode?.sender?.id ??
-        this.episode?.senderId ??
-        null,
+      senderId: this.episode?.sender?.id ?? this.episode?.senderId ?? null,
 
       diverterId:
-        this.episode?.diverter?.id ??
-        this.episode?.diverterId ??
-        null,
+        this.episode?.diverter?.id ?? this.episode?.diverterId ?? null,
 
-      stateCode:
-        this.episode?.state?.code ??
-        this.episode?.stateCode ??
-        null,
+      stateCode: this.episode?.state?.code ?? this.episode?.stateCode ?? null,
 
       resultCode:
-        this.episode?.result?.code ??
-        this.episode?.resultCode ??
-        null,
+        this.episode?.result?.code ?? this.episode?.resultCode ?? null,
     };
 
     console.log('[EpisodePurge] fecha correctionDraft', {
       episodeOriginalRequestDate: this.episode?.originalRequestDate,
       episodeRequestDate: this.episode?.requestDate,
-      correctionOriginalRequestDate:
-        this.correctionDraft?.originalRequestDate,
-      isDate:
-        this.correctionDraft?.originalRequestDate instanceof Date,
+      correctionOriginalRequestDate: this.correctionDraft?.originalRequestDate,
+      isDate: this.correctionDraft?.originalRequestDate instanceof Date,
     });
 
     const selectedEpisodeId = Number(this.episodeId);
@@ -1966,38 +2154,34 @@ export class EpisodePurgeComponent {
       ? this.longitudinal.events.filter(
           (event: any) =>
             Number(event?.episodeId) === selectedEpisodeId &&
-            Number(
-              event?.program?.id ??
-              event?.programId ??
-              0
-            ) === selectedProgramId,
+            Number(event?.program?.id ?? event?.programId ?? 0) ===
+              selectedProgramId,
         )
       : [];
 
-    this.correctionEvents = JSON.parse(
-      JSON.stringify(sourceEvents),
-    ).sort((left: any, right: any) => {
-      const leftDateTime =
-        String(left?.eventDate ?? '') +
-        'T' +
-        String(left?.eventTime ?? '00:00:00');
+    this.correctionEvents = JSON.parse(JSON.stringify(sourceEvents)).sort(
+      (left: any, right: any) => {
+        const leftDateTime =
+          String(left?.eventDate ?? '') +
+          'T' +
+          String(left?.eventTime ?? '00:00:00');
 
-      const rightDateTime =
-        String(right?.eventDate ?? '') +
-        'T' +
-        String(right?.eventTime ?? '00:00:00');
+        const rightDateTime =
+          String(right?.eventDate ?? '') +
+          'T' +
+          String(right?.eventTime ?? '00:00:00');
 
-      const dateComparison =
-        leftDateTime.localeCompare(rightDateTime);
+        const dateComparison = leftDateTime.localeCompare(rightDateTime);
 
-      if (dateComparison !== 0) {
-        return dateComparison;
-      }
+        if (dateComparison !== 0) {
+          return dateComparison;
+        }
 
-      return String(left?.createdAt ?? '').localeCompare(
-        String(right?.createdAt ?? ''),
-      );
-    });
+        return String(left?.createdAt ?? '').localeCompare(
+          String(right?.createdAt ?? ''),
+        );
+      },
+    );
 
     this.correctionEvents.forEach((event: any) => {
       if (event?.eventTime) {
@@ -2016,7 +2200,6 @@ export class EpisodePurgeComponent {
     this.adminMode = null;
     this.correctionDraft = null;
     this.correctionEvents = [];
-    this.selectedSecondarySubstanceId = null;
     this.episode = null;
     this.purgeResult = null;
     this.confirmationCode = '';
@@ -2079,8 +2262,7 @@ export class EpisodePurgeComponent {
 
           const selectedEpisodeEvents = Array.isArray(response?.events)
             ? response.events.filter(
-                (event: any) =>
-                  Number(event?.episodeId) === Number(episodeId),
+                (event: any) => Number(event?.episodeId) === Number(episodeId),
               )
             : [];
 
@@ -2106,25 +2288,20 @@ export class EpisodePurgeComponent {
             JSON.stringify(selectedFeedback, null, 2),
           );
 
-          console.log(
-            '[EpisodePurge] RETROALIMENTACION hora:',
-            {
-              id: selectedFeedback?.id,
-              eventDate: selectedFeedback?.eventDate,
-              eventTime: selectedFeedback?.eventTime,
-              createdAt: selectedFeedback?.createdAt,
-            },
-          );
+          console.log('[EpisodePurge] RETROALIMENTACION hora:', {
+            id: selectedFeedback?.id,
+            eventDate: selectedFeedback?.eventDate,
+            eventTime: selectedFeedback?.eventTime,
+            createdAt: selectedFeedback?.createdAt,
+          });
 
           if (Array.isArray(response?.events)) {
-            response.events
-              .slice(0, 3)
-              .forEach((event: any, index: number) => {
-                console.log(
-                  '[EpisodePurge] EVENTO ' + (index + 1) + ':',
-                  JSON.stringify(event, null, 2),
-                );
-              });
+            response.events.slice(0, 3).forEach((event: any, index: number) => {
+              console.log(
+                '[EpisodePurge] EVENTO ' + (index + 1) + ':',
+                JSON.stringify(event, null, 2),
+              );
+            });
           }
 
           console.log(
@@ -2162,79 +2339,47 @@ export class EpisodePurgeComponent {
             '[EpisodePurge] Claves etapas:',
             Array.isArray(response?.stages)
               ? response.stages.map((stage: any) => ({
-                  stageId:
-                    stage?.id ??
-                    stage?.stageId ??
-                    null,
+                  stageId: stage?.id ?? stage?.stageId ?? null,
                   keys: Object.keys(stage ?? {}),
                 }))
               : [],
           );
 
-          console.log(
-            '[EpisodePurge] Estructura cronológica:',
-            {
-              events:
-                response?.events ??
-                response?.episodeEvents ??
-                null,
+          console.log('[EpisodePurge] Estructura cronológica:', {
+            events: response?.events ?? response?.episodeEvents ?? null,
 
-              stages: Array.isArray(response?.stages)
-                ? response.stages.map((stage: any) => ({
-                    id: stage?.id ?? stage?.stageId ?? null,
-                    program:
-                      stage?.program?.name ??
-                      stage?.programName ??
-                      null,
-                    receivedAt: stage?.receivedAt ?? null,
-                    closedAt: stage?.closedAt ?? null,
-                    events:
-                      stage?.events ??
-                      stage?.episodeEvents ??
-                      null,
-                  }))
-                : [],
+            stages: Array.isArray(response?.stages)
+              ? response.stages.map((stage: any) => ({
+                  id: stage?.id ?? stage?.stageId ?? null,
+                  program: stage?.program?.name ?? stage?.programName ?? null,
+                  receivedAt: stage?.receivedAt ?? null,
+                  closedAt: stage?.closedAt ?? null,
+                  events: stage?.events ?? stage?.episodeEvents ?? null,
+                }))
+              : [],
 
-              episodeEvents:
-                episode?.events ??
-                episode?.episodeEvents ??
-                null,
-            },
-          );
+            episodeEvents: episode?.events ?? episode?.episodeEvents ?? null,
+          });
 
-          console.log(
-            '[EpisodePurge] Datos episodio seleccionado:',
-            {
-              id: episode?.id ?? episode?.episodeId ?? null,
-              episodeCode:
-                episode?.episodeCode ??
-                episode?.code ??
-                null,
+          console.log('[EpisodePurge] Datos episodio seleccionado:', {
+            id: episode?.id ?? episode?.episodeId ?? null,
+            episodeCode: episode?.episodeCode ?? episode?.code ?? null,
 
-              originalRequestDate:
-                episode?.originalRequestDate ??
-                episode?.requestDate ??
-                null,
+            originalRequestDate:
+              episode?.originalRequestDate ?? episode?.requestDate ?? null,
 
-              initialProgram:
-                episode?.initialProgram ??
-                null,
+            initialProgram: episode?.initialProgram ?? null,
 
-              initialProgramId:
-                episode?.initialProgramId ??
-                episode?.initialProgram?.id ??
-                null,
+            initialProgramId:
+              episode?.initialProgramId ?? episode?.initialProgram?.id ?? null,
 
-              initialProgramName:
-                episode?.initialProgramName ??
-                episode?.initialProgram?.name ??
-                null,
+            initialProgramName:
+              episode?.initialProgramName ??
+              episode?.initialProgram?.name ??
+              null,
 
-              currentProgram:
-                episode?.currentProgram ??
-                null,
-            },
-          );
+            currentProgram: episode?.currentProgram ?? null,
+          });
         },
         error: (error: HttpErrorResponse) => {
           this.errorMessage =
@@ -2280,11 +2425,9 @@ export class EpisodePurgeComponent {
       .pipe(finalize(() => (this.reversing = false)))
       .subscribe({
         next: () => {
-          this.snackBar.open(
-            'Reversión realizada correctamente.',
-            'Cerrar',
-            { duration: 5000 },
-          );
+          this.snackBar.open('Reversión realizada correctamente.', 'Cerrar', {
+            duration: 5000,
+          });
 
           this.reversalReason = '';
           this.reversalObservation = '';
@@ -2348,6 +2491,8 @@ export class EpisodePurgeComponent {
   }
 
   private normalize(value: string): string {
-    return String(value ?? '').trim().toUpperCase();
+    return String(value ?? '')
+      .trim()
+      .toUpperCase();
   }
 }

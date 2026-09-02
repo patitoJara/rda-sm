@@ -72,126 +72,120 @@
       </button>
     </form>
 
-  <div class="error-banner" *ngIf="errorMessage">
-    <mat-icon>error_outline</mat-icon>
-    <span>{{ errorMessage }}</span>
-  </div>
-
-  <div class="episode-summary-compact" *ngIf="episode">
-    <div class="section-heading">
-      <div class="section-icon section-icon--warning">
-        <mat-icon>warning</mat-icon>
-      </div>
-
-      <div>
-        <h2>Episodio localizado</h2>
-        <p>Revise cuidadosamente la información antes de continuar.</p>
-      </div>
+    <div class="error-banner" *ngIf="errorMessage">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage }}</span>
     </div>
 
-    <div class="episode-grid">
-      <div class="data-item">
-        <span>Código</span>
-        <strong>{{ episodeCode || "No informado" }}</strong>
-      </div>
-
-      <div class="data-item">
-        <span>ID</span>
-        <strong>{{ episodeId }}</strong>
-      </div>
-
-      <div class="data-item">
-        <span>Persona</span>
-        <strong>{{ personName }}</strong>
-      </div>
-
-      <div class="data-item">
-        <span>RUN</span>
-        <strong>{{ personRut }}</strong>
-      </div>
-
-      <div class="data-item">
-        <span>Programa responsable</span>
-        <strong>{{ programName }}</strong>
-      </div>
-
-      <div class="data-item">
-        <span>Estado</span>
-        <strong>{{ stateLabel }}</strong>
-      </div>
-    </div>
-
-    <div class="admin-action-selector">
-      <div>
-        <h3>Seleccione la operación administrativa</h3>
-        <p>
-          Seleccione la acción que desea realizar sobre el episodio.
-        </p>
-      </div>
-
-      <div class="admin-action-selector__buttons">
-        <button
-          mat-flat-button
-          color="primary"
-          type="button"
-          (click)="selectAdminAction('correction')"
-        >
-          <mat-icon>edit_note</mat-icon>
-          <span>Modificar por programa</span>
-        </button>
-
-        <button
-          mat-stroked-button
-          type="button"
-          (click)="selectAdminAction('reversal')"
-        >
-          <mat-icon>undo</mat-icon>
-          <span>Reversión por programa</span>
-        </button>
-
-        <button
-          mat-stroked-button
-          color="warn"
-          type="button"
-          (click)="selectAdminAction('purge')"
-        >
-          <mat-icon>delete_forever</mat-icon>
-          <span>Eliminar episodio</span>
-        </button>
-      </div>
-
-      <div
-        class="admin-program-selector"
-        *ngIf="
-          adminMode === 'correction' ||
-          adminMode === 'reversal'
-        "
-      >
-        <mat-form-field appearance="outline" floatLabel="always">
-          <mat-label>Programa a intervenir</mat-label>
-
-          <mat-select
-            [(ngModel)]="selectedProgramForAdminAction"
-            name="selectedProgramForAdminAction"
-            panelClass="admin-program-select-panel"
-            (selectionChange)="onAdminProgramSelected($event.value)"
-          >
-            <mat-option
-              *ngFor="let program of episodePrograms"
-              [value]="program.id"
-            >
-              {{ program.name }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <p *ngIf="!episodePrograms.length">
-          No se encontraron programas asociados al episodio.
-        </p>
-      </div>
-    </div>
-
+    <div class="episode-summary-compact" *ngIf="episode">
+      <div class="section-heading">
+        <div class="section-icon section-icon--warning">
+          <mat-icon>warning</mat-icon>
         </div>
+
+        <div>
+          <h2>Episodio localizado</h2>
+          <p>Revise cuidadosamente la información antes de continuar.</p>
+        </div>
+      </div>
+
+      <div class="episode-grid">
+        <div class="data-item">
+          <span>Código</span>
+          <strong>{{ episodeCode || "No informado" }}</strong>
+        </div>
+
+        <div class="data-item">
+          <span>ID</span>
+          <strong>{{ episodeId }}</strong>
+        </div>
+
+        <div class="data-item">
+          <span>Persona</span>
+          <strong>{{ personName }}</strong>
+        </div>
+
+        <div class="data-item">
+          <span>RUN</span>
+          <strong>{{ personRut }}</strong>
+        </div>
+
+        <div class="data-item">
+          <span>Programa responsable</span>
+          <strong>{{ programName }}</strong>
+        </div>
+
+        <div class="data-item">
+          <span>Estado</span>
+          <strong>{{ stateLabel }}</strong>
+        </div>
+      </div>
+
+      <div class="admin-action-selector">
+        <div>
+          <h3>Seleccione la operación administrativa</h3>
+          <p>Seleccione la acción que desea realizar sobre el episodio.</p>
+        </div>
+
+        <div class="admin-action-selector__buttons">
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            (click)="selectAdminAction('correction')"
+          >
+            <mat-icon>edit_note</mat-icon>
+            <span>Modificar por programa</span>
+          </button>
+
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="selectAdminAction('reversal')"
+          >
+            <mat-icon>undo</mat-icon>
+            <span>Reversión por programa</span>
+          </button>
+
+          <button
+            mat-stroked-button
+            color="warn"
+            type="button"
+            (click)="selectAdminAction('purge')"
+          >
+            <mat-icon>delete_forever</mat-icon>
+            <span>Eliminar episodio</span>
+          </button>
+        </div>
+
+        <div
+          class="admin-program-selector"
+          *ngIf="adminMode === 'correction' || adminMode === 'reversal'"
+        >
+          <mat-form-field appearance="outline" floatLabel="always">
+            <mat-label>Programa a intervenir</mat-label>
+
+            <mat-select
+              [(ngModel)]="selectedProgramForAdminAction"
+              name="selectedProgramForAdminAction"
+              panelClass="admin-program-select-panel"
+              (selectionChange)="onAdminProgramSelected($event.value)"
+            >
+              <mat-option
+                *ngFor="let program of episodePrograms"
+                [value]="program.id"
+              >
+                {{ program.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <p *ngIf="!episodePrograms.length">
+            No se encontraron programas asociados al episodio.
+          </p>
+        </div>
+      </div>
+    </div>
   </mat-card>
 
   <div class="purge-workspace-scroll">
@@ -213,18 +207,12 @@
         </div>
       </div>
 
-      <div
-        class="error-banner"
-        *ngIf="correctionCatalogsError"
-      >
+      <div class="error-banner" *ngIf="correctionCatalogsError">
         <mat-icon>error_outline</mat-icon>
         <span>{{ correctionCatalogsError }}</span>
       </div>
 
-      <div
-        class="correction-loading"
-        *ngIf="correctionCatalogsLoading"
-      >
+      <div class="correction-loading" *ngIf="correctionCatalogsLoading">
         <mat-progress-spinner
           diameter="24"
           mode="indeterminate"
@@ -233,10 +221,7 @@
         <span>Cargando catálogos...</span>
       </div>
 
-      <div
-        class="correction-section"
-        *ngIf="!correctionCatalogsLoading"
-      >
+      <div class="correction-section" *ngIf="!correctionCatalogsLoading">
         <div class="correction-section__title">
           <mat-icon>assignment</mat-icon>
 
@@ -254,10 +239,7 @@
               [(ngModel)]="correctionDraft.episodeTypeId"
               name="correctionEpisodeTypeId"
             >
-              <mat-option
-                *ngFor="let item of episodeTypes"
-                [value]="item.id"
-              >
+              <mat-option *ngFor="let item of episodeTypes" [value]="item.id">
                 {{ item.name }}
               </mat-option>
             </mat-select>
@@ -283,6 +265,26 @@
               #correctionOriginalRequestDatePicker
             ></mat-datepicker>
           </mat-form-field>
+          <mat-form-field appearance="outline" floatLabel="always">
+            <mat-label>Fecha ingreso al programa</mat-label>
+
+            <input
+              matInput
+              [matDatepicker]="correctionProgramReceivedAtPicker"
+              [(ngModel)]="correctionDraft.programReceivedAt"
+              name="correctionProgramReceivedAt"
+              placeholder="dd/mm/aaaa"
+            />
+
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="correctionProgramReceivedAtPicker"
+            ></mat-datepicker-toggle>
+
+            <mat-datepicker #correctionProgramReceivedAtPicker></mat-datepicker>
+
+            <mat-hint>Corresponde al programa seleccionado</mat-hint>
+          </mat-form-field>
 
           <mat-form-field appearance="outline" floatLabel="always">
             <mat-label>Programa inicial</mat-label>
@@ -304,10 +306,7 @@
               [(ngModel)]="correctionDraft.contactTypeId"
               name="correctionContactTypeId"
             >
-              <mat-option
-                *ngFor="let item of contactTypes"
-                [value]="item.id"
-              >
+              <mat-option *ngFor="let item of contactTypes" [value]="item.id">
                 {{ item.name }}
               </mat-option>
             </mat-select>
@@ -320,14 +319,9 @@
               [(ngModel)]="correctionDraft.senderId"
               name="correctionSenderId"
             >
-              <mat-option [value]="null">
-                Sin remitente
-              </mat-option>
+              <mat-option [value]="null"> Sin remitente </mat-option>
 
-              <mat-option
-                *ngFor="let item of senders"
-                [value]="item.id"
-              >
+              <mat-option *ngFor="let item of senders" [value]="item.id">
                 {{ item.name }}
               </mat-option>
             </mat-select>
@@ -340,14 +334,9 @@
               [(ngModel)]="correctionDraft.diverterId"
               name="correctionDiverterId"
             >
-              <mat-option [value]="null">
-                Sin derivador
-              </mat-option>
+              <mat-option [value]="null"> Sin derivador </mat-option>
 
-              <mat-option
-                *ngFor="let item of diverters"
-                [value]="item.id"
-              >
+              <mat-option *ngFor="let item of diverters" [value]="item.id">
                 {{ item.name }}
               </mat-option>
             </mat-select>
@@ -365,606 +354,432 @@
             />
           </mat-form-field>
 
-
-
-          <div class="secondary-substances">
-            <div class="secondary-substances__primary">
-              <mat-form-field appearance="outline" floatLabel="always">
-            <mat-label>Sustancia principal</mat-label>
-
-            <mat-select
-              [(ngModel)]="correctionDraft.primarySubstanceId"
-              name="correctionPrimarySubstanceId"
-            >
-              <mat-option
-                *ngFor="let item of substances"
-                [value]="item.id"
-              >
-                {{ item.name }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+          <div class="administrative-substances">
+            <div class="administrative-substances__header">
+              <div>Sustancia</div>
+              <div>Principal</div>
+              <div>Secundaria</div>
             </div>
 
-            <div class="secondary-substances__header">
-              <div>
-                <strong>Sustancias secundarias</strong>
-                <div class="secondary-substances__hint">
-                  Puede agregar o quitar sustancias secundarias del episodio.
-                </div>
+            <div
+              *ngFor="let item of substances"
+              class="administrative-substances__row"
+              (click)="toggleAdministrativeSubstanceSecondary(item.id)"
+            >
+              <div class="administrative-substances__name">
+                {{ item.name }}
+              </div>
+
+              <div
+                class="administrative-substances__principal"
+                (click)="$event.stopPropagation()"
+              >
+                <mat-radio-button
+                  [checked]="correctionDraft.primarySubstanceId === item.id"
+                  (change)="selectAdministrativeSubstancePrincipal(item.id)"
+                ></mat-radio-button>
+              </div>
+
+              <div class="administrative-substances__order">
+                {{
+                  correctionDraft.primarySubstanceId === item.id
+                    ? "Principal"
+                    : getAdministrativeSubstanceOrder(item.id) || "-"
+                }}
               </div>
             </div>
+          </div>
+        </div>
+      </div>
 
-            <div class="secondary-substances__add">
-              <mat-form-field appearance="outline">
-                <mat-label>Agregar sustancia secundaria</mat-label>
+      <div class="correction-section">
+        <div class="correction-section__title">
+          <mat-icon>event_available</mat-icon>
 
-                <mat-select
-                  [(ngModel)]="selectedSecondarySubstanceId"
-                  name="correctionSecondarySubstanceId"
-                >
-                  <mat-option
-                    *ngFor="let item of substances"
-                    [value]="item.id"
-                  >
-                    {{ item.name }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
+          <div>
+            <strong>Citaciones y asistencias del programa</strong>
+            <span>
+              Las gestiones se presentan según la entrevista y el tipo de
+              citación al que pertenecen.
+            </span>
+          </div>
+        </div>
+
+        <div class="event-timeline__empty" *ngIf="!citationRows.length">
+          No se encontraron citaciones para organizar.
+        </div>
+
+        <div class="citation-correction-groups" *ngIf="citationRows.length">
+          <div class="citation-correction-row" *ngFor="let row of citationRows">
+            <div class="citation-correction-row__heading">
+              <div>
+                <strong>{{ row.title }}</strong>
+                <span>{{ row.label }}</span>
+              </div>
 
               <button
+                *ngIf="!row.attempts.length"
                 mat-stroked-button
+                color="primary"
                 type="button"
-                (click)="addSecondarySubstance()"
-                [disabled]="!selectedSecondarySubstanceId"
+                (click)="addCorrectionCitation(row)"
               >
                 <mat-icon>add</mat-icon>
-                Agregar
+                Agregar citación
+              </button>
+              <button
+                *ngIf="row.attempts.length"
+                mat-stroked-button
+                color="primary"
+                type="button"
+                (click)="addCorrectionCitation(row)"
+              >
+                <mat-icon>add</mat-icon>
+                Agregar otro registro
               </button>
             </div>
 
             <div
-              class="secondary-substances__empty"
-              *ngIf="!correctionDraft.secondarySubstances?.length"
+              class="citation-correction-attempt"
+              *ngFor="let attempt of row.attempts; let attemptIndex = index"
             >
-              No hay sustancias secundarias registradas.
-            </div>
-
-            <div
-              class="secondary-substances__list"
-              *ngIf="correctionDraft.secondarySubstances?.length"
-            >
-              <div
-                class="secondary-substances__item"
-                *ngFor="
-                  let item of correctionDraft.secondarySubstances;
-                  let index = index
-                "
-              >
-                <div class="secondary-substances__order">
-                  {{ item.useOrder }}
-                </div>
-
-                <div class="secondary-substances__data">
-                  <strong>{{ item.substanceName }}</strong>
-
-                  <span *ngIf="item.observation">
-                    {{ item.observation }}
-                  </span>
-                </div>
-
-                <button
-                  mat-icon-button
-                  type="button"
-                  aria-label="Quitar sustancia secundaria"
-                  (click)="removeSecondarySubstance(index)"
-                >
-                  <mat-icon>delete_outline</mat-icon>
-                </button>
+              <div class="citation-correction-attempt__number">
+                Registro {{ attemptIndex + 1 }}
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-    <div class="correction-section">
-      <div class="correction-section__title">
-        <mat-icon>event_available</mat-icon>
+              <div class="citation-correction-pair">
+                <section class="citation-correction-card">
+                  <header>
+                    <mat-icon>event</mat-icon>
 
-        <div>
-          <strong>Citaciones y asistencias del programa</strong>
-          <span>
-            Las gestiones se presentan según la entrevista y el tipo de
-            citación al que pertenecen.
-          </span>
-        </div>
-      </div>
+                    <div>
+                      <strong>Citación</strong>
+                      <span>
+                        {{ row.label }}
+                      </span>
 
-      <div
-        class="event-timeline__empty"
-        *ngIf="!citationRows.length"
-      >
-        No se encontraron citaciones para organizar.
-      </div>
-
-      <div
-        class="citation-correction-groups"
-        *ngIf="citationRows.length"
-      >
-        <div
-          class="citation-correction-row"
-          *ngFor="let row of citationRows"
-        >
-          <div class="citation-correction-row__heading">
-            <div>
-              <strong>{{ row.title }}</strong>
-              <span>{{ row.label }}</span>
-            </div>
-
-            <button
-              *ngIf="!row.attempts.length"
-              mat-stroked-button
-              color="primary"
-              type="button"
-              (click)="addCorrectionCitation(row)"
-            >
-              <mat-icon>add</mat-icon>
-              Agregar citación
-            </button>
-            <button
-              *ngIf="row.attempts.length"
-              mat-stroked-button
-              color="primary"
-              type="button"
-              (click)="addCorrectionCitation(row)"
-            >
-              <mat-icon>add</mat-icon>
-              Agregar otro registro
-            </button>
-          </div>
-
-          <div
-            class="citation-correction-attempt"
-            *ngFor="
-              let attempt of row.attempts;
-              let attemptIndex = index
-            "
-          >
-            <div class="citation-correction-attempt__number">
-              Registro {{ attemptIndex + 1 }}
-            </div>
-
-            <div class="citation-correction-pair">
-              <section class="citation-correction-card">
-                <header>
-                  <mat-icon>event</mat-icon>
-
-                  <div>
-                    <strong>Citación</strong>
-                    <span>
-                      {{ row.label }}
+                      <span>
+                        ID citación:
+                        {{
+                          attempt.citation.id > 0
+                            ? attempt.citation.id
+                            : "Nuevo"
+                        }}
+                      </span>
+</div>
+                    <span *ngIf="attempt.citation.markedForDeletion">
+                      Marcada para eliminar
                     </span>
-                  </div>
-                </header>
 
-                <div class="citation-correction-card__grid">
-                  <mat-form-field appearance="outline">
-                    <mat-label>Facultativo</mat-label>
-
-                    <mat-select
-                      [(ngModel)]="attempt.citation.programProfessionalId"
-                      [name]="
-                        'correctionCitationProfessional_' +
-                        attempt.citation.id
-                      "
-                      (selectionChange)="
-                        onCorrectionCitationProfessionalChange(
-                          attempt.citation,
-                          $event.value
-                        )
-                      "
+                    <button
+                      *ngIf="!attempt.citation.markedForDeletion"
+                      mat-stroked-button
+                      color="warn"
+                      type="button"
+                      (click)="removeCorrectionCitation(attempt)"
                     >
-                      <mat-option
-                        *ngFor="let professional of professionals"
-                        [value]="professional.id"
-                      >
-                        {{ professional.name }}
-                        <ng-container
-                          *ngIf="professional.professionName"
-                        >
-                          · {{ professional.professionName }}
-                        </ng-container>
-                      </mat-option>
-                    </mat-select>
+                      <mat-icon>delete_outline</mat-icon>
+                      Eliminar
+                    </button>
 
-                    <mat-hint *ngIf="isLoadingProfessionals">
-                      Cargando facultativos...
-                    </mat-hint>
-                  </mat-form-field>
+                    <button
+                      *ngIf="attempt.citation.markedForDeletion"
+                      mat-stroked-button
+                      color="primary"
+                      type="button"
+                      (click)="restoreCorrectionCitation(attempt)"
+                    >
+                      <mat-icon>restore</mat-icon>
+                      Restaurar
+                    </button>
+                  </header>
 
-                  <mat-form-field appearance="outline">
-                    <mat-label>Profesión</mat-label>
-
-                    <input
-                      matInput
-                      [value]="
-                        attempt.citation.professionName ||
-                        'No informada'
-                      "
-                      readonly
-                    />
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline">
-                    <mat-label>Fecha citación</mat-label>
-
-                    <input
-                      matInput
-                      [matDatepicker]="correctionCitationDatePicker"
-                      [(ngModel)]="attempt.citation.eventDate"
-                      [name]="
-                        'correctionCitationDate_' +
-                        attempt.citation.id
-                      "
-                      placeholder="dd/mm/aaaa"
-                    />
-
-                    <mat-datepicker-toggle
-                      matIconSuffix
-                      [for]="correctionCitationDatePicker"
-                    ></mat-datepicker-toggle>
-
-                    <mat-datepicker
-                      #correctionCitationDatePicker
-                    ></mat-datepicker>
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline">
-                    <mat-label>Hora citación</mat-label>
-
-                    <input
-                      matInput
-                      type="text"
-                      inputmode="numeric"
-                      maxlength="5"
-                      placeholder="HH:mm"
-                      pattern="(?:[01]\d|2[0-3]):[0-5]\d"
-                      [(ngModel)]="attempt.citation.eventTime"
-                      [name]="
-                        'correctionCitationTime_' +
-                        attempt.citation.id
-                      "
-                    />
-                  </mat-form-field>
-
-                  <mat-form-field
-                    appearance="outline"
-                    class="citation-correction-card__full"
-                  >
-                    <mat-label>Comentario de citación</mat-label>
-
-                    <textarea
-                      matInput
-                      rows="2"
-                      [(ngModel)]="attempt.citation.comment"
-                      [name]="
-                        'correctionCitationComment_' +
-                        attempt.citation.id
-                      "
-                    ></textarea>
-                  </mat-form-field>
-                </div>
-              </section>
-
-              <section class="citation-correction-card citation-correction-card--attendance">
-                <header>
-                  <mat-icon>how_to_reg</mat-icon>
-
-                  <div>
-                    <strong>Asistencia</strong>
-                    <span>
-                      Relacionada con la citación
-                    </span>
-                  </div>
-                </header>
-
-                <ng-container *ngIf="attempt.attendance; else noAttendance">
                   <div class="citation-correction-card__grid">
-                    <mat-form-field
-                      appearance="outline"
-                      class="citation-correction-card__full"
-                    >
-                      <mat-label>Estado de asistencia</mat-label>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Facultativo</mat-label>
 
                       <mat-select
-                        [(ngModel)]="attempt.attendance.attendanceStatus"
+                        [(ngModel)]="attempt.citation.programProfessionalId"
                         [name]="
-                          'correctionAttendanceStatus_' +
-                          attempt.attendance.id
+                          'correctionCitationProfessional_' +
+                          attempt.citation.id
                         "
-                        [compareWith]="compareCorrectionCatalogItems"
+                        (selectionChange)="
+                          onCorrectionCitationProfessionalChange(
+                            attempt.citation,
+                            $event.value
+                          )
+                        "
                       >
                         <mat-option
-                          *ngFor="let item of attendanceStatuses"
-                          [value]="item"
+                          *ngFor="let professional of professionals"
+                          [value]="professional.id"
                         >
-                          {{ item.name }}
+                          {{ professional.name }}
+                          <ng-container *ngIf="professional.professionName">
+                            · {{ professional.professionName }}
+                          </ng-container>
                         </mat-option>
                       </mat-select>
+
+                      <mat-hint *ngIf="isLoadingProfessionals">
+                        Cargando facultativos...
+                      </mat-hint>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Profesión</mat-label>
+
+                      <input
+                        matInput
+                        [value]="
+                          attempt.citation.professionName || 'No informada'
+                        "
+                        readonly
+                      />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Fecha citación</mat-label>
+
+                      <input
+                        matInput
+                        [matDatepicker]="correctionCitationDatePicker"
+                        [(ngModel)]="attempt.citation.eventDate"
+                        [name]="'correctionCitationDate_' + attempt.citation.id"
+                        placeholder="dd/mm/aaaa"
+                      />
+
+                      <mat-datepicker-toggle
+                        matIconSuffix
+                        [for]="correctionCitationDatePicker"
+                      ></mat-datepicker-toggle>
+
+                      <mat-datepicker
+                        #correctionCitationDatePicker
+                      ></mat-datepicker>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Hora citación</mat-label>
+
+                      <input
+                        matInput
+                        type="text"
+                        inputmode="numeric"
+                        maxlength="5"
+                        placeholder="HH:mm"
+                        pattern="(?:[01]\d|2[0-3]):[0-5]\d"
+                        [(ngModel)]="attempt.citation.eventTime"
+                        [name]="'correctionCitationTime_' + attempt.citation.id"
+                      />
                     </mat-form-field>
 
                     <mat-form-field
                       appearance="outline"
                       class="citation-correction-card__full"
                     >
-                      <mat-label>Comentario</mat-label>
+                      <mat-label>Comentario de citación</mat-label>
 
                       <textarea
                         matInput
-                        rows="3"
-                        [(ngModel)]="attempt.attendance.comment"
+                        rows="2"
+                        [(ngModel)]="attempt.citation.comment"
                         [name]="
-                          'correctionAttendanceComment_' +
-                          attempt.attendance.id
+                          'correctionCitationComment_' + attempt.citation.id
                         "
                       ></textarea>
                     </mat-form-field>
                   </div>
-                </ng-container>
+                </section>
 
-                <ng-template #noAttendance>
-                  <div class="citation-correction-card__empty">
-                    <button
-                      mat-stroked-button
-                      color="primary"
-                      type="button"
-                      (click)="addCorrectionAttendance(attempt)"
-                    >
-                      <mat-icon>person_add</mat-icon>
-                      Agregar asistencia
-                    </button>
-                  </div>
-                </ng-template>
-              </section>
+                <section
+                  class="citation-correction-card citation-correction-card--attendance"
+                >
+                  <header>
+                    <mat-icon>how_to_reg</mat-icon>
+
+                    <div>
+                      <strong>Asistencia</strong>
+                      <span> Relacionada con la citación </span>
+
+                      <span *ngIf="attempt.attendance">
+                        ID asistencia:
+                        {{
+                          attempt.attendance.id > 0
+                            ? attempt.attendance.id
+                            : "Nuevo"
+                        }}
+                      </span>
+</div>
+                    <ng-container *ngIf="attempt.attendance">
+                      <span *ngIf="attempt.attendance.markedForDeletion">
+                        Marcada para eliminar
+                      </span>
+
+                      <button
+                        *ngIf="!attempt.attendance.markedForDeletion"
+                        mat-stroked-button
+                        color="warn"
+                        type="button"
+                        (click)="removeCorrectionAttendance(attempt)"
+                      >
+                        <mat-icon>delete_outline</mat-icon>
+                        Eliminar
+                      </button>
+
+                      <button
+                        *ngIf="attempt.attendance.markedForDeletion"
+                        mat-stroked-button
+                        color="primary"
+                        type="button"
+                        (click)="restoreCorrectionAttendance(attempt)"
+                      >
+                        <mat-icon>restore</mat-icon>
+                        Restaurar
+                      </button>
+                    </ng-container>
+                  </header>
+
+                  <ng-container *ngIf="attempt.attendance; else noAttendance">
+                    <div class="citation-correction-card__grid">
+                      <mat-form-field
+                        appearance="outline"
+                        class="citation-correction-card__full"
+                      >
+                        <mat-label>Estado de asistencia</mat-label>
+
+                        <mat-select
+                          [(ngModel)]="attempt.attendance.attendanceStatus"
+                          [name]="
+                            'correctionAttendanceStatus_' +
+                            attempt.attendance.id
+                          "
+                          [compareWith]="compareCorrectionCatalogItems"
+                        >
+                          <mat-option
+                            *ngFor="let item of attendanceStatuses"
+                            [value]="item"
+                          >
+                            {{ item.name }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+
+                      <mat-form-field
+                        appearance="outline"
+                        class="citation-correction-card__full"
+                      >
+                        <mat-label>Comentario</mat-label>
+
+                        <textarea
+                          matInput
+                          rows="3"
+                          [(ngModel)]="attempt.attendance.comment"
+                          [name]="
+                            'correctionAttendanceComment_' +
+                            attempt.attendance.id
+                          "
+                        ></textarea>
+                      </mat-form-field>
+                    </div>
+                  </ng-container>
+
+                  <ng-template #noAttendance>
+                    <div class="citation-correction-card__empty">
+                      <button
+                        mat-stroked-button
+                        color="primary"
+                        type="button"
+                        (click)="addCorrectionAttendance(attempt)"
+                      >
+                        <mat-icon>person_add</mat-icon>
+                        Agregar asistencia
+                      </button>
+                    </div>
+                  </ng-template>
+                </section>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div
-        class="event-timeline__empty"
-        *ngIf="professionalsError"
-      >
-        {{ professionalsError }}
-      </div>
-    </div>
-    
-    <div class="correction-section">
-      <div class="correction-section__title">
-        <mat-icon>assignment_turned_in</mat-icon>
-
-        <div>
-          <strong>Retroalimentación del programa</strong>
-          <span>
-            Decisión registrada para la etapa del programa seleccionado.
-            Las referencias y derivaciones no pueden modificarse desde este mantenedor.
-          </span>
+        <div class="event-timeline__empty" *ngIf="professionalsError">
+          {{ professionalsError }}
         </div>
       </div>
 
-      <div
-        class="citation-correction-card__empty"
-        *ngIf="!feedbackDraft"
-      >
-        <button
-          mat-stroked-button
-          color="primary"
-          type="button"
-          (click)="addCorrectionFeedback()"
-        >
-          <mat-icon>add</mat-icon>
-          Agregar retroalimentación
-        </button>
-      </div>
-
-      <div
-        class="correction-grid"
-        *ngIf="feedbackDraft"
-      >
-        <mat-form-field appearance="outline">
-          <mat-label>Fecha de retroalimentación</mat-label>
-
-          <input
-            matInput
-            [matDatepicker]="correctionFeedbackDatePicker"
-            [(ngModel)]="feedbackDraft.eventDate"
-            [name]="'correctionFeedbackDate_' + feedbackDraft.id"
-            placeholder="dd/mm/aaaa"
-          />
-
-          <mat-datepicker-toggle
-            matIconSuffix
-            [for]="correctionFeedbackDatePicker"
-          ></mat-datepicker-toggle>
-
-          <mat-datepicker
-            #correctionFeedbackDatePicker
-          ></mat-datepicker>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Hora</mat-label>
-
-          <input
-            matInput
-            type="text"
-            inputmode="numeric"
-            maxlength="5"
-            placeholder="HH:mm"
-            pattern="(?:[01]\d|2[0-3]):[0-5]\d"
-            [(ngModel)]="feedbackDraft.eventTime"
-            [name]="'correctionFeedbackTime_' + feedbackDraft.id"
-          />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Profesional</mat-label>
-
-          <mat-select
-            [(ngModel)]="feedbackDraft.programProfessionalId"
-            [name]="'correctionFeedbackProfessional_' + feedbackDraft.id"
-            (selectionChange)="
-              onCorrectionFeedbackProfessionalChange($event.value)
-            "
-          >
-            <mat-option
-              *ngFor="let professional of professionals"
-              [value]="professional.id"
-            >
-              {{ professional.name }}
-              <ng-container *ngIf="professional.professionName">
-                · {{ professional.professionName }}
-              </ng-container>
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Profesión</mat-label>
-
-          <input
-            matInput
-            [value]="feedbackDraft.professionName || 'No informada'"
-            readonly
-          />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Compromiso biopsicosocial</mat-label>
-
-          <mat-select
-            [(ngModel)]="feedbackDraft.biopsychosocialCommitmentLevel"
-            [name]="'correctionFeedbackCommitment_' + feedbackDraft.id"
-            [compareWith]="compareCorrectionCatalogItems"
-            (selectionChange)="
-              onCorrectionFeedbackCommitmentChange($event.value)
-            "
-          >
-            <mat-option
-              *ngFor="let item of biopsychosocialCommitmentLevels"
-              [value]="item"
-            >
-              {{ item.name }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Resultado</mat-label>
-
-          <mat-select
-            [(ngModel)]="feedbackDraft.result"
-            [name]="'correctionFeedbackResult_' + feedbackDraft.id"
-            [compareWith]="compareCorrectionCatalogItems"
-            (selectionChange)="
-              onCorrectionFeedbackResultChange($event.value)
-            "
-          >
-            <mat-option
-              *ngFor="let item of feedbackResults"
-              [value]="item"
-            >
-              {{ item.name }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field
-          appearance="outline"
-          class="event-timeline__full-field"
-        >
-          <mat-label>Comentario</mat-label>
-
-          <textarea
-            matInput
-            rows="3"
-            [(ngModel)]="feedbackDraft.comment"
-            [name]="'correctionFeedbackComment_' + feedbackDraft.id"
-          ></textarea>
-        </mat-form-field>
-      </div>
-    </div>
-
-    <div class="correction-section">
-      <div class="correction-section__title">
-        <mat-icon>notes</mat-icon>
-
-        <div>
-          <strong>Observaciones del programa</strong>
-          <span>
-            Registro de observaciones asociadas a la etapa del programa seleccionado.
-            Puede existir más de una observación.
-          </span>
-        </div>
-      </div>
-
-      <div
-        class="citation-correction-card__empty"
-        *ngIf="observationDrafts.length === 0"
-      >
-        No existen observaciones registradas para este programa.
-      </div>
-
-      <div
-        class="citation-correction-card"
-        *ngFor="
-          let observation of observationDrafts;
-          let observationIndex = index
-        "
-      >
+      <div class="correction-section">
         <div class="correction-section__title">
-          <mat-icon>sticky_note_2</mat-icon>
+          <mat-icon>assignment_turned_in</mat-icon>
 
           <div>
-            <strong>
-              Observación {{ observationIndex + 1 }}
-            </strong>
+            <strong>Retroalimentación del programa</strong>
+            <span>
+              Decisión registrada para la etapa del programa seleccionado. Las
+              referencias y derivaciones no pueden modificarse desde este
+              mantenedor.
+            </span>
           </div>
+        </div>
 
+        <div class="citation-correction-card__empty" *ngIf="!feedbackDraft">
           <button
             mat-stroked-button
+            color="primary"
             type="button"
-            color="warn"
-            (click)="removeCorrectionObservation(observation)"
+            (click)="addCorrectionFeedback()"
           >
-            <mat-icon>delete</mat-icon>
-            Eliminar
+            <mat-icon>add</mat-icon>
+            Agregar retroalimentación
           </button>
         </div>
 
-        <div class="correction-grid">
+        <div *ngIf="feedbackDraft" class="correction-section__actions">
+          <span *ngIf="feedbackDraft.markedForDeletion">
+            Retroalimentación marcada para eliminar
+          </span>
+
+          <button
+            *ngIf="!feedbackDraft.markedForDeletion"
+            mat-stroked-button
+            color="warn"
+            type="button"
+            (click)="removeCorrectionFeedback()"
+          >
+            <mat-icon>delete_outline</mat-icon>
+            Eliminar retroalimentación
+          </button>
+
+          <button
+            *ngIf="feedbackDraft.markedForDeletion"
+            mat-stroked-button
+            color="primary"
+            type="button"
+            (click)="restoreCorrectionFeedback()"
+          >
+            <mat-icon>restore</mat-icon>
+            Restaurar retroalimentación
+          </button>
+        </div>
+        <div class="correction-grid" *ngIf="feedbackDraft">
           <mat-form-field appearance="outline">
-            <mat-label>Fecha</mat-label>
+            <mat-label>Fecha de retroalimentación</mat-label>
 
             <input
               matInput
-              [matDatepicker]="correctionObservationDatePicker"
-              [(ngModel)]="observation.eventDate"
-              [name]="
-                'correctionObservationDate_' +
-                observation.id
-              "
+              [matDatepicker]="correctionFeedbackDatePicker"
+              [(ngModel)]="feedbackDraft.eventDate"
+              [name]="'correctionFeedbackDate_' + feedbackDraft.id"
               placeholder="dd/mm/aaaa"
             />
 
             <mat-datepicker-toggle
               matIconSuffix
-              [for]="correctionObservationDatePicker"
+              [for]="correctionFeedbackDatePicker"
             ></mat-datepicker-toggle>
 
-            <mat-datepicker
-              #correctionObservationDatePicker
-            ></mat-datepicker>
+            <mat-datepicker #correctionFeedbackDatePicker></mat-datepicker>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
@@ -977,12 +792,76 @@
               maxlength="5"
               placeholder="HH:mm"
               pattern="(?:[01]\d|2[0-3]):[0-5]\d"
-              [(ngModel)]="observation.eventTime"
-              [name]="
-                'correctionObservationTime_' +
-                observation.id
-              "
+              [(ngModel)]="feedbackDraft.eventTime"
+              [name]="'correctionFeedbackTime_' + feedbackDraft.id"
             />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Profesional</mat-label>
+
+            <mat-select
+              [(ngModel)]="feedbackDraft.programProfessionalId"
+              [name]="'correctionFeedbackProfessional_' + feedbackDraft.id"
+              (selectionChange)="
+                onCorrectionFeedbackProfessionalChange($event.value)
+              "
+            >
+              <mat-option
+                *ngFor="let professional of professionals"
+                [value]="professional.id"
+              >
+                {{ professional.name }}
+                <ng-container *ngIf="professional.professionName">
+                  · {{ professional.professionName }}
+                </ng-container>
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Profesión</mat-label>
+
+            <input
+              matInput
+              [value]="feedbackDraft.professionName || 'No informada'"
+              readonly
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Compromiso biopsicosocial</mat-label>
+
+            <mat-select
+              [(ngModel)]="feedbackDraft.biopsychosocialCommitmentLevel"
+              [name]="'correctionFeedbackCommitment_' + feedbackDraft.id"
+              [compareWith]="compareCorrectionCatalogItems"
+              (selectionChange)="
+                onCorrectionFeedbackCommitmentChange($event.value)
+              "
+            >
+              <mat-option
+                *ngFor="let item of biopsychosocialCommitmentLevels"
+                [value]="item"
+              >
+                {{ item.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Resultado</mat-label>
+
+            <mat-select
+              [(ngModel)]="feedbackDraft.result"
+              [name]="'correctionFeedbackResult_' + feedbackDraft.id"
+              [compareWith]="compareCorrectionCatalogItems"
+              (selectionChange)="onCorrectionFeedbackResultChange($event.value)"
+            >
+              <mat-option *ngFor="let item of feedbackResults" [value]="item">
+                {{ item.name }}
+              </mat-option>
+            </mat-select>
           </mat-form-field>
 
           <mat-form-field
@@ -994,116 +873,197 @@
             <textarea
               matInput
               rows="3"
-              [(ngModel)]="observation.comment"
-              [name]="
-                'correctionObservationComment_' +
-                observation.id
-              "
+              [(ngModel)]="feedbackDraft.comment"
+              [name]="'correctionFeedbackComment_' + feedbackDraft.id"
             ></textarea>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="correction-section">
+        <div class="correction-section__title">
+          <mat-icon>notes</mat-icon>
+
+          <div>
+            <strong>Observaciones del programa</strong>
+            <span>
+              Registro de observaciones asociadas a la etapa del programa
+              seleccionado. Puede existir más de una observación.
+            </span>
+          </div>
+        </div>
+
+        <div
+          class="citation-correction-card__empty"
+          *ngIf="observationDrafts.length === 0"
+        >
+          No existen observaciones registradas para este programa.
+        </div>
+
+        <div
+          class="citation-correction-card"
+          *ngFor="
+            let observation of observationDrafts;
+            let observationIndex = index
+          "
+        >
+          <div class="correction-section__title">
+            <mat-icon>sticky_note_2</mat-icon>
+
+            <div>
+              <strong> Observación {{ observationIndex + 1 }} </strong>
+            </div>
+
+            <button
+              mat-stroked-button
+              type="button"
+              color="warn"
+              (click)="removeCorrectionObservation(observation)"
+            >
+              <mat-icon>delete</mat-icon>
+              Eliminar
+            </button>
+          </div>
+
+          <div class="correction-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha</mat-label>
+
+              <input
+                matInput
+                [matDatepicker]="correctionObservationDatePicker"
+                [(ngModel)]="observation.eventDate"
+                [name]="'correctionObservationDate_' + observation.id"
+                placeholder="dd/mm/aaaa"
+              />
+
+              <mat-datepicker-toggle
+                matIconSuffix
+                [for]="correctionObservationDatePicker"
+              ></mat-datepicker-toggle>
+
+              <mat-datepicker #correctionObservationDatePicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Hora</mat-label>
+
+              <input
+                matInput
+                type="text"
+                inputmode="numeric"
+                maxlength="5"
+                placeholder="HH:mm"
+                pattern="(?:[01]\d|2[0-3]):[0-5]\d"
+                [(ngModel)]="observation.eventTime"
+                [name]="'correctionObservationTime_' + observation.id"
+              />
+            </mat-form-field>
+
+            <mat-form-field
+              appearance="outline"
+              class="event-timeline__full-field"
+            >
+              <mat-label>Comentario</mat-label>
+
+              <textarea
+                matInput
+                rows="3"
+                [(ngModel)]="observation.comment"
+                [name]="'correctionObservationComment_' + observation.id"
+              ></textarea>
+            </mat-form-field>
+
+            <mat-form-field
+              appearance="outline"
+              class="event-timeline__full-field"
+            >
+              <mat-label>Observación adicional</mat-label>
+
+              <textarea
+                matInput
+                rows="3"
+                [(ngModel)]="observation.observation"
+                [name]="'correctionObservationText_' + observation.id"
+              ></textarea>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <button
+          mat-stroked-button
+          color="primary"
+          type="button"
+          (click)="addCorrectionObservation()"
+        >
+          <mat-icon>add</mat-icon>
+          Agregar observación
+        </button>
+      </div>
+
+      <div class="correction-section" *ngIf="closureDraft">
+        <div class="correction-section__title">
+          <mat-icon>lock</mat-icon>
+
+          <div>
+            <strong>Cierre del programa</strong>
+            <span>
+              Corrección administrativa de los datos funcionales registrados al
+              cerrar la etapa del programa seleccionado.
+            </span>
+          </div>
+        </div>
+
+        <div class="correction-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Motivo de cierre</mat-label>
+
+            <mat-select
+              [(ngModel)]="closureDraft.closureReason"
+              name="correctionClosureReason"
+              [compareWith]="compareCorrectionCatalogItems"
+              (selectionChange)="onCorrectionClosureReasonChange($event.value)"
+            >
+              <mat-option *ngFor="let item of closureReasons" [value]="item">
+                {{ item.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha de cierre</mat-label>
+
+            <input
+              matInput
+              [matDatepicker]="correctionClosureDatePicker"
+              [(ngModel)]="closureDraft.closureDate"
+              name="correctionClosureDate"
+              placeholder="dd/mm/aaaa"
+            />
+
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="correctionClosureDatePicker"
+            ></mat-datepicker-toggle>
+
+            <mat-datepicker #correctionClosureDatePicker></mat-datepicker>
           </mat-form-field>
 
           <mat-form-field
             appearance="outline"
             class="event-timeline__full-field"
           >
-            <mat-label>Observación adicional</mat-label>
+            <mat-label>Observación de cierre</mat-label>
 
             <textarea
               matInput
               rows="3"
-              [(ngModel)]="observation.observation"
-              [name]="
-                'correctionObservationText_' +
-                observation.id
-              "
+              [(ngModel)]="closureDraft.closureComment"
+              name="correctionClosureComment"
             ></textarea>
           </mat-form-field>
         </div>
       </div>
-
-      <button
-        mat-stroked-button
-        color="primary"
-        type="button"
-        (click)="addCorrectionObservation()"
-      >
-        <mat-icon>add</mat-icon>
-        Agregar observación
-      </button>
-    </div>
-
-    <div class="correction-section" *ngIf="closureDraft">
-      <div class="correction-section__title">
-        <mat-icon>lock</mat-icon>
-
-        <div>
-          <strong>Cierre del programa</strong>
-          <span>
-            Corrección administrativa de los datos funcionales registrados al cerrar
-            la etapa del programa seleccionado.
-          </span>
-        </div>
-      </div>
-
-      <div class="correction-grid">
-        <mat-form-field appearance="outline">
-          <mat-label>Motivo de cierre</mat-label>
-
-          <mat-select
-            [(ngModel)]="closureDraft.closureReason"
-            name="correctionClosureReason"
-            [compareWith]="compareCorrectionCatalogItems"
-            (selectionChange)="
-              onCorrectionClosureReasonChange($event.value)
-            "
-          >
-            <mat-option
-              *ngFor="let item of closureReasons"
-              [value]="item"
-            >
-              {{ item.name }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Fecha de cierre</mat-label>
-
-          <input
-            matInput
-            [matDatepicker]="correctionClosureDatePicker"
-            [(ngModel)]="closureDraft.closureDate"
-            name="correctionClosureDate"
-            placeholder="dd/mm/aaaa"
-          />
-
-          <mat-datepicker-toggle
-            matIconSuffix
-            [for]="correctionClosureDatePicker"
-          ></mat-datepicker-toggle>
-
-          <mat-datepicker
-            #correctionClosureDatePicker
-          ></mat-datepicker>
-
-        </mat-form-field>
-
-        <mat-form-field
-          appearance="outline"
-          class="event-timeline__full-field"
-        >
-          <mat-label>Observación de cierre</mat-label>
-
-          <textarea
-            matInput
-            rows="3"
-            [(ngModel)]="closureDraft.closureComment"
-            name="correctionClosureComment"
-          ></textarea>
-        </mat-form-field>
-      </div>
-    </div>
-
     </div>
     <div
       class="confirmation-panel"
@@ -1113,9 +1073,8 @@
         <h3>Aplicar corrección administrativa</h3>
 
         <p>
-          Revise los antecedentes modificados e indique obligatoriamente
-          el motivo de la corrección. La operación quedará registrada en
-          auditoría.
+          Revise los antecedentes modificados e indique obligatoriamente el
+          motivo de la corrección. La operación quedará registrada en auditoría.
         </p>
       </div>
 
@@ -1154,9 +1113,7 @@
 
         <span>
           {{
-            correcting
-              ? "Aplicando..."
-              : "Aplicar corrección administrativa"
+            correcting ? "Aplicando..." : "Aplicar corrección administrativa"
           }}
         </span>
       </button>
@@ -1208,9 +1165,7 @@
         color="warn"
         type="button"
         [disabled]="
-          reversing ||
-          !selectedProgramForAdminAction ||
-          !reversalReason
+          reversing || !selectedProgramForAdminAction || !reversalReason
         "
         (click)="reverseEpisode()"
       >
@@ -1245,7 +1200,8 @@
         <h3>Confirmación obligatoria</h3>
         <p>
           Para habilitar la eliminación, escriba exactamente
-          <strong>{{ confirmationTarget }}</strong>.
+          <strong>{{ confirmationTarget }}</strong
+          >.
         </p>
       </div>
 
@@ -1278,73 +1234,73 @@
         ></mat-progress-spinner>
 
         <mat-icon *ngIf="!purging">delete_forever</mat-icon>
-        <span>{{ purging ? "Eliminando..." : "Eliminar definitivamente" }}</span>
+        <span>{{
+          purging ? "Eliminando..." : "Eliminar definitivamente"
+        }}</span>
       </button>
     </div>
-  <mat-card class="result-card" *ngIf="purgeResult">
-    <div class="result-heading">
-      <mat-icon>check_circle</mat-icon>
+    <mat-card class="result-card" *ngIf="purgeResult">
+      <div class="result-heading">
+        <mat-icon>check_circle</mat-icon>
 
-      <div>
-        <h2>Episodio eliminado correctamente</h2>
-        <p>
-          {{ purgeResult.episodeCode }} · ID {{ purgeResult.episodeId }}
-        </p>
-      </div>
-    </div>
-
-    <div class="result-summary">
-      <div>
-        <span>Persona conservada</span>
-        <strong>ID {{ purgeResult.postulantId }}</strong>
+        <div>
+          <h2>Episodio eliminado correctamente</h2>
+          <p>{{ purgeResult.episodeCode }} · ID {{ purgeResult.episodeId }}</p>
+        </div>
       </div>
 
-      <div>
-        <span>Base de datos</span>
-        <strong>
-          {{ purgeResult.databasePurged ? "Depurada" : "No confirmada" }}
-        </strong>
+      <div class="result-summary">
+        <div>
+          <span>Persona conservada</span>
+          <strong>ID {{ purgeResult.postulantId }}</strong>
+        </div>
+
+        <div>
+          <span>Base de datos</span>
+          <strong>
+            {{ purgeResult.databasePurged ? "Depurada" : "No confirmada" }}
+          </strong>
+        </div>
+
+        <div>
+          <span>Archivos eliminados</span>
+          <strong>{{ purgeResult.deletedFiles }}</strong>
+        </div>
+
+        <div>
+          <span>Archivos con error</span>
+          <strong>{{ purgeResult.failedFiles }}</strong>
+        </div>
       </div>
 
-      <div>
-        <span>Archivos eliminados</span>
-        <strong>{{ purgeResult.deletedFiles }}</strong>
+      <div class="deleted-rows">
+        <h3>Registros eliminados</h3>
+
+        <div class="deleted-row" *ngFor="let item of deletedRows">
+          <span>{{ item[0] }}</span>
+          <strong>{{ item[1] }}</strong>
+        </div>
       </div>
 
-      <div>
-        <span>Archivos con error</span>
-        <strong>{{ purgeResult.failedFiles }}</strong>
+      <div
+        class="file-warning"
+        *ngIf="
+          purgeResult.failedFilePaths.length ||
+          purgeResult.skippedUnsafeFilePaths.length
+        "
+      >
+        <mat-icon>report_problem</mat-icon>
+
+        <div>
+          <strong>La eliminación requiere revisión</strong>
+          <p *ngFor="let path of purgeResult.failedFilePaths">
+            Archivo no eliminado: {{ path }}
+          </p>
+          <p *ngFor="let path of purgeResult.skippedUnsafeFilePaths">
+            Ruta omitida por seguridad: {{ path }}
+          </p>
+        </div>
       </div>
-    </div>
-
-    <div class="deleted-rows">
-      <h3>Registros eliminados</h3>
-
-      <div class="deleted-row" *ngFor="let item of deletedRows">
-        <span>{{ item[0] }}</span>
-        <strong>{{ item[1] }}</strong>
-      </div>
-    </div>
-
-    <div
-      class="file-warning"
-      *ngIf="
-        purgeResult.failedFilePaths.length ||
-        purgeResult.skippedUnsafeFilePaths.length
-      "
-    >
-      <mat-icon>report_problem</mat-icon>
-
-      <div>
-        <strong>La eliminación requiere revisión</strong>
-        <p *ngFor="let path of purgeResult.failedFilePaths">
-          Archivo no eliminado: {{ path }}
-        </p>
-        <p *ngFor="let path of purgeResult.skippedUnsafeFilePaths">
-          Ruta omitida por seguridad: {{ path }}
-        </p>
-      </div>
-    </div>
-  </mat-card>
+    </mat-card>
   </div>
 </section>

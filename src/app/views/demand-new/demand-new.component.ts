@@ -1979,7 +1979,7 @@ export class DemandNewComponent
           });
         }
 
-        
+
 
         if (
           this.requestedEpisodeId &&
@@ -3223,7 +3223,7 @@ export class DemandNewComponent
       return;
     }
 
-    
+
 
     const feedbackSaveAction = resolveFeedbackSaveAction(
       this.demandActionMatrix,
@@ -3644,7 +3644,7 @@ export class DemandNewComponent
       return;
     }
 
-    
+
 
     const selectedClosureReason = this.closureReasons.find(
       (item) => item.id === closureContext.payload.closureReasonId,
@@ -6475,9 +6475,10 @@ this.createdEpisode = activeEpisode;
           status: milestone.attendance,
           description: milestone.description,
           registeredByName: milestone.registeredByName,
-          createdAt: milestone.createdAt,          details: milestone.attemptLabel
-            ? [milestone.attemptLabel]
-            : [],
+          createdAt: milestone.createdAt,          details: [
+            ...(milestone.attemptLabel ? [milestone.attemptLabel] : []),
+            ...(milestone.details ?? []),
+          ],
         });
       });
 
@@ -6999,6 +7000,41 @@ this.createdEpisode = activeEpisode;
         this.episodeOriginDate,
     );
   }
+  get currentEpisodeTypeName(): string {
+    const episode =
+      this.longitudinal?.activeEpisode ??
+      this.episodeSummary ??
+      this.createdEpisode ??
+      null;
+
+    const directName =
+      episode?.episodeType?.name ??
+      episode?.episodeTypeName ??
+      null;
+
+    if (directName) {
+      return directName;
+    }
+
+    const episodeTypeId = Number(
+      episode?.episodeType?.id ??
+      episode?.episodeTypeId ??
+      this.episodeForm.controls.episodeTypeId.value ??
+      0,
+    );
+
+    if (!episodeTypeId) {
+      return 'No informado';
+    }
+
+    return (
+      this.episodeTypes.find(
+        (item: any) => Number(item?.id) === episodeTypeId,
+      )?.name ??
+      'No informado'
+    );
+  }
+
   formatDisplayDate(value: any): string {
     return formatDisplayDateValue(value);
   }

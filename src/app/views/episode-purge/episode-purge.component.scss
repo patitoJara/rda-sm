@@ -1664,3 +1664,88 @@ button mat-progress-spinner {
     max-width: none;
   }
 }
+/* Corrección administrativa · Sustancias */
+
+.administrative-substances {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 12px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.administrative-substances__header {
+  grid-column: 1 / -1;
+}
+
+.administrative-substances__row {
+  border: 1px solid #edf1f2;
+  border-radius: 6px;
+  margin-bottom: 4px;
+}
+
+@media (max-width: 900px) {
+  .administrative-substances {
+    grid-template-columns: 1fr;
+  }
+
+  .administrative-substances__header {
+    grid-column: 1;
+  }
+}
+
+.administrative-substances__header,
+.administrative-substances__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 90px 110px;
+  align-items: center;
+}
+
+.administrative-substances__header {
+  min-height: 34px;
+  padding: 5px 12px;
+  background: #f3f6f7;
+  border-bottom: 1px solid #e1e6e8;
+  color: #455a64;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.administrative-substances__header > div:first-child {
+  text-align: left;
+}
+
+.administrative-substances__row {
+  min-height: 36px;
+  padding: 3px 12px;
+  border-bottom: 1px solid #edf1f2;
+  cursor: pointer;
+}
+
+.administrative-substances__row:hover {
+  background: #f8fafb;
+}
+
+.administrative-substances__name {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.administrative-substances__principal,
+.administrative-substances__order {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.administrative-substances__principal mat-radio-button {
+  transform: scale(0.8);
+}
+
+.administrative-substances__order {
+  color: #08778a;
+  font-weight: 700;
+}
