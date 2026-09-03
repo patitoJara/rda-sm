@@ -716,9 +716,7 @@
           <div>
             <strong>Retroalimentación del programa</strong>
             <span>
-              Decisión registrada para la etapa del programa seleccionado. Las
-              referencias y derivaciones no pueden modificarse desde este
-              mantenedor.
+              Decisión registrada para la etapa del programa seleccionado.
             </span>
           </div>
         </div>
@@ -879,6 +877,106 @@
           </mat-form-field>
         </div>
       </div>
+      <div class="correction-section">
+        <div class="correction-section__title">
+          <mat-icon>forward_to_inbox</mat-icon>
+
+          <div>
+            <strong>Referencias del programa</strong>
+            <span>
+              Referencias realizadas desde la etapa del programa seleccionado.
+            </span>
+          </div>
+        </div>
+
+        <div
+          class="citation-correction-card__empty"
+          *ngIf="referenceDrafts.length === 0"
+        >
+          No existen referencias registradas para este programa.
+        </div>
+
+        <div
+          class="citation-correction-card"
+          *ngFor="
+            let reference of referenceDrafts;
+            let referenceIndex = index
+          "
+        >
+          <div class="correction-section__title">
+            <mat-icon>swap_horiz</mat-icon>
+
+            <div>
+              <strong>Referencia {{ referenceIndex + 1 }}</strong>
+              <span>
+                ID referencia:
+                {{ reference.id > 0 ? reference.id : 'Nueva' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="correction-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Programa origen</mat-label>
+              <input
+                matInput
+                [value]="reference.originProgram?.name || 'No informado'"
+                readonly
+              />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Programa destino</mat-label>
+              <input
+                matInput
+                [value]="reference.destinationProgram?.name || 'No informado'"
+                readonly
+              />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha de referencia</mat-label>
+              <input
+                matInput
+                [matDatepicker]="correctionReferenceDatePicker"
+                [(ngModel)]="reference.referenceDate"
+                [name]="'correctionReferenceDate_' + reference.id"
+                placeholder="dd/mm/aaaa"
+              />
+              <mat-datepicker-toggle
+                matIconSuffix
+                [for]="correctionReferenceDatePicker"
+              ></mat-datepicker-toggle>
+              <mat-datepicker
+                #correctionReferenceDatePicker
+              ></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Motivo</mat-label>
+              <input
+                matInput
+                [(ngModel)]="reference.reason"
+                [name]="'correctionReferenceReason_' + reference.id"
+              />
+            </mat-form-field>
+
+            <mat-form-field
+              appearance="outline"
+              class="event-timeline__full-field"
+            >
+              <mat-label>Observación</mat-label>
+              <textarea
+                matInput
+                rows="3"
+                [(ngModel)]="reference.observation"
+                [name]="'correctionReferenceObservation_' + reference.id"
+              ></textarea>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+
 
       <div class="correction-section">
         <div class="correction-section__title">

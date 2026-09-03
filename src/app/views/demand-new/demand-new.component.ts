@@ -3704,11 +3704,6 @@ export class DemandNewComponent
       this.closureError = null;
       this.closureSuccess = null;
 
-      console.log('[DemandNew][DEBUG cierre payload]', {
-        episodeId,
-        workingStageId: this.workingStageId,
-        payload: closureContext.payload,
-      });
       this.demandEpisodeService
         .closeEpisode(episodeId, closureContext.payload)
         .pipe(
@@ -3895,20 +3890,7 @@ this.createdEpisode = activeEpisode;
       if (activeEpisodeId > 0) {
         this.loadEpisodeProgramContext(activeEpisodeId);
       }
-      console.log('[DemandNew][DEBUG ACTIVO]', {
-        requestedMode: this.requestedMode,
-        activeProgramId: this.activeProgramId,
-        sessionProgramId: this.tokenService.getActiveProgramId(),
-        activeEpisode,
-        episodeState: activeEpisode?.state?.code ?? activeEpisode?.stateCode,
-        episodeClosedAt: activeEpisode?.closedAt,
-        episodeClosureDate: activeEpisode?.closureDate,
-        workingStage: this.workingStage,
-        workingStageId: this.workingStageId,
-        isHistoricalEpisode: this.isHistoricalEpisode,
-        canManageCurrentEpisode: this.canManageCurrentEpisode,
-        demandActionMatrix: this.demandActionMatrix,
-      });
+
       this.showCreateEpisodeForm = false;
 
       this.episodeForm.patchValue(
@@ -4498,15 +4480,7 @@ this.createdEpisode = activeEpisode;
            * Mantiene actualizado el resumen del episodio mostrado.
            * Puede corresponder a una demanda activa o cerrada.
            */
-          console.log('[DemandNew][DEBUG antes episodio]', {
-            rawResponseEpisode,
-            responseEpisode,
-            responseEpisodeId: responseEpisode?.id,
-            responseEpisodeEpisodeId: responseEpisode?.episodeId,
-            responseEpisodeFromLongitudinal: response?.episode,
-            activeEpisodeFromLongitudinal: response?.activeEpisode,
-            requestedEpisode,
-          });
+
           if (responseEpisode?.id) {
             this.episodeSummary = {
               ...this.episodeSummary,
@@ -4515,16 +4489,7 @@ this.createdEpisode = activeEpisode;
               postulant: mergedPostulant ?? responseEpisode.postulant,
             };
 
-            console.log('[DemandNew][DEBUG episodio]', {
-              requestedMode: this.requestedMode,
-              episodeSummary: this.episodeSummary,
-              activeEpisode: this.longitudinal?.activeEpisode,
-              workingStage: this.workingStage,
-              workingStageId: this.workingStageId,
-              isHistoricalEpisode: this.isHistoricalEpisode,
-              canManageCurrentEpisode: this.canManageCurrentEpisode,
-              demandActionMatrix: this.demandActionMatrix,
-            });
+
             this.episodeLoaded = true;
             this.showCreateEpisodeForm = false;
 
@@ -5723,7 +5688,7 @@ this.createdEpisode = activeEpisode;
 
   get lastEpisodeEvent(): any | null {
     return resolveLatestOperationalStageEvent(
-      this.currentStageEvents,
+      this.episodeEvents ?? [],
       this.currentEpisodeStage,
     );
   }
@@ -5838,12 +5803,8 @@ this.createdEpisode = activeEpisode;
       : 'Sin gestiones registradas';
 
     const lastManagementDate =
-      lastEvent && this.getEventTypeCode(lastEvent) === 'CIERRE'
-        ? this.workingStageClosureDate ??
-          lastEvent?.eventDate ??
-          lastEvent?.createdAt
-        : lastEvent?.eventDate ??
-          lastEvent?.createdAt;
+      lastEvent?.eventDate ??
+      lastEvent?.createdAt;
 
     const lastManagementDetail = lastEvent
       ? `${formatDisplayDateValue(

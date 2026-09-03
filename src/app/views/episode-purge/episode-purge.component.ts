@@ -99,6 +99,8 @@ export class EpisodePurgeComponent {
   professionalsError = '';
   citationRows: any[] = [];
   feedbackDraft: any = null;
+
+  referenceDrafts: any[] = [];
   observationDrafts: any[] = [];
   closureDraft: any = null;
   feedbackResults: any[] = [];
@@ -1604,6 +1606,67 @@ export class EpisodePurgeComponent {
     const programReceivedAtChanged =
       correctedProgramReceivedAt !== null &&
       correctedProgramReceivedAt !== originalProgramReceivedAt;
+    const originalReferences = Array.isArray(this.longitudinal?.references)
+      ? this.longitudinal.references
+      : [];
+
+    const references = this.referenceDrafts
+      .filter((reference: any) => Number(reference?.id) > 0)
+      .map((reference: any) => {
+        const original = originalReferences.find(
+          (item: any) => Number(item?.id) === Number(reference?.id),
+        );
+
+        if (!original) {
+          return null;
+        }
+
+        const correctedReferenceDate = this.toAdministrativeDate(
+          reference?.referenceDate,
+        );
+
+        const originalReferenceDate = original?.referenceDate
+          ? String(original.referenceDate).slice(0, 10)
+          : null;
+
+        const correctedReason = String(reference?.reason ?? '').trim();
+        const originalReason = String(original?.reason ?? '').trim();
+
+        const correctedObservation = String(
+          reference?.observation ?? '',
+        ).trim();
+
+        const originalObservation = String(
+          original?.observation ?? '',
+        ).trim();
+
+        const changed =
+          correctedReferenceDate !== originalReferenceDate ||
+          correctedReason !== originalReason ||
+          correctedObservation !== originalObservation;
+
+        if (!changed) {
+          return null;
+        }
+
+        return {
+          action: 'UPDATE',
+          id: Number(reference.id),
+          referenceId: Number(reference.id),
+          originStageId: Number(reference.originStageId),
+          destinationStageId: Number(reference.destinationStageId),
+          destinationProgramId: Number(
+            reference?.destinationProgram?.id ??
+              reference?.destinationProgramId ??
+              0,
+          ),
+          referenceDate: correctedReferenceDate,
+          reason: correctedReason || null,
+          observation: correctedObservation || null,
+          makeDestinationCurrent: false,
+        };
+      })
+      .filter((reference: any) => reference !== null);
 
     const payload: any = {
       programId,
@@ -1646,6 +1709,9 @@ export class EpisodePurgeComponent {
         payload.episode.previousTreatmentNumber =
           correctedPreviousTreatmentNumber;
       }
+    }
+    if (references.length > 0) {
+      payload.references = references;
     }
 
     if (citations.length > 0) {
@@ -2082,6 +2148,7 @@ export class EpisodePurgeComponent {
           }))
         : [],
     });
+
     this.loadCorrectionCatalogs();
     this.loadCorrectionSubstances();
 
@@ -2149,6 +2216,23 @@ export class EpisodePurgeComponent {
     });
 
     const selectedEpisodeId = Number(this.episodeId);
+
+    const sourceReferences = Array.isArray(this.longitudinal?.references)
+      ? this.longitudinal.references.filter(
+          (reference: any) =>
+            Number(reference?.episodeId) === selectedEpisodeId &&
+            Number(reference?.originStageId) === Number(selectedStageId),
+        )
+      : [];
+
+    this.referenceDrafts = JSON.parse(
+      JSON.stringify(sourceReferences),
+    ).map((reference: any) => ({
+      ...reference,
+      referenceDate: reference?.referenceDate
+        ? parseBackendDate(String(reference.referenceDate).slice(0, 10))
+        : null,
+    }));
 
     const sourceEvents = Array.isArray(this.longitudinal?.events)
       ? this.longitudinal.events.filter(
