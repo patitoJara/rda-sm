@@ -77,6 +77,29 @@
       <span>{{ errorMessage }}</span>
     </div>
 
+    <div
+      class="danger-notice"
+      *ngIf="directPurgeAvailable && !loading"
+    >
+      <mat-icon>warning</mat-icon>
+
+      <div>
+        <strong>No fue posible cargar el episodio</strong>
+        <p>
+          Si verificó que el ID es correcto, puede realizar una purga directa.
+        </p>
+
+        <button
+          mat-stroked-button
+          color="warn"
+          type="button"
+          (click)="selectAdminAction('purge')"
+        >
+          <mat-icon>delete_forever</mat-icon>
+          <span>Purgar directamente ID {{ episodeId }}</span>
+        </button>
+      </div>
+    </div>
     <div class="episode-summary-compact" *ngIf="episode">
       <div class="section-heading">
         <div class="section-icon section-icon--warning">
@@ -545,7 +568,8 @@
                       <input
                         matInput
                         [matDatepicker]="correctionCitationDatePicker"
-                        [(ngModel)]="attempt.citation.eventDate"
+[(ngModel)]="attempt.citation.eventDate"
+                        (blur)="normalizeCorrectionDateInput($event, attempt.citation, 'eventDate')"
                         [name]="'correctionCitationDate_' + attempt.citation.id"
                         placeholder="dd/mm/aaaa"
                       />
@@ -570,7 +594,8 @@
                         maxlength="5"
                         placeholder="HH:mm"
                         pattern="(?:[01]\d|2[0-3]):[0-5]\d"
-                        [(ngModel)]="attempt.citation.eventTime"
+[(ngModel)]="attempt.citation.eventTime"
+                        (blur)="formatCorrectionHourInput(attempt.citation, 'eventTime')"
                         [name]="'correctionCitationTime_' + attempt.citation.id"
                       />
                     </mat-form-field>
@@ -939,7 +964,8 @@
               <input
                 matInput
                 [matDatepicker]="correctionReferenceDatePicker"
-                [(ngModel)]="reference.referenceDate"
+[(ngModel)]="reference.referenceDate"
+                (blur)="normalizeCorrectionDateInput($event, reference, 'referenceDate')"
                 [name]="'correctionReferenceDate_' + reference.id"
                 placeholder="dd/mm/aaaa"
               />
@@ -1030,7 +1056,8 @@
               <input
                 matInput
                 [matDatepicker]="correctionObservationDatePicker"
-                [(ngModel)]="observation.eventDate"
+[(ngModel)]="observation.eventDate"
+                (blur)="normalizeCorrectionDateInput($event, observation, 'eventDate')"
                 [name]="'correctionObservationDate_' + observation.id"
                 placeholder="dd/mm/aaaa"
               />
@@ -1053,7 +1080,8 @@
                 maxlength="5"
                 placeholder="HH:mm"
                 pattern="(?:[01]\d|2[0-3]):[0-5]\d"
-                [(ngModel)]="observation.eventTime"
+[(ngModel)]="observation.eventTime"
+                (blur)="formatCorrectionHourInput(observation, 'eventTime')"
                 [name]="'correctionObservationTime_' + observation.id"
               />
             </mat-form-field>
@@ -1134,7 +1162,8 @@
             <input
               matInput
               [matDatepicker]="correctionClosureDatePicker"
-              [(ngModel)]="closureDraft.closureDate"
+[(ngModel)]="closureDraft.closureDate"
+              (blur)="normalizeCorrectionDateInput($event, closureDraft, 'closureDate')"
               name="correctionClosureDate"
               placeholder="dd/mm/aaaa"
             />

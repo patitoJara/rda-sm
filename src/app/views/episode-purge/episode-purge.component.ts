@@ -90,6 +90,7 @@ export class EpisodePurgeComponent {
   reversalReason = '';
   reversalObservation = '';
   errorMessage = '';
+  directPurgeAvailable = false;
 
   adminMode: 'correction' | 'reversal' | 'purge' | null = null;
   selectedProgramForAdminAction: number | null = null;
@@ -268,7 +269,7 @@ export class EpisodePurgeComponent {
     const entered = this.normalize(this.confirmationCode);
 
     return (
-      !!this.episode &&
+      !!this.episodeId &&
       !!expected &&
       entered === expected &&
       !this.loading &&
@@ -887,6 +888,101 @@ export class EpisodePurgeComponent {
     attendance.markedForDeletion = false;
 
     this.buildCitationRows();
+  }
+  /**
+   * Normaliza una fecha escrita manualmente usando exactamente
+   * el mismo DateAdapter empleado por demand-new.
+   *
+   * Ejemplos aceptados dependen de DemandNewDateAdapter:
+   * DD/MM/AAAA, DDMMAAAA, etc.
+   */
+  normalizeCorrectionDateInput(
+    event: FocusEvent,
+    target: any,
+    property: string,
+  ): void {
+    const input = event.target as HTMLInputElement | null;
+
+    if (!input || !target || !property) {
+      return;
+    }
+
+    const rawValue = input.value?.trim();
+
+    if (!rawValue) {
+      return;
+    }
+
+    const adapter = new DemandNewDateAdapter('es-CL');
+    const parsedDate = adapter.parse(rawValue);
+
+    if (!parsedDate) {
+      this.snackBar.open(
+        'Ingrese una fecha válida. Use DD/MM/AAAA.',
+        'Cerrar',
+        {
+          duration: 3500,
+        },
+      );
+
+      return;
+    }
+
+    target[property] = parsedDate;
+    input.value = adapter.format(parsedDate);
+  }
+
+  /**
+   * Replica la ayuda de escritura de hora usada en demand-new.
+   *
+   * 930   -> 09:30
+   * 1530  -> 15:30
+   * 9:30  -> 09:30
+   */
+  formatCorrectionHourInput(
+    target: any,
+    property: string,
+  ): void {
+    if (!target || !property) {
+      return;
+    }
+
+    const raw = String(target[property] ?? '')
+      .replace(/\D/g, '')
+      .slice(0, 4);
+
+    if (!raw) {
+      target[property] = '';
+      return;
+    }
+
+    let formatted = raw;
+
+    if (raw.length >= 3) {
+      formatted = `${raw.slice(0, raw.length - 2)}:${raw.slice(-2)}`;
+    }
+
+    if (
+      formatted.length === 4 &&
+      formatted.startsWith('0') === false
+    ) {
+      formatted = `0${formatted}`;
+    }
+
+    target[property] = formatted;
+
+    const valid =
+      /^([01]\d|2[0-3]):[0-5]\d$/.test(formatted);
+
+    if (!valid && formatted.length === 5) {
+      this.snackBar.open(
+        'Ingrese una hora válida entre 00:00 y 23:59.',
+        'Cerrar',
+        {
+          duration: 3500,
+        },
+      );
+    }
   }
   addCorrectionObservation(): void {
     const episodeId = Number(this.episodeId);
@@ -2288,6 +2384,7 @@ export class EpisodePurgeComponent {
     this.purgeResult = null;
     this.confirmationCode = '';
     this.errorMessage = '';
+    this.directPurgeAvailable = false;
   }
 
   searchEpisode(): void {
@@ -2300,6 +2397,7 @@ export class EpisodePurgeComponent {
 
     this.loading = true;
     this.errorMessage = '';
+    this.directPurgeAvailable = false;
     this.longitudinal = null;
     this.episode = null;
     this.purgeResult = null;
@@ -2466,6 +2564,8 @@ export class EpisodePurgeComponent {
           });
         },
         error: (error: HttpErrorResponse) => {
+          this.directPurgeAvailable = error.status !== 404;
+
           this.errorMessage =
             error.status === 404
               ? 'No existe un episodio con ese ID.'

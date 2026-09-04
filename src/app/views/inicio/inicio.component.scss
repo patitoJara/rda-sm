@@ -1896,6 +1896,19 @@ mat-paginator {
     width: 280px;
   }
 
+  .filters-form .filter-field--search {
+    width: 360px;
+  }
+
+  :host ::ng-deep .filters-form .filter-field--search input {
+    font-size: 0.72rem;
+  }
+
+  :host ::ng-deep .filters-form .filter-field--search input::placeholder {
+    font-size: 0.72rem;
+    opacity: 1;
+  }
+
   .filter-field--result {
     width: 265px;
   }
@@ -2462,15 +2475,22 @@ mat-paginator {
   }
 
   .mat-column-person {
-    width: 9% !important;
+    width: 8% !important;
   }
 
   .mat-column-rut {
-    width: 5.5% !important;
+    width: 6.2% !important;
+  }
+
+  .mat-column-createdBy {
+    width: 7.5% !important;
+    min-width: 0 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
   }
 
   .mat-column-requestDate {
-    width: 3.5% !important;
+    width: 4.2% !important;
   }
 
   .mat-column-citationFirstFirst,
@@ -2707,5 +2727,178 @@ mat-paginator {
   .scope-banner {
     flex: 0 0 auto;
     min-height: 48px;
+  }
+}
+/* ============================================================
+   CABECERA COMPACTA FINAL BANDEJA
+   Título, alcance y ayuda en una sola línea.
+   ============================================================ */
+
+@media (min-width: 901px) {
+
+  .table-heading {
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+    min-height: 46px !important;
+    padding: 7px 14px !important;
+  }
+
+  .table-heading__content {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    align-items: center !important;
+    min-width: 0 !important;
+  }
+
+  /* Oculta la pequeña leyenda HISTORIAL DE DEMANDAS / BANDEJA DE TRABAJO */
+  .table-heading__content > span {
+    display: none !important;
+  }
+
+  .table-heading__main-row {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 18px !important;
+    min-width: 0 !important;
+  }
+
+  .table-heading__main-row h2 {
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    align-items: center !important;
+    gap: 5px !important;
+    margin: 0 !important;
+    font-size: 0.92rem !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+  }
+
+  .table-heading__main-row h2 mat-icon {
+    width: 19px !important;
+    height: 19px !important;
+    font-size: 19px !important;
+  }
+
+  .table-heading__context {
+    display: flex !important;
+    flex: 0 1 auto !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 9px !important;
+    min-width: 0 !important;
+  }
+
+  .table-heading__scope {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+
+    min-height: 28px !important;
+    padding: 4px 9px !important;
+
+    color: #38565f !important;
+    border: 1px solid #d3e2e6 !important;
+    border-radius: 8px !important;
+    background: #f5fafb !important;
+
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  .table-heading__scope mat-icon {
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 16px !important;
+    color: #08778a !important;
+  }
+
+  .table-heading__scope--filtered {
+    color: #006b7b !important;
+    border-color: #9fd2da !important;
+    background: #eaf7f9 !important;
+  }
+
+  /* Anula el formato antiguo de column-help */
+  .column-help.column-help--inline {
+    position: relative !important;
+    display: inline-block !important;
+    flex: 0 0 auto !important;
+
+    width: auto !important;
+    min-width: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+
+  .column-help.column-help--inline > summary {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+
+    min-height: 28px !important;
+    padding: 4px 9px !important;
+
+    color: #38565f !important;
+    border: 1px solid #d3e2e6 !important;
+    border-radius: 8px !important;
+    background: #f5fafb !important;
+
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    list-style: none !important;
+  }
+
+  .column-help.column-help--inline > summary::-webkit-details-marker {
+    display: none !important;
+  }
+
+  .column-help.column-help--inline > summary mat-icon {
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 16px !important;
+    color: #08778a !important;
+  }
+
+  /* Solo al abrir la ayuda ocupa una segunda línea */
+  .column-help.column-help--inline[open] {
+    position: static !important;
+  }
+
+  .column-help.column-help--inline[open] .column-help__grid {
+    position: absolute !important;
+    z-index: 50 !important;
+    left: 14px !important;
+    right: 14px !important;
+    top: calc(100% - 2px) !important;
+
+    margin: 0 !important;
+    padding: 10px 12px !important;
+
+    border: 1px solid #d3e2e6 !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+
+    box-shadow: 0 8px 20px rgba(34, 59, 70, 0.12) !important;
+  }
+
+  .table-heading__total {
+    flex: 0 0 auto !important;
+    margin-left: auto !important;
   }
 }

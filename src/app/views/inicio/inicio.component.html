@@ -285,8 +285,9 @@
       <mat-form-field
         appearance="outline"
         class="filter-field filter-field--search"
+        floatLabel="always"
       >
-        <mat-label>ID - Nombre - RUN</mat-label>
+        <mat-label>Buscar demanda</mat-label>
 
         <mat-icon matPrefix>search</mat-icon>
 
@@ -295,8 +296,8 @@
           type="text"
           formControlName="search"
           autocomplete="off"
-          placeholder="Ej.: 31, Sofia o 14.036.818-0"
-          aria-label="Buscar por ID de episodio, nombre o RUN"
+          placeholder="ID, código, nombre, RUN o creador"
+          aria-label="Buscar por ID, código de episodio, nombre, RUN o usuario creador"
         />
       </mat-form-field>
 
@@ -366,7 +367,7 @@
     [class.priority-table-card--historical]="isHistoricalMode"
   >
     <div class="table-heading">
-      <div>
+      <div class="table-heading__content">
         <span>
           {{
             isHistoricalMode
@@ -375,22 +376,58 @@
           }}
         </span>
 
-        <h2>
-          <mat-icon *ngIf="isHistoricalMode">lock</mat-icon>
-          {{
-            isHistoricalMode
-              ? "Historial disponible en modo de consulta"
-              : "Demandas activas ordenadas por prioridad"
-          }}
-        </h2>
+        <div class="table-heading__main-row">
+          <h2>
+            <mat-icon *ngIf="isHistoricalMode">lock</mat-icon>
+            {{
+              isHistoricalMode
+                ? "Historial disponible en modo de consulta"
+                : "Demandas activas ordenadas por prioridad"
+            }}
+          </h2>
 
-        <p>
-          {{
-            isHistoricalMode
-              ? "Las demandas cerradas pueden revisarse, pero no admiten nuevas gestiones."
-              : "Los casos con mayor cantidad de días acumulados aparecen primero."
-          }}
-        </p>
+          <div class="table-heading__context">
+            <span
+              class="table-heading__scope"
+              [class.table-heading__scope--filtered]="hasAppliedFilters"
+              [matTooltip]="metricsScopeMessage"
+            >
+              <mat-icon>
+                {{ hasAppliedFilters ? "filter_alt" : "info" }}
+              </mat-icon>
+
+              {{ metricsScopeTitle }}
+            </span>
+
+            <details class="column-help column-help--inline">
+              <summary>
+                <mat-icon>help_outline</mat-icon>
+                Significado de columnas
+              </summary>
+
+              <div class="column-help__grid">
+                <span><strong>Solic.</strong> Fecha original de la demanda.</span>
+                <span><strong>C1-E1</strong> Primera citación a primera entrevista.</span>
+                <span><strong>C2-E1</strong> Segunda citación a primera entrevista.</span>
+                <span><strong>C1-E2</strong> Primera citación a segunda entrevista.</span>
+                <span><strong>C2-E2</strong> Segunda citación a segunda entrevista.</span>
+                <span><strong>C1-E3</strong> Primera citación a tercera entrevista.</span>
+                <span><strong>C2-E3</strong> Segunda citación a tercera entrevista.</span>
+                <span><strong>Opc.</strong> Entrevista opcional.</span>
+                <span><strong>Retro.</strong> Fecha de Retroalimentación.</span>
+                <span><strong>Comp. BPS</strong> Compromiso biopsicosocial.</span>
+                <span><strong>Últ. gest.</strong> Última gestión registrada.</span>
+                <span>
+                  <strong>Semáforo.</strong>
+                  Días acumulados desde la solicitud original.
+                </span>
+                <span><strong>Verde:</strong> 0 a 45 días.</span>
+                <span><strong>Amarillo:</strong> 46 a 90 días.</span>
+                <span><strong>Rojo:</strong> 91 días o más.</span>
+              </div>
+            </details>
+          </div>
+        </div>
       </div>
 
       <div class="table-heading__total">
@@ -400,53 +437,6 @@
         </span>
       </div>
     </div>
-
-    <div
-      class="scope-banner"
-      [class.scope-banner--filtered]="hasAppliedFilters"
-      [class.scope-banner--historical]="isHistoricalMode"
-      role="status"
-      aria-live="polite"
-    >
-      <div class="scope-banner__icon">
-        <mat-icon>
-          {{ hasAppliedFilters ? "filter_alt" : "info" }}
-        </mat-icon>
-      </div>
-
-      <div class="scope-banner__content">
-        <strong>{{ metricsScopeTitle }}</strong>
-        <span>{{ metricsScopeMessage }}</span>
-      </div>
-    </div>
-
-    <details class="column-help">
-      <summary>
-        <mat-icon>help_outline</mat-icon>
-        Significado de columnas
-      </summary>
-
-      <div class="column-help__grid">
-        <span><strong>Solic.</strong> Fecha original de la demanda.</span>
-        <span><strong>C1-E1</strong> Primera citación a primera entrevista.</span>
-        <span><strong>C2-E1</strong> Segunda citación a primera entrevista.</span>
-        <span><strong>C1-E2</strong> Primera citación a segunda entrevista.</span>
-        <span><strong>C2-E2</strong> Segunda citación a segunda entrevista.</span>
-        <span><strong>C1-E3</strong> Primera citación a tercera entrevista.</span>
-        <span><strong>C2-E3</strong> Segunda citación a tercera entrevista.</span>
-        <span><strong>Opc.</strong> Entrevista opcional.</span>
-        <span><strong>Retro.</strong> Fecha de Retroalimentación.</span>
-        <span><strong>Comp. BPS</strong> Compromiso biopsicosocial.</span>
-        <span><strong>Últ. gest.</strong> Última gestión registrada.</span>
-        <span>
-          <strong>Semáforo.</strong>
-          Días acumulados desde la solicitud original.
-        </span>
-        <span><strong>Verde:</strong> 0 a 45 días.</span>
-        <span><strong>Amarillo:</strong> 46 a 90 días.</span>
-        <span><strong>Rojo:</strong> 91 días o más.</span>
-      </div>
-    </details>
     <mat-progress-bar
       *ngIf="loadingEpisodes"
       mode="indeterminate"
@@ -594,6 +584,18 @@
             </strong>
           </td>
         </ng-container>
+
+        <!-- CREADO POR -->
+        <ng-container matColumnDef="createdBy">
+          <th mat-header-cell *matHeaderCellDef>
+            <span matTooltip="Usuario que creó el episodio">Creado por</span>
+          </th>
+
+          <td mat-cell *matCellDef="let row">
+            {{ row.createdByUser?.name || "Sin información" }}
+          </td>
+        </ng-container>
+
 
         <!-- FECHA SOLICITUD -->
         <ng-container matColumnDef="requestDate">

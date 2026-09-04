@@ -719,6 +719,664 @@ button mat-progress-spinner {
   }
 }
 
+/* ===== Mejora visual citaciones y asistencias ===== */
+
+/*
+ * Objetivo:
+ * - distinguir claramente cada tipo de citación;
+ * - dar identidad visual distinta a Citación y Asistencia;
+ * - facilitar el recorrido vertical del mantenedor;
+ * - no modificar estructura ni lógica.
+ */
+
+.citation-correction-groups {
+  gap: 1.35rem;
+}
+
+.citation-correction-row {
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 2px 7px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+}
+
+.citation-correction-row__heading {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #c7d8eb;
+  border-left: 4px solid #1976d2;
+  background: #edf5ff;
+}
+
+.citation-correction-row__heading strong {
+  color: #17324d;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.citation-correction-row__heading span {
+  padding: 0.22rem 0.55rem;
+  border: 1px solid #b7d4f3;
+  background: #dcecff;
+  color: #155a94;
+  font-weight: 700;
+}
+
+.citation-correction-row__heading button {
+  background: #ffffff;
+}
+
+.citation-correction-attempt {
+  padding: 1rem;
+  background: #fbfdff;
+}
+
+.citation-correction-attempt + .citation-correction-attempt {
+  border-top: 2px solid #e2e8f0;
+}
+
+.citation-correction-attempt__number {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 0.8rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #eef2f7;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.045em;
+}
+
+.citation-correction-pair {
+  gap: 1.1rem;
+}
+
+/* ----- CITACIÓN ----- */
+
+.citation-correction-card {
+  position: relative;
+  border: 1px solid #b9d7f4;
+  border-left: 4px solid #1976d2;
+  border-radius: 11px;
+  background: #f7fbff;
+  box-shadow: 0 1px 3px rgba(25, 118, 210, 0.07);
+}
+
+.citation-correction-card > header {
+  margin: -0.75rem -0.75rem 0.8rem;
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid #cfe2f5;
+  background: #eaf4ff;
+}
+
+.citation-correction-card > header mat-icon {
+  color: #1565c0;
+}
+
+.citation-correction-card > header strong {
+  color: #174f7d;
+  font-weight: 750;
+}
+
+.citation-correction-card > header span {
+  color: #54758f;
+}
+
+/* ----- ASISTENCIA ----- */
+
+.citation-correction-card--attendance {
+  border: 1px solid #badcbc;
+  border-left: 4px solid #2e7d32;
+  background: #f8fcf8;
+  box-shadow: 0 1px 3px rgba(46, 125, 50, 0.07);
+}
+
+.citation-correction-card--attendance > header {
+  border-bottom-color: #cce5ce;
+  background: #edf8ee;
+}
+
+.citation-correction-card--attendance > header mat-icon {
+  color: #2e7d32;
+}
+
+.citation-correction-card--attendance > header strong {
+  color: #245c28;
+}
+
+.citation-correction-card--attendance > header span {
+  color: #5c795e;
+}
+
+/* ----- ASISTENCIA AÚN NO REGISTRADA ----- */
+
+.citation-correction-card--attendance
+  .citation-correction-card__empty {
+  min-height: 105px;
+  border: 1px dashed #a8c9aa;
+  background: #fbfdfb;
+  color: #526c54;
+}
+
+/* ----- CAMPOS ----- */
+
+.citation-correction-card__grid {
+  gap: 0.65rem 0.75rem;
+}
+
+/*
+ * Evita que los campos dominen visualmente sobre
+ * el encabezado de Citación / Asistencia.
+ */
+.citation-correction-card mat-form-field {
+  margin-bottom: 0;
+}
+
+/* ----- BOTONES DE ELIMINACIÓN ----- */
+
+.citation-correction-card
+  button[color="warn"] {
+  background: #fffafa;
+}
+
+/* ----- RESPONSIVE ----- */
+
+@media (max-width: 1100px) {
+  .citation-correction-pair {
+    gap: 0.8rem;
+  }
+}
+
+@media (max-width: 700px) {
+  .citation-correction-row__heading {
+    border-left-width: 3px;
+  }
+
+  .citation-correction-attempt {
+    padding: 0.75rem;
+  }
+}
+/* ===== Jerarquía visual secciones administrativas ===== */
+
+/* =========================================================
+   RETROALIMENTACIÓN
+   Decisión funcional de la etapa
+   ========================================================= */
+
+.correction-section:has(
+    > .correction-section__title strong
+  ):has(
+    > .correction-section__title strong:first-child
+  ) {
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+/*
+ * Retroalimentación.
+ * Se identifica por el icono assignment_turned_in.
+ */
+.correction-section:has(
+    > .correction-section__title > mat-icon:first-child
+  ) {
+  border-radius: 12px;
+}
+
+.correction-section:has(
+    > .correction-section__title > mat-icon:first-child
+  ):has(
+    > .correction-section__title strong
+  ) {
+  overflow: hidden;
+}
+
+/*
+ * Aplicamos identidad solamente cuando el encabezado
+ * utiliza assignment_turned_in.
+ */
+.correction-section:has(
+    > .correction-section__title > mat-icon
+  ):has(
+    > .correction-section__title strong
+  ) {
+  --section-accent: transparent;
+}
+
+/* Retroalimentación */
+.correction-section:has(
+    > .correction-section__title > mat-icon:first-child
+  ):has(
+    > .correction-section__title strong
+  ):has(
+    mat-icon:first-child
+  ) {
+  position: relative;
+}
+
+/*
+ * Angular Material mantiene el nombre del icono como texto
+ * dentro de mat-icon, por lo que estos estilos se apoyan
+ * principalmente en el orden real de las secciones.
+ *
+ * Los selectores específicos siguientes usan :has() sobre
+ * contenido propio de cada sección.
+ */
+
+/* ----- Retroalimentación ----- */
+
+.correction-section:has(
+    [name^="correctionFeedback"]
+  ) {
+  padding: 0.9rem;
+  border: 1px solid #d8c8ec;
+  border-left: 4px solid #7e57c2;
+  border-radius: 12px;
+  background: #fcfaff;
+}
+
+.correction-section:has(
+    [name^="correctionFeedback"]
+  )
+  > .correction-section__title {
+  margin: -0.9rem -0.9rem 0.15rem;
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid #ded1ee;
+  background: #f3eefb;
+}
+
+.correction-section:has(
+    [name^="correctionFeedback"]
+  )
+  > .correction-section__title
+  mat-icon {
+  color: #6f42a6;
+}
+
+.correction-section:has(
+    [name^="correctionFeedback"]
+  )
+  > .correction-section__title
+  strong {
+  color: #51317a;
+}
+
+
+/* =========================================================
+   REFERENCIAS
+   Movimiento administrativo entre programas
+   ========================================================= */
+
+.correction-section:has(
+    [name^="correctionReference"]
+  ),
+.correction-section:has(
+    > .citation-correction-card__empty
+  ):has(
+    > .correction-section__title mat-icon
+  ):has(
+    .citation-correction-card [name^="correctionReference"]
+  ) {
+  padding: 0.9rem;
+  border: 1px solid #ead7ad;
+  border-left: 4px solid #c58a25;
+  border-radius: 12px;
+  background: #fffdf8;
+}
+
+.correction-section:has(
+    [name^="correctionReference"]
+  )
+  > .correction-section__title {
+  margin: -0.9rem -0.9rem 0.15rem;
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid #ead9b8;
+  background: #fff7e8;
+}
+
+.correction-section:has(
+    [name^="correctionReference"]
+  )
+  > .correction-section__title
+  mat-icon {
+  color: #a56d13;
+}
+
+.correction-section:has(
+    [name^="correctionReference"]
+  )
+  > .correction-section__title
+  strong {
+  color: #755018;
+}
+
+/*
+ * Las tarjetas de referencia reutilizan citation-correction-card.
+ * Aquí neutralizamos el azul de Citaciones.
+ */
+.correction-section:has(
+    [name^="correctionReference"]
+  )
+  > .citation-correction-card {
+  border: 1px solid #ead9b8;
+  border-left: 4px solid #d6a34c;
+  background: #fffefb;
+  box-shadow: none;
+}
+
+.correction-section:has(
+    [name^="correctionReference"]
+  )
+  > .citation-correction-card
+  > .correction-section__title {
+  margin: -0.75rem -0.75rem 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid #eee0c6;
+  background: #fff9ee;
+}
+
+.correction-section:has(
+    [name^="correctionReference"]
+  )
+  > .citation-correction-card
+  > .correction-section__title
+  mat-icon {
+  color: #a56d13;
+}
+
+
+/* =========================================================
+   OBSERVACIONES
+   Notas administrativas: menor peso visual
+   ========================================================= */
+
+.correction-section:has(
+    [name^="correctionObservation"]
+  ) {
+  padding: 0.9rem;
+  border: 1px solid #d8dee4;
+  border-left: 4px solid #78909c;
+  border-radius: 12px;
+  background: #fbfcfd;
+}
+
+.correction-section:has(
+    [name^="correctionObservation"]
+  )
+  > .correction-section__title {
+  margin: -0.9rem -0.9rem 0.15rem;
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid #dce2e6;
+  background: #f3f6f7;
+}
+
+.correction-section:has(
+    [name^="correctionObservation"]
+  )
+  > .correction-section__title
+  mat-icon {
+  color: #546e7a;
+}
+
+.correction-section:has(
+    [name^="correctionObservation"]
+  )
+  > .correction-section__title
+  strong {
+  color: #37474f;
+}
+
+/*
+ * Cada observación deja de parecer una Citación.
+ */
+.correction-section:has(
+    [name^="correctionObservation"]
+  )
+  > .citation-correction-card {
+  border: 1px solid #d9dfe3;
+  border-left: 4px solid #90a4ae;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.correction-section:has(
+    [name^="correctionObservation"]
+  )
+  > .citation-correction-card
+  > .correction-section__title {
+  margin: -0.75rem -0.75rem 0.7rem;
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid #e1e5e8;
+  background: #f6f8f9;
+}
+
+.correction-section:has(
+    [name^="correctionObservation"]
+  )
+  > .citation-correction-card
+  > .correction-section__title
+  mat-icon {
+  color: #607d8b;
+}
+
+.correction-section:has(
+    [name^="correctionObservation"]
+  )
+  > .citation-correction-card
+  > .correction-section__title
+  strong {
+  color: #455a64;
+  font-weight: 750;
+}
+
+/*
+ * El botón Agregar observación queda como acción secundaria
+ * del bloque y no como otra tarjeta.
+ */
+.correction-section:has(
+    [name^="correctionObservation"]
+  )
+  > button:last-child {
+  justify-self: stretch;
+  border-color: #9faeb5;
+  background: #ffffff;
+}
+
+
+/* =========================================================
+   CIERRE DEL PROGRAMA
+   Zona funcional sensible
+   ========================================================= */
+
+.correction-section:has(
+    [name="correctionClosureReason"]
+  ) {
+  padding: 0.95rem;
+  border: 1px solid #bac8d1;
+  border-left: 5px solid #455a64;
+  border-radius: 12px;
+  background: #f8fafb;
+}
+
+.correction-section:has(
+    [name="correctionClosureReason"]
+  )
+  > .correction-section__title {
+  margin: -0.95rem -0.95rem 0.2rem;
+  padding: 0.8rem 0.95rem;
+  border-bottom: 1px solid #cbd5db;
+  background: #eaf0f3;
+}
+
+.correction-section:has(
+    [name="correctionClosureReason"]
+  )
+  > .correction-section__title
+  mat-icon {
+  color: #37474f;
+}
+
+.correction-section:has(
+    [name="correctionClosureReason"]
+  )
+  > .correction-section__title
+  strong {
+  color: #263238;
+  font-size: 1rem;
+}
+
+
+/* =========================================================
+   APLICAR CORRECCIÓN ADMINISTRATIVA
+   Cierre visual del flujo
+   ========================================================= */
+
+.confirmation-panel:has(
+    textarea[name="correctionReason"]
+  ) {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #b7cad7;
+  border-top: 4px solid #1565c0;
+  border-radius: 12px;
+  background: #f3f8fc;
+  box-shadow: 0 2px 7px rgba(15, 23, 42, 0.05);
+}
+
+.confirmation-panel:has(
+    textarea[name="correctionReason"]
+  )
+  h3 {
+  margin-bottom: 0.3rem;
+  color: #174f7d;
+  font-size: 1.05rem;
+}
+
+.confirmation-panel:has(
+    textarea[name="correctionReason"]
+  )
+  p {
+  color: #526875;
+}
+
+.confirmation-panel:has(
+    textarea[name="correctionReason"]
+  )
+  mat-form-field {
+  background: #ffffff;
+  border-radius: 6px;
+}
+
+.confirmation-panel:has(
+    textarea[name="correctionReason"]
+  )
+  button[mat-flat-button] {
+  min-height: 44px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .correction-section:has(
+      [name^="correctionFeedback"]
+    ),
+  .correction-section:has(
+      [name^="correctionReference"]
+    ),
+  .correction-section:has(
+      [name^="correctionObservation"]
+    ),
+  .correction-section:has(
+      [name="correctionClosureReason"]
+    ) {
+    padding: 0.7rem;
+    border-left-width: 3px;
+  }
+
+  .confirmation-panel:has(
+      textarea[name="correctionReason"]
+    ) {
+    border-top-width: 3px;
+  }
+}
+/* ===== Campos administrativos compactos ===== */
+
+/* ---------------------------------------------------------
+   OBSERVACIONES
+   Fecha y hora no necesitan el mismo ancho que los textos.
+   --------------------------------------------------------- */
+
+.correction-section:has(
+    [name^="correctionObservation"]
+  )
+  > .citation-correction-card
+  > .correction-grid {
+  grid-template-columns:
+    190px
+    120px
+    minmax(280px, 1fr)
+    minmax(280px, 1fr);
+}
+
+/* ---------------------------------------------------------
+   CIERRE DEL PROGRAMA
+   Motivo y fecha compactos; observación toma el resto.
+   --------------------------------------------------------- */
+
+.correction-section:has(
+    [name="correctionClosureReason"]
+  )
+  > .correction-grid {
+  grid-template-columns:
+    260px
+    190px
+    minmax(320px, 1fr);
+}
+
+/* ---------------------------------------------------------
+   FECHAS EN GENERAL
+   Evita que un datepicker aislado se expanda innecesariamente.
+   --------------------------------------------------------- */
+
+.correction-section
+  mat-form-field:has(mat-datepicker-toggle) {
+  min-width: 0;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .correction-section:has(
+      [name^="correctionObservation"]
+    )
+    > .citation-correction-card
+    > .correction-grid,
+  .correction-section:has(
+      [name="correctionClosureReason"]
+    )
+    > .correction-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .correction-section:has(
+      [name^="correctionObservation"]
+    )
+    > .citation-correction-card
+    > .correction-grid,
+  .correction-section:has(
+      [name="correctionClosureReason"]
+    )
+    > .correction-grid {
+    grid-template-columns: 1fr;
+  }
+}
 /* ===== Operación administrativa compacta ===== */
 
 .admin-action-selector {
@@ -1748,4 +2406,79 @@ button mat-progress-spinner {
 .administrative-substances__order {
   color: #08778a;
   font-weight: 700;
+}
+
+/* ===== Episode purge · apariencia ejecutiva 2026 ===== */
+
+.purge-page {
+  font-family: Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #344b55;
+}
+
+.purge-hero {
+  padding: 13px 16px;
+  border-radius: 12px;
+  box-shadow: none;
+
+  h1 {
+    margin: 2px 0 3px;
+    font-size: 1.28rem;
+    font-weight: 750;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    max-width: 760px;
+    margin: 0;
+    font-size: 0.72rem;
+    line-height: 1.25;
+    opacity: 0.94;
+  }
+}
+
+.purge-hero .eyebrow {
+  gap: 5px;
+  font-size: 0.61rem;
+  font-weight: 800;
+  letter-spacing: 0.045em;
+}
+
+.purge-hero .admin-badge {
+  border-radius: 10px;
+}
+
+.search-card,
+.episode-summary-compact,
+.confirmation-panel,
+.danger-notice,
+.result-card {
+  border-radius: 11px;
+  box-shadow: 0 1px 3px rgba(30, 55, 65, 0.08);
+}
+
+.section-heading,
+.result-heading {
+  h2 {
+    font-size: 0.92rem;
+    font-weight: 750;
+    letter-spacing: -0.01em;
+  }
+
+  p {
+    font-size: 0.68rem;
+    line-height: 1.2;
+  }
+}
+
+.data-item {
+  span {
+    font-size: 0.61rem;
+    font-weight: 650;
+  }
+
+  strong {
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
 }

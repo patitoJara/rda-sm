@@ -226,13 +226,14 @@ export class InicioComponent implements OnInit, OnDestroy {
     );
   }
 
-  readonly pageSizeOptions = [20, 50, 100];
+  readonly pageSizeOptions = [6, 20, 50, 100];
 
   readonly activeDisplayedColumns = [
     'semaphore',
     'days',
     'person',
     'rut',
+    'createdBy',
     'requestDate',
     'citationFirstFirst',
     'citationSecondFirst',

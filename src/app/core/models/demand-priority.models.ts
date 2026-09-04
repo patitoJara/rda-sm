@@ -1,4 +1,4 @@
-﻿export interface DemandProgramSummaryDTO {
+export interface DemandProgramSummaryDTO {
   id: number;
   name: string;
   active?: boolean;
@@ -46,6 +46,12 @@ export interface PrioritizedEpisodeDTO {
   closureDate: string | null;
 
   biopsychosocialCommitmentCode: string | null;
+
+  createdByUser: {
+    id: number;
+    name: string;
+    email: string;
+  } | null;
 
   suggestedAction: string | null;
 }
