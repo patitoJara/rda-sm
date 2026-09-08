@@ -21,7 +21,7 @@ function buildInput(
 }
 
 describe('resolveDemandActionMatrix', () => {
-  it('debe iniciar una etapa permitiendo citar, observar y abandonar', () => {
+  it('debe iniciar una etapa permitiendo citar, retroalimentar y observar', () => {
     const matrix = resolveDemandActionMatrix(buildInput());
 
     expect(matrix.scenario).toBe('ACTIVE_INITIAL');
@@ -29,14 +29,14 @@ describe('resolveDemandActionMatrix', () => {
     expect(matrix.attendance.enabled).toBeFalse();
     expect(matrix.feedback.enabled).toBeTrue();
     expect(matrix.observation.enabled).toBeTrue();
-    expect(matrix.reference.enabled).toBeTrue();
-    expect(matrix.closure.enabled).toBeTrue();
-    expect(matrix.allowedClosureOptions).toEqual(['ABANDONO']);
+    expect(matrix.reference.enabled).toBeFalse();
+    expect(matrix.closure.enabled).toBeFalse();
+    expect(matrix.allowedClosureOptions).toEqual([]);
     expect(matrix.historical).toBeFalse();
     expect(matrix.readonly).toBeFalse();
   });
 
-  it('debe mantener referencia disponible en una etapa abierta', () => {
+  it('debe mantener referencia bloqueada antes de una retroalimentación habilitante', () => {
     const matrix = resolveDemandActionMatrix(
       buildInput({
         citationCount: 1,
@@ -45,7 +45,7 @@ describe('resolveDemandActionMatrix', () => {
       }),
     );
 
-    expect(matrix.reference.enabled).toBeTrue();
+    expect(matrix.reference.enabled).toBeFalse();
   });
 
   it('LISTA_ESPERA debe bloquear nuevas citaciones, asistencias y retroalimentación', () => {

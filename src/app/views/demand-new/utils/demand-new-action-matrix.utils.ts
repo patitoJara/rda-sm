@@ -457,7 +457,7 @@ export function resolveDemandActionMatrix(
 
       observation: action(true),
 
-      reference: action(false, 'La referencia solo se habilita cuando la retroalimentación define Referencia.'),
+      reference: action(true),
 
       closure: action(true),
 
