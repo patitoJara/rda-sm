@@ -46,7 +46,7 @@ export class InicioClosedMetricsService {
       }
 
       return this.demandService
-        .getPrioritizedEpisodes({
+        .getPrioritizedEpisodeStages({
           ...baseQuery,
           resultCode,
         })
@@ -61,7 +61,7 @@ export class InicioClosedMetricsService {
 
     return forkJoin({
       closed:
-        this.demandService.getPrioritizedEpisodes({
+        this.demandService.getPrioritizedEpisodeStages({
           ...baseQuery,
           resultCode: filter.resultCode,
         }),
