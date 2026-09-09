@@ -56,6 +56,78 @@ export interface PrioritizedEpisodeDTO {
   suggestedAction: string | null;
 }
 
+export interface PrioritizedEpisodeStageDTO {
+  episodeId: number;
+  episodeCode: string;
+  rut: string;
+  personName: string;
+
+  createdByUser: {
+    id: number;
+    name: string;
+    email: string;
+  } | null;
+
+  currentProgram: DemandProgramSummaryDTO | null;
+  currentStageId: number | null;
+
+  program: DemandProgramSummaryDTO | null;
+  programId: number;
+  programName: string;
+
+  stageId: number;
+  stageOrder: number;
+  originStageId: number | null;
+
+  receivedAt: string | null;
+  closedAt: string | null;
+  closureDate: string | null;
+  daysInStage: number;
+
+  stageStateCode: string | null;
+  stageResultCode: string | null;
+
+  closed: boolean;
+  current: boolean;
+
+  closureReason: {
+    id: number;
+    code: string;
+    name: string;
+  } | null;
+
+  closureComment: string | null;
+
+  responsibleUser: {
+    id: number;
+    name: string;
+    email: string;
+  } | null;
+
+  originalRequestDate: string;
+  accumulatedDays: number;
+  semaphoreColor: string;
+
+  lastManagement: string | null;
+  lastManagementDate: string | null;
+  lastManagementTime: string | null;
+
+  firstCitationFirstInterviewDate: string | null;
+  secondCitationFirstInterviewDate: string | null;
+  firstCitationSecondInterviewDate: string | null;
+  secondCitationSecondInterviewDate: string | null;
+  firstCitationThirdInterviewDate: string | null;
+  secondCitationThirdInterviewDate: string | null;
+  optionalInterviewDate: string | null;
+
+  feedbackDate: string | null;
+  feedbackResultCode: string | null;
+  biopsychosocialCommitmentCode: string | null;
+
+  suggestedAction: string | null;
+
+  events: any[];
+}
 export interface DemandEpisodeProgramContextDTO {
   episodeId: number;
   programId: number;

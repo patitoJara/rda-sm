@@ -531,7 +531,7 @@
               class="waiting-days"
               [matTooltip]="getSemaphoreLabelByDays(row.accumulatedDays)"
             >
-              <strong>{{ row.accumulatedDays ?? 0 }} d</strong>
+              <strong>{{ getEpisodeDisplayDays(row) }} d</strong>
             </div>
           </td>
         </ng-container>

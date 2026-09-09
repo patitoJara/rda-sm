@@ -41,6 +41,8 @@ import { catchError, finalize, map, of, switchMap } from 'rxjs';
 import {
   DemandEpisodeProgramContextDTO,
   PrioritizedEpisodeDTO,
+
+  PrioritizedEpisodeStageDTO,
   SupervisorDashboardDTO,
 } from '../../core/models/demand-priority.models';
 import { DemandPersonDTO, DemandService } from '../../core/services/demand.service';
@@ -50,7 +52,6 @@ import { DemandListStateService } from '../../core/services/demand-list-state.se
 import { getSemaphoreColorFromDays } from '../demand-new/utils/demand-new-semaphore.utils';
 import {
   resolveEpisodeAccessModeFromProgramContext,
-  resolveEpisodeSuggestedActionFromProgramContext,
 } from '../demand-new/utils/demand-new-permission.utils';
 import { TokenService } from '../../services/token.service';
 import {
@@ -525,28 +526,15 @@ export class InicioComponent implements OnInit, OnDestroy {
   getEpisodeSuggestedActionLabel(
     episode: PrioritizedEpisodeDTO,
   ): string {
-    const context =
-      this.programContextsByEpisodeId.get(
-        episode.episodeId,
-      );
-
-    return resolveEpisodeSuggestedActionFromProgramContext(
-      this.activeProgramId,
-      context,
-      episode.suggestedAction,
-    );
+    return String(
+      episode.suggestedAction ?? '',
+    ).trim();
   }
   getEpisodeStageStateCode(
     episode: PrioritizedEpisodeDTO,
   ): string {
-    const context =
-      this.programContextsByEpisodeId.get(
-        episode.episodeId,
-      );
-
     return String(
-      context?.stageStateCode ??
-        episode.currentStageStateCode ??
+      episode.currentStageStateCode ??
         episode.stateCode ??
         '',
     ).trim();
@@ -555,33 +543,34 @@ export class InicioComponent implements OnInit, OnDestroy {
   getEpisodeStageResultCode(
     episode: PrioritizedEpisodeDTO,
   ): string {
-    const context =
-      this.programContextsByEpisodeId.get(
-        episode.episodeId,
-      );
-
     return String(
-      context?.stageResultCode ??
-        episode.currentStageResultCode ??
+      episode.currentStageResultCode ??
         episode.resultCode ??
         '',
     ).trim();
   }
 
+  getEpisodeDisplayDays(
+    episode: PrioritizedEpisodeDTO,
+  ): number {
+    const stageDays = Number(
+      episode.currentStageDays,
+    );
+
+    if (
+      Number.isFinite(stageDays) &&
+      stageDays >= 0
+    ) {
+      return stageDays;
+    }
+
+    return Number(
+      episode.accumulatedDays ?? 0,
+    );
+  }
   getEpisodeStageClosureDate(
     episode: PrioritizedEpisodeDTO,
   ): string | null {
-    const context =
-      this.programContextsByEpisodeId.get(
-        episode.episodeId,
-      );
-
-    if (context) {
-      return context.closed === true
-        ? context.closureDate ?? null
-        : null;
-    }
-
     return episode.closureDate ?? null;
   }
 
@@ -855,8 +844,12 @@ export class InicioComponent implements OnInit, OnDestroy {
   trackByEpisodeId(
     _index: number,
     item: PrioritizedEpisodeDTO,
-  ): number {
-    return item.episodeId;
+  ): string {
+    if (this.isHistoricalMode) {
+      return `${item.episodeId}-${item.currentStageId ?? 'stage'}`;
+    }
+
+    return String(item.episodeId);
   }
   private loadClosedMetrics(): void {
     this.loadingClosedMetrics = true;
@@ -1065,24 +1058,103 @@ export class InicioComponent implements OnInit, OnDestroy {
         },
       });
   }
+  private mapHistoricalStageToPrioritizedEpisode(
+    stage: PrioritizedEpisodeStageDTO,
+  ): PrioritizedEpisodeDTO {
+    return {
+      episodeId: stage.episodeId,
+      episodeCode: stage.episodeCode,
+      rut: stage.rut,
+      personName: stage.personName,
+
+      currentProgram: stage.program ?? stage.currentProgram ?? null,
+
+      currentStageId: stage.stageId,
+      currentStageStateCode: stage.stageStateCode,
+      currentStageResultCode: stage.stageResultCode,
+      currentStageReceivedAt: stage.receivedAt,
+      currentStageDays: stage.daysInStage,
+
+      originProgramId: null,
+      originProgramName: null,
+      referenceCount:
+        stage.stageResultCode === 'REFERENCIA'
+          ? 1
+          : 0,
+
+      originalRequestDate: stage.originalRequestDate,
+      accumulatedDays: stage.accumulatedDays,
+      semaphoreColor: stage.semaphoreColor,
+
+      stateCode: stage.stageStateCode ?? '',
+      resultCode: stage.stageResultCode ?? '',
+
+      lastManagement: stage.lastManagement,
+      lastManagementDate: stage.lastManagementDate,
+      lastManagementTime: stage.lastManagementTime,
+
+      firstCitationFirstInterviewDate:
+        stage.firstCitationFirstInterviewDate,
+      secondCitationFirstInterviewDate:
+        stage.secondCitationFirstInterviewDate,
+      firstCitationSecondInterviewDate:
+        stage.firstCitationSecondInterviewDate,
+      secondCitationSecondInterviewDate:
+        stage.secondCitationSecondInterviewDate,
+      firstCitationThirdInterviewDate:
+        stage.firstCitationThirdInterviewDate,
+      secondCitationThirdInterviewDate:
+        stage.secondCitationThirdInterviewDate,
+      optionalInterviewDate:
+        stage.optionalInterviewDate,
+
+      feedbackDate: stage.feedbackDate,
+      closureDate: stage.closureDate,
+
+      biopsychosocialCommitmentCode:
+        stage.biopsychosocialCommitmentCode,
+
+      createdByUser: stage.createdByUser,
+
+      suggestedAction: stage.suggestedAction,
+    };
+  }
+
   loadEpisodes(): void {
     this.loadingEpisodes = true;
     this.episodesError = null;
 
     const filters = this.appliedFilters;
 
-    this.demandService
-      .getPrioritizedEpisodes({
-        page: this.pageIndex,
-        size: this.pageSize,
-        programId: filters.programId,
-        stateCode: this.isHistoricalMode
-          ? 'CERRADO'
-          : 'EN_TRAMITE',
-        resultCode: filters.resultCode || null,
-        search: filters.search?.trim() || null,
-        sort: this.currentSort,
-      })
+    const query = {
+      page: this.pageIndex,
+      size: this.pageSize,
+      programId: filters.programId,
+      stateCode: this.isHistoricalMode
+        ? 'CERRADO'
+        : 'EN_TRAMITE',
+      resultCode: filters.resultCode || null,
+      search: filters.search?.trim() || null,
+      sort: this.currentSort,
+    };
+
+    const request$ = this.isHistoricalMode
+      ? this.demandService
+          .getPrioritizedEpisodeStages(query)
+          .pipe(
+            map((response) => ({
+              ...response,
+              content: (response?.content ?? []).map(
+                (stage) =>
+                  this.mapHistoricalStageToPrioritizedEpisode(
+                    stage,
+                  ),
+              ),
+            })),
+          )
+      : this.demandService.getPrioritizedEpisodes(query);
+
+    request$
       .pipe(
         finalize(() => {
           this.loadingEpisodes = false;
@@ -1091,6 +1163,7 @@ export class InicioComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           const episodes = response?.content ?? [];
+
           const totalElements = Number(
             response?.totalElements ?? 0,
           );
@@ -1123,7 +1196,14 @@ export class InicioComponent implements OnInit, OnDestroy {
           this.episodes = episodes;
           this.totalElements = totalElements;
 
-          this.loadEpisodeProgramContexts(this.episodes);
+          if (this.isHistoricalMode) {
+            this.programContextsByEpisodeId.clear();
+          }
+          else {
+            this.loadEpisodeProgramContexts(
+              this.episodes,
+            );
+          }
         },
 
         error: (error: HttpErrorResponse) => {
@@ -1134,6 +1214,7 @@ export class InicioComponent implements OnInit, OnDestroy {
 
           this.episodes = [];
           this.totalElements = 0;
+          this.programContextsByEpisodeId.clear();
 
           this.episodesError =
             error.status === 403
@@ -1142,7 +1223,6 @@ export class InicioComponent implements OnInit, OnDestroy {
         },
       });
   }
-
   private loadEpisodeProgramContexts(
     episodes: PrioritizedEpisodeDTO[],
   ): void {

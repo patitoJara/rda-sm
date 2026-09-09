@@ -10,6 +10,7 @@ import {
   PageDTO,
   PrioritizedEpisodeDTO,
   PrioritizedEpisodeQuery,
+  PrioritizedEpisodeStageDTO,
   SupervisorDashboardDTO,
   SupervisorProgramDashboardDTO,
   SupervisorProgramReferenceDTO,
@@ -328,6 +329,44 @@ export class DemandService {
     );
   }
 
+  getPrioritizedEpisodeStages(
+    query: PrioritizedEpisodeQuery = {},
+  ): Observable<PageDTO<PrioritizedEpisodeStageDTO>> {
+    let params = new HttpParams()
+      .set('page', String(query.page ?? 0))
+      .set('size', String(query.size ?? 20));
+
+    if (
+      query.programId !== null &&
+      query.programId !== undefined
+    ) {
+      params = params.set(
+        'programId',
+        String(query.programId),
+      );
+    }
+
+    if (query.stateCode) {
+      params = params.set('stateCode', query.stateCode);
+    }
+
+    if (query.resultCode) {
+      params = params.set('resultCode', query.resultCode);
+    }
+
+    if (query.search?.trim()) {
+      params = params.set('search', query.search.trim());
+    }
+
+    if (query.sort) {
+      params = params.set('sort', query.sort);
+    }
+
+    return this.http.get<PageDTO<PrioritizedEpisodeStageDTO>>(
+      `${this.demandUrl}/episodes/prioritized/stages`,
+      { params },
+    );
+  }
   getEpisodeProgramContexts(
     request: DemandEpisodeProgramContextsRequest,
   ): Observable<DemandEpisodeProgramContextDTO[]> {
