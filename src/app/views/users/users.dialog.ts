@@ -539,7 +539,7 @@ export class UsersDialogComponent implements OnInit {
   private isSystemUser(): boolean {
     const userId = Number(this.data?.id);
 
-    return userId === 1 || userId === 2;
+    return userId === 1;
   }
 
   private requiresProgram(selectedRoles: Array<{ id: number }>): boolean {

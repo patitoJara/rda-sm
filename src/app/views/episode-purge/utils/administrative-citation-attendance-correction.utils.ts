@@ -104,6 +104,91 @@ export function buildAdministrativeCitationAttendanceCorrections(
   const citations: any[] = [];
   const attendances: any[] = [];
 
+  /*
+   * Si administrativamente cambia la fecha u hora de una citación,
+   * la asistencia vinculada debe conservar la misma fecha/hora.
+   *
+   * Esto evita dejar una asistencia cronológicamente separada de
+   * la citación a la que pertenece.
+   */
+  const currentCitationsById = new Map<number, any>();
+
+  (Array.isArray(currentEvents) ? currentEvents : []).forEach(
+    (event: any) => {
+      if (resolveEventTypeCode(event) !== 'CITACION') {
+        return;
+      }
+
+      const id = Number(event?.id);
+
+      if (Number.isInteger(id) && id > 0) {
+        currentCitationsById.set(id, event);
+      }
+    },
+  );
+
+  (Array.isArray(currentEvents) ? currentEvents : []).forEach(
+    (event: any) => {
+      if (resolveEventTypeCode(event) !== 'ASISTENCIA') {
+        return;
+      }
+
+      const relatedEventId = Number(
+        event?.relatedEventId ??
+          event?.relatedEvent?.id ??
+          event?.citationEventId ??
+          event?.citationId,
+      );
+
+      if (
+        !Number.isInteger(relatedEventId) ||
+        relatedEventId <= 0
+      ) {
+        return;
+      }
+
+      const currentCitation =
+        currentCitationsById.get(relatedEventId);
+
+      const originalCitation =
+        originalsById.get(relatedEventId);
+
+      if (!currentCitation || !originalCitation) {
+        return;
+      }
+
+      const serializedCurrentCitation =
+        serializeEvent(currentCitation);
+
+      const serializedCurrentAttendance =
+        serializeEvent(event);
+
+      const dateMismatch =
+        normalizeComparableValue(
+          serializedCurrentAttendance?.eventDate,
+        ) !==
+        normalizeComparableValue(
+          serializedCurrentCitation?.eventDate,
+        );
+
+      const timeMismatch =
+        normalizeComparableValue(
+          serializedCurrentAttendance?.eventTime,
+        ) !==
+        normalizeComparableValue(
+          serializedCurrentCitation?.eventTime,
+        );
+
+      if (dateMismatch) {
+        event.eventDate = currentCitation?.eventDate ?? null;
+      }
+
+      if (timeMismatch) {
+        event.eventTime = currentCitation?.eventTime ?? '';
+      }
+    },
+  );
+
   (Array.isArray(currentEvents) ? currentEvents : []).forEach(
     (event: any) => {
       const typeCode = resolveEventTypeCode(event);
