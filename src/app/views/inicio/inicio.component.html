@@ -154,7 +154,7 @@
         </div>
 
         <div>
-          <span>Promedio de espera</span>
+          <span>Promedio días episodio</span>
           <strong>
             {{
               activeMetrics.averageWaitingDays
@@ -162,7 +162,25 @@
             }}
             días
           </strong>
-          <small>Promedio de días acumulados</small>
+          <small>Promedio acumulado desde la solicitud</small>
+        </div>
+      </mat-card>
+
+      <mat-card class="metric-card metric-card--average">
+        <div class="metric-card__icon">
+          <mat-icon>schedule</mat-icon>
+        </div>
+
+        <div>
+          <span>Promedio días programa</span>
+          <strong>
+            {{
+              activeMetrics.averageProgramDays
+                | number: "1.0-1":"es-CL"
+            }}
+            días
+          </strong>
+          <small>Promedio de permanencia en el programa actual</small>
         </div>
       </mat-card>
     </ng-container>
@@ -270,7 +288,7 @@
           aria-label="Programa responsable"
         >
           <mat-option [value]="null">
-            Todos los programas autorizados
+            Todos los programas
           </mat-option>
 
           <mat-option
@@ -523,7 +541,7 @@
         <!-- DÍAS -->
         <ng-container matColumnDef="days">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>
-            Días
+            {{ isHistoricalMode ? "Días programa" : "Días episodio" }}
           </th>
 
           <td mat-cell *matCellDef="let row">
@@ -532,6 +550,18 @@
               [matTooltip]="getSemaphoreLabelByDays(row.accumulatedDays)"
             >
               <strong>{{ getEpisodeDisplayDays(row) }} d</strong>
+            </div>
+          </td>
+        </ng-container>
+        <!-- DÍAS PROGRAMA -->
+        <ng-container matColumnDef="programDays">
+          <th mat-header-cell *matHeaderCellDef>
+            Días programa
+          </th>
+
+          <td mat-cell *matCellDef="let row">
+            <div class="waiting-days">
+              <strong>{{ getEpisodeProgramDays(row) }} d</strong>
             </div>
           </td>
         </ng-container>

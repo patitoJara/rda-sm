@@ -54,6 +54,7 @@ import {
   resolveEpisodeAccessModeFromProgramContext,
 } from '../demand-new/utils/demand-new-permission.utils';
 import { TokenService } from '../../services/token.service';
+import { PreloadCatalogsService } from '../../services/demand/preload-catalogs.service';
 import {
   ProgramAnalysisDialogComponent,
 } from './program-analysis-dialog/program-analysis-dialog.component';
@@ -121,6 +122,7 @@ interface ResultOption {
 })
 export class InicioComponent implements OnInit, OnDestroy {
   private readonly tokenService = inject(TokenService);
+  private readonly preloadCatalogs = inject(PreloadCatalogsService);
   private readonly demandService = inject(DemandService);
   private readonly contactService = inject(ContactService);
   private readonly demandListState = inject(DemandListStateService);
@@ -196,15 +198,9 @@ export class InicioComponent implements OnInit, OnDestroy {
   }
 
   get activeMetrics(): InicioActiveMetrics {
-    if (this.hasAppliedFilters) {
-      return (
-        this.filteredActiveMetrics ??
-        buildInicioActiveMetrics(null)
-      );
-    }
-
-    return buildInicioActiveMetrics(
-      this.dashboard,
+    return (
+      this.filteredActiveMetrics ??
+      buildInicioActiveMetrics(this.dashboard)
     );
   }
 
@@ -232,6 +228,7 @@ export class InicioComponent implements OnInit, OnDestroy {
   readonly activeDisplayedColumns = [
     'semaphore',
     'days',
+    'programDays',
     'person',
     'rut',
     'createdBy',
@@ -255,7 +252,9 @@ export class InicioComponent implements OnInit, OnDestroy {
 
   readonly historicalDisplayedColumns =
     this.activeDisplayedColumns.filter(
-      (column) => column !== 'result',
+      (column) =>
+        column !== 'result' &&
+        column !== 'programDays',
     );
 
   get displayedColumns(): string[] {
@@ -286,37 +285,7 @@ export class InicioComponent implements OnInit, OnDestroy {
   };
 
   currentSort: string | null = null;
-  readonly activeResultOptions: ResultOption[] = [
-    {
-      code: 'AUN_SIN_RESULTADO',
-      name: 'Aún sin resultado',
-    },
-    {
-      code: 'LISTA_ESPERA',
-      name: 'Lista de espera',
-    },
-  ];
-
-  readonly historicalResultOptions: ResultOption[] = [
-    {
-      code: 'INGRESO_TRATAMIENTO',
-      name: 'Ingreso a tratamiento',
-    },
-    {
-      code: 'REFERENCIA',
-      name: 'Referencia',
-    },
-    {
-      code: 'ABANDONO',
-      name: 'Abandono',
-    },
-  ];
-
-  get resultOptions(): ResultOption[] {
-    return this.isHistoricalMode
-      ? this.historicalResultOptions
-      : this.activeResultOptions;
-  }
+  resultOptions: ResultOption[] = [];
 
   readonly filtersForm = new FormGroup({
     programId: new FormControl<number | null>(null),
@@ -330,6 +299,7 @@ export class InicioComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadSessionContext();
+    this.loadFilterCatalogs();
     this.restoreListState();
 
     this.refresh();
@@ -550,9 +520,27 @@ export class InicioComponent implements OnInit, OnDestroy {
     ).trim();
   }
 
+  getEpisodeProgramDays(
+    episode: PrioritizedEpisodeDTO,
+  ): number {
+    const stageDays = Number(
+      episode.currentStageDays,
+    );
+
+    return Number.isFinite(stageDays) &&
+      stageDays >= 0
+      ? stageDays
+      : 0;
+  }
   getEpisodeDisplayDays(
     episode: PrioritizedEpisodeDTO,
   ): number {
+    if (!this.isHistoricalMode) {
+      return Number(
+        episode.accumulatedDays ?? 0,
+      );
+    }
+
     const stageDays = Number(
       episode.currentStageDays,
     );
@@ -568,6 +556,8 @@ export class InicioComponent implements OnInit, OnDestroy {
       episode.accumulatedDays ?? 0,
     );
   }
+
+
   getEpisodeStageClosureDate(
     episode: PrioritizedEpisodeDTO,
   ): string | null {
@@ -888,15 +878,11 @@ export class InicioComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.hasAppliedFilters) {
-      this.loadActiveFilteredMetrics();
-      return;
+    this.loadActiveFilteredMetrics();
+
+    if (!this.hasAppliedFilters) {
+      this.loadDashboard();
     }
-
-    this.filteredActiveMetrics = null;
-    this.activeMetricsError = null;
-
-    this.loadDashboard();
   }
 
   private loadActiveFilteredMetrics(): void {
@@ -1329,6 +1315,80 @@ export class InicioComponent implements OnInit, OnDestroy {
         search: state.search,
       });
 }
+  private loadFilterCatalogs(): void {
+    this.preloadCatalogs.loadAll().subscribe({
+      next: (data) => {
+        const loadedPrograms =
+          data.programs?.content ??
+          data.programs ??
+          [];
+
+        this.programs = loadedPrograms
+          .map((program: any) => ({
+            id: Number(
+              program?.id ??
+                program?.programId,
+            ),
+            name: String(
+              program?.name ??
+                program?.programName ??
+                '',
+            ).trim(),
+          }))
+          .filter(
+            (program: ProgramOption) =>
+              Number.isFinite(program.id) &&
+              program.id > 0 &&
+              !!program.name,
+          )
+          .sort((a: ProgramOption, b: ProgramOption) =>
+            a.name.localeCompare(
+              b.name,
+              'es',
+              { sensitivity: 'base' },
+            ),
+          );
+
+        const loadedResults =
+          data.results?.content ??
+          data.results ??
+          [];
+
+        this.resultOptions = loadedResults
+          .map((result: any) => ({
+            code: String(
+              result?.code ?? '',
+            )
+              .trim()
+              .toUpperCase(),
+            name: String(
+              result?.name ?? '',
+            ).trim(),
+          }))
+          .filter(
+            (result: ResultOption) =>
+              !!result.code &&
+              !!result.name,
+          )
+          .sort((a: ResultOption, b: ResultOption) =>
+            a.name.localeCompare(
+              b.name,
+              'es',
+              { sensitivity: 'base' },
+            ),
+          );
+      },
+      error: (error) => {
+        console.error(
+          '[Inicio] Error cargando catálogos:',
+          error,
+        );
+
+        this.programs = [];
+        this.resultOptions = [];
+      },
+    });
+  }
   private loadSessionContext(): void {
     const profile = this.tokenService.getUserProfile();
 
@@ -1344,29 +1404,6 @@ export class InicioComponent implements OnInit, OnDestroy {
       roles[0] ||
       null;
 
-    const rawPrograms =
-      this.tokenService.getUserPrograms() || [];
-
-    this.programs = rawPrograms
-      .map((program: any) => ({
-        id: Number(
-          program?.id ??
-            program?.programId,
-        ),
-
-        name: String(
-          program?.name ??
-            program?.programName ??
-            '',
-        ).trim(),
-      }))
-      .filter(
-        (program: ProgramOption) =>
-          Number.isFinite(program.id) &&
-          program.id > 0 &&
-          !!program.name,
-      );
-
     const activeProgramId = Number(
       this.tokenService.getActiveProgramId(),
     );
@@ -1376,12 +1413,17 @@ export class InicioComponent implements OnInit, OnDestroy {
       activeProgramId > 0
         ? activeProgramId
         : null;
+    const userPrograms =
+      this.tokenService.getUserPrograms() || [];
 
     this.activeProgram =
       this.tokenService.getActiveProgram() ||
-      this.programs.find(
-        (program) =>
-          program.id === this.activeProgramId,
+      userPrograms.find(
+        (program: any) =>
+          Number(
+            program?.id ??
+              program?.programId,
+          ) === this.activeProgramId,
       )?.name ||
       null;
   }

@@ -124,7 +124,7 @@
 
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 20px;
 }
@@ -802,7 +802,7 @@ mat-paginator {
   .metrics-grid {
     order: 3;
     flex: 0 0 auto;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 9px;
     margin-bottom: 9px;
   }
@@ -840,13 +840,16 @@ mat-paginator {
 
   .metric-card > div:not(.metric-card__icon) > span {
     grid-area: label;
+    display: -webkit-box;
     overflow: hidden;
     color: #40555e;
     font-size: 0.72rem;
     font-weight: 700;
     line-height: 1.15;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
 
   .metric-card > div:not(.metric-card__icon) > strong {
@@ -863,13 +866,15 @@ mat-paginator {
 
   .metric-card > div:not(.metric-card__icon) > small {
     grid-area: detail;
-    display: block;
+    display: -webkit-box;
     overflow: hidden;
     color: #71828a;
     font-size: 0.61rem;
     line-height: 1.15;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
 
   .dashboard-error {
@@ -2845,23 +2850,35 @@ mat-paginator {
   .column-help.column-help--inline > summary {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 5px !important;
+    gap: 6px !important;
 
-    min-height: 28px !important;
-    padding: 4px 9px !important;
+    min-height: 30px !important;
+    padding: 5px 11px !important;
 
-    color: #38565f !important;
-    border: 1px solid #d3e2e6 !important;
+    color: #006b7b !important;
+    border: 1px solid #9fd2da !important;
     border-radius: 8px !important;
-    background: #f5fafb !important;
+    background: #eaf7f9 !important;
 
     font-size: 0.72rem !important;
-    font-weight: 700 !important;
+    font-weight: 750 !important;
     line-height: 1 !important;
 
     white-space: nowrap !important;
     cursor: pointer !important;
     list-style: none !important;
+
+    box-shadow: 0 2px 5px rgba(34, 59, 70, 0.08) !important;
+  }
+
+  .column-help.column-help--inline > summary:hover {
+    background: #dff2f5 !important;
+    border-color: #72bcc7 !important;
+  }
+
+  .column-help.column-help--inline[open] > summary {
+    background: #dff2f5 !important;
+    border-color: #72bcc7 !important;
   }
 
   .column-help.column-help--inline > summary::-webkit-details-marker {
@@ -2877,28 +2894,51 @@ mat-paginator {
 
   /* Solo al abrir la ayuda ocupa una segunda línea */
   .column-help.column-help--inline[open] {
+    display: block !important;
+    flex: 1 1 100% !important;
+    width: 100% !important;
     position: static !important;
   }
 
   .column-help.column-help--inline[open] .column-help__grid {
-    position: absolute !important;
-    z-index: 50 !important;
-    left: 14px !important;
-    right: 14px !important;
-    top: calc(100% - 2px) !important;
-
-    margin: 0 !important;
+    position: static !important;
+    width: 100% !important;
+    margin: 8px 0 0 !important;
     padding: 10px 12px !important;
 
     border: 1px solid #d3e2e6 !important;
     border-radius: 8px !important;
     background: #ffffff !important;
 
-    box-shadow: 0 8px 20px rgba(34, 59, 70, 0.12) !important;
+    box-sizing: border-box !important;
+    box-shadow: 0 5px 14px rgba(34, 59, 70, 0.10) !important;
   }
 
   .table-heading__total {
     flex: 0 0 auto !important;
     margin-left: auto !important;
   }
+}
+
+/* Días episodio y días programa */
+.mat-column-programDays {
+  width: 64px !important;
+  min-width: 64px !important;
+}
+
+@media (min-width: 901px) {
+  .priority-table-card:not(.priority-table-card--historical) .mat-column-days,
+  .priority-table-card:not(.priority-table-card--historical) .mat-column-programDays {
+    width: 4.2% !important;
+    min-width: 0 !important;
+  }
+}
+/* Ayuda de columnas abierta */
+.table-heading__context:has(.column-help[open]) {
+  flex-wrap: wrap !important;
+  flex: 1 1 100% !important;
+}
+
+.table-heading__context:has(.column-help[open]) .column-help[open] {
+  flex-basis: 100% !important;
 }

@@ -80,6 +80,11 @@ export class InicioActiveMetricsService {
               0,
               Number(episode.accumulatedDays ?? 0),
             );
+
+            accumulator.programDaysTotal += Math.max(
+              0,
+              Number(episode.currentStageDays ?? 0),
+            );
           }
 
           return accumulator;
@@ -90,6 +95,7 @@ export class InicioActiveMetricsService {
           redCases: 0,
           withoutFirstCitation: 0,
           accumulatedDaysTotal: 0,
+          programDaysTotal: 0,
         },
       ),
       map((totals) => ({
@@ -101,6 +107,14 @@ export class InicioActiveMetricsService {
           totals.activeDemands > 0
             ? Math.round(
                 (totals.accumulatedDaysTotal /
+                  totals.activeDemands) *
+                  10,
+              ) / 10
+            : 0,
+        averageProgramDays:
+          totals.activeDemands > 0
+            ? Math.round(
+                (totals.programDaysTotal /
                   totals.activeDemands) *
                   10,
               ) / 10

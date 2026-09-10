@@ -6,6 +6,7 @@ export interface InicioActiveMetrics {
   redCases: number;
   withoutFirstCitation: number;
   averageWaitingDays: number;
+  averageProgramDays: number;
 }
 
 export function buildInicioActiveMetrics(
@@ -21,5 +22,6 @@ export function buildInicioActiveMetrics(
     averageWaitingDays: Number(
       dashboard?.averageAccumulatedDays ?? 0,
     ),
+    averageProgramDays: 0,
   };
 }
