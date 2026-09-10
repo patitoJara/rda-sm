@@ -265,6 +265,7 @@ export class InicioComponent implements OnInit, OnDestroy {
   readonly sortFieldMap: Record<string, string> = {
     semaphore: 'accumulatedDays',
     days: 'accumulatedDays',
+    programDays: 'currentStageDays',
     person: 'personName',
     rut: 'rut',
     requestDate: 'originalRequestDate',

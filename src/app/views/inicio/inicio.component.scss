@@ -2930,7 +2930,7 @@ mat-paginator {
   .priority-table-card:not(.priority-table-card--historical) .mat-column-days,
   .priority-table-card:not(.priority-table-card--historical) .mat-column-programDays {
     width: 4.2% !important;
-    min-width: 0 !important;
+    min-width: 72px !important;
   }
 }
 /* Ayuda de columnas abierta */
