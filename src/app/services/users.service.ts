@@ -56,11 +56,59 @@ export class UsersService {
   }
 
   getAllUsersPrograms() {
-    return this.http.get<any[]>(`${this.BASE}/api/v1/users_programs`);
+    return this.http.get<any[]>(
+      `${this.BASE}/api/v1/users_programs`,
+      {
+        params: {
+          _ts: Date.now().toString(),
+        },
+      },
+    );
+  }
+
+  getCommunicationConfigurations(): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.BASE}/api/v1/users_programs/communications`,
+      {
+        params: {
+          _ts: Date.now().toString(),
+        },
+      },
+    );
+  }
+  getUserProgramById(id: number): Observable<any> {
+    return this.http.get<any>(
+      `${this.BASE}/api/v1/users_programs/${id}`,
+    );
+  }
+
+  updateUserProgram(id: number, relation: any): Observable<any> {
+    return this.http.put<any>(
+      `${this.BASE}/api/v1/users_programs/${id}`,
+      relation,
+    );
+  }
+
+  createUserProgram(relation: any): Observable<any> {
+    return this.http.post<any>(
+      `${this.BASE}/api/v1/users_programs`,
+      relation,
+    );
   }
 
   /** ======================= Consultas ========================= */
 
+  getAllUserRoleRelations(): Observable<any[]> {
+    return this.http.get<any>(`${this.BASE}/api/v1/users_roles`).pipe(
+      map((res) => {
+        if (!res) {
+          return [];
+        }
+
+        return Array.isArray(res) ? res : [res];
+      }),
+    );
+  }
   getUserRoles(userId: number): Observable<Role[]> {
     return this.http
       .get<any>(`${this.BASE}/api/v1/users_roles/user/${userId}`)

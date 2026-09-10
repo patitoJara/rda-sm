@@ -2504,3 +2504,873 @@ mat-panel-description {
 .directory-workspace .programs-section {
   padding-top: 10px;
 }
+/* ============================================================
+   DIRECTORIO - PROTOTIPO VISUAL DE COMUNICACIONES
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   CABECERA ÚNICA DE LAS NOTIFICACIONES
+   ------------------------------------------------------------ */
+
+.communication-flags-header {
+  display: grid;
+  grid-template-columns: repeat(8, 48px);
+  justify-content: end;
+  align-items: center;
+  gap: 6px;
+
+  margin: 0 52px 5px 0;
+  padding: 0;
+
+  color: #536b72;
+  font-size: 0.56rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.01em;
+}
+
+.communication-flags-header span {
+  display: block;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------
+   TARJETA INSTITUCIONAL
+   Nombre + checks arriba
+   Rol + correo abajo
+   ------------------------------------------------------------ */
+
+.directory-workspace .contact-card--institutional {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+
+  min-height: 74px;
+  padding: 8px 10px;
+}
+
+/* Cuerpo de la persona */
+.directory-workspace
+.contact-card--institutional
+.contact-card__body {
+  display: grid;
+
+  grid-template-columns:
+    minmax(175px, 0.9fr)
+    minmax(390px, 1.6fr);
+
+  grid-template-rows: auto auto;
+
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 2px;
+
+  min-width: 0;
+}
+
+/* Nombre: arriba izquierda */
+.directory-workspace
+.contact-card--institutional
+.contact-card__body > strong {
+  grid-column: 1;
+  grid-row: 1;
+
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Rol: abajo izquierda */
+.directory-workspace
+.contact-card--institutional
+.contact-card__body > span {
+  grid-column: 1;
+  grid-row: 2;
+
+  margin-top: 0;
+  min-width: 0;
+}
+
+/* Correo: segunda línea, debajo de los checks */
+.directory-workspace
+.contact-card--institutional
+.contact-card__body > button {
+  grid-column: 2;
+  grid-row: 2;
+
+  justify-self: start;
+
+  min-width: 0;
+  max-width: 100%;
+  min-height: 24px;
+  padding: 0 3px;
+
+  font-size: 0.68rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------
+   CHECKS: ARRIBA A LA DERECHA
+   ------------------------------------------------------------ */
+
+.communication-flags--institutional {
+  grid-column: 2;
+  grid-row: 1;
+
+  display: grid;
+  grid-template-columns: repeat(8, 48px);
+  align-items: center;
+  justify-content: start;
+  gap: 6px;
+
+  min-width: 0;
+
+  margin: 0;
+  padding: 0;
+
+  border-top: 0;
+}
+
+/* El título interno ya no se necesita */
+.communication-flags__title {
+  display: none;
+}
+
+.communication-flags--institutional mat-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  min-width: 48px;
+
+  margin: 0;
+  padding: 0;
+}
+
+/* Checkbox antiguo de selección de correo:
+   permanece independiente al extremo derecho */
+.directory-workspace
+.contact-card--institutional > mat-checkbox {
+  align-self: center;
+  margin-left: 2px;
+}
+
+/* ------------------------------------------------------------
+   AJUSTES RESPONSIVE
+   ------------------------------------------------------------ */
+
+@media (max-width: 1450px) {
+
+  .directory-workspace
+  .contact-card--institutional
+  .contact-card__body {
+    grid-template-columns:
+      minmax(160px, 0.85fr)
+      minmax(350px, 1.5fr);
+  }
+
+  .communication-flags-header,
+  .communication-flags--institutional {
+    grid-template-columns: repeat(8, 43px);
+    gap: 4px;
+  }
+
+  .communication-flags--institutional mat-checkbox {
+    width: 43px;
+    min-width: 43px;
+  }
+}
+
+@media (max-width: 1200px) {
+
+  .directory-workspace
+  .contact-card--institutional
+  .contact-card__body {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+  }
+
+  .directory-workspace
+  .contact-card--institutional
+  .contact-card__body > strong {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .communication-flags--institutional {
+    grid-column: 1;
+    grid-row: 2;
+
+    justify-content: start;
+    margin-top: 3px;
+  }
+
+  .directory-workspace
+  .contact-card--institutional
+  .contact-card__body > span {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .directory-workspace
+  .contact-card--institutional
+  .contact-card__body > button {
+    grid-column: 1;
+    grid-row: 4;
+  }
+
+  .communication-flags-header {
+    justify-content: start;
+    margin-right: 0;
+  }
+}
+/* ============================================================
+   AJUSTE COMPACTO CHECKBOX COMUNICACIONES
+   ============================================================ */
+
+.communication-flags-header,
+.communication-flags--institutional {
+  grid-template-columns: repeat(8, 32px) !important;
+  gap: 1px !important;
+}
+
+.communication-flags--institutional mat-checkbox {
+  width: 32px !important;
+  min-width: 32px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  justify-content: center;
+}
+
+/* Reducir el área visual que Material reserva para cada checkbox */
+.communication-flags--institutional
+::ng-deep .mdc-form-field {
+  width: 32px;
+  min-width: 32px;
+}
+
+.communication-flags--institutional
+::ng-deep .mat-mdc-checkbox {
+  width: 32px;
+  min-width: 32px;
+}
+
+.communication-flags--institutional
+::ng-deep .mat-mdc-checkbox-touch-target {
+  width: 32px;
+  height: 32px;
+}
+/* ============================================================
+   ALINEACION CABECERA CHECKBOX COMUNICACIONES
+   ============================================================ */
+
+/*
+  La cabecera debe comenzar exactamente donde comienza
+  la matriz de checks de cada persona.
+*/
+.communication-flags-header {
+  display: grid !important;
+  grid-template-columns: repeat(8, 32px) !important;
+  gap: 1px !important;
+
+  justify-content: start !important;
+
+  /*
+    34px avatar
+    + 9px gap
+    + 175px bloque nombre/rol aprox.
+    + 12px separación
+  */
+  margin-left: 250px !important;
+  margin-right: 0 !important;
+  margin-bottom: 5px !important;
+
+  width: max-content;
+}
+
+.communication-flags-header span {
+  width: 32px;
+  text-align: center !important;
+}
+
+/* Mantener exactamente la misma grilla en las filas */
+.communication-flags--institutional {
+  grid-template-columns: repeat(8, 32px) !important;
+  gap: 1px !important;
+  justify-content: start !important;
+}
+
+.communication-flags--institutional mat-checkbox {
+  width: 32px !important;
+  min-width: 32px !important;
+}
+/* ============================================================
+   AJUSTE TIPOGRAFIA CORREO Y ROL
+   ============================================================ */
+
+/* Rol: Supervisor / Administrativo / etc. */
+.directory-workspace
+.contact-card--institutional
+.contact-card__body > span {
+  font-size: 0.76rem !important;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+/* Correo institucional de la persona */
+.directory-workspace
+.contact-card--institutional
+.contact-card__body > button {
+  font-size: 0.76rem !important;
+  font-weight: 600;
+  line-height: 1.2 !important;
+}
+
+/* Icono @ acompañando el correo */
+.directory-workspace
+.contact-card--institutional
+.contact-card__body > button mat-icon {
+  width: 17px;
+  height: 17px;
+  font-size: 17px;
+}
+/* ============================================================
+   CABECERA STICKY NOTIFICACIONES
+   ============================================================ */
+
+.communication-flags-header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 25 !important;
+
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+
+  background: #f4f8f9 !important;
+
+  border-bottom: 1px solid #d9e5e8;
+}
+
+/* Evita que las tarjetas se transparenten detrás de la cabecera */
+.directory-workspace .institutional-section {
+  position: relative;
+}
+/* ============================================================
+   CABECERA EN BLOQUE ADMINISTRACION Y SUPERVISION
+   ============================================================ */
+
+.section-heading__communications {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 7px;
+  min-width: 0;
+}
+
+.section-heading__communications > small {
+  display: block;
+  max-width: none !important;
+  margin: 0;
+  text-align: right;
+}
+
+/*
+  Los nombres de las columnas quedan inmediatamente
+  debajo de la descripción de la sección.
+*/
+.section-heading__communications .communication-flags-header {
+  position: static !important;
+
+  display: grid !important;
+  grid-template-columns: repeat(8, 32px) !important;
+  gap: 1px !important;
+
+  justify-content: end !important;
+
+  width: max-content;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  background: transparent !important;
+  border: 0 !important;
+}
+
+/* Anula el sticky agregado anteriormente */
+.communication-flags-header {
+  position: static !important;
+  top: auto !important;
+}
+
+/* La cabecera de la sección se alinea arriba */
+.directory-workspace
+.institutional-section
+.section-heading {
+  align-items: flex-start;
+}
+
+/* Un poco de aire antes de las tarjetas */
+.directory-workspace
+.institutional-section
+.institutional-grid {
+  margin-top: 2px;
+}
+
+@media (max-width: 1100px) {
+  .section-heading__communications {
+    align-items: flex-start;
+  }
+
+  .section-heading__communications > small {
+    text-align: left;
+  }
+
+  .section-heading__communications .communication-flags-header {
+    justify-content: start !important;
+  }
+}
+/* ============================================================
+   CORRECCION FINAL CABECERA COMUNICACIONES
+   ============================================================ */
+
+/*
+  La cabecera replica horizontalmente la estructura
+  utilizada por las tarjetas de usuarios.
+*/
+.directory-workspace
+.institutional-section
+.section-heading {
+  display: grid !important;
+  grid-template-columns: 230px minmax(0, 1fr) !important;
+  align-items: end !important;
+  gap: 0 !important;
+}
+
+/* Bloque izquierdo: título de la sección */
+.directory-workspace
+.institutional-section
+.section-heading > div:first-child {
+  grid-column: 1;
+}
+
+/* Descripción + nombres de columnas */
+.directory-workspace
+.institutional-section
+.section-heading__communications {
+  grid-column: 2;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+
+  width: 100%;
+  min-width: 0;
+  gap: 5px;
+}
+
+/* Recuperar tipografía normal de la descripción */
+.directory-workspace
+.institutional-section
+.section-heading__communications > small {
+  margin: 0 !important;
+
+  color: #657b82 !important;
+  font-family: inherit !important;
+  font-size: 0.67rem !important;
+  font-weight: 400 !important;
+  line-height: 1.25 !important;
+  text-align: left !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+
+/* Encabezados exactamente sobre los checkbox */
+.directory-workspace
+.institutional-section
+.communication-flags-header {
+  position: static !important;
+
+  display: grid !important;
+  grid-template-columns: repeat(8, 32px) !important;
+  gap: 1px !important;
+
+  justify-content: start !important;
+  align-items: center !important;
+
+  width: max-content !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  background: transparent !important;
+  border: 0 !important;
+
+  color: #536b72 !important;
+  font-family: inherit !important;
+  font-size: 0.56rem !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+/* Cada título ocupa exactamente lo mismo que su checkbox */
+.directory-workspace
+.institutional-section
+.communication-flags-header span {
+  display: block !important;
+
+  width: 32px !important;
+
+  color: inherit !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  line-height: inherit !important;
+
+  text-align: center !important;
+  white-space: nowrap !important;
+
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+/* Mantener las filas exactamente con la misma matriz */
+.directory-workspace
+.institutional-section
+.communication-flags--institutional {
+  grid-template-columns: repeat(8, 32px) !important;
+  gap: 1px !important;
+}
+
+/* Separación inferior del encabezado */
+.directory-workspace
+.institutional-section
+.institutional-grid {
+  margin-top: 7px !important;
+}
+/* ============================================================
+   AJUSTE FINO ALINEACION TITULOS NOTIFICACIONES
+   ============================================================ */
+
+/*
+  Los títulos estaban desplazados a la izquierda respecto
+  de los checkbox. Se mueve únicamente la fila de encabezados.
+*/
+.directory-workspace
+.institutional-section
+.section-heading__communications
+.communication-flags-header {
+  margin-left: 20px !important;
+}
+/* ============================================================
+   AJUSTE FINAL NOTIFICACIONES USUARIOS PROGRAMA
+   ============================================================ */
+
+/* Redistribución de columnas */
+.directory-workspace
+.directory-contact-group--users
+.directory-people-table th:nth-child(1),
+.directory-workspace
+.directory-contact-group--users
+.directory-people-table td:nth-child(1) {
+  width: 28% !important;
+}
+
+.directory-workspace
+.directory-contact-group--users
+.directory-people-table th:nth-child(2),
+.directory-workspace
+.directory-contact-group--users
+.directory-people-table td:nth-child(2) {
+  width: 20% !important;
+}
+
+.directory-workspace
+.directory-contact-group--users
+.directory-people-table th:nth-child(3),
+.directory-workspace
+.directory-contact-group--users
+.directory-people-table td:nth-child(3) {
+  width: 25% !important;
+}
+
+.directory-workspace
+.directory-contact-group--users
+.directory-people-table__communications {
+  width: 27% !important;
+  min-width: 280px !important;
+}
+
+/* Encabezado */
+.program-user-communication-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.program-user-communication-header > strong {
+  color: #536b72;
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.program-user-communication-header__labels,
+.program-user-communication__checks {
+  display: grid;
+  grid-template-columns: repeat(8, 32px);
+  gap: 1px;
+  align-items: center;
+}
+
+.program-user-communication-header__labels span {
+  width: 32px;
+  color: #536b72;
+  font-size: 0.55rem;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Cada usuario queda en una sola fila de checks */
+.program-user-communication {
+  display: block;
+  width: max-content;
+}
+
+.program-user-communication__checks {
+  margin-top: 0;
+}
+
+.program-user-communication__checks mat-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  min-width: 32px;
+  margin: 0;
+  padding: 0;
+}
+
+/* Rol y correo un poco más compactos */
+.directory-contact-group--users .directory-person-role {
+  font-size: 0.72rem !important;
+}
+
+.directory-contact-group--users .directory-email-button {
+  max-width: 100%;
+  padding-inline: 2px !important;
+  font-size: 0.68rem !important;
+  white-space: nowrap;
+}
+/* ============================================================
+   AJUSTE SIN SCROLL HORIZONTAL DIRECTORIO
+   ============================================================ */
+
+/* La tabla debe utilizar solamente el ancho disponible */
+.directory-workspace .directory-people-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.directory-workspace .directory-people-table {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  table-layout: fixed !important;
+}
+
+/* ============================================================
+   USUARIOS CON ACCESO AL PROGRAMA
+   ============================================================ */
+
+.directory-contact-group--users
+.directory-people-table__communications {
+  width: 27% !important;
+  min-width: 0 !important;
+}
+
+/* ============================================================
+   EQUIPO CLINICO
+   ============================================================ */
+
+/* Nombre */
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table th:nth-child(1),
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table td:nth-child(1) {
+  width: 24% !important;
+}
+
+/* Profesión */
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table th:nth-child(2),
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table td:nth-child(2) {
+  width: 17% !important;
+}
+
+/* Correo */
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table th:nth-child(3),
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table td:nth-child(3) {
+  width: 24% !important;
+}
+
+/* Teléfono */
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table th:nth-child(4),
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table td:nth-child(4) {
+  width: 13% !important;
+}
+
+/* Notificaciones */
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table th:nth-child(5),
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table td:nth-child(5) {
+  width: 22% !important;
+}
+
+.directory-contact-group--clinical
+.directory-people-table__communications {
+  min-width: 0 !important;
+}
+
+/* ============================================================
+   MATRIZ COMPACTA DE 8 NOTIFICACIONES
+   ============================================================ */
+
+.directory-contact-group--users
+.program-user-communication-header__labels,
+.directory-contact-group--users
+.program-user-communication__checks,
+.directory-contact-group--clinical
+.program-user-communication-header__labels,
+.directory-contact-group--clinical
+.program-user-communication__checks {
+  display: grid !important;
+  grid-template-columns: repeat(8, 27px) !important;
+  gap: 1px !important;
+  width: max-content;
+  max-width: 100%;
+}
+
+/* Títulos */
+.directory-contact-group--users
+.program-user-communication-header__labels span,
+.directory-contact-group--clinical
+.program-user-communication-header__labels span {
+  width: 27px !important;
+  min-width: 0 !important;
+  font-size: 0.50rem !important;
+  text-align: center;
+}
+
+/* Checkbox */
+.directory-contact-group--users
+.program-user-communication__checks mat-checkbox,
+.directory-contact-group--clinical
+.program-user-communication__checks mat-checkbox {
+  width: 27px !important;
+  min-width: 27px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  justify-content: center;
+}
+
+.directory-contact-group--users
+.program-user-communication,
+.directory-contact-group--clinical
+.program-user-communication {
+  width: max-content;
+  max-width: 100%;
+}
+
+/* Correo no debe ensanchar la tabla */
+.directory-contact-group--users .directory-email-button,
+.directory-contact-group--clinical .directory-email-button {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Teléfono tampoco debe forzar ancho */
+.directory-contact-group--clinical .directory-phone {
+  min-width: 0;
+  white-space: nowrap;
+}
+/* Cuando no existe bloque institucional, programas ocupan todo el ancho */
+.directory-workspace--programs-only {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.directory-workspace--programs-only .programs-section {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-width: 0;
+}
+
+/* ============================================================
+   AJUSTE COLUMNAS EQUIPO CLINICO
+   ============================================================ */
+
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table th:nth-child(1),
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table td:nth-child(1) {
+  width: 29% !important;
+}
+
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table th:nth-child(2),
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table td:nth-child(2) {
+  width: 22% !important;
+}
+
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table th:nth-child(3),
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table td:nth-child(3) {
+  width: 31% !important;
+}
+
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table th:nth-child(4),
+.directory-workspace
+.directory-contact-group--clinical
+.directory-people-table td:nth-child(4) {
+  width: 18% !important;
+}

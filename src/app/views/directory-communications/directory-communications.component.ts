@@ -26,6 +26,8 @@ import { User } from '../../models/user';
 import { ProgramProfessionalService } from '../../services/program-professional.service';
 import { ProgramService } from '../../services/program.service';
 import { UsersService } from '../../services/users.service';
+import { TokenService } from '../../services/token.service';
+import { CurrentUserService } from '../../services/current-user.service';
 
 type ContactSource = 'USER' | 'PROFESSIONAL';
 
@@ -39,6 +41,8 @@ interface DirectoryContact {
   detail: string;
   roles: string[];
   programIds: number[];
+  communicationsByProgram: Record<number, UserProgramRelation>;
+  transversalCommunication: UserProgramRelation | null;
   active: boolean;
 }
 
@@ -51,9 +55,31 @@ interface DirectoryProgram {
 }
 
 interface UserProgramRelation {
+  id: number | null;
   userId: number | null;
   programId: number | null;
+  transversal: boolean;
+  communicationScope: string | null;
+
+  canManageCommunications: boolean;
+  canReceiveCitations: boolean;
+  canReceiveAttendances: boolean;
+  canReceiveFeedback: boolean;
+  canReceiveReferences: boolean;
+  canReceiveClosures: boolean;
+  canReceiveDocuments: boolean;
+  canReceiveObservations: boolean;
 }
+
+type CommunicationFlag =
+  | 'canManageCommunications'
+  | 'canReceiveCitations'
+  | 'canReceiveAttendances'
+  | 'canReceiveFeedback'
+  | 'canReceiveReferences'
+  | 'canReceiveClosures'
+  | 'canReceiveDocuments'
+  | 'canReceiveObservations';
 
 @Component({
   standalone: true,
@@ -82,6 +108,8 @@ export class DirectoryCommunicationsComponent implements OnInit {
   private readonly programService = inject(ProgramService);
   private readonly professionalService = inject(ProgramProfessionalService);
   private readonly usersService = inject(UsersService);
+  private readonly tokenService = inject(TokenService);
+  private readonly currentUserService = inject(CurrentUserService);
   private readonly snackBar = inject(MatSnackBar);
 
   loading = false;
@@ -164,25 +192,60 @@ export class DirectoryCommunicationsComponent implements OnInit {
         .pipe(catchError(() => of([] as User[]))),
 
       relations: this.usersService
-        .getAllUsersPrograms()
-        .pipe(catchError(() => of([] as any[]))),
+        .getCommunicationConfigurations()
+        .pipe(
+          catchError((error) => {
+            console.error(
+              '[DIRECTORIO] Error cargando configuraciones de comunicaciones',
+              error,
+            );
+            return of([] as any[]);
+          }),
+        ),
+
+      userRoleRelations: this.usersService
+        .getAllUserRoleRelations()
+        .pipe(
+          catchError((error) => {
+            console.error(
+              '[DIRECTORIO] Error cargando roles de usuarios',
+              error,
+            );
+            return of([] as any[]);
+          }),
+        ),
     })
       .pipe(
-        map((result) => ({
-          ...result,
-          relations: this.normalizeRelations(result.relations),
-        })),
+        map((result) => {
+          const normalizedRelations = this.normalizeRelations(result.relations);
+
+          return {
+            ...result,
+            relations: normalizedRelations,
+          };
+        }),
         finalize(() => {
           this.loading = false;
         }),
       )
       .subscribe({
-        next: ({ programs, professionals, users, relations }) => {
+        next: ({
+          programs,
+          professionals,
+          users,
+          relations,
+          userRoleRelations,
+        }) => {
           this.programs = programs
             .filter((program) => program.active !== false && !program.deletedAt)
             .sort((a, b) => a.name.localeCompare(b.name));
 
-          this.loadUserRoles(users, professionals, relations);
+          this.finishDirectory(
+            users,
+            professionals,
+            relations,
+            userRoleRelations,
+          );
         },
         error: () => {
           this.errorMessage =
@@ -430,19 +493,16 @@ export class DirectoryCommunicationsComponent implements OnInit {
             Administración y supervisión, independientemente del programa.
           </p>
 
-          <div class="contact-grid">
+          <div class="contact-list">
             ${this.institutionalContacts
               .map(
                 (contact) => `
-                  <article class="contact-card">
+                  <div class="contact-row">
                     <strong>${this.escapeHtml(contact.name)}</strong>
-                    <span>${this.escapeHtml(contact.detail)}</span>
-                    ${
-                      contact.email
-                        ? `<small>${this.escapeHtml(contact.email)}</small>`
-                        : '<small>Sin correo registrado</small>'
-                    }
-                  </article>
+                    <span>${this.escapeHtml(
+                      contact.email || 'Sin correo registrado',
+                    )}</span>
+                  </div>
                 `,
               )
               .join('')}
@@ -462,19 +522,16 @@ export class DirectoryCommunicationsComponent implements OnInit {
               <h3>Usuarios con acceso al sistema</h3>
               <p>${users.length} usuario(s) asociado(s)</p>
 
-              <div class="contact-grid">
+              <div class="contact-list">
                 ${users
                   .map(
                     (contact) => `
-                      <article class="contact-card">
+                      <div class="contact-row">
                         <strong>${this.escapeHtml(contact.name)}</strong>
-                        <span>${this.escapeHtml(contact.detail)}</span>
-                        ${
-                          contact.email
-                            ? `<small>${this.escapeHtml(contact.email)}</small>`
-                            : '<small>Sin correo registrado</small>'
-                        }
-                      </article>
+                        <span>${this.escapeHtml(
+                          contact.email || 'Sin correo registrado',
+                        )}</span>
+                      </div>
                     `,
                   )
                   .join('')}
@@ -489,24 +546,16 @@ export class DirectoryCommunicationsComponent implements OnInit {
               <h3>Facultativos del programa</h3>
               <p>${professionals.length} facultativo(s) asociado(s)</p>
 
-              <div class="contact-grid">
+              <div class="contact-list">
                 ${professionals
                   .map(
                     (contact) => `
-                      <article class="contact-card">
+                      <div class="contact-row">
                         <strong>${this.escapeHtml(contact.name)}</strong>
-                        <span>${this.escapeHtml(contact.detail)}</span>
-                        ${
-                          contact.email
-                            ? `<small>${this.escapeHtml(contact.email)}</small>`
-                            : '<small>Sin correo registrado</small>'
-                        }
-                        ${
-                          contact.phone
-                            ? `<small>${this.escapeHtml(contact.phone)}</small>`
-                            : ''
-                        }
-                      </article>
+                        <span>${this.escapeHtml(
+                          contact.email || 'Sin correo registrado',
+                        )}</span>
+                      </div>
                     `,
                   )
                   .join('')}
@@ -655,98 +704,95 @@ export class DirectoryCommunicationsComponent implements OnInit {
             }
 
             .program-block {
-              margin-bottom: 8mm;
-              border: 1px solid #aebfc3;
+              margin-bottom: 6mm;
+              padding-top: 2mm;
+              border-top: 1px solid #9fb3b8;
               break-inside: auto;
             }
 
             .program-header {
-              padding: 4mm;
-              border-bottom: 1px solid #c9d7da;
-              background: #f1f7f7;
+              padding: 0 0 2mm;
               break-after: avoid;
             }
 
             .program-header h2 {
               margin: 0;
               color: #153f49;
-              font-size: 14pt;
+              font-size: 13pt;
             }
 
             .program-header p {
-              margin: 1mm 0 0;
+              margin: 0.8mm 0 0;
               color: #60777d;
-              font-size: 8.5pt;
+              font-size: 8pt;
             }
 
             .program-data {
               display: grid;
               grid-template-columns: repeat(3, minmax(0, 1fr));
-              gap: 3mm;
-              padding: 4mm;
+              gap: 4mm;
+              padding: 1.5mm 0 2mm;
               border-bottom: 1px solid #d8e2e4;
               break-inside: avoid;
             }
 
             .program-data strong {
               display: block;
-              margin-top: 1mm;
+              margin-top: 0.5mm;
               overflow-wrap: anywhere;
             }
 
             .contact-group {
-              padding: 4mm;
+              padding: 2mm 0 0;
             }
 
             .contact-group + .contact-group {
-              border-top: 2px solid #b7cccf;
+              margin-top: 2mm;
+              padding-top: 2mm;
+              border-top: 1px solid #d8e2e4;
             }
 
             .contact-group h3 {
               margin: 0;
               color: #153f49;
-              font-size: 12pt;
+              font-size: 10.5pt;
               break-after: avoid;
             }
 
             .contact-group > p {
-              margin: 1mm 0 3mm;
+              margin: 0.5mm 0 1.5mm;
               color: #60777d;
-              font-size: 8pt;
+              font-size: 7.5pt;
             }
 
-            .contact-grid {
+            .contact-list {
+              width: 100%;
+            }
+
+            .contact-row {
               display: grid;
-              grid-template-columns: repeat(2, minmax(0, 1fr));
-              gap: 3mm;
-            }
-
-            .contact-card {
-              min-width: 0;
-              padding: 3mm;
-              border: 1px solid #cbd9dc;
+              grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+              column-gap: 5mm;
+              align-items: baseline;
+              padding: 1.4mm 0;
+              border-bottom: 1px solid #e2eaec;
               break-inside: avoid;
             }
 
-            .contact-card strong,
-            .contact-card span,
-            .contact-card small {
-              display: block;
+            .contact-row:last-child {
+              border-bottom: 0;
+            }
+
+            .contact-row strong {
+              min-width: 0;
+              color: #153f49;
               overflow-wrap: anywhere;
             }
 
-            .contact-card strong {
-              color: #153f49;
-            }
-
-            .contact-card span {
-              margin-top: 1mm;
-              color: #536c72;
-            }
-
-            .contact-card small {
-              margin-top: 1.5mm;
+            .contact-row span {
+              min-width: 0;
               color: #345b64;
+              overflow-wrap: anywhere;
             }
 
             .empty {
@@ -860,42 +906,11 @@ export class DirectoryCommunicationsComponent implements OnInit {
     );
   }
 
-  private loadUserRoles(
-    users: User[],
-    professionals: ProgramProfessional[],
-    relations: UserProgramRelation[],
-  ): void {
-    if (!users.length) {
-      this.finishDirectory([], professionals, relations);
-      return;
-    }
-
-    const roleRequests = users.map((user) => {
-      const userId = Number(user.id);
-
-      if (!Number.isFinite(userId)) {
-        return of([] as Role[]);
-      }
-
-      return this.usersService.getUserRoles(userId);
-    });
-
-    forkJoin(roleRequests)
-      .pipe(catchError(() => of(users.map(() => [] as Role[]))))
-      .subscribe((rolesByUser) => {
-        const enrichedUsers = users.map((user, index) => ({
-          ...user,
-          roles: rolesByUser[index] ?? user.roles ?? [],
-        }));
-
-        this.finishDirectory(enrichedUsers, professionals, relations);
-      });
-  }
-
   private finishDirectory(
     users: User[],
     professionals: ProgramProfessional[],
     relations: UserProgramRelation[],
+    userRoleRelations: any[],
   ): void {
     const relationMap = new Map<number, number[]>();
 
@@ -951,6 +966,32 @@ export class DirectoryCommunicationsComponent implements OnInit {
             : 'Usuario del sistema',
           roles,
           programIds,
+
+          communicationsByProgram: relations
+            .filter(
+              (relation) =>
+                relation.userId === id &&
+                relation.programId !== null,
+            )
+            .reduce<Record<number, UserProgramRelation>>(
+              (acc, relation) => {
+                if (relation.programId !== null) {
+                  acc[relation.programId] = relation;
+                }
+
+                return acc;
+              },
+              {},
+            ),
+
+          transversalCommunication:
+            relations.find(
+              (relation) =>
+                relation.userId === id &&
+                relation.programId === null &&
+                relation.transversal === true,
+            ) ?? null,
+
           active: !user.deletedAt,
         };
       });
@@ -972,6 +1013,8 @@ export class DirectoryCommunicationsComponent implements OnInit {
           professional.professionCode?.trim() ||
           'Facultativo del programa',
         roles: [],
+        communicationsByProgram: {},
+        transversalCommunication: null,
         programIds: [
           ...new Set([
             ...(professional.programIds ?? []),
@@ -985,9 +1028,40 @@ export class DirectoryCommunicationsComponent implements OnInit {
 
     this.contacts = [...userContacts, ...professionalContacts];
 
+
+    const institutionalUserIds = new Set<number>(
+      (userRoleRelations ?? [])
+        .filter(
+          (relation) =>
+            relation?.active !== false &&
+            !relation?.deletedAt,
+        )
+        .filter((relation) => {
+          const role = String(
+            relation?.role?.code ??
+              relation?.role?.name ??
+              '',
+          )
+            .trim()
+            .toUpperCase();
+
+          return role === 'ADMIN' || role === 'SUPERVISOR';
+        })
+        .map((relation) =>
+          this.readNumericId(
+            relation?.user?.id,
+            relation?.userId,
+          ),
+        )
+        .filter(
+          (userId): userId is number =>
+            userId !== null,
+        ),
+    );
+
     this.institutionalContacts = userContacts
       .filter((contact) =>
-        contact.roles.some((role) => role === 'ADMIN' || role === 'SUPERVISOR'),
+        institutionalUserIds.has(contact.id),
       )
       .sort((a, b) => a.name.localeCompare(b.name));
 
@@ -1006,6 +1080,376 @@ export class DirectoryCommunicationsComponent implements OnInit {
     );
   }
 
+
+  isCommunicationEnabled(
+    contact: DirectoryContact,
+    programId: number | null | undefined,
+    flag: CommunicationFlag,
+  ): boolean {
+    const numericProgramId = Number(programId);
+
+    if (!Number.isFinite(numericProgramId)) {
+      return false;
+    }
+
+    const relation = contact.communicationsByProgram[numericProgramId];
+
+    return Boolean(relation?.[flag]);
+  }
+
+
+  private readonly updatingCommunicationRelations = new Set<number>();
+
+  isCommunicationUpdating(
+    contact: DirectoryContact,
+    programId: number | null | undefined,
+  ): boolean {
+    const numericProgramId = Number(programId);
+
+    if (!Number.isFinite(numericProgramId)) {
+      return false;
+    }
+
+    const relation = contact.communicationsByProgram[numericProgramId];
+
+    return relation?.id !== null &&
+      relation?.id !== undefined &&
+      this.updatingCommunicationRelations.has(relation.id);
+  }
+
+  private isAdministrativeRoleActive(): boolean {
+    const activeRole = String(
+      this.tokenService.getActiveRole() ?? '',
+    )
+      .trim()
+      .toUpperCase();
+
+    return activeRole === 'ADMIN';
+  }
+
+  canEditCommunications(): boolean {
+    // El nivel "Administración y supervisión" no se administra a sí mismo.
+    // Solo un ADMIN global puede modificar configuraciones transversales.
+    return this.isAdministrativeRoleActive();
+  }
+
+  canAssignCommunicationAdministrator(): boolean {
+    if (this.isAdministrativeRoleActive()) {
+      return true;
+    }
+
+    const currentUserId = this.tokenService.getUserId();
+
+    if (currentUserId === null) {
+      return false;
+    }
+
+    const currentContact = this.contacts.find(
+      (contact) =>
+        contact.source === 'USER' &&
+        contact.id === currentUserId,
+    );
+
+    // Administración y supervisión actúa hacia abajo:
+    // puede designar administradores de comunicaciones de programas.
+    return Boolean(
+      currentContact?.transversalCommunication?.canManageCommunications,
+    );
+  }
+
+  canModifyCommunication(
+    programId: number | null | undefined,
+  ): boolean {
+    if (this.isAdministrativeRoleActive()) {
+      return true;
+    }
+
+    const currentUserId = this.tokenService.getUserId();
+    const numericProgramId = Number(programId);
+
+    if (
+      currentUserId === null ||
+      !Number.isFinite(numericProgramId)
+    ) {
+      return false;
+    }
+
+    const currentContact = this.contacts.find(
+      (contact) =>
+        contact.source === 'USER' &&
+        contact.id === currentUserId,
+    );
+
+    if (!currentContact) {
+      return false;
+    }
+
+    // Administración y supervisión administra hacia abajo
+    // todos los programas.
+    if (
+      currentContact.transversalCommunication
+        ?.canManageCommunications
+    ) {
+      return true;
+    }
+
+    // Un administrador de programa administra únicamente
+    // las notificaciones de su propio programa.
+    return Boolean(
+      currentContact.communicationsByProgram[numericProgramId]
+        ?.canManageCommunications,
+    );
+  }
+  onCommunicationFlagChange(
+    contact: DirectoryContact,
+    programId: number | null | undefined,
+    flag: CommunicationFlag,
+    checked: boolean,
+  ): void {
+    const numericProgramId = Number(programId);
+
+    if (!Number.isFinite(numericProgramId)) {
+      this.notify('No fue posible identificar el programa.');
+      return;
+    }
+
+
+    const canModify =
+      flag === 'canManageCommunications'
+        ? this.canAssignCommunicationAdministrator()
+        : this.canModifyCommunication(numericProgramId);
+
+    if (!canModify) {
+      this.notify(
+        'No tiene permisos para modificar la configuración de comunicaciones.',
+      );
+      return;
+    }
+
+    const relation = contact.communicationsByProgram[numericProgramId];
+    const relationId = relation?.id;
+
+    if (relationId === null || relationId === undefined) {
+      this.notify('No existe una relación usuario-programa para actualizar.');
+      return;
+    }
+
+    if (this.updatingCommunicationRelations.has(relationId)) {
+      return;
+    }
+
+    const previousValue = Boolean(relation[flag]);
+
+    if (previousValue === checked) {
+      return;
+    }
+
+    this.updatingCommunicationRelations.add(relationId);
+
+    this.usersService.getUserProgramById(relationId).subscribe({
+      next: (currentRelation) => {
+        const payload = {
+          ...currentRelation,
+          [flag]: checked,
+        };
+
+        this.usersService.updateUserProgram(relationId, payload).subscribe({
+          next: (updatedRelation) => {
+            const normalized =
+              this.normalizeRelations([updatedRelation])[0];
+
+            if (normalized) {
+              contact.communicationsByProgram[numericProgramId] = normalized;
+            }
+
+            this.updatingCommunicationRelations.delete(relationId);
+
+            this.notify('Configuración de comunicaciones actualizada.');
+          },
+
+          error: (error) => {
+            console.error(
+              '[DIRECTORIO] Error actualizando users_programs',
+              error,
+            );
+
+            this.updatingCommunicationRelations.delete(relationId);
+
+            relation[flag] = previousValue;
+
+            this.notify(
+              'No fue posible actualizar la configuración de comunicaciones.',
+            );
+          },
+        });
+      },
+
+      error: (error) => {
+        console.error(
+          '[DIRECTORIO] Error obteniendo users_programs',
+          error,
+        );
+
+        this.updatingCommunicationRelations.delete(relationId);
+
+        relation[flag] = previousValue;
+
+        this.notify(
+          'No fue posible obtener la configuración del usuario.',
+        );
+      },
+    });
+  }
+
+  private readonly updatingTransversalUsers = new Set<number>();
+
+  isTransversalCommunicationEnabled(
+    contact: DirectoryContact,
+    flag: CommunicationFlag,
+  ): boolean {
+    return Boolean(contact.transversalCommunication?.[flag]);
+  }
+
+  isTransversalCommunicationUpdating(
+    contact: DirectoryContact,
+  ): boolean {
+    const userId = Number(contact.id);
+
+    return Number.isFinite(userId) &&
+      this.updatingTransversalUsers.has(userId);
+  }
+
+  onTransversalCommunicationFlagChange(
+    contact: DirectoryContact,
+    flag: CommunicationFlag,
+    checked: boolean,
+  ): void {
+    const userId = Number(contact.id);
+
+    if (!Number.isFinite(userId)) {
+      this.notify('No fue posible identificar el usuario.');
+      return;
+    }
+
+    if (!this.canEditCommunications()) {
+      this.notify(
+        'No tiene permisos para modificar la configuración de comunicaciones.',
+      );
+      return;
+    }
+
+    if (this.updatingTransversalUsers.has(userId)) {
+      return;
+    }
+
+    const relation = contact.transversalCommunication;
+    const previousValue = Boolean(relation?.[flag]);
+
+    if (previousValue === checked) {
+      return;
+    }
+
+    this.updatingTransversalUsers.add(userId);
+
+    if (relation?.id !== null && relation?.id !== undefined) {
+      const relationId = relation.id;
+
+      this.usersService.getUserProgramById(relationId).subscribe({
+        next: (currentRelation) => {
+          const payload = {
+            ...currentRelation,
+            [flag]: checked,
+          };
+
+          this.usersService.updateUserProgram(relationId, payload).subscribe({
+            next: (updatedRelation) => {
+              const normalized =
+                this.normalizeRelations([updatedRelation])[0];
+
+              if (normalized) {
+                contact.transversalCommunication = normalized;
+              }
+
+              this.updatingTransversalUsers.delete(userId);
+              this.notify('Configuración transversal actualizada.');
+            },
+
+            error: (error) => {
+              console.error(
+                '[DIRECTORIO] Error actualizando configuración transversal',
+                error,
+              );
+
+              this.updatingTransversalUsers.delete(userId);
+              this.notify(
+                'No fue posible actualizar la configuración transversal.',
+              );
+            },
+          });
+        },
+
+        error: (error) => {
+          console.error(
+            '[DIRECTORIO] Error obteniendo configuración transversal',
+            error,
+          );
+
+          this.updatingTransversalUsers.delete(userId);
+          this.notify(
+            'No fue posible obtener la configuración transversal.',
+          );
+        },
+      });
+
+      return;
+    }
+
+    const payload = {
+      userId,
+      programId: null,
+      transversal: true,
+      communicationScope: 'TRANSVERSAL',
+      isActive: true,
+      isSupervisor: false,
+      canManageCommunications: false,
+      canReceiveCitations: false,
+      canReceiveAttendances: false,
+      canReceiveFeedback: false,
+      canReceiveReferences: false,
+      canReceiveClosures: false,
+      canReceiveDocuments: false,
+      canReceiveObservations: false,
+      canManageDemands: false,
+      canViewDashboard: false,
+      [flag]: checked,
+    };
+
+    this.usersService.createUserProgram(payload).subscribe({
+      next: (createdRelation) => {
+        const normalized =
+          this.normalizeRelations([createdRelation])[0];
+
+        if (normalized) {
+          contact.transversalCommunication = normalized;
+        }
+
+        this.updatingTransversalUsers.delete(userId);
+        this.notify('Configuración transversal creada.');
+      },
+
+      error: (error) => {
+        console.error(
+          '[DIRECTORIO] Error creando configuración transversal',
+          error,
+        );
+
+        this.updatingTransversalUsers.delete(userId);
+        this.notify(
+          'No fue posible crear la configuración transversal.',
+        );
+      },
+    });
+  }
   private rebuildDirectory(): void {
     const filters = this.filtersForm.getRawValue();
     const query = this.normalizeSearch(filters.q);
@@ -1109,21 +1553,43 @@ export class DirectoryCommunicationsComponent implements OnInit {
 
   private normalizeRelations(relations: any[]): UserProgramRelation[] {
     return (relations ?? []).map((relation) => ({
+      id: this.readNumericId(relation?.id),
+
       userId: this.readNumericId(
         relation?.userId,
         relation?.user?.id,
         relation?.users?.id,
       ),
+
       programId: this.readNumericId(
         relation?.programId,
         relation?.program?.id,
         relation?.programs?.id,
       ),
+
+      transversal: relation?.transversal === true,
+      communicationScope:
+        typeof relation?.communicationScope === 'string'
+          ? relation.communicationScope
+          : null,
+
+      canManageCommunications: relation?.canManageCommunications === true,
+      canReceiveCitations: relation?.canReceiveCitations === true,
+      canReceiveAttendances: relation?.canReceiveAttendances === true,
+      canReceiveFeedback: relation?.canReceiveFeedback === true,
+      canReceiveReferences: relation?.canReceiveReferences === true,
+      canReceiveClosures: relation?.canReceiveClosures === true,
+      canReceiveDocuments: relation?.canReceiveDocuments === true,
+      canReceiveObservations: relation?.canReceiveObservations === true,
     }));
   }
 
   private readNumericId(...values: unknown[]): number | null {
     for (const value of values) {
+      if (value === null || value === undefined || value === '') {
+        continue;
+      }
+
       const numeric = Number(value);
 
       if (Number.isFinite(numeric)) {
