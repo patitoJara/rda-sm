@@ -1176,6 +1176,28 @@
             <mat-datepicker #correctionClosureDatePicker></mat-datepicker>
           </mat-form-field>
 
+          <div
+            class="correction-reference-warning"
+            *ngIf="referenceDrafts?.length"
+          >
+            <mat-icon>warning_amber</mat-icon>
+
+            <div>
+              <strong>Atención: esta etapa tiene una referencia registrada.</strong>
+
+              <span>
+                Si modifica la fecha de cierre, verifique también la fecha de
+                referencia y la fecha de ingreso al programa receptor para
+                mantener la cronología del episodio.
+              </span>
+
+              <span>
+                La fecha de cierre no modifica automáticamente la fecha de
+                ingreso del programa receptor.
+              </span>
+            </div>
+          </div>
+
           <mat-form-field
             appearance="outline"
             class="event-timeline__full-field"

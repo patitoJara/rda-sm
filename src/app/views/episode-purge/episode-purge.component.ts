@@ -1820,6 +1820,34 @@ export class EpisodePurgeComponent {
     if (feedbacks.length > 0) {
       payload.feedbacks = feedbacks;
     }
+    /*
+     * REGLA FUNCIONAL — CIERRE ADMINISTRATIVO POR PROGRAMA
+     *
+     * El cierre puede afectar solo una etapa/programa o al episodio completo.
+     *
+     * 1. Cierre por REFERENCIA:
+     *    - Se cierra la etapa del programa origen.
+     *    - stateCode = CERRADO.
+     *    - resultCode = REFERENCIA.
+     *    - closed = true.
+     *    - closeEpisode = false.
+     *    - El episodio continúa abierto en el programa receptor.
+     *
+     * 2. Cierre por cualquier otro motivo:
+     *    - Se cierra la etapa seleccionada.
+     *    - Se cierra también el episodio completo.
+     *    - closeEpisode = true.
+     *
+     * 3. Fechas:
+     *    - closureDate/closedAt corresponden al cierre de la etapa seleccionada.
+     *    - receivedAt del programa receptor es independiente.
+     *    - Modificar la fecha de cierre NO modifica automáticamente la fecha
+     *      de ingreso de la etapa receptora.
+     *
+     * 4. Corrección administrativa:
+     *    - stateCode y resultCode se resuelven desde la etapa seleccionada,
+     *      no desde el estado global del episodio.
+     */
     if (closureChanged) {
       const isReferenceClosure =
         correctedClosureReasonCode === 'REFERENCIA';
