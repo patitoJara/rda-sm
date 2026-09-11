@@ -3704,8 +3704,13 @@ export class DemandNewComponent
       this.closureError = null;
       this.closureSuccess = null;
 
+      const closurePayload = {
+        ...closureContext.payload,
+        closureReasonCode,
+      };
+
       this.demandEpisodeService
-        .closeEpisode(episodeId, closureContext.payload)
+        .closeEpisode(episodeId, closurePayload)
         .pipe(
           finalize(() => {
             this.isSavingClosure = false;
@@ -3713,7 +3718,7 @@ export class DemandNewComponent
         )
         .subscribe({
           next: () => {
-            this.closureSuccess = getClosureSuccessMessage();
+            this.closureSuccess = getClosureSuccessMessage(isReferenceClosure);
             this.showOperationSuccess(this.closureSuccess);
             this.closeActionPanel();
             this.loadEpisodeLongitudinal(episodeId);

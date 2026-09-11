@@ -135,7 +135,9 @@ export interface TreatmentEntryRequest {
 }
 
 export interface CloseEpisodeRequest {
+  stageId?: number | null;
   closureReasonId: number;
+  closureReasonCode?: string;
   closureDate?: string;
   observation?: string;
   [key: string]: any;

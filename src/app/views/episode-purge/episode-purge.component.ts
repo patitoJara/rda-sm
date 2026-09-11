@@ -1821,45 +1821,41 @@ export class EpisodePurgeComponent {
       payload.feedbacks = feedbacks;
     }
     if (closureChanged) {
+      const isReferenceClosure =
+        correctedClosureReasonCode === 'REFERENCIA';
+
       payload.closure = {
         stageId,
         closureReasonId,
         closureReasonCode,
         closureDate,
-        closedAt: stageWasClosed ? closureDate : null,
+
+        closedAt:
+          stageWasClosed && closureDate
+            ? `${closureDate}T00:00:00`
+            : null,
+
         closureComment:
-          stageWasClosed ? correctedClosureComment || null : null,
+          stageWasClosed
+            ? correctedClosureComment || null
+            : null,
+
         stateCode:
           stageWasClosed
-            ? this.correctionDraft?.stateCode ?? null
+            ? 'CERRADO'
             : 'EN_TRAMITE',
+
         resultCode:
           stageWasClosed
-            ? this.correctionDraft?.resultCode ?? null
+            ? isReferenceClosure
+              ? 'REFERENCIA'
+              : this.correctionDraft?.resultCode ?? null
             : 'AUN_SIN_RESULTADO',
+
         closed: stageWasClosed,
-        closeEpisode: false,
-      };
-    }
-    if (closureChanged) {
-      payload.closure = {
-        stageId,
-        closureReasonId,
-        closureReasonCode,
-        closureDate,
-        closedAt: stageWasClosed ? closureDate : null,
-        closureComment:
-          stageWasClosed ? correctedClosureComment || null : null,
-        stateCode:
-          stageWasClosed
-            ? this.correctionDraft?.stateCode ?? null
-            : 'EN_TRAMITE',
-        resultCode:
-          stageWasClosed
-            ? this.correctionDraft?.resultCode ?? null
-            : 'AUN_SIN_RESULTADO',
-        closed: stageWasClosed,
-        closeEpisode: false,
+
+        closeEpisode:
+          stageWasClosed && !isReferenceClosure,
       };
     }
     console.log('[EpisodePurge] Administrative correction payload:', payload);
@@ -2298,10 +2294,21 @@ export class EpisodePurgeComponent {
       diverterId:
         this.episode?.diverter?.id ?? this.episode?.diverterId ?? null,
 
-      stateCode: this.episode?.state?.code ?? this.episode?.stateCode ?? null,
+      stateCode:
+        selectedProgramStage?.stageStateCode ??
+        selectedProgramStage?.state?.code ??
+        selectedProgramStage?.stateCode ??
+        this.episode?.state?.code ??
+        this.episode?.stateCode ??
+        null,
 
       resultCode:
-        this.episode?.result?.code ?? this.episode?.resultCode ?? null,
+        selectedProgramStage?.stageResultCode ??
+        selectedProgramStage?.result?.code ??
+        selectedProgramStage?.resultCode ??
+        this.episode?.result?.code ??
+        this.episode?.resultCode ??
+        null,
     };
 
     console.log('[EpisodePurge] fecha correctionDraft', {

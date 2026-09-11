@@ -72,6 +72,10 @@ function formatDateLabel(value: string): string {
     : value;
 }
 
-export function getClosureSuccessMessage(): string {
-  return 'Demanda cerrada correctamente.';
+export function getClosureSuccessMessage(
+  isReferenceClosure: boolean,
+): string {
+  return isReferenceClosure
+    ? 'Atención del programa cerrada por referencia. El episodio continúa activo.'
+    : 'Demanda cerrada correctamente.';
 }
