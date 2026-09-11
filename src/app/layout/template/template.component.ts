@@ -202,8 +202,16 @@ export class TemplateComponent implements OnInit, OnDestroy {
         : this.tokenService.getUserPrograms();
 
     this.userPrograms = rawPrograms
-      .map((program: any) => program?.name ?? program)
-      .filter((program: any) => !!program);
+      .map((program: any) => {
+        if (typeof program === 'string') {
+          return program.trim();
+        }
+
+        return typeof program?.name === 'string'
+          ? program.name.trim()
+          : '';
+      })
+      .filter((program: string) => !!program);
 
     // =============================================
     // 👑 ADMIN ESTRUCTURAL

@@ -124,7 +124,11 @@ export class UsersDialogComponent implements OnInit {
       rut: [userData.rut],
       // Programas se validan en save(): usuarios normales requieren programa,
       // pero ADMIN puede quedar sin programa activo.
-      programs: [userData.programs?.map((p) => p.id) ?? []],
+      programs: [
+        (userData.programs ?? [])
+          .filter((p) => p?.id != null)
+          .map((p) => Number(p.id)),
+      ],
       roles: [userData.roles?.map((r) => r.id) ?? [], [Validators.required]],
     });
 
@@ -156,7 +160,11 @@ export class UsersDialogComponent implements OnInit {
 
       this.usersService.getUserPrograms(userData.id!).subscribe({
         next: (programs: Program[]) => {
-          this.form.patchValue({ programs: programs.map((p) => p.id) });
+          const programIds = (programs ?? [])
+            .filter((p) => p?.id != null)
+            .map((p) => Number(p.id));
+
+          this.form.patchValue({ programs: programIds });
         },
         error: (err) => this.handleError(err, 'programas'),
       });
