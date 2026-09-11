@@ -1,4 +1,4 @@
-﻿//C:\Users\pjara\Documents\DESARROLLO\ANGULAR\rda-sm\src\app\services\token.service.ts
+//C:\Users\pjara\Documents\DESARROLLO\ANGULAR\rda-sm\src\app\services\token.service.ts
 
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
@@ -17,6 +17,17 @@ export class TokenService {
     sessionStorage.getItem(this.ACTIVE_PROGRAM_KEY),
   );
 
+  private activeProgramId$ = new BehaviorSubject<number | null>(
+    (() => {
+      const value = sessionStorage.getItem(this.ACTIVE_PROGRAM_ID_KEY);
+      const parsed = value ? Number(value) : null;
+
+      return parsed !== null && Number.isFinite(parsed)
+        ? parsed
+        : null;
+    })(),
+  );
+
   private activeRole$ = new BehaviorSubject<string | null>(
     sessionStorage.getItem(this.ACTIVE_ROLE_KEY),
   );
@@ -25,8 +36,8 @@ export class TokenService {
   private activeRoleMemory: string | null = null;
   private activeProgramMemory: string | null = null;
   private activeProgramIdMemory: number | null = null;
-
   activeProgramChanges = this.activeProgram$.asObservable();
+  activeProgramIdChanges = this.activeProgramId$.asObservable();
   activeRoleChanges = this.activeRole$.asObservable();
 
   // =====================================================
@@ -101,6 +112,7 @@ export class TokenService {
 
     this.activeRole$.next(null);
     this.activeProgram$.next(null);
+    this.activeProgramId$.next(null);
 
     console.log('[TokenService] 🧹 Contexto de sesión eliminado');
   }
@@ -222,6 +234,7 @@ export class TokenService {
     } else {
       sessionStorage.removeItem(this.ACTIVE_PROGRAM_ID_KEY);
     }
+    this.activeProgramId$.next(programId);
 
     console.log('💾 activeProgramId guardado en memoria:', programId);
   }

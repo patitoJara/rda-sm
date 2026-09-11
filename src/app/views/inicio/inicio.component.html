@@ -768,6 +768,12 @@
                 <mat-icon>subdirectory_arrow_right</mat-icon>
                 Desde: {{ row.originProgramName }}
               </small>
+
+              <small class="program-origin">
+                <mat-icon>schedule</mat-icon>
+                Inicio etapa:
+                {{ formatCompactDate(getEpisodeStageStartDate(row)) }}
+              </small>
             </div>
           </td>
         </ng-container>

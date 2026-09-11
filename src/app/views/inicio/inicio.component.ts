@@ -54,6 +54,7 @@ import {
   resolveEpisodeAccessModeFromProgramContext,
 } from '../demand-new/utils/demand-new-permission.utils';
 import { TokenService } from '../../services/token.service';
+import { Subscription } from 'rxjs';
 import { PreloadCatalogsService } from '../../services/demand/preload-catalogs.service';
 import {
   ProgramAnalysisDialogComponent,
@@ -133,9 +134,8 @@ export class InicioComponent implements OnInit, OnDestroy {
 
   private readonly activeMetricsService =
     inject(InicioActiveMetricsService);
-
   private clockInterval: ReturnType<typeof setInterval> | null = null;
-
+  private activeProgramIdSubscription: Subscription | null = null;
   fullName = 'Usuario';
   activeRole: string | null = null;
   activeProgram: string | null = null;
@@ -300,6 +300,35 @@ export class InicioComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadSessionContext();
+
+    this.activeProgramIdSubscription =
+      this.tokenService.activeProgramIdChanges.subscribe((programId) => {
+        const numericProgramId = Number(programId);
+
+        const nextProgramId =
+          Number.isFinite(numericProgramId) && numericProgramId > 0
+            ? numericProgramId
+            : null;
+
+        const programChanged =
+          this.activeProgramId !== nextProgramId;
+
+        this.activeProgramId = nextProgramId;
+        this.activeProgram = this.tokenService.getActiveProgram();
+
+        if (nextProgramId === null) {
+          this.programContextsByEpisodeId.clear();
+          return;
+        }
+
+        if (
+          programChanged &&
+          !this.isHistoricalMode &&
+          this.episodes.length > 0
+        ) {
+          this.loadEpisodeProgramContexts(this.episodes);
+        }
+      });
     this.loadFilterCatalogs();
     this.restoreListState();
 
@@ -309,8 +338,9 @@ export class InicioComponent implements OnInit, OnDestroy {
       this.currentDate = new Date();
     }, 60000);
   }
-
   ngOnDestroy(): void {
+    this.activeProgramIdSubscription?.unsubscribe();
+    this.activeProgramIdSubscription = null;
     if (this.clockInterval) {
       clearInterval(this.clockInterval);
       this.clockInterval = null;
@@ -557,7 +587,15 @@ export class InicioComponent implements OnInit, OnDestroy {
       episode.accumulatedDays ?? 0,
     );
   }
-
+  getEpisodeStageStartDate(
+    episode: PrioritizedEpisodeDTO,
+  ): string | null {
+    return (
+      episode.currentStageReceivedAt ??
+      episode.originalRequestDate ??
+      null
+    );
+  }
 
   getEpisodeStageClosureDate(
     episode: PrioritizedEpisodeDTO,
