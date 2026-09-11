@@ -58,6 +58,7 @@ import { finalize, map, switchMap } from 'rxjs/operators';
 import { ConfirmDialogYesNoComponent } from '@app/shared/confirm-dialog/confirm-dialog-yes-no.component';
 import { ConfirmDialogOkComponent } from '@app/shared/confirm-dialog/confirm-dialog-ok.component';
 import { Postulant } from '@app/models/postulant';
+import { formatPersonName } from '@app/core/utils/text.utils';
 import { DemandEpisodeService } from '@app/services/demand/demand-episode.service';
 import { PreloadCatalogsService } from '@app/services/demand/preload-catalogs.service';
 import { PostulantService } from '@app/services/postulant.service';
@@ -2774,17 +2775,25 @@ export class DemandNewComponent
         id: Number(raw.sex),
       },
 
-      firstName: toStringOrNull(raw.firstName),
+      firstName: raw.firstName?.trim()
+        ? formatPersonName(raw.firstName)
+        : null,
 
       /*
        * En Postulant, lastName representa
        * el segundo nombre de la persona.
        */
-      lastName: toStringOrNull(raw.secondName),
+      lastName: raw.secondName?.trim()
+        ? formatPersonName(raw.secondName)
+        : null,
 
-      firstLastName: toStringOrNull(raw.firstLastName),
+      firstLastName: raw.firstLastName?.trim()
+        ? formatPersonName(raw.firstLastName)
+        : null,
 
-      secondLastName: toStringOrNull(raw.secondLastName),
+      secondLastName: raw.secondLastName?.trim()
+        ? formatPersonName(raw.secondLastName)
+        : null,
 
       rut: formatRut(raw.rut),
 
@@ -3750,13 +3759,13 @@ export class DemandNewComponent
 
     this.personForm.patchValue({
       rut: person.rut ?? '',
-      firstName: person.firstName ?? '',
+      firstName: person.firstName ? formatPersonName(person.firstName) : '',
 
       // En el modelo actual, el segundo nombre viene como lastName.
-      secondName: person.lastName ?? '',
+      secondName: person.lastName ? formatPersonName(person.lastName) : '',
 
-      firstLastName: person.firstLastName ?? '',
-      secondLastName: person.secondLastName ?? '',
+      firstLastName: person.firstLastName ? formatPersonName(person.firstLastName) : '',
+      secondLastName: person.secondLastName ? formatPersonName(person.secondLastName) : '',
       birthDate,
       sex: person.sex?.id ?? null,
       phone: person.phone ?? '',

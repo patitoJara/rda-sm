@@ -70,7 +70,28 @@ export function normalizeSpaces(text: string): string {
  */
 export function formatPersonName(text: string): string {
   if (!text) return '';
-  return capitalizeWords(normalizeSpaces(text));
+
+  /*
+   * Normalización institucional de nombres de personas.
+   *
+   * - Elimina espacios duplicados.
+   * - Convierte primero todo a minúsculas.
+   * - Capitaliza cada palabra.
+   * - Respeta letras Unicode: Á, É, Í, Ó, Ú, Ü, Ñ.
+   * - Capitaliza correctamente después de guiones y apóstrofes.
+   *
+   * Ejemplos:
+   *   "mARÍA  jOSÉ" -> "María José"
+   *   "maría-josé"  -> "María-José"
+   *   "o'higgins"   -> "O'Higgins"
+   */
+  return normalizeSpaces(text)
+    .toLocaleLowerCase('es-CL')
+    .replace(
+      /(^|[\s'-])(\p{L})/gu,
+      (_, separator: string, letter: string) =>
+        separator + letter.toLocaleUpperCase('es-CL'),
+    );
 }
 
 /**
