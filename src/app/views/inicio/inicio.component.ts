@@ -1,36 +1,16 @@
-import { CommonModule } from '@angular/common';
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-  inject,
-} from '@angular/core';
-import {
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import {
-  HttpErrorResponse,
-} from '@angular/common/http';
-import {
-  Router,
-  RouterModule,
-} from '@angular/router';
+﻿import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Router, RouterModule } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import {
-  MatDialog,
-  MatDialogModule,
-} from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import {
-  MatPaginatorModule,
-  PageEvent,
-} from '@angular/material/paginator';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSortModule, Sort } from '@angular/material/sort';
@@ -41,45 +21,35 @@ import { catchError, finalize, map, of, switchMap } from 'rxjs';
 import {
   DemandEpisodeProgramContextDTO,
   PrioritizedEpisodeDTO,
-
   PrioritizedEpisodeStageDTO,
   SupervisorDashboardDTO,
 } from '../../core/models/demand-priority.models';
-import { DemandPersonDTO, DemandService } from '../../core/services/demand.service';
+import {
+  DemandPersonDTO,
+  DemandService,
+} from '../../core/services/demand.service';
 import { ContactService } from '../../services/contact.service';
 import { Contact } from '../../models/contact';
 import { DemandListStateService } from '../../core/services/demand-list-state.service';
 import { getSemaphoreColorFromDays } from '../demand-new/utils/demand-new-semaphore.utils';
-import {
-  resolveEpisodeAccessModeFromProgramContext,
-} from '../demand-new/utils/demand-new-permission.utils';
+import { resolveEpisodeAccessModeFromProgramContext } from '../demand-new/utils/demand-new-permission.utils';
 import { TokenService } from '../../services/token.service';
 import { Subscription } from 'rxjs';
 import { PreloadCatalogsService } from '../../services/demand/preload-catalogs.service';
-import {
-  ProgramAnalysisDialogComponent,
-} from './program-analysis-dialog/program-analysis-dialog.component';
-import {
-  ProgramTrajectoryDialogComponent,
-} from './program-trajectory-dialog/program-trajectory-dialog.component';
+import { ProgramAnalysisDialogComponent } from './program-analysis-dialog/program-analysis-dialog.component';
+import { ProgramTrajectoryDialogComponent } from './program-trajectory-dialog/program-trajectory-dialog.component';
 
 import {
   buildInicioActiveMetrics,
   InicioActiveMetrics,
 } from './utils/inicio-active-metrics.utils';
-import {
-  InicioClosedMetrics,
-} from './utils/inicio-closed-metrics.utils';
+import { InicioClosedMetrics } from './utils/inicio-closed-metrics.utils';
 import {
   resolveInicioViewPresentation,
   InicioViewPresentation,
 } from './utils/inicio-view-mode.utils';
-import {
-  InicioClosedMetricsService,
-} from './services/inicio-closed-metrics.service';
-import {
-  InicioActiveMetricsService,
-} from './services/inicio-active-metrics.service';
+import { InicioClosedMetricsService } from './services/inicio-closed-metrics.service';
+import { InicioActiveMetricsService } from './services/inicio-active-metrics.service';
 import {
   buildInicioMetricsScopeMessage,
   buildInicioMetricsScopeTitle,
@@ -129,11 +99,9 @@ export class InicioComponent implements OnInit, OnDestroy {
   private readonly demandListState = inject(DemandListStateService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
-  private readonly closedMetricsService =
-    inject(InicioClosedMetricsService);
+  private readonly closedMetricsService = inject(InicioClosedMetricsService);
 
-  private readonly activeMetricsService =
-    inject(InicioActiveMetricsService);
+  private readonly activeMetricsService = inject(InicioActiveMetricsService);
   private clockInterval: ReturnType<typeof setInterval> | null = null;
   private activeProgramIdSubscription: Subscription | null = null;
   fullName = 'Usuario';
@@ -154,12 +122,13 @@ export class InicioComponent implements OnInit, OnDestroy {
   loadingActiveMetrics = false;
   activeMetricsError: string | null = null;
 
-  appliedFilters: InicioMetricsFilter =
-    normalizeInicioMetricsFilter({});
+  appliedFilters: InicioMetricsFilter = normalizeInicioMetricsFilter({});
   episodes: PrioritizedEpisodeDTO[] = [];
 
-  readonly programContextsByEpisodeId =
-    new Map<number, DemandEpisodeProgramContextDTO>();
+  readonly programContextsByEpisodeId = new Map<
+    number,
+    DemandEpisodeProgramContextDTO
+  >();
 
   loadingDashboard = false;
   loadingEpisodes = false;
@@ -178,10 +147,7 @@ export class InicioComponent implements OnInit, OnDestroy {
     }
   > = {};
 
-  readonly personDetailErrorByEpisodeId: Record<
-    number,
-    string | null
-  > = {};
+  readonly personDetailErrorByEpisodeId: Record<number, string | null> = {};
   pageIndex = 0;
   pageSize = 20;
   totalElements = 0;
@@ -192,22 +158,17 @@ export class InicioComponent implements OnInit, OnDestroy {
   }
 
   get viewPresentation(): InicioViewPresentation {
-    return resolveInicioViewPresentation(
-      this.episodeListMode,
-    );
+    return resolveInicioViewPresentation(this.episodeListMode);
   }
 
   get activeMetrics(): InicioActiveMetrics {
     return (
-      this.filteredActiveMetrics ??
-      buildInicioActiveMetrics(this.dashboard)
+      this.filteredActiveMetrics ?? buildInicioActiveMetrics(this.dashboard)
     );
   }
 
   get hasAppliedFilters(): boolean {
-    return hasInicioMetricsFilter(
-      this.appliedFilters,
-    );
+    return hasInicioMetricsFilter(this.appliedFilters);
   }
 
   get metricsScopeMessage(): string {
@@ -250,12 +211,9 @@ export class InicioComponent implements OnInit, OnDestroy {
     'actions',
   ];
 
-  readonly historicalDisplayedColumns =
-    this.activeDisplayedColumns.filter(
-      (column) =>
-        column !== 'result' &&
-        column !== 'programDays',
-    );
+  readonly historicalDisplayedColumns = this.activeDisplayedColumns.filter(
+    (column) => column !== 'result' && column !== 'programDays',
+  );
 
   get displayedColumns(): string[] {
     return this.isHistoricalMode
@@ -310,8 +268,7 @@ export class InicioComponent implements OnInit, OnDestroy {
             ? numericProgramId
             : null;
 
-        const programChanged =
-          this.activeProgramId !== nextProgramId;
+        const programChanged = this.activeProgramId !== nextProgramId;
 
         this.activeProgramId = nextProgramId;
         this.activeProgram = this.tokenService.getActiveProgram();
@@ -361,13 +318,8 @@ export class InicioComponent implements OnInit, OnDestroy {
     this.loadEpisodes();
   }
 
-  setEpisodeListMode(
-    mode: 'active' | 'closed',
-  ): void {
-    if (
-      this.episodeListMode === mode ||
-      this.loadingEpisodes
-    ) {
+  setEpisodeListMode(mode: 'active' | 'closed'): void {
+    if (this.episodeListMode === mode || this.loadingEpisodes) {
       return;
     }
 
@@ -384,8 +336,7 @@ export class InicioComponent implements OnInit, OnDestroy {
       },
     );
 
-    this.appliedFilters =
-      normalizeInicioMetricsFilter({});
+    this.appliedFilters = normalizeInicioMetricsFilter({});
 
     this.pageIndex = 0;
     this.episodes = [];
@@ -397,11 +348,10 @@ export class InicioComponent implements OnInit, OnDestroy {
     this.loadEpisodes();
   }
 
-    applyFilters(): void {
-    this.appliedFilters =
-      normalizeInicioMetricsFilter(
-        this.filtersForm.getRawValue(),
-      );
+  applyFilters(): void {
+    this.appliedFilters = normalizeInicioMetricsFilter(
+      this.filtersForm.getRawValue(),
+    );
 
     this.pageIndex = 0;
     this.saveListState();
@@ -422,8 +372,7 @@ export class InicioComponent implements OnInit, OnDestroy {
       },
     );
 
-    this.appliedFilters =
-      normalizeInicioMetricsFilter({});
+    this.appliedFilters = normalizeInicioMetricsFilter({});
 
     this.pageIndex = 0;
     this.saveListState();
@@ -479,9 +428,7 @@ export class InicioComponent implements OnInit, OnDestroy {
     });
   }
 
-  getEpisodeOpenMode(
-    episode: PrioritizedEpisodeDTO,
-  ): 'view' | 'manage' {
+  getEpisodeOpenMode(episode: PrioritizedEpisodeDTO): 'view' | 'manage' {
     if (
       this.isHistoricalMode ||
       this.activeRole === 'ADMIN' ||
@@ -490,141 +437,85 @@ export class InicioComponent implements OnInit, OnDestroy {
       return 'view';
     }
 
-    const context =
-      this.programContextsByEpisodeId.get(
-        episode.episodeId,
-      );
+    const context = this.programContextsByEpisodeId.get(episode.episodeId);
 
-    const accessMode =
-      resolveEpisodeAccessModeFromProgramContext(
-        this.activeProgramId,
-        context,
-      );
+    const accessMode = resolveEpisodeAccessModeFromProgramContext(
+      this.activeProgramId,
+      context,
+    );
 
-    return accessMode === 'MANAGE'
-      ? 'manage'
-      : 'view';
+    return accessMode === 'MANAGE' ? 'manage' : 'view';
   }
-  getEpisodeActionLabel(
-    episode: PrioritizedEpisodeDTO,
-  ): string {
+  getEpisodeActionLabel(episode: PrioritizedEpisodeDTO): string {
     return this.getEpisodeOpenMode(episode) === 'manage'
       ? 'Gestionar'
       : 'Solo lectura';
   }
 
-  getEpisodeActionIcon(
-    episode: PrioritizedEpisodeDTO,
-  ): string {
+  getEpisodeActionIcon(episode: PrioritizedEpisodeDTO): string {
     return this.getEpisodeOpenMode(episode) === 'manage'
       ? 'edit'
       : 'visibility';
   }
 
-  getEpisodeActionTooltip(
-    episode: PrioritizedEpisodeDTO,
-  ): string {
+  getEpisodeActionTooltip(episode: PrioritizedEpisodeDTO): string {
     return this.getEpisodeOpenMode(episode) === 'manage'
       ? 'Gestionar demanda'
       : 'Abrir ficha en modo solo lectura';
   }
-  getEpisodeSuggestedActionLabel(
-    episode: PrioritizedEpisodeDTO,
-  ): string {
-    return String(
-      episode.suggestedAction ?? '',
-    ).trim();
+  getEpisodeSuggestedActionLabel(episode: PrioritizedEpisodeDTO): string {
+    return String(episode.suggestedAction ?? '').trim();
   }
-  getEpisodeStageStateCode(
-    episode: PrioritizedEpisodeDTO,
-  ): string {
+  getEpisodeStageStateCode(episode: PrioritizedEpisodeDTO): string {
     return String(
-      episode.currentStageStateCode ??
-        episode.stateCode ??
-        '',
+      episode.currentStageStateCode ?? episode.stateCode ?? '',
     ).trim();
   }
 
-  getEpisodeStageResultCode(
-    episode: PrioritizedEpisodeDTO,
-  ): string {
+  getEpisodeStageResultCode(episode: PrioritizedEpisodeDTO): string {
     return String(
-      episode.currentStageResultCode ??
-        episode.resultCode ??
-        '',
+      episode.currentStageResultCode ?? episode.resultCode ?? '',
     ).trim();
   }
 
-  getEpisodeProgramDays(
-    episode: PrioritizedEpisodeDTO,
-  ): number {
-    const stageDays = Number(
-      episode.currentStageDays,
-    );
+  getEpisodeProgramDays(episode: PrioritizedEpisodeDTO): number {
+    const stageDays = Number(episode.currentStageDays);
 
-    return Number.isFinite(stageDays) &&
-      stageDays >= 0
-      ? stageDays
-      : 0;
+    return Number.isFinite(stageDays) && stageDays >= 0 ? stageDays : 0;
   }
-  getEpisodeDisplayDays(
-    episode: PrioritizedEpisodeDTO,
-  ): number {
+  getEpisodeDisplayDays(episode: PrioritizedEpisodeDTO): number {
     if (!this.isHistoricalMode) {
-      return Number(
-        episode.accumulatedDays ?? 0,
-      );
+      return Number(episode.accumulatedDays ?? 0);
     }
 
-    const stageDays = Number(
-      episode.currentStageDays,
-    );
+    const stageDays = Number(episode.currentStageDays);
 
-    if (
-      Number.isFinite(stageDays) &&
-      stageDays >= 0
-    ) {
+    if (Number.isFinite(stageDays) && stageDays >= 0) {
       return stageDays;
     }
 
-    return Number(
-      episode.accumulatedDays ?? 0,
-    );
+    return Number(episode.accumulatedDays ?? 0);
   }
-  getEpisodeStageStartDate(
-    episode: PrioritizedEpisodeDTO,
-  ): string | null {
+  getEpisodeStageStartDate(episode: PrioritizedEpisodeDTO): string | null {
     return (
-      episode.currentStageReceivedAt ??
-      episode.originalRequestDate ??
-      null
+      episode.currentStageReceivedAt ?? episode.originalRequestDate ?? null
     );
   }
 
-  getEpisodeStageClosureDate(
-    episode: PrioritizedEpisodeDTO,
-  ): string | null {
+  getEpisodeStageClosureDate(episode: PrioritizedEpisodeDTO): string | null {
     return episode.closureDate ?? null;
   }
 
-  openEpisode(
-    episode: PrioritizedEpisodeDTO,
-    mode: 'view' | 'manage',
-  ): void {
-    this.router.navigate(
-      ['/demand-new'],
-      {
-        queryParams: {
-          rut: episode.rut,
-          episodeId: episode.episodeId,
-          mode,
-        },
+  openEpisode(episode: PrioritizedEpisodeDTO, mode: 'view' | 'manage'): void {
+    this.router.navigate(['/demand-new'], {
+      queryParams: {
+        rut: episode.rut,
+        episodeId: episode.episodeId,
+        mode,
       },
-    );
+    });
   }
-  getPersonAge(
-    birthdate: string | null | undefined,
-  ): number | null {
+  getPersonAge(birthdate: string | null | undefined): number | null {
     const value = String(birthdate ?? '').trim();
 
     if (!value) {
@@ -653,15 +544,11 @@ export class InicioComponent implements OnInit, OnDestroy {
 
     let age = today.getFullYear() - year;
 
-    const monthDifference =
-      today.getMonth() + 1 - month;
+    const monthDifference = today.getMonth() + 1 - month;
 
     if (
       monthDifference < 0 ||
-      (
-        monthDifference === 0 &&
-        today.getDate() < day
-      )
+      (monthDifference === 0 && today.getDate() < day)
     ) {
       age--;
     }
@@ -689,13 +576,13 @@ export class InicioComponent implements OnInit, OnDestroy {
   formatCompactTime(value: string | null | undefined): string {
     const text = String(value ?? '').trim();
 
-    return text
-      ? text.slice(0, 5)
-      : '';
+    return text ? text.slice(0, 5) : '';
   }
 
   getCommitmentLabel(value: string | null | undefined): string {
-    const code = String(value ?? '').trim().toUpperCase();
+    const code = String(value ?? '')
+      .trim()
+      .toUpperCase();
 
     const labels: Record<string, string> = {
       LEVE: 'Leve',
@@ -707,13 +594,11 @@ export class InicioComponent implements OnInit, OnDestroy {
   }
 
   getCommitmentClass(value: string | null | undefined): string {
-    const code = String(value ?? '').trim().toLowerCase();
+    const code = String(value ?? '')
+      .trim()
+      .toLowerCase();
 
-    if (
-      code === 'leve' ||
-      code === 'moderado' ||
-      code === 'severo'
-    ) {
+    if (code === 'leve' || code === 'moderado' || code === 'severo') {
       return `commitment--${code}`;
     }
 
@@ -756,9 +641,7 @@ export class InicioComponent implements OnInit, OnDestroy {
       .trim()
       .toUpperCase();
 
-    const option = this.resultOptions.find(
-      (item) => item.code === code,
-    );
+    const option = this.resultOptions.find((item) => item.code === code);
 
     return option?.name ?? this.formatCodeLabel(code, 'Sin resultado');
   }
@@ -770,9 +653,7 @@ export class InicioComponent implements OnInit, OnDestroy {
 
     return getSemaphoreColorFromDays(days) ?? 'VERDE';
   }
-  getSemaphoreLabelByDays(
-    accumulatedDays: number | null | undefined,
-  ): string {
+  getSemaphoreLabelByDays(accumulatedDays: number | null | undefined): string {
     const color = this.getSemaphoreColorByDays(accumulatedDays);
 
     const labels: Record<'VERDE' | 'AMARILLO' | 'ROJO', string> = {
@@ -827,10 +708,7 @@ export class InicioComponent implements OnInit, OnDestroy {
       return 0;
     }
 
-    return Math.min(
-      (this.pageIndex + 1) * this.pageSize,
-      this.totalElements,
-    );
+    return Math.min((this.pageIndex + 1) * this.pageSize, this.totalElements);
   }
 
   get paginationSummary(): string {
@@ -845,11 +723,8 @@ export class InicioComponent implements OnInit, OnDestroy {
     }`;
   }
 
-
   get averageDaysLabel(): string {
-    const value = Number(
-      this.dashboard?.averageAccumulatedDays ?? 0,
-    );
+    const value = Number(this.dashboard?.averageAccumulatedDays ?? 0);
 
     return value.toLocaleString('es-CL', {
       minimumFractionDigits: 0,
@@ -874,10 +749,7 @@ export class InicioComponent implements OnInit, OnDestroy {
     return `${date} — ${time}`;
   }
 
-  trackByEpisodeId(
-    _index: number,
-    item: PrioritizedEpisodeDTO,
-  ): string {
+  trackByEpisodeId(_index: number, item: PrioritizedEpisodeDTO): string {
     if (this.isHistoricalMode) {
       return `${item.episodeId}-${item.currentStageId ?? 'stage'}`;
     }
@@ -977,10 +849,7 @@ export class InicioComponent implements OnInit, OnDestroy {
         },
 
         error: (error: HttpErrorResponse) => {
-          console.error(
-            '[Inicio] Error cargando indicadores:',
-            error,
-          );
+          console.error('[Inicio] Error cargando indicadores:', error);
 
           this.dashboard = null;
 
@@ -992,10 +861,7 @@ export class InicioComponent implements OnInit, OnDestroy {
       });
   }
 
-  togglePersonDetails(
-    episode: PrioritizedEpisodeDTO,
-    event: MouseEvent,
-  ): void {
+  togglePersonDetails(episode: PrioritizedEpisodeDTO, event: MouseEvent): void {
     event.stopPropagation();
 
     const episodeId = Number(episode.episodeId);
@@ -1027,15 +893,11 @@ export class InicioComponent implements OnInit, OnDestroy {
   ): boolean => {
     return this.isPersonDetailsExpanded(episode);
   };
-  isPersonDetailsExpanded(
-    episode: PrioritizedEpisodeDTO,
-  ): boolean {
+  isPersonDetailsExpanded(episode: PrioritizedEpisodeDTO): boolean {
     return this.expandedPersonEpisodeId === Number(episode.episodeId);
   }
 
-  private loadPersonDetails(
-    episode: PrioritizedEpisodeDTO,
-  ): void {
+  private loadPersonDetails(episode: PrioritizedEpisodeDTO): void {
     const episodeId = Number(episode.episodeId);
     const rut = String(episode.rut ?? '').trim();
 
@@ -1061,15 +923,13 @@ export class InicioComponent implements OnInit, OnDestroy {
             });
           }
 
-          return this.contactService
-            .getByPostulant(postulantId)
-            .pipe(
-              catchError(() => of(null)),
-              map((contact) => ({
-                person,
-                contact,
-              })),
-            );
+          return this.contactService.getByPostulant(postulantId).pipe(
+            catchError(() => of(null)),
+            map((contact) => ({
+              person,
+              contact,
+            })),
+          );
         }),
         finalize(() => {
           if (this.loadingPersonEpisodeId === episodeId) {
@@ -1106,10 +966,7 @@ export class InicioComponent implements OnInit, OnDestroy {
 
       originProgramId: null,
       originProgramName: null,
-      referenceCount:
-        stage.stageResultCode === 'REFERENCIA'
-          ? 1
-          : 0,
+      referenceCount: stage.stageResultCode === 'REFERENCIA' ? 1 : 0,
 
       originalRequestDate: stage.originalRequestDate,
       accumulatedDays: stage.accumulatedDays,
@@ -1122,26 +979,19 @@ export class InicioComponent implements OnInit, OnDestroy {
       lastManagementDate: stage.lastManagementDate,
       lastManagementTime: stage.lastManagementTime,
 
-      firstCitationFirstInterviewDate:
-        stage.firstCitationFirstInterviewDate,
-      secondCitationFirstInterviewDate:
-        stage.secondCitationFirstInterviewDate,
-      firstCitationSecondInterviewDate:
-        stage.firstCitationSecondInterviewDate,
+      firstCitationFirstInterviewDate: stage.firstCitationFirstInterviewDate,
+      secondCitationFirstInterviewDate: stage.secondCitationFirstInterviewDate,
+      firstCitationSecondInterviewDate: stage.firstCitationSecondInterviewDate,
       secondCitationSecondInterviewDate:
         stage.secondCitationSecondInterviewDate,
-      firstCitationThirdInterviewDate:
-        stage.firstCitationThirdInterviewDate,
-      secondCitationThirdInterviewDate:
-        stage.secondCitationThirdInterviewDate,
-      optionalInterviewDate:
-        stage.optionalInterviewDate,
+      firstCitationThirdInterviewDate: stage.firstCitationThirdInterviewDate,
+      secondCitationThirdInterviewDate: stage.secondCitationThirdInterviewDate,
+      optionalInterviewDate: stage.optionalInterviewDate,
 
       feedbackDate: stage.feedbackDate,
       closureDate: stage.closureDate,
 
-      biopsychosocialCommitmentCode:
-        stage.biopsychosocialCommitmentCode,
+      biopsychosocialCommitmentCode: stage.biopsychosocialCommitmentCode,
 
       createdByUser: stage.createdByUser,
 
@@ -1159,28 +1009,21 @@ export class InicioComponent implements OnInit, OnDestroy {
       page: this.pageIndex,
       size: this.pageSize,
       programId: filters.programId,
-      stateCode: this.isHistoricalMode
-        ? 'CERRADO'
-        : 'EN_TRAMITE',
+      stateCode: this.isHistoricalMode ? 'CERRADO' : 'EN_TRAMITE',
       resultCode: filters.resultCode || null,
       search: filters.search?.trim() || null,
       sort: this.currentSort,
     };
 
     const request$ = this.isHistoricalMode
-      ? this.demandService
-          .getPrioritizedEpisodeStages(query)
-          .pipe(
-            map((response) => ({
-              ...response,
-              content: (response?.content ?? []).map(
-                (stage) =>
-                  this.mapHistoricalStageToPrioritizedEpisode(
-                    stage,
-                  ),
-              ),
-            })),
-          )
+      ? this.demandService.getPrioritizedEpisodeStages(query).pipe(
+          map((response) => ({
+            ...response,
+            content: (response?.content ?? []).map((stage) =>
+              this.mapHistoricalStageToPrioritizedEpisode(stage),
+            ),
+          })),
+        )
       : this.demandService.getPrioritizedEpisodes(query);
 
     request$
@@ -1193,9 +1036,7 @@ export class InicioComponent implements OnInit, OnDestroy {
         next: (response) => {
           const episodes = response?.content ?? [];
 
-          const totalElements = Number(
-            response?.totalElements ?? 0,
-          );
+          const totalElements = Number(response?.totalElements ?? 0);
 
           const totalPages = Math.max(
             1,
@@ -1204,20 +1045,14 @@ export class InicioComponent implements OnInit, OnDestroy {
 
           const lastValidPageIndex = totalPages - 1;
 
-          if (
-            totalElements > 0 &&
-            this.pageIndex > lastValidPageIndex
-          ) {
+          if (totalElements > 0 && this.pageIndex > lastValidPageIndex) {
             this.pageIndex = lastValidPageIndex;
             this.saveListState();
             this.loadEpisodes();
             return;
           }
 
-          if (
-            totalElements === 0 &&
-            this.pageIndex !== 0
-          ) {
+          if (totalElements === 0 && this.pageIndex !== 0) {
             this.pageIndex = 0;
             this.saveListState();
           }
@@ -1227,19 +1062,13 @@ export class InicioComponent implements OnInit, OnDestroy {
 
           if (this.isHistoricalMode) {
             this.programContextsByEpisodeId.clear();
-          }
-          else {
-            this.loadEpisodeProgramContexts(
-              this.episodes,
-            );
+          } else {
+            this.loadEpisodeProgramContexts(this.episodes);
           }
         },
 
         error: (error: HttpErrorResponse) => {
-          console.error(
-            '[Inicio] Error cargando bandeja priorizada:',
-            error,
-          );
+          console.error('[Inicio] Error cargando bandeja priorizada:', error);
 
           this.episodes = [];
           this.totalElements = 0;
@@ -1252,9 +1081,7 @@ export class InicioComponent implements OnInit, OnDestroy {
         },
       });
   }
-  private loadEpisodeProgramContexts(
-    episodes: PrioritizedEpisodeDTO[],
-  ): void {
+  private loadEpisodeProgramContexts(episodes: PrioritizedEpisodeDTO[]): void {
     this.programContextsByEpisodeId.clear();
 
     const programId = this.activeProgramId;
@@ -1263,19 +1090,11 @@ export class InicioComponent implements OnInit, OnDestroy {
       new Set(
         episodes
           .map((episode) => Number(episode.episodeId))
-          .filter(
-            (episodeId) =>
-              Number.isFinite(episodeId) &&
-              episodeId > 0,
-          ),
+          .filter((episodeId) => Number.isFinite(episodeId) && episodeId > 0),
       ),
     );
 
-    if (
-      programId === null ||
-      programId <= 0 ||
-      episodeIds.length === 0
-    ) {
+    if (programId === null || programId <= 0 || episodeIds.length === 0) {
       return;
     }
 
@@ -1289,20 +1108,14 @@ export class InicioComponent implements OnInit, OnDestroy {
           this.programContextsByEpisodeId.clear();
 
           for (const context of contexts ?? []) {
-            this.programContextsByEpisodeId.set(
-              context.episodeId,
-              context,
-            );
+            this.programContextsByEpisodeId.set(context.episodeId, context);
           }
 
-          console.debug(
-            '[Inicio] Contextos por programa cargados:',
-            {
-              programId,
-              episodeIds,
-              contexts,
-            },
-          );
+          console.debug('[Inicio] Contextos por programa cargados:', {
+            programId,
+            episodeIds,
+            contexts,
+          });
         },
 
         error: (error: HttpErrorResponse) => {
@@ -1351,81 +1164,46 @@ export class InicioComponent implements OnInit, OnDestroy {
       },
     );
 
-    this.appliedFilters =
-      normalizeInicioMetricsFilter({
-        programId: state.programId,
-        resultCode: state.resultCode,
-        search: state.search,
-      });
-}
+    this.appliedFilters = normalizeInicioMetricsFilter({
+      programId: state.programId,
+      resultCode: state.resultCode,
+      search: state.search,
+    });
+  }
   private loadFilterCatalogs(): void {
     this.preloadCatalogs.loadAll().subscribe({
       next: (data) => {
-        const loadedPrograms =
-          data.programs?.content ??
-          data.programs ??
-          [];
+        const loadedPrograms = data.programs?.content ?? data.programs ?? [];
 
         this.programs = loadedPrograms
           .map((program: any) => ({
-            id: Number(
-              program?.id ??
-                program?.programId,
-            ),
-            name: String(
-              program?.name ??
-                program?.programName ??
-                '',
-            ).trim(),
+            id: Number(program?.id ?? program?.programId),
+            name: String(program?.name ?? program?.programName ?? '').trim(),
           }))
           .filter(
             (program: ProgramOption) =>
-              Number.isFinite(program.id) &&
-              program.id > 0 &&
-              !!program.name,
+              Number.isFinite(program.id) && program.id > 0 && !!program.name,
           )
           .sort((a: ProgramOption, b: ProgramOption) =>
-            a.name.localeCompare(
-              b.name,
-              'es',
-              { sensitivity: 'base' },
-            ),
+            a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }),
           );
 
-        const loadedResults =
-          data.results?.content ??
-          data.results ??
-          [];
+        const loadedResults = data.results?.content ?? data.results ?? [];
 
         this.resultOptions = loadedResults
           .map((result: any) => ({
-            code: String(
-              result?.code ?? '',
-            )
+            code: String(result?.code ?? '')
               .trim()
               .toUpperCase(),
-            name: String(
-              result?.name ?? '',
-            ).trim(),
+            name: String(result?.name ?? '').trim(),
           }))
-          .filter(
-            (result: ResultOption) =>
-              !!result.code &&
-              !!result.name,
-          )
+          .filter((result: ResultOption) => !!result.code && !!result.name)
           .sort((a: ResultOption, b: ResultOption) =>
-            a.name.localeCompare(
-              b.name,
-              'es',
-              { sensitivity: 'base' },
-            ),
+            a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }),
           );
       },
       error: (error) => {
-        console.error(
-          '[Inicio] Error cargando catálogos:',
-          error,
-        );
+        console.error('[Inicio] Error cargando catálogos:', error);
 
         this.programs = [];
         this.resultOptions = [];
@@ -1435,46 +1213,30 @@ export class InicioComponent implements OnInit, OnDestroy {
   private loadSessionContext(): void {
     const profile = this.tokenService.getUserProfile();
 
-    this.fullName =
-      profile?.fullName ||
-      profile?.name ||
-      'Usuario';
+    this.fullName = profile?.fullName || profile?.name || 'Usuario';
 
     const roles = this.tokenService.getUserRoles() || [];
 
-    this.activeRole =
-      sessionStorage.getItem('activeRole') ||
-      roles[0] ||
-      null;
+    this.activeRole = sessionStorage.getItem('activeRole') || roles[0] || null;
 
-    const activeProgramId = Number(
-      this.tokenService.getActiveProgramId(),
-    );
+    const activeProgramId = Number(this.tokenService.getActiveProgramId());
 
     this.activeProgramId =
-      Number.isFinite(activeProgramId) &&
-      activeProgramId > 0
+      Number.isFinite(activeProgramId) && activeProgramId > 0
         ? activeProgramId
         : null;
-    const userPrograms =
-      this.tokenService.getUserPrograms() || [];
+    const userPrograms = this.tokenService.getUserPrograms() || [];
 
     this.activeProgram =
       this.tokenService.getActiveProgram() ||
       userPrograms.find(
         (program: any) =>
-          Number(
-            program?.id ??
-              program?.programId,
-          ) === this.activeProgramId,
+          Number(program?.id ?? program?.programId) === this.activeProgramId,
       )?.name ||
       null;
   }
 
-  private formatCodeLabel(
-    value: string,
-    fallback: string,
-  ): string {
+  private formatCodeLabel(value: string, fallback: string): string {
     const normalized = String(value ?? '')
       .trim()
       .toLowerCase()
@@ -1485,9 +1247,41 @@ export class InicioComponent implements OnInit, OnDestroy {
       return fallback;
     }
 
-    return (
-      normalized.charAt(0).toUpperCase() +
-      normalized.slice(1)
+    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+  }
+
+  private resolveActiveProgramName(): string | null {
+    const activeProgram = this.tokenService.getActiveProgram();
+
+    if (typeof activeProgram === 'string') {
+      const value = activeProgram.trim();
+
+      if (value) {
+        return value;
+      }
+    }
+
+    if (activeProgram && typeof activeProgram === 'object') {
+      const program = activeProgram as any;
+
+      const value = String(program?.name ?? '').trim();
+
+      if (value) {
+        return value;
+      }
+    }
+
+    const activeProgramId = Number(this.tokenService.getActiveProgramId());
+
+    const userPrograms = this.tokenService.getUserPrograms() || [];
+
+    const program = userPrograms.find(
+      (item: any) => Number(item?.id ?? item?.programId) === activeProgramId,
     );
+
+    const value = String(program?.name ?? '').trim();
+
+    return value || null;
   }
 }
+
