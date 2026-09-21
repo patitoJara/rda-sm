@@ -167,7 +167,7 @@ export const routes: Routes = [
           section: 'main',
           title: 'Gestión de Demanda',
           icon: 'account_tree',
-          roles: ['ADMIN', 'ADMINISTRATIVO'],
+          roles: ['ADMIN', 'ADMINISTRATIVO', 'SUPERVISOR'],
           iconColor: '#0f6b75',
           order: 20,
         },
@@ -251,6 +251,29 @@ export const routes: Routes = [
           iconColor: '#455a64',
           tag: 'Solo ADMIN',
           order: 5,
+        },
+      },
+
+      {
+        path: 'person-name-normalization',
+        loadComponent: () =>
+          import('./views/person-name-normalization/person-name-normalization.component').then(
+            (m) => m.PersonNameNormalizationComponent,
+          ),
+        canActivate: [roleGuard],
+        data: {
+          module: 'administracion',
+          group: 'Mantenedores',
+          maintainerGroup: 'Gestión de demanda',
+          section: 'maintainer',
+          title: 'Regularización de nombres',
+          description:
+            'Herramienta administrativa para analizar y regularizar nombres de demandantes existentes.',
+          icon: 'manage_accounts',
+          roles: ['ADMIN'],
+          iconColor: '#455a64',
+          tag: 'Solo ADMIN',
+          order: 6,
         },
       },
 

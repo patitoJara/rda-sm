@@ -482,7 +482,11 @@ export class InicioComponent implements OnInit, OnDestroy {
   getEpisodeOpenMode(
     episode: PrioritizedEpisodeDTO,
   ): 'view' | 'manage' {
-    if (this.isHistoricalMode) {
+    if (
+      this.isHistoricalMode ||
+      this.activeRole === 'ADMIN' ||
+      this.activeRole === 'SUPERVISOR'
+    ) {
       return 'view';
     }
 

@@ -1,4 +1,4 @@
-﻿// src/app/core/interceptors/auth.interceptor.ts
+// src/app/core/interceptors/auth.interceptor.ts
 
 import {
   HttpErrorResponse,
@@ -35,7 +35,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     req.url.includes('/auth/login') ||
     req.url.includes('/auth/refresh') ||
     req.url.includes('/auth/register') ||
-    req.url.includes('/time/server');
+    req.url.includes('/time/server') ||
+    req.url.includes('/demand/notifications/email');
 
   /**
    * Estas solicitudes pasan directamente:

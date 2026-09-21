@@ -1,4 +1,4 @@
-﻿<div class="manual-container" #manualScroll (scroll)="onScroll()">
+<div class="manual-container" #manualScroll (scroll)="onScroll()">
   <div class="manual-content">
     <!-- CABECERA -->
     <mat-card class="manual-header" id="manual-top">
@@ -20,6 +20,9 @@
       <ul class="manual-list">
         <li><a (click)="scrollTo('intro')">📘 Introducción</a></li>
         <li>
+          <a (click)="scrollTo('video-tutorial')">🎥 Video tutorial</a>
+        </li>
+        <li>
           <a (click)="scrollTo('flujo-demanda')">🔄 Cómo funciona una demanda</a>
         </li>
 <li>
@@ -35,9 +38,42 @@
         <li><a (click)="scrollTo('seguridad')">🛡️ Seguridad y Sesión</a></li>
       </ul>
     </mat-card>
-
-    <!-- SECCIONES -->
+<!-- SECCIONES -->
     <app-intro></app-intro>
+
+<!-- VIDEO TUTORIAL -->
+    <mat-card class="manual-section manual-video" id="video-tutorial">
+      <div class="video-tutorial-layout">
+        <div class="video-tutorial-icon">
+          <mat-icon>play_circle</mat-icon>
+        </div>
+
+        <div class="video-tutorial-copy">
+          <span class="video-tutorial-eyebrow">APOYO AUDIOVISUAL</span>
+
+          <h2>Video tutorial del Sistema Gestión de Demanda</h2>
+
+          <p>
+            Revisa de manera práctica el flujo principal del sistema,
+            desde el registro de una demanda hasta su seguimiento,
+            referencia y cierre.
+          </p>
+        </div>
+
+        <div class="video-tutorial-action">
+          <button
+            mat-flat-button
+            class="video-tutorial-button"
+            disabled
+          >
+            <mat-icon>play_arrow</mat-icon>
+            Ver video tutorial
+          </button>
+
+          <small>Enlace pendiente de publicación</small>
+        </div>
+      </div>
+    </mat-card>
 
     <app-flujo-demanda></app-flujo-demanda>
 <app-listado></app-listado>

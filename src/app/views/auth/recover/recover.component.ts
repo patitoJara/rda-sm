@@ -55,36 +55,60 @@ export class RecoverComponent implements OnInit {
     if (emailParam) this.form.patchValue({ email: emailParam });
   }
 
-  /** 🔹 Envía correo a soporte con copia al usuario */
+  /** 🔹 Envía solicitud de recuperación */
   recover(): void {
-    if (this.form.invalid) {
+    if (this.form.invalid || this.loading) {
       this.form.markAllAsTouched();
       return;
     }
 
-    const userEmail = this.form.value.email!;
+    const userEmail = this.form.value.email?.trim();
+
+    if (!userEmail) {
+      return;
+    }
+
     this.loading = true;
 
-    console.log(`[Recover] ✉️ Enviando correo de recuperación para: ${userEmail}`);
+    console.log(
+      `[Recover] Solicitud de recuperación para: ${userEmail}`,
+    );
 
     this.emailService
       .sendRecoveryEmail(userEmail)
       .then(() => {
-        this.loading = false;
-        this.sent = true;
-        this.snackBar.open('✅ Correo enviado correctamente.', 'Cerrar', {
-          duration: 4000,
-          panelClass: ['success-snackbar'],
-        });
+        this.completeRecoveryRequest();
       })
       .catch((error) => {
-        console.error('[Recover] ❌ Error al enviar correo:', error);
-        this.loading = false;
-        this.snackBar.open('⚠️ No se pudo enviar el correo.', 'Cerrar', {
-          duration: 4000,
-          panelClass: ['warn-snackbar'],
-        });
+        /*
+         * No exponemos al usuario diferencias entre éxito y error.
+         * El detalle queda disponible solamente en consola.
+         */
+        console.warn(
+          '[Recover] Error interno enviando solicitud:',
+          error,
+        );
+
+        this.completeRecoveryRequest();
       });
+  }
+
+  private completeRecoveryRequest(): void {
+    this.loading = false;
+    this.sent = true;
+
+    this.snackBar.open(
+      '📩 Si el correo está registrado, recibirás instrucciones.',
+      'Cerrar',
+      {
+        duration: 4000,
+        panelClass: ['success-snackbar'],
+      },
+    );
+
+    setTimeout(() => {
+      void this.router.navigateByUrl('/auth/login');
+    }, 8000);
   }
 
   /** 🔹 Volver al login conservando el email */

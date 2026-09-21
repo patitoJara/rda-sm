@@ -1,0 +1,174 @@
+.normalization-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.page-header h1 {
+  margin: 4px 0 8px;
+}
+
+.page-header p {
+  margin: 0;
+  max-width: 760px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: rgba(69, 90, 100, 0.08);
+}
+
+.header-icon mat-icon {
+  width: 36px;
+  height: 36px;
+  font-size: 36px;
+}
+
+.action-card {
+  padding: 20px;
+}
+
+.action-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.action-content h2 {
+  margin: 0 0 6px;
+}
+
+.action-content p {
+  margin: 0;
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+}
+
+.error-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+}
+
+.summary-card span {
+  font-size: 13px;
+}
+
+.summary-card strong {
+  font-size: 28px;
+}
+
+.results-card {
+  overflow: hidden;
+}
+
+.results-header {
+  padding: 20px 20px 8px;
+}
+
+.results-header h2 {
+  margin: 0 0 6px;
+}
+
+.results-header p {
+  margin: 0;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.normalization-table {
+  width: 100%;
+}
+
+.comparison {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 190px;
+}
+
+.comparison mat-icon {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
+.before {
+  text-decoration: line-through;
+  opacity: 0.65;
+}
+
+.after {
+  font-weight: 600;
+}
+
+.empty-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+}
+
+.empty-card h2,
+.empty-card p {
+  margin: 0;
+}
+
+.empty-card p {
+  margin-top: 4px;
+}
+
+@media (max-width: 900px) {
+  .page-header,
+  .action-content {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}

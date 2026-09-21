@@ -1,8 +1,17 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+
+import { environment } from '../../../environments/environment';
 import emailjs, { EmailJSResponseStatus } from 'emailjs-com';
 
 @Injectable({ providedIn: 'root' })
 export class EmailService {
+  private readonly http = inject(HttpClient);
+
+  private readonly notificationUrl =
+    `${environment.apiBaseUrl}/demand/notifications/email`;
+
   // con mi gmail
   //private serviceId = 'service_f56t47b';
   //private templateId = 'template_ajgvyt8';
@@ -41,24 +50,35 @@ export class EmailService {
   }
 
   /**
-   * Envío específico para recuperación de contraseña
+   * Envía la solicitud de recuperación mediante el backend Spring.
+   * El endpoint es público para permitir su uso antes del login.
    */
-  sendRecoveryEmail(userEmail: string): Promise<EmailJSResponseStatus> {
-    const subject = 'Recuperar acceso RDA-SM';
-    const body = `
-Estimado equipo TIC,
+  async sendRecoveryEmail(
+    userEmail: string,
+  ): Promise<unknown> {
+    const payload = {
+      to: userEmail,
+      subject: 'Solicitud de recuperación de acceso RDA-SM',
+      message: `
+Estimado/a usuario/a,
 
-El usuario ${userEmail} ha solicitado recuperar el acceso al sistema RDA-SM.
+Hemos recibido una solicitud de recuperación de acceso al Sistema de Gestión de Demanda.
 
-Por favor, verifiquen sus credenciales y gestionen el restablecimiento correspondiente.
+El equipo de soporte TIC gestionará el restablecimiento correspondiente.
 
-Este correo fue enviado automáticamente por el formulario "Recuperar contraseña" del sistema.
+Si usted no realizó esta solicitud, puede ignorar este mensaje.
 
 Atentamente,
-Sistema RDA-SM
+Departamento TIC
 Servicio de Salud Magallanes
-    `;
+      `.trim(),
+    };
 
-    return this.sendEmail('patricio.jara@redsalud.gob.cl', userEmail, subject, body);
+    return firstValueFrom(
+      this.http.post(
+        this.notificationUrl,
+        payload,
+      ),
+    );
   }
 }
