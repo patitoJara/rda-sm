@@ -43,7 +43,9 @@
 
 <!-- VIDEO TUTORIAL -->
     <mat-card class="manual-section manual-video" id="video-tutorial">
+
       <div class="video-tutorial-layout">
+
         <div class="video-tutorial-icon">
           <mat-icon>play_circle</mat-icon>
         </div>
@@ -59,23 +61,39 @@
             referencia y cierre.
           </p>
         </div>
+
+        <div class="video-tutorial-action">
+          <button
+            mat-flat-button
+            class="video-tutorial-button"
+            (click)="showVideoTutorial = !showVideoTutorial"
+          >
+            <mat-icon>play_arrow</mat-icon>
+            Ver video tutorial
+          </button>
+        </div>
+
       </div>
 
-      <div class="video-player-wrapper">
-        <video
-          class="video-player"
-          controls
-          preload="metadata"
-          playsinline
-        >
-          <source
-            src="https://gestiondemanda.dssm.cl/videodemanda.mp4"
-            type="video/mp4"
-          />
+      @if (showVideoTutorial) {
+        <div class="video-player-wrapper">
+          <video
+            class="video-player"
+            controls
+            preload="metadata"
+            playsinline
+            poster="/assets/video/portada-gestion-demanda.png"
+          >
+            <source
+              src="https://gestiondemanda.dssm.cl/videodemanda.mp4"
+              type="video/mp4"
+            />
 
-          Su navegador no permite reproducir este video.
-        </video>
-      </div>
+            Su navegador no permite reproducir este video.
+          </video>
+        </div>
+      }
+
     </mat-card>
 
     <app-flujo-demanda></app-flujo-demanda>

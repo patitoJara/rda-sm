@@ -52,13 +52,22 @@ export class ManualComponent {
 
   scrollTo(id: string): void {
     const target = document.getElementById(id);
-    if (!target) return;
+    const container = this.manualScroll?.nativeElement;
 
-    target.scrollIntoView({
+    if (!target || !container) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+
+    const targetTop =
+      container.scrollTop +
+      (targetRect.top - containerRect.top) -
+      16;
+
+    container.scrollTo({
+      top: targetTop,
       behavior: 'smooth',
-      block: 'start',
     });
   }
 }
-
 
