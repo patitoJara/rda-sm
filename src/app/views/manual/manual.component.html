@@ -59,19 +59,22 @@
             referencia y cierre.
           </p>
         </div>
+      </div>
 
-        <div class="video-tutorial-action">
-          <button
-            mat-flat-button
-            class="video-tutorial-button"
-            disabled
-          >
-            <mat-icon>play_arrow</mat-icon>
-            Ver video tutorial
-          </button>
+      <div class="video-player-wrapper">
+        <video
+          class="video-player"
+          controls
+          preload="metadata"
+          playsinline
+        >
+          <source
+            src="https://gestiondemanda.dssm.cl/videodemanda.mp4"
+            type="video/mp4"
+          />
 
-          <small>Enlace pendiente de publicación</small>
-        </div>
+          Su navegador no permite reproducir este video.
+        </video>
       </div>
     </mat-card>
 
