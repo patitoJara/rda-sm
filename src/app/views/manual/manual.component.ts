@@ -37,6 +37,7 @@ export class ManualComponent {
   @ViewChild('manualScroll') manualScroll!: ElementRef<HTMLDivElement>;
 
   showIndexBtn = false;
+  showVideoTutorial = false;
 
   onScroll(): void {
     const scrollTop = this.manualScroll.nativeElement.scrollTop;

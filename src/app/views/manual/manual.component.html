@@ -23,9 +23,11 @@
           <a (click)="scrollTo('video-tutorial')">🎥 Video tutorial</a>
         </li>
         <li>
-          <a (click)="scrollTo('flujo-demanda')">🔄 Cómo funciona una demanda</a>
+          <a (click)="scrollTo('flujo-demanda')"
+            >🔄 Cómo funciona una demanda</a
+          >
         </li>
-<li>
+        <li>
           <a (click)="scrollTo('listado')">📋 Listado de Demandas</a>
         </li>
         <li>
@@ -38,14 +40,12 @@
         <li><a (click)="scrollTo('seguridad')">🛡️ Seguridad y Sesión</a></li>
       </ul>
     </mat-card>
-<!-- SECCIONES -->
+    <!-- SECCIONES -->
     <app-intro></app-intro>
 
-<!-- VIDEO TUTORIAL -->
+    <!-- VIDEO TUTORIAL -->
     <mat-card class="manual-section manual-video" id="video-tutorial">
-
       <div class="video-tutorial-layout">
-
         <div class="video-tutorial-icon">
           <mat-icon>play_circle</mat-icon>
         </div>
@@ -56,9 +56,8 @@
           <h2>Video tutorial del Sistema Gestión de Demanda</h2>
 
           <p>
-            Revisa de manera práctica el flujo principal del sistema,
-            desde el registro de una demanda hasta su seguimiento,
-            referencia y cierre.
+            Revisa de manera práctica el flujo principal del sistema, desde el
+            registro de una demanda hasta su seguimiento, referencia y cierre.
           </p>
         </div>
 
@@ -72,7 +71,6 @@
             Ver video tutorial
           </button>
         </div>
-
       </div>
 
       @if (showVideoTutorial) {
@@ -84,20 +82,16 @@
             playsinline
             poster="/assets/video/portada-gestion-demanda.png"
           >
-            <source
-              src="https://gestiondemanda.dssm.cl/videodemanda.mp4"
-              type="video/mp4"
-            />
+            <source src="/assets/video/videodemanda.mp4" type="video/mp4" />
 
             Su navegador no permite reproducir este video.
           </video>
         </div>
       }
-
     </mat-card>
 
     <app-flujo-demanda></app-flujo-demanda>
-<app-listado></app-listado>
+    <app-listado></app-listado>
     <app-panel-estrategico></app-panel-estrategico>
     <app-mantenedores></app-mantenedores>
     <app-roles></app-roles>
@@ -116,5 +110,3 @@
 >
   <mat-icon>keyboard_arrow_up</mat-icon>
 </button>
-
-
