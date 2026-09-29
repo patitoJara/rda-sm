@@ -85,9 +85,15 @@ export function filterFeedbackEvents(
           eventStageId === numericStageId
         );
 
+      const deletedAt =
+        event?.deletedAt ??
+        event?.deleted_at ??
+        null;
+
       return (
         code === 'RETROALIMENTACION' &&
-        belongsToCurrentStage
+        belongsToCurrentStage &&
+        !deletedAt
       );
     })
     .sort((left: any, right: any) => {

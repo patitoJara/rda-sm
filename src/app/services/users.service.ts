@@ -76,6 +76,21 @@ export class UsersService {
       },
     );
   }
+  getCommunicationRecipients(
+    programId: number,
+    type: string,
+  ): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.BASE}/api/v1/users_programs/communications/recipients`,
+      {
+        params: {
+          programId: programId.toString(),
+          type,
+          _ts: Date.now().toString(),
+        },
+      },
+    );
+  }
   getUserProgramById(id: number): Observable<any> {
     return this.http.get<any>(
       `${this.BASE}/api/v1/users_programs/${id}`,

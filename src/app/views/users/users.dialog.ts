@@ -486,6 +486,13 @@ export class UsersDialogComponent implements OnInit {
 
     await this.relationsService.updateRoles(finalUserId, selectedRoles);
 
+    const keepsTransversal =
+      this.keepsTransversalCommunication(selectedRoles);
+
+    if (!keepsTransversal) {
+      await this.relationsService.deleteTransversalUserProgram(finalUserId);
+    }
+
     await this.relationsService.updatePrograms(
       finalUserId,
       programRequired ? selectedPrograms : [],
@@ -550,6 +557,32 @@ export class UsersDialogComponent implements OnInit {
     return userId === 1;
   }
 
+  private keepsTransversalCommunication(
+    selectedRoles: Array<{ id: number }>,
+  ): boolean {
+    return selectedRoles.some((selectedRole: { id: number }) => {
+      const role = this.roles.find(
+        (item) => Number(item.id) === Number(selectedRole.id),
+      );
+
+      const roleName = String(role?.name ?? '')
+        .trim()
+        .toUpperCase();
+
+      const roleCode = String((role as any)?.code ?? '')
+        .trim()
+        .toUpperCase();
+
+      return (
+        roleName === 'SUPERVISOR' ||
+        roleCode === 'SUPERVISOR' ||
+        roleName === 'PROFESIONAL' ||
+        roleCode === 'PROFESIONAL' ||
+        roleName === 'EJECUTIVO' ||
+        roleCode === 'EJECUTIVO'
+      );
+    });
+  }
   private requiresProgram(selectedRoles: Array<{ id: number }>): boolean {
     if (this.isSystemUser()) {
       return false;

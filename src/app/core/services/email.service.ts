@@ -50,6 +50,26 @@ export class EmailService {
   }
 
   /**
+   * Envía una notificación operativa mediante el backend Spring.
+   *
+   * Se utiliza para las comunicaciones automáticas de Gestión de Demanda.
+   */
+  sendNotificationEmail(
+    to: string,
+    subject: string,
+    message: string,
+  ) {
+    return this.http.post(
+      this.notificationUrl,
+      {
+        to,
+        subject,
+        message,
+      },
+    );
+  }
+
+  /**
    * Envía la solicitud de recuperación mediante el backend Spring.
    * El endpoint es público para permitir su uso antes del login.
    */

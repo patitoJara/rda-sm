@@ -195,3 +195,86 @@
     grid-template-columns: 1fr;
   }
 }
+/* =========================================================
+   TRAYECTORIA RESUMIDA - ACTIVIDAD CRONOLÓGICA DE LA ETAPA
+   ========================================================= */
+
+.trajectory-activity {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(0, 92, 110, 0.22);
+}
+
+.trajectory-activity__header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.7;
+}
+
+.trajectory-activity__header mat-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+}
+
+.trajectory-activity__item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 22px;
+  padding: 2px 0 2px 14px;
+  position: relative;
+  font-size: 0.75rem;
+  line-height: 1.25;
+}
+
+.trajectory-activity__item::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.trajectory-activity__when {
+  white-space: nowrap;
+  font-weight: 600;
+  opacity: 0.78;
+}
+
+.trajectory-activity__label {
+  font-weight: 600;
+}
+
+.trajectory-activity__deleted {
+  margin-left: auto;
+  padding: 1px 5px;
+  border: 1px solid currentColor;
+  border-radius: 5px;
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+
+.trajectory-activity__item--deleted {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+@media (max-width: 700px) {
+  .trajectory-activity__item {
+    flex-wrap: wrap;
+  }
+
+  .trajectory-activity__deleted {
+    margin-left: 0;
+  }
+}

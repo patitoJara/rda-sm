@@ -2195,7 +2195,7 @@
           (click)="saveReference()"
         >
           <mat-icon>sync_alt</mat-icon>
-          {{ isSavingReference ? "Registrando..." : "Guardar referencia" }}
+          {{ isSavingReference ? "Preparando..." : "Continuar" }}
         </button>
         <button
           *ngIf="activeActionPanel === 'egressClosure'"
@@ -2615,6 +2615,48 @@
                   <strong>Cierre revertido</strong>
                   <span>{{ formatDisplayDate(item.reversalDate) }}</span>
                 </div>
+              </div>
+
+              <div
+                class="trajectory-activity"
+                *ngIf="item.id && getTrajectoryStageEvents(item.id).length"
+              >
+                <div class="trajectory-activity__header">
+                  <mat-icon>history</mat-icon>
+                  <span>Actividad de la etapa</span>
+                </div>
+
+                <ng-container
+                  *ngFor="let event of getTrajectoryStageEvents(item.id)"
+                >
+                  <div
+                    class="trajectory-activity__item"
+                    *ngIf="
+                      event.code !== 'REFERENCIA' &&
+                      event.code !== 'CIERRE' &&
+                      event.code !== 'REVERSION'
+                    "
+                    [class.trajectory-activity__item--deleted]="event.deleted"
+                  >
+                    <span class="trajectory-activity__when">
+                      {{ formatDisplayDate(event.date) }}
+                      <ng-container *ngIf="event.time">
+                        · {{ event.time.slice(0, 5) }}
+                      </ng-container>
+                    </span>
+
+                    <span class="trajectory-activity__label">
+                      {{ event.label }}
+                    </span>
+
+                    <span
+                      class="trajectory-activity__deleted"
+                      *ngIf="event.deleted"
+                    >
+                      ELIMINADA
+                    </span>
+                  </div>
+                </ng-container>
               </div>
             </div>
           </div>

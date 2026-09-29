@@ -60,6 +60,7 @@ import { ConfirmDialogOkComponent } from '@app/shared/confirm-dialog/confirm-dia
 import { Postulant } from '@app/models/postulant';
 import { formatPersonName } from '@app/core/utils/text.utils';
 import { DemandEpisodeService } from '@app/services/demand/demand-episode.service';
+import { DemandNotificationService } from '@app/services/demand/demand-notification.service';
 import { PreloadCatalogsService } from '@app/services/demand/preload-catalogs.service';
 import { PostulantService } from '@app/services/postulant.service';
 import { ProgramProfessionalService } from '@app/services/program-professional.service';
@@ -73,6 +74,10 @@ import { SistraReportService } from '@app/services/reports/sistra-report.service
 import { DemandService, EpisodeSubstance } from '../../core/services/demand.service';
 import { EpisodeDocumentsComponent } from './documents/episode-documents.component';
 import { FeedbackPanelComponent } from './components/feedback-panel/feedback-panel.component';
+import {
+  ReferenceEmailPreviewDialogComponent,
+  ReferenceEmailPreviewDialogResult,
+} from './components/reference-email-preview-dialog/reference-email-preview-dialog.component';
 
 import {
   ActiveActionPanel,
@@ -264,6 +269,7 @@ export class DemandNewComponent
   private readonly tokenService = inject(TokenService);
   private readonly demandService = inject(DemandService);
   private readonly demandEpisodeService = inject(DemandEpisodeService);
+  private readonly demandNotificationService = inject(DemandNotificationService);
   private readonly programProfessionalService = inject(
     ProgramProfessionalService,
   );
@@ -1382,34 +1388,32 @@ export class DemandNewComponent
   private loadActiveProfessionals(): void {
     this.professionals = [];
     this.professionalsError = null;
+
+    const workingProgramId = Number(this.workingProgramId);
+
+    if (!Number.isFinite(workingProgramId) || workingProgramId <= 0) {
+      this.professionalsError =
+        'No fue posible identificar el programa de la etapa.';
+      return;
+    }
+
     this.isLoadingProfessionals = true;
 
     this.programProfessionalService
-      .getActive()
+      .getByProgram(workingProgramId)
       .pipe(finalize(() => (this.isLoadingProfessionals = false)))
       .subscribe({
         next: (response: any) => {
           const items = extractArray(response);
 
-          const activeProgramId = Number(
-            this.tokenService.getActiveProgramId(),
-          );
-
           this.professionals = items
             .map((item: any) => normalizeProfessionalForCitation(item))
-            .filter((item: any) => {
-              const isActive =
-                !!item.id && !item.deletedAt && item.active !== false;
-
-              const belongsToActiveProgram =
-                activeProgramId > 0 &&
-                Array.isArray(item.programIds) &&
-                item.programIds.some(
-                  (programId: number) => Number(programId) === activeProgramId,
-                );
-
-              return isActive && belongsToActiveProgram;
-            })
+            .filter(
+              (item: any) =>
+                !!item.id &&
+                !item.deletedAt &&
+                item.active !== false,
+            )
             .sort((a: any, b: any) =>
               String(a.name).localeCompare(String(b.name), 'es', {
                 sensitivity: 'base',
@@ -1418,24 +1422,24 @@ export class DemandNewComponent
 
           if (!this.professionals.length) {
             this.professionalsError =
-              activeProgramId > 0
-                ? 'No hay facultativos activos asociados al programa actual.'
-                : 'No fue posible identificar el programa activo.';
+              'No hay facultativos activos asociados al programa de la etapa.';
           }
         },
         error: (error) => {
           console.error(
-            '[DemandNew] Error cargando facultativos activos:',
-            error,
+            '[DemandNew] Error cargando facultativos del programa:',
+            {
+              programId: workingProgramId,
+              error,
+            },
           );
 
           this.professionals = [];
           this.professionalsError =
-            'No fue posible cargar los facultativos activos.';
+            'No fue posible cargar los facultativos del programa.';
         },
       });
   }
-
   get selectedCitationProfessional(): any | null {
     const professionalId = Number(
       this.citationForm.controls.programProfessionalId.value,
@@ -1478,7 +1482,7 @@ export class DemandNewComponent
   }
 
   onInterviewProfessionalChange(programProfessionalId: number | null): void {
-    const selected = this.professions.find(
+    const selected = this.professionals.find(
       (item: any) => Number(item?.id) === Number(programProfessionalId),
     );
 
@@ -3180,11 +3184,11 @@ export class DemandNewComponent
       return;
     }
 
-    const programId = this.tokenService.getActiveProgramId();
+    const programId = this.workingProgramId;
 
     if (!programId) {
       this.interviewError =
-        'No fue posible identificar el programa activo para registrar la retroalimentación.';
+        'No fue posible identificar el programa de la etapa para registrar la retroalimentación.';
       return;
     }
 
@@ -3291,6 +3295,172 @@ export class DemandNewComponent
 
           this.interviewSuccess = feedbackResult.successMessage;
           this.showOperationSuccess(this.interviewSuccess);
+          const rawFeedback =
+            this.interviewForm.getRawValue();
+
+          const personFormValue =
+            this.personForm.getRawValue();
+
+          const demandante =
+            [
+              personFormValue.firstName,
+              personFormValue.secondName,
+              personFormValue.firstLastName,
+              personFormValue.secondLastName,
+            ]
+              .filter(Boolean)
+              .join(' ')
+              .trim() ||
+            'Persona no informada';
+
+          const rawRut = String(
+            personFormValue.rut ??
+              this.selectedPerson?.rut ??
+              '',
+          ).trim();
+
+          const maskedRut = rawRut
+            ? rawRut.replace(
+                /^(\d{1,2})\.?(\d{3})\.?(\d{3})-?([\dkK])$/,
+                '$1.$2.***-$4',
+              )
+            : 'RUN no informado';
+
+          const episode =
+            this.longitudinal?.activeEpisode ??
+            this.episodeSummary ??
+            this.longitudinal?.episode ??
+            this.createdEpisode ??
+            null;
+
+          const episodeCode =
+            episode?.code ??
+            episode?.episodeCode ??
+            `DEM-${episodeId.toString().padStart(6, '0')}`;
+
+          const selectedProfessional =
+            this.professionals.find(
+              (item: any) =>
+                Number(item?.id) ===
+                Number(rawFeedback.programProfessionalId),
+            );
+
+          const professionalName =
+            selectedProfessional?.name ??
+            event?.programProfessionalName ??
+            event?.professionalName ??
+            'Profesional no informado';
+
+          const professionName =
+            rawFeedback.professionName ??
+            selectedProfessional?.professionName ??
+            selectedProfessional?.profession?.name ??
+            event?.professionName ??
+            'Profesión no informada';
+
+          const commitmentName =
+            getCommitmentLevelLabel(event);
+
+          const resultName =
+            this.results.find(
+              (item: any) =>
+                String(item?.code ?? '') ===
+                String(rawFeedback.resultCode ?? ''),
+            )?.name ??
+            event?.result?.name ??
+            event?.resultName ??
+            rawFeedback.resultCode ??
+            'Resultado no informado';
+
+          const profile =
+            this.tokenService.getUserProfile();
+
+          const registeredBy =
+            profile?.fullName ??
+            profile?.name ??
+            profile?.username ??
+            'Usuario responsable';
+
+          const daysInProgram =
+            this.episodeOperationalSummary.days;
+
+          const stageReceivedAt =
+            this.workingStage?.receivedAt ??
+            null;
+
+          const notificationNow = new Date();
+
+          const notificationRegisteredAt =
+            `${String(notificationNow.getDate()).padStart(2, '0')}/${String(
+              notificationNow.getMonth() + 1,
+            ).padStart(2, '0')}/${notificationNow.getFullYear()} ${String(
+              notificationNow.getHours(),
+            ).padStart(2, '0')}:${String(
+              notificationNow.getMinutes(),
+            ).padStart(2, '0')}`;
+
+          const notificationSubject =
+            `Gestión de Demanda | Nueva retroalimentación | ${episodeCode} | ${demandante}`;
+
+          const notificationLines = [
+            'NUEVA RETROALIMENTACIÓN REGISTRADA',
+            'Gestión de Demanda - Servicio de Salud Magallanes',
+            '',
+            'PERSONA',
+            `Nombre: ${demandante}`,
+            `RUN: ${maskedRut}`,
+            `Episodio: ${episodeCode}`,
+            '',
+            'CONTEXTO DE ATENCIÓN',
+            `Programa: ${this.activeProgramName ?? 'Programa no identificado'}`,
+            ...(stageReceivedAt
+              ? [
+                  `Ingreso al programa: ${formatDisplayDateValue(
+                    stageReceivedAt,
+                  )}`,
+                ]
+              : []),
+            `Tiempo en el programa: ${daysInProgram} días`,
+            '',
+            'RETROALIMENTACIÓN',
+            `Fecha: ${formatDisplayDateValue(rawFeedback.eventDate)}`,
+            `Hora: ${rawFeedback.eventHour ?? 'Hora no informada'}`,
+            `Profesional: ${professionalName}`,
+            `Profesión: ${professionName}`,
+            `Compromiso biopsicosocial: ${commitmentName}`,
+            `Resultado: ${resultName}`,
+            '',
+            'REGISTRO',
+            `Registrado por: ${registeredBy}`,
+            `Fecha y hora de registro: ${notificationRegisteredAt}`,
+            '',
+            'Este mensaje fue generado automáticamente por Gestión de Demanda.',
+          ];
+
+          const notificationMessage =
+            notificationLines.join('\n');
+
+          this.demandNotificationService
+            .sendAutomatic(
+              programId,
+              'FEEDBACK',
+              notificationSubject,
+              notificationMessage,
+            )
+            .subscribe({
+              next: (notificationResult) => {
+                console.log(
+                  '[DemandNew] Notificación FEEDBACK procesada:',
+                  notificationResult,
+                );
+              },
+              error: (notificationError) => {
+                console.error(
+                  '[DemandNew] Error inesperado enviando notificación FEEDBACK:',
+                  notificationError,
+                );
+              },
+            });
           this.interviewForm.reset(feedbackResult.resetValue);
 
           this.closeActionPanel();
@@ -3333,6 +3503,18 @@ export class DemandNewComponent
     return resolveCurrentEpisodeStage(this.longitudinal, episode);
   }
 
+  get workingProgramId(): number | null {
+    const programId = Number(
+      this.currentProgramContext?.programId ??
+        this.workingStage?.programId ??
+        this.workingStage?.program?.id ??
+        this.activeProgramId,
+    );
+
+    return Number.isFinite(programId) && programId > 0
+      ? programId
+      : null;
+  }
   get workingStage(): any | null {
     return resolveWorkingStage(
       this.longitudinal?.stages,
@@ -3480,7 +3662,7 @@ export class DemandNewComponent
 
     const referenceContext = buildReferenceContext({
       raw: this.referenceForm.getRawValue(),
-      currentProgramId: this.activeProgramId,
+      currentProgramId: this.workingProgramId,
     originStageId: this.workingStageId,
     originalRequestDate: this.episodeOriginDate,
       episodeEvents: this.episodeEvents ?? [],
@@ -3503,68 +3685,274 @@ export class DemandNewComponent
       destinationProgram?.name ??
       'Programa destino no identificado';
 
-    const referenceConfirmationMessage =
-      '¿Está seguro de que desea realizar esta referencia?\n\n' +
-      `Programa de origen: ${this.activeProgramName ?? 'Programa actual'}\n` +
-      `Programa destino: ${destinationProgramName}\n\n` +
-      `Motivo: ${referenceContext.payload.reason}\n\n` +
-      'Esta acción registrará la referencia al programa seleccionado. ' +
-      'El episodio continuará su trayectoria en la red.';
+    const originProgramName =
+      this.activeProgramName ??
+      'Programa origen no identificado';
 
-    const referenceConfirmRef = this.dialog.open(
-      ConfirmDialogYesNoComponent,
-      {
-        width: '460px',
-        maxWidth: '95vw',
-        disableClose: true,
-        panelClass: 'rda-confirm-dialog',
-        backdropClass: 'app-backdrop',
-        data: {
-          title: 'Confirmar referencia',
-          message: referenceConfirmationMessage,
-          confirmText: 'Confirmar referencia',
-          cancelText: 'Cancelar',
-          color: 'warn',
-          icon: 'warning',
-        },
-      },
-    );
+    const personFormValue =
+      this.personForm.getRawValue();
 
-    referenceConfirmRef.afterClosed().subscribe(
-      (confirmed: boolean) => {
-        if (!confirmed) {
-          return;
-        }
+    const demandante =
+      [
+        personFormValue.firstName,
+        personFormValue.secondName,
+        personFormValue.firstLastName,
+        personFormValue.secondLastName,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .trim() ||
+      'Persona no informada';
 
-        this.isSavingReference = true;
-        this.referenceError = null;
-        this.referenceSuccess = null;
+    const rawRut = String(
+      personFormValue.rut ??
+        this.selectedPerson?.rut ??
+        '',
+    ).trim();
 
-        this.demandService
-          .createReference(episodeId, referenceContext.payload)
-          .pipe(
-            finalize(() => {
-              this.isSavingReference = false;
-            }),
+    const maskedRut = rawRut
+      ? rawRut.replace(
+          /^(\d{1,2})\.?(\d{3})\.?(\d{3})-?([\dkK])$/,
+          '$1.$2.***-$4',
+        )
+      : 'RUN no informado';
+
+    const episode =
+      this.longitudinal?.activeEpisode ??
+      this.episodeSummary ??
+      this.longitudinal?.episode ??
+      this.createdEpisode ??
+      null;
+
+    const episodeCode =
+      episode?.code ??
+      episode?.episodeCode ??
+      `DEM-${episodeId.toString().padStart(6, '0')}`;
+
+    const profile =
+      this.tokenService.getUserProfile();
+
+    const registeredBy =
+      profile?.fullName ??
+      profile?.name ??
+      profile?.username ??
+      'Usuario responsable';
+
+    const rawReference =
+      this.referenceForm.getRawValue();
+
+    const referenceDate =
+      rawReference.referenceDate
+        ? formatDisplayDateValue(
+            rawReference.referenceDate,
           )
-          .subscribe({
-            next: () => {
-              this.referenceSuccess = getReferenceSuccessMessage();
-              this.showOperationSuccess(this.referenceSuccess);
-              this.closeActionPanel();
-              this.loadEpisodeLongitudinal(episodeId);
-            },
-            error: (error: HttpErrorResponse) => {
-              console.error(
-                '[DemandNew] Error registrando referencia:',
-                error,
-              );
+        : 'Fecha no informada';
 
-              this.referenceError = getReferenceErrorMessage(error);
-            },
-          });
-      },
-    );
+    const notificationNow = new Date();
+
+    const notificationRegisteredAt =
+      `${String(notificationNow.getDate()).padStart(2, '0')}/${String(
+        notificationNow.getMonth() + 1,
+      ).padStart(2, '0')}/${notificationNow.getFullYear()} ${String(
+        notificationNow.getHours(),
+      ).padStart(2, '0')}:${String(
+        notificationNow.getMinutes(),
+      ).padStart(2, '0')}`;
+
+    const notificationSubject =
+      `Gestión de Demanda | Nueva derivación | ${episodeCode} | ${demandante}`;
+
+    const notificationMessage = [
+      'NUEVA DERIVACIÓN ENTRE PROGRAMAS',
+      'Gestión de Demanda - Servicio de Salud Magallanes',
+      '',
+      'PERSONA',
+      `Nombre: ${demandante}`,
+      `RUN: ${maskedRut}`,
+      `Episodio: ${episodeCode}`,
+      '',
+      'DERIVACIÓN',
+      `Programa de origen: ${originProgramName}`,
+      `Programa de destino: ${destinationProgramName}`,
+      `Fecha: ${referenceDate}`,
+      `Motivo: ${referenceContext.payload.reason}`,
+      ...(referenceContext.payload.observation
+        ? [
+            `Observación: ${referenceContext.payload.observation}`,
+          ]
+        : []),
+      '',
+      'REGISTRO',
+      `Registrado por: ${registeredBy}`,
+      `Fecha y hora de registro: ${notificationRegisteredAt}`,
+      '',
+      'Este mensaje fue generado automáticamente por Gestión de Demanda.',
+    ].join('\n');
+
+    this.referenceError = null;
+    this.referenceSuccess = null;
+
+    this.demandNotificationService
+      .getRecipients(
+        destinationProgramId,
+        'REFERENCE',
+      )
+      .subscribe({
+        next: (recipients) => {
+          const originProgramEmail =
+            String(
+              this.programs.find(
+                (program: any) =>
+                  Number(program?.id) ===
+                  Number(this.workingProgramId),
+              )?.email ?? '',
+            )
+              .trim()
+              .toLowerCase();
+
+          const destinationProgramEmail =
+            String(destinationProgram?.email ?? '')
+              .trim()
+              .toLowerCase();
+
+          /*
+           * REFERENCIA:
+           * - usuarios habilitados REFERENCE del destino;
+           * - correo institucional del programa origen;
+           * - correo institucional del programa destino.
+           *
+           * El diálogo permitirá además agregar correos manuales.
+           */
+          const automaticRecipients = [
+            ...new Set(
+              [
+                ...recipients.map(
+                  (recipient) => recipient.email,
+                ),
+                originProgramEmail,
+                destinationProgramEmail,
+              ]
+                .map((email) =>
+                  String(email ?? '')
+                    .trim()
+                    .toLowerCase(),
+                )
+                .filter(Boolean),
+            ),
+          ];
+
+          const referencePreviewRef =
+            this.dialog.open(
+              ReferenceEmailPreviewDialogComponent,
+              {
+                width: '820px',
+                maxWidth: '96vw',
+                disableClose: true,
+                panelClass:
+                  'rda-reference-email-preview',
+                backdropClass: 'app-backdrop',
+                data: {
+                  originProgramName,
+                  destinationProgramName,
+                  subject: notificationSubject,
+                  message: notificationMessage,
+                  automaticRecipients,
+                },
+              },
+            );
+
+          referencePreviewRef
+            .afterClosed()
+            .subscribe(
+              (
+                result:
+                  | ReferenceEmailPreviewDialogResult
+                  | null,
+              ) => {
+                // CANCELAR:
+                // no guarda referencia y no envía correo.
+                if (!result?.confirmed) {
+                  return;
+                }
+
+                this.isSavingReference = true;
+                this.referenceError = null;
+                this.referenceSuccess = null;
+
+                // PRIMERO se registra la referencia.
+                this.demandService
+                  .createReference(
+                    episodeId,
+                    referenceContext.payload,
+                  )
+                  .pipe(
+                    finalize(() => {
+                      this.isSavingReference =
+                        false;
+                    }),
+                  )
+                  .subscribe({
+                    next: () => {
+                      this.referenceSuccess =
+                        getReferenceSuccessMessage();
+
+                      this.showOperationSuccess(
+                        this.referenceSuccess,
+                      );
+
+                      this.closeActionPanel();
+
+                      this.loadEpisodeLongitudinal(
+                        episodeId,
+                      );
+
+                      // SOLO después de guardar correctamente,
+                      // se intenta enviar el correo.
+                      this.demandNotificationService
+                        .sendToEmails(
+                          result.emails,
+                          result.subject,
+                          result.message,
+                        )
+                        .subscribe({
+                          next: (
+                            notificationResult,
+                          ) => {
+                            console.log(
+                              '[DemandNew] Notificación REFERENCE procesada:',
+                              notificationResult,
+                            );
+                          },
+
+                          error: (
+                            notificationError,
+                          ) => {
+                            console.error(
+                              '[DemandNew] Error inesperado enviando notificación REFERENCE:',
+                              notificationError,
+                            );
+                          },
+                        });
+                    },
+
+                    error: (
+                      error: HttpErrorResponse,
+                    ) => {
+                      console.error(
+                        '[DemandNew] Error registrando referencia:',
+                        error,
+                      );
+
+                      this.referenceError =
+                        getReferenceErrorMessage(
+                          error,
+                        );
+                    },
+                  });
+              },
+            );
+        },
+      });
   }
 
   saveClosure(): void {
@@ -3674,6 +4062,17 @@ export class DemandNewComponent
 
     const isReferenceClosure = closureReasonCode === 'REFERENCIA';
 
+    /*
+     * Programa al que pertenece el cierre que se está ejecutando.
+     * Se conserva antes del guardado para notificar al programa correcto.
+     */
+    const closureNotificationProgramId = this.workingProgramId;
+
+    const closureNotificationProgramName =
+      this.workingStage?.program?.name ??
+      this.activeProgramName ??
+      'Programa no identificado';
+
     const closureConfirmationMessage = isReferenceClosure
       ? (
           '¿Está seguro de que desea cerrar la atención de este programa?\n\n' +
@@ -3729,6 +4128,169 @@ export class DemandNewComponent
           next: () => {
             this.closureSuccess = getClosureSuccessMessage(isReferenceClosure);
             this.showOperationSuccess(this.closureSuccess);
+
+            /*
+             * =====================================================
+             * NOTIFICACIÓN AUTOMÁTICA - CIERRE
+             * =====================================================
+             *
+             * El cierre ya fue registrado correctamente.
+             * Un eventual error del correo NO revierte el cierre.
+             */
+
+            if (closureNotificationProgramId) {
+              const personFormValue = this.personForm.getRawValue();
+
+              const demandante =
+                [
+                  personFormValue.firstName,
+                  personFormValue.secondName,
+                  personFormValue.firstLastName,
+                  personFormValue.secondLastName,
+                ]
+                  .filter(Boolean)
+                  .join(' ')
+                  .trim() ||
+                'Persona no informada';
+
+              const rawRut = String(
+                personFormValue.rut ??
+                  this.selectedPerson?.rut ??
+                  '',
+              ).trim();
+
+              const maskedRut = rawRut
+                ? rawRut.replace(
+                    /^(\d{1,2})\.?(\d{3})\.?(\d{3})-?([\dkK])$/,
+                    '$1.$2.***-$4',
+                  )
+                : 'RUN no informado';
+
+              const episode =
+                this.longitudinal?.activeEpisode ??
+                this.episodeSummary ??
+                this.longitudinal?.episode ??
+                this.createdEpisode ??
+                null;
+
+              const episodeCode =
+                episode?.code ??
+                episode?.episodeCode ??
+                `DEM-${episodeId.toString().padStart(6, '0')}`;
+
+              const profile =
+                this.tokenService.getUserProfile();
+
+              const registeredBy =
+                profile?.fullName ??
+                profile?.name ??
+                profile?.username ??
+                'Usuario responsable';
+
+              const closureNotificationDaysInProgram =
+                this.episodeOperationalSummary.days;
+
+              const closureNotificationStageReceivedAt =
+                this.workingStage?.receivedAt ??
+                null;
+
+              const notificationNow = new Date();
+
+              const notificationRegisteredAt =
+                `${String(notificationNow.getDate()).padStart(2, '0')}/${String(
+                  notificationNow.getMonth() + 1,
+                ).padStart(2, '0')}/${notificationNow.getFullYear()} ${String(
+                  notificationNow.getHours(),
+                ).padStart(2, '0')}:${String(
+                  notificationNow.getMinutes(),
+                ).padStart(2, '0')}`;
+
+              const closureDate =
+                formatDisplayDateValue(
+                  closureContext.payload.closureDate,
+                );
+
+              const notificationSubject = isReferenceClosure
+                ? `Gestión de Demanda | Cierre de atención por derivación | ${episodeCode} | ${demandante}`
+                : `Gestión de Demanda | Cierre de demanda | ${episodeCode} | ${demandante}`;
+
+              const notificationLines = [
+                isReferenceClosure
+                  ? 'CIERRE DE ATENCIÓN POR DERIVACIÓN'
+                  : 'CIERRE DE DEMANDA',
+                'Gestión de Demanda - Servicio de Salud Magallanes',
+                '',
+                'PERSONA',
+                `Nombre: ${demandante}`,
+                `RUN: ${maskedRut}`,
+                `Episodio: ${episodeCode}`,
+                '',
+                'CONTEXTO DE ATENCIÓN',
+                `Programa: ${closureNotificationProgramName}`,
+                ...(closureNotificationStageReceivedAt
+                  ? [
+                      `Ingreso al programa: ${formatDisplayDateValue(
+                        closureNotificationStageReceivedAt,
+                      )}`,
+                    ]
+                  : []),
+                `Tiempo en el programa: ${closureNotificationDaysInProgram} días`,
+                '',
+                'CIERRE',
+                `Fecha de cierre: ${closureDate}`,
+                `Motivo de cierre: ${closureReasonName}`,
+                ...(String(
+                  closureContext.payload.observation ?? '',
+                ).trim()
+                  ? [
+                      `Observación: ${String(
+                        closureContext.payload.observation,
+                      ).trim()}`,
+                    ]
+                  : []),
+                '',
+                'RESULTADO DEL CIERRE',
+                isReferenceClosure
+                  ? 'La atención de este programa fue cerrada por derivación. El episodio continúa abierto en el programa responsable actual.'
+                  : 'El episodio de demanda fue cerrado formalmente.',
+                '',
+                'REGISTRO',
+                `Registrado por: ${registeredBy}`,
+                `Fecha y hora de registro: ${notificationRegisteredAt}`,
+                '',
+                'Este mensaje fue generado automáticamente por Gestión de Demanda.',
+              ];
+
+              const notificationMessage =
+                notificationLines.join('\n');
+
+              this.demandNotificationService
+                .sendAutomatic(
+                  closureNotificationProgramId,
+                  'CLOSURE',
+                  notificationSubject,
+                  notificationMessage,
+                )
+                .subscribe({
+                  next: (notificationResult) => {
+                    console.log(
+                      '[DemandNew] Notificación CLOSURE procesada:',
+                      notificationResult,
+                    );
+                  },
+                  error: (notificationError) => {
+                    console.error(
+                      '[DemandNew] Error inesperado enviando notificación CLOSURE:',
+                      notificationError,
+                    );
+                  },
+                });
+            } else {
+              console.warn(
+                '[DemandNew] Cierre registrado, pero no fue posible identificar el programa para enviar CLOSURE.',
+              );
+            }
+
             this.closeActionPanel();
             this.loadEpisodeLongitudinal(episodeId);
           },
@@ -3820,11 +4382,19 @@ export class DemandNewComponent
       return;
     }
 
-    const programId = this.tokenService.getActiveProgramId();
+    const programId = this.workingProgramId;
 
     if (!programId) {
       this.observationError =
-        'No fue posible identificar el programa activo para registrar la observación.';
+        'No fue posible identificar el programa de la etapa para registrar la observación.';
+      return;
+    }
+
+    const stageId = this.workingStageId;
+
+    if (!stageId) {
+      this.observationError =
+        'No fue posible identificar la etapa para registrar la observación.';
       return;
     }
 
@@ -3833,6 +4403,7 @@ export class DemandNewComponent
     const payload = {
       eventTypeCode: 'OBSERVACION',
       eventDate: toBackendDate(raw.eventDate),
+      stageId: Number(stageId),
       programId: Number(programId),
       comment: toStringOrNull(raw.comment),
       observation: toStringOrNull(raw.observation),
@@ -3851,6 +4422,154 @@ export class DemandNewComponent
 
           this.observationSuccess = observationResult.successMessage;
           this.showOperationSuccess(this.observationSuccess);
+
+          /*
+           * =====================================================
+           * NOTIFICACIÓN AUTOMÁTICA - OBSERVACIÓN
+           * =====================================================
+           *
+           * La observación ya fue registrada correctamente.
+           * Un eventual error de correo NO revierte la operación.
+           */
+
+          const personFormValue = this.personForm.getRawValue();
+
+          const demandante =
+            [
+              personFormValue.firstName,
+              personFormValue.secondName,
+              personFormValue.firstLastName,
+              personFormValue.secondLastName,
+            ]
+              .filter(Boolean)
+              .join(' ')
+              .trim() ||
+            'Persona no informada';
+
+          const rawRut = String(
+            personFormValue.rut ??
+              this.selectedPerson?.rut ??
+              '',
+          ).trim();
+
+          const maskedRut = rawRut
+            ? rawRut.replace(
+                /^(\d{1,2})\.?(\d{3})\.?(\d{3})-?([\dkK])$/,
+                '$1.$2.***-$4',
+              )
+            : 'RUN no informado';
+
+          const episode =
+            this.longitudinal?.activeEpisode ??
+            this.episodeSummary ??
+            this.longitudinal?.episode ??
+            this.createdEpisode ??
+            null;
+
+          const episodeCode =
+            episode?.code ??
+            episode?.episodeCode ??
+            `DEM-${episodeId.toString().padStart(6, '0')}`;
+
+          const profile =
+            this.tokenService.getUserProfile();
+
+          const registeredBy =
+            event?.registeredByUser?.name ??
+            profile?.fullName ??
+            profile?.name ??
+            profile?.username ??
+            'Usuario responsable';
+
+          const programName =
+            this.workingStage?.program?.name ??
+            this.activeProgramName ??
+            'Programa no identificado';
+
+          const daysInProgram =
+            this.episodeOperationalSummary.days;
+
+          const stageReceivedAt =
+            this.workingStage?.receivedAt ??
+            null;
+
+          const notificationNow = new Date();
+
+          const notificationRegisteredAt =
+            `${String(notificationNow.getDate()).padStart(2, '0')}/${String(
+              notificationNow.getMonth() + 1,
+            ).padStart(2, '0')}/${notificationNow.getFullYear()} ${String(
+              notificationNow.getHours(),
+            ).padStart(2, '0')}:${String(
+              notificationNow.getMinutes(),
+            ).padStart(2, '0')}`;
+
+          const notificationSubject =
+            `Gestión de Demanda | Nueva observación | ${episodeCode} | ${demandante}`;
+
+          const notificationLines = [
+            'NUEVA OBSERVACIÓN REGISTRADA',
+            'Gestión de Demanda - Servicio de Salud Magallanes',
+            '',
+            'PERSONA',
+            `Nombre: ${demandante}`,
+            `RUN: ${maskedRut}`,
+            `Episodio: ${episodeCode}`,
+            '',
+            'CONTEXTO DE ATENCIÓN',
+            `Programa: ${programName}`,
+            ...(stageReceivedAt
+              ? [
+                  `Ingreso al programa: ${formatDisplayDateValue(
+                    stageReceivedAt,
+                  )}`,
+                ]
+              : []),
+            `Tiempo en el programa: ${daysInProgram} días`,
+            '',
+            'OBSERVACIÓN',
+            `Fecha: ${formatDisplayDateValue(raw.eventDate)}`,
+            `Comentario: ${String(raw.comment ?? '').trim()}`,
+            ...(String(raw.observation ?? '').trim()
+              ? [
+                  `Observación: ${String(
+                    raw.observation,
+                  ).trim()}`,
+                ]
+              : []),
+            '',
+            'REGISTRO',
+            `Registrado por: ${registeredBy}`,
+            `Fecha y hora de registro: ${notificationRegisteredAt}`,
+            '',
+            'Este mensaje fue generado automáticamente por Gestión de Demanda.',
+          ];
+
+          const notificationMessage =
+            notificationLines.join('\n');
+
+          this.demandNotificationService
+            .sendAutomatic(
+              programId,
+              'OBSERVATION',
+              notificationSubject,
+              notificationMessage,
+            )
+            .subscribe({
+              next: (notificationResult) => {
+                console.log(
+                  '[DemandNew] Notificación OBSERVATION procesada:',
+                  notificationResult,
+                );
+              },
+              error: (notificationError) => {
+                console.error(
+                  '[DemandNew] Error inesperado enviando notificación OBSERVATION:',
+                  notificationError,
+                );
+              },
+            });
+
           this.observationForm.reset(observationResult.resetValue);
 
           this.closeActionPanel();
@@ -3870,7 +4589,6 @@ export class DemandNewComponent
         },
       });
   }
-
   private applyLongitudinalData(data: any): void {
     const summarizedPostulant =
       data?.postulant ?? data?.activeEpisode?.postulant ?? null;
@@ -5452,11 +6170,11 @@ this.createdEpisode = activeEpisode;
       return;
     }
 
-    const programId = this.tokenService.getActiveProgramId();
+    const programId = this.workingProgramId;
 
     if (!programId) {
       this.citationError =
-        'No fue posible identificar el programa activo para registrar la citación.';
+        'No fue posible identificar el programa de la etapa para registrar la citación.';
       return;
     }
 
@@ -5511,6 +6229,167 @@ this.createdEpisode = activeEpisode;
           this.citationSuccess = citationResult.successMessage;
           this.showOperationSuccess(this.citationSuccess);
 
+          const person = this.selectedPerson ?? {};
+          const personFormValue = this.personForm.getRawValue();
+
+          const demandante =
+            [
+              personFormValue.firstName,
+              personFormValue.secondName,
+              personFormValue.firstLastName,
+              personFormValue.secondLastName,
+            ]
+              .filter(Boolean)
+              .join(' ')
+              .trim() ||
+            'Persona no informada';
+
+          const rawRut = String(
+            personFormValue.rut ??
+              person?.rut ??
+              '',
+          ).trim();
+
+          const maskedRut = rawRut
+            ? rawRut.replace(
+                /^(\d{1,2})\.?(\d{3})\.?(\d{3})-?([\dkK])$/,
+                '$1.$2.***-$4',
+              )
+            : 'RUN no informado';
+
+          const episode =
+            this.longitudinal?.activeEpisode ??
+            this.episodeSummary ??
+            this.longitudinal?.episode ??
+            this.createdEpisode ??
+            null;
+
+          const episodeCode =
+            episode?.code ??
+            episode?.episodeCode ??
+            `DEM-${episodeId.toString().padStart(6, '0')}`;
+
+          const selectedProfessional =
+            this.selectedCitationProfessional;
+
+          const professionalName =
+            selectedProfessional?.name ??
+            selectedProfessional?.professional?.name ??
+            'Profesional no informado';
+
+          const professionName =
+            raw.professionName ??
+            selectedProfessional?.professionName ??
+            selectedProfessional?.profession?.name ??
+            selectedProfessional?.professional?.professionName ??
+            selectedProfessional?.professional?.profession?.name ??
+            'Profesión no informada';
+
+          const citationTypeName =
+            this.citationTypes.find(
+              (item: any) =>
+                String(item?.code ?? '') ===
+                String(raw.citationTypeCode ?? ''),
+            )?.name ??
+            raw.citationTypeCode ??
+            'Tipo de citación no informado';
+
+          const profile =
+            this.tokenService.getUserProfile();
+
+          const registeredBy =
+            profile?.fullName ??
+            profile?.name ??
+            profile?.username ??
+            'Usuario responsable';
+
+          const daysInProgram =
+            this.episodeOperationalSummary.days;
+
+          const stageReceivedAt =
+            this.workingStage?.receivedAt ??
+            null;
+
+          const notificationNow = new Date();
+
+          const notificationRegisteredAt =
+            `${String(notificationNow.getDate()).padStart(2, '0')}/${String(
+              notificationNow.getMonth() + 1,
+            ).padStart(2, '0')}/${notificationNow.getFullYear()} ${String(
+              notificationNow.getHours(),
+            ).padStart(2, '0')}:${String(
+              notificationNow.getMinutes(),
+            ).padStart(2, '0')}`;
+
+          const notificationSubject =
+            `Gestión de Demanda | Nueva citación | ${episodeCode} | ${demandante}`;
+
+          const notificationLines = [
+            'NUEVA CITACIÓN REGISTRADA',
+            'Gestión de Demanda - Servicio de Salud Magallanes',
+            '',
+            'PERSONA',
+            `Nombre: ${demandante}`,
+            `RUN: ${maskedRut}`,
+            `Episodio: ${episodeCode}`,
+            '',
+            'CONTEXTO DE ATENCIÓN',
+            `Programa: ${this.activeProgramName ?? 'Programa no identificado'}`,
+            ...(stageReceivedAt
+              ? [
+                  `Ingreso al programa: ${formatDisplayDateValue(
+                    stageReceivedAt,
+                  )}`,
+                ]
+              : []),
+            `Tiempo en el programa: ${daysInProgram} días`,
+            '',
+            'CITACIÓN',
+            `Tipo: ${citationTypeName}`,
+            `Fecha: ${formatDisplayDateValue(raw.eventDate)}`,
+            `Hora: ${raw.eventHour ?? 'Hora no informada'}`,
+            `Profesional: ${professionalName}`,
+            `Profesión: ${professionName}`,
+            ...(String(raw.citationComment ?? '').trim()
+              ? [
+                  `Comentario: ${String(
+                    raw.citationComment,
+                  ).trim()}`,
+                ]
+              : []),
+            '',
+            'REGISTRO',
+            `Registrado por: ${registeredBy}`,
+            `Fecha y hora de registro: ${notificationRegisteredAt}`,
+            '',
+            'Este mensaje fue generado automáticamente por Gestión de Demanda.',
+          ];
+
+          const notificationMessage =
+            notificationLines.join('\n');
+
+          this.demandNotificationService
+            .sendAutomatic(
+              programId,
+              'CITATION',
+              notificationSubject,
+              notificationMessage,
+            )
+            .subscribe({
+              next: (notificationResult) => {
+                console.log(
+                  '[DemandNew] Notificación CITATION procesada:',
+                  notificationResult,
+                );
+              },
+              error: (notificationError) => {
+                console.error(
+                  '[DemandNew] Error inesperado enviando notificación CITATION:',
+                  notificationError,
+                );
+              },
+            });
+
           this.citationForm.reset(citationResult.resetValue);
 
           this.closeActionPanel();
@@ -5562,7 +6441,7 @@ this.createdEpisode = activeEpisode;
       this.episodeSummary,
     );
 
-    const programId = Number(this.tokenService.getActiveProgramId()) || null;
+    const programId = this.workingProgramId;
     const raw = this.attendanceForm.getRawValue();
 
     const selectedCitation = this.pendingCitationEvents.find(
@@ -5638,6 +6517,185 @@ this.createdEpisode = activeEpisode;
           this.episodeEvents = attendanceResult.episodeEvents;
           this.attendanceSuccess = attendanceResult.successMessage;
           this.showOperationSuccess(this.attendanceSuccess);
+
+          const personFormValue =
+            this.personForm.getRawValue();
+
+          const demandante =
+            [
+              personFormValue.firstName,
+              personFormValue.secondName,
+              personFormValue.firstLastName,
+              personFormValue.secondLastName,
+            ]
+              .filter(Boolean)
+              .join(' ')
+              .trim() ||
+            'Persona no informada';
+
+          const rawRut = String(
+            personFormValue.rut ??
+              this.selectedPerson?.rut ??
+              '',
+          ).trim();
+
+          const maskedRut = rawRut
+            ? rawRut.replace(
+                /^(\d{1,2})\.?(\d{3})\.?(\d{3})-?([\dkK])$/,
+                '$1.$2.***-$4',
+              )
+            : 'RUN no informado';
+
+          const episode =
+            this.longitudinal?.activeEpisode ??
+            this.episodeSummary ??
+            this.longitudinal?.episode ??
+            this.createdEpisode ??
+            null;
+
+          const episodeCode =
+            episode?.code ??
+            episode?.episodeCode ??
+            `DEM-${validEpisodeId.toString().padStart(6, '0')}`;
+
+          const attendanceStatus =
+            (this.attendanceStatuses ?? []).find(
+              (item: any) =>
+                Number(item?.id) ===
+                Number(raw.attendanceStatusId),
+            );
+
+          const attendanceStatusName =
+            attendanceStatus?.name ??
+            event?.attendanceStatus?.name ??
+            event?.attendanceStatusName ??
+            'Estado no informado';
+
+          const citationTypeName =
+            this.getCitationDisplayName(
+              validSelectedCitation,
+            );
+
+          const citationDate =
+            this.formatCitationOptionDate(
+              validSelectedCitation,
+            ).replace(/-/g, '/');
+
+          const citationTime =
+            this.formatCitationOptionTime(
+              validSelectedCitation,
+            );
+
+          const professionalName =
+            validSelectedCitation?.programProfessionalName ??
+            validSelectedCitation?.professionalName ??
+            validSelectedCitation?.programProfessional?.name ??
+            validSelectedCitation?.professional?.name ??
+            'Profesional no informado';
+
+          const professionName =
+            validSelectedCitation?.professionName ??
+            validSelectedCitation?.profession?.name ??
+            validSelectedCitation?.programProfessional?.professionName ??
+            validSelectedCitation?.programProfessional?.profession?.name ??
+            'Profesión no informada';
+
+          const profile =
+            this.tokenService.getUserProfile();
+
+          const registeredBy =
+            profile?.fullName ??
+            profile?.name ??
+            profile?.username ??
+            'Usuario responsable';
+
+          const daysInProgram =
+            this.episodeOperationalSummary.days;
+
+          const stageReceivedAt =
+            this.workingStage?.receivedAt ??
+            null;
+
+          const notificationNow = new Date();
+
+          const notificationRegisteredAt =
+            `${String(notificationNow.getDate()).padStart(2, '0')}/${String(
+              notificationNow.getMonth() + 1,
+            ).padStart(2, '0')}/${notificationNow.getFullYear()} ${String(
+              notificationNow.getHours(),
+            ).padStart(2, '0')}:${String(
+              notificationNow.getMinutes(),
+            ).padStart(2, '0')}`;
+
+          const notificationSubject =
+            `Gestión de Demanda | Nueva asistencia | ${episodeCode} | ${demandante}`;
+
+          const notificationLines = [
+            'NUEVA ASISTENCIA REGISTRADA',
+            'Gestión de Demanda - Servicio de Salud Magallanes',
+            '',
+            'PERSONA',
+            `Nombre: ${demandante}`,
+            `RUN: ${maskedRut}`,
+            `Episodio: ${episodeCode}`,
+            '',
+            'CONTEXTO DE ATENCIÓN',
+            `Programa: ${this.activeProgramName ?? 'Programa no identificado'}`,
+            ...(stageReceivedAt
+              ? [
+                  `Ingreso al programa: ${formatDisplayDateValue(
+                    stageReceivedAt,
+                  )}`,
+                ]
+              : []),
+            `Tiempo en el programa: ${daysInProgram} días`,
+            '',
+            'ASISTENCIA',
+            `Tipo de citación: ${citationTypeName}`,
+            `Fecha de citación: ${citationDate}`,
+            `Hora de citación: ${citationTime}`,
+            `Estado: ${attendanceStatusName}`,
+            `Profesional: ${professionalName}`,
+            `Profesión: ${professionName}`,
+            ...(String(raw.comment ?? '').trim()
+              ? [
+                  `Comentario: ${String(
+                    raw.comment,
+                  ).trim()}`,
+                ]
+              : []),
+            '',
+            'REGISTRO',
+            `Registrado por: ${registeredBy}`,
+            `Fecha y hora de registro: ${notificationRegisteredAt}`,
+            '',
+            'Este mensaje fue generado automáticamente por Gestión de Demanda.',
+          ];
+
+          const notificationMessage =
+            notificationLines.join('\n');
+
+          this.demandNotificationService
+            .sendAutomatic(
+              validProgramId,
+              'ATTENDANCE',
+              notificationSubject,
+              notificationMessage,
+            )
+            .subscribe({
+              next: (notificationResult) => {
+                console.log(
+                  '[DemandNew] Notificación ATTENDANCE procesada:',
+                  notificationResult,
+                );
+              },
+              error: (notificationError) => {
+                console.error(
+                  '[DemandNew] Error inesperado enviando notificación ATTENDANCE:',
+                  notificationError,
+                );
+              },
+            });
         },
 
         error: (error: any) => {
@@ -6450,7 +7508,8 @@ this.createdEpisode = activeEpisode;
           status: milestone.attendance,
           description: milestone.description,
           registeredByName: milestone.registeredByName,
-          createdAt: milestone.createdAt,          details: [
+          createdAt: milestone.createdAt,
+          details: [
             ...(milestone.attemptLabel ? [milestone.attemptLabel] : []),
             ...(milestone.details ?? []),
           ],
@@ -6892,7 +7951,7 @@ this.createdEpisode = activeEpisode;
   getNextCitationNumberForActiveProgram(): number {
     return getNextCitationNumberForProgram(
       this.citationEvents,
-      this.tokenService.getActiveProgramId(),
+      this.workingProgramId,
     );
   }
 
@@ -6962,6 +8021,104 @@ this.createdEpisode = activeEpisode;
     return Number.isFinite(numericStageId) && numericStageId > 0
       ? numericStageId
       : null;
+  }
+
+  getTrajectoryStageEvents(stageId: number): any[] {
+    const numericStageId = Number(stageId);
+
+    if (!Number.isFinite(numericStageId) || numericStageId <= 0) {
+      return [];
+    }
+
+    const eventLabels: Record<string, string> = {
+      CITACION: 'Citación',
+      ASISTENCIA: 'Asistencia',
+      RETROALIMENTACION: 'Retroalimentación',
+      REFERENCIA: 'Referencia',
+      CIERRE: 'Cierre',
+      REVERSION: 'Reversión de cierre',
+      OBSERVACION: 'Observación',
+      DOCUMENTO: 'Documento',
+      DOCUMENT: 'Documento',
+    };
+
+    return (this.episodeEvents ?? [])
+      .filter((event: any) => {
+        const eventStageId = Number(
+          event?.stageId ??
+            event?.stage?.id ??
+            event?.demandStageId,
+        );
+
+        return (
+          Number.isFinite(eventStageId) &&
+          eventStageId === numericStageId
+        );
+      })
+      .map((event: any) => {
+        const code = this.getEventTypeCode(event);
+
+        const eventDate =
+          event?.eventDate ??
+          event?.date ??
+          event?.createdAt ??
+          null;
+
+        const eventTime =
+          event?.eventTime ??
+          event?.eventHour ??
+          event?.time ??
+          null;
+
+        const deletedAt =
+          event?.deletedAt ??
+          event?.deleted_at ??
+          null;
+
+        const sortValue = new Date(
+          `${String(eventDate ?? '').slice(0, 10)}T${
+            eventTime || '00:00:00'
+          }`,
+        ).getTime();
+
+        const createdAtSort =
+          new Date(event?.createdAt ?? '').getTime();
+
+        return {
+          id: event?.id ?? null,
+          code,
+          label:
+            eventLabels[code] ??
+            this.formatResultLabel(code, code || 'Gestión'),
+          date: eventDate,
+          time: eventTime,
+          deleted: !!deletedAt,
+          deletedAt,
+          sortValue: Number.isNaN(sortValue)
+            ? Number.isNaN(createdAtSort)
+              ? 0
+              : createdAtSort
+            : sortValue,
+          createdAt: event?.createdAt ?? null,
+        };
+      })
+      .filter((item: any) => !!item.code)
+      .sort((left: any, right: any) => {
+        if (left.sortValue !== right.sortValue) {
+          return left.sortValue - right.sortValue;
+        }
+
+        const leftCreatedAt =
+          new Date(left.createdAt ?? '').getTime();
+
+        const rightCreatedAt =
+          new Date(right.createdAt ?? '').getTime();
+
+        return (
+          (Number.isNaN(leftCreatedAt) ? 0 : leftCreatedAt) -
+          (Number.isNaN(rightCreatedAt) ? 0 : rightCreatedAt)
+        );
+      });
   }
 
   get compactProgramTrajectory(): CompactProgramTrajectoryItem[] {

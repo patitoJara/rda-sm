@@ -238,6 +238,26 @@ export class UsersRelationsService {
     );
   }
 
+  async deleteTransversalUserProgram(userId: number): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.http.delete(
+          `${this.usersProgramsUrl}/user/${userId}/transversal`,
+        ),
+      );
+
+      console.log(
+        '[UsersRelationsService] ✅ Relación transversal eliminada',
+        { userId },
+      );
+    } catch (error: any) {
+      if (error?.status === 404) {
+        return;
+      }
+
+      throw error;
+    }
+  }
   private async restoreUserProgramByRelationId(
     relationId: number,
   ): Promise<void> {
