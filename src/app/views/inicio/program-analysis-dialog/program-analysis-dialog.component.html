@@ -1,4 +1,4 @@
-<div class="analysis-dialog">
+﻿<div class="analysis-dialog">
   <header class="analysis-header">
     <div class="analysis-header__identity">
       <span class="analysis-header__icon">
@@ -712,11 +712,23 @@
   </mat-dialog-content>
 
   <mat-dialog-actions class="analysis-footer">
-    <span *ngIf="updatedAt">
-      <mat-icon>update</mat-icon>
-      Actualizado:
-      {{ updatedAt | date: "dd/MM/yyyy HH:mm" }}
-    </span>
+  <span *ngIf="updatedAt">
+    <mat-icon>update</mat-icon>
+    Actualizado:
+    {{ updatedAt | date: "dd/MM/yyyy HH:mm" }}
+  </span>
+
+  <div class="analysis-footer__actions">
+    <button
+      mat-stroked-button
+      type="button"
+      class="analysis-footer__print"
+      [disabled]="loading || programs.length === 0"
+      (click)="printAnalysis()"
+    >
+      <mat-icon>print</mat-icon>
+      Imprimir
+    </button>
 
     <button
       mat-flat-button
@@ -725,5 +737,6 @@
     >
       Cerrar
     </button>
-  </mat-dialog-actions>
+  </div>
+</mat-dialog-actions>
 </div>

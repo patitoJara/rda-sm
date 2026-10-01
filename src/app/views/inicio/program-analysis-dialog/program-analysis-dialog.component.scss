@@ -1,9 +1,12 @@
-:host {
+﻿:host {
   display: block;
   color: #263940;
 }
 
 .analysis-dialog {
+  display: flex;
+  flex-direction: column;
+  height: min(92vh, 900px);
   overflow: hidden;
   border-radius: 18px;
   background: #f3f7f8;
@@ -90,7 +93,11 @@
 }
 
 .analysis-content {
-  max-height: calc(92vh - 154px);
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 18px 22px 20px;
   box-sizing: border-box;
   background: #f3f7f8;
@@ -839,7 +846,7 @@
   }
 
   .analysis-content {
-    max-height: calc(92vh - 138px);
+    max-height: none;
     padding: 12px;
   }
 
@@ -960,6 +967,46 @@
   }
 
   .analysis-footer {
+    justify-content: flex-end;
+  }
+}
+
+/* =====================================================
+   AJUSTE DE SCROLL ÚNICO DEL DIÁLOGO
+===================================================== */
+
+.analysis-header {
+  flex: 0 0 auto;
+}
+
+.analysis-footer {
+  flex: 0 0 auto;
+}
+
+
+/* =====================================================
+   ACCIONES DEL PIE / IMPRESIÓN
+===================================================== */
+
+.analysis-footer__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.analysis-footer .analysis-footer__print {
+  color: #08778a;
+  border-color: #9bcbd1;
+  background: #ffffff;
+}
+
+.analysis-footer .analysis-footer__print mat-icon {
+  margin-right: 5px;
+}
+
+@media (max-width: 520px) {
+  .analysis-footer__actions {
+    width: 100%;
     justify-content: flex-end;
   }
 }
