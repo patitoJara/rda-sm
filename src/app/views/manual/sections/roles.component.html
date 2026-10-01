@@ -20,8 +20,8 @@
   </div>
 
   <p>
-    Dependiendo del rol asignado, algunas opciones pueden estar disponibles
-    y otras permanecer restringidas.
+    Actualmente, el sistema Gestión de Demanda trabaja con tres perfiles
+    principales: <strong>Administrador, Supervisor y Administrativo</strong>.
   </p>
 
 
@@ -38,8 +38,13 @@
       <strong>Administrador</strong>
 
       <p>
-        Tiene acceso amplio al sistema y puede realizar tareas de administración,
-        incluyendo la gestión de mantenedores y configuraciones disponibles.
+        Corresponde al perfil con acceso amplio a las funciones de
+        administración general del sistema.
+      </p>
+
+      <p>
+        Puede acceder a mantenedores, configuraciones y funciones
+        especiales de administración.
       </p>
     </div>
   </div>
@@ -51,8 +56,24 @@
       <strong>Supervisor</strong>
 
       <p>
-        Puede revisar y gestionar demandas de acuerdo con los permisos
-        asociados a su perfil.
+        Corresponde al perfil destinado a la
+        <strong>supervisión, revisión y control de la gestión</strong>.
+      </p>
+
+      <p>
+        El Supervisor <strong>no trabaja dentro de un programa específico</strong>
+        ni realiza la gestión operativa habitual de las demandas.
+      </p>
+
+      <p>
+        Su función es revisar la información de los distintos programas
+        correspondientes a su ámbito de supervisión, por ejemplo
+        <strong>Atención Abierta o Atención Cerrada</strong>.
+      </p>
+
+      <p>
+        Puede consultar demandas, revisar indicadores, análisis por programa
+        y otras herramientas de seguimiento y control disponibles en el sistema.
       </p>
     </div>
   </div>
@@ -64,8 +85,18 @@
       <strong>Administrativo</strong>
 
       <p>
-        Puede registrar y gestionar demandas según las funciones
-        habilitadas para su rol.
+        Corresponde al perfil operativo del sistema.
+      </p>
+
+      <p>
+        El Administrativo <strong>trabaja directamente dentro de un programa</strong>
+        y es el encargado de registrar, actualizar y gestionar las demandas
+        correspondientes a dicho programa.
+      </p>
+
+      <p>
+        Las acciones que puede realizar dependen del programa en el que se
+        encuentra trabajando y de la etapa actual de la demanda.
       </p>
     </div>
   </div>
@@ -78,23 +109,39 @@
   <h3 class="manual-subtitle">Rol y programa activo</h3>
 
   <p>
-    Además del rol, el sistema considera el
-    <strong>programa desde el cual está trabajando el usuario</strong>.
+    El sistema considera tanto el <strong>rol del usuario</strong> como el
+    <strong>programa activo</strong> desde el cual se encuentra trabajando.
+  </p>
+
+  <p>
+    El programa activo es especialmente relevante para los usuarios con perfil
+    <strong>Administrativo</strong>, ya que las acciones de gestión se realizan
+    desde el programa correspondiente.
   </p>
 
   <div class="manual-box box-warning">
     <mat-icon>account_tree</mat-icon>
 
     <div>
-      Una demanda puede estar activa, pero eso no significa que todos los
+      Una demanda puede encontrarse activa, pero eso no significa que todos los
       programas puedan realizar acciones sobre ella.
     </div>
   </div>
 
   <p>
-    Si el programa del usuario mantiene una etapa abierta, podrá realizar
-    las acciones correspondientes. Si la etapa de ese programa ya terminó,
-    la demanda podrá quedar disponible solo para consulta.
+    Si el programa activo corresponde al programa responsable de la etapa actual,
+    el usuario Administrativo podrá realizar las acciones habilitadas para dicha etapa.
+  </p>
+
+  <p>
+    Si el programa ya no es responsable de la gestión actual, la información
+    podrá quedar disponible únicamente para consulta.
+  </p>
+
+  <p>
+    El perfil <strong>Supervisor no depende de un programa activo</strong> para
+    realizar su función de supervisión, ya que su objetivo es revisar y controlar
+    la gestión de los programas pertenecientes a su ámbito.
   </p>
 
 
@@ -105,9 +152,15 @@
   <h3 class="manual-subtitle">Cambio de rol o programa</h3>
 
   <p>
-    Cuando un usuario tiene más de un rol o programa disponible,
+    Cuando un usuario dispone de más de un rol o programa disponible,
     debe verificar cuál se encuentra seleccionado antes de comenzar
     una gestión.
+  </p>
+
+  <p>
+    Para los usuarios Administrativos, es especialmente importante comprobar
+    que el <strong>programa activo corresponda al programa desde el cual se
+    realizará la gestión</strong>.
   </p>
 
   <div class="manual-box box-success">
