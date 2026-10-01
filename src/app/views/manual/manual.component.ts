@@ -12,6 +12,7 @@ import { RolesComponent } from './sections/roles.component';
 import { SeguridadComponent } from './sections/seguridad.component';
 import { PanelEstrategicoComponent } from './sections/panel-estrategico.component';
 import { Component, ViewChild, ElementRef } from '@angular/core';
+import { DirectorioComunicacionesComponent } from './sections/directorio-comunicaciones.component';
 
 @Component({
   selector: 'app-manual',
@@ -28,6 +29,7 @@ import { Component, ViewChild, ElementRef } from '@angular/core';
     FlujoDemandaComponent,
     ListadoComponent,
     MantenedoresComponent,
+    DirectorioComunicacionesComponent,
     RolesComponent,
     SeguridadComponent,
 PanelEstrategicoComponent,

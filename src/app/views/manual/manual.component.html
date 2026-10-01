@@ -1,4 +1,4 @@
-<div class="manual-container" #manualScroll (scroll)="onScroll()">
+﻿<div class="manual-container" #manualScroll (scroll)="onScroll()">
   <div class="manual-content">
     <!-- CABECERA -->
     <mat-card class="manual-header" id="manual-top">
@@ -36,6 +36,11 @@
           >
         </li>
         <li><a (click)="scrollTo('mantenedores')">🛠️ Mantenedores</a></li>
+        <li>
+          <a (click)="scrollTo('directorio-comunicaciones')">
+            📧 Directorio y comunicaciones
+          </a>
+        </li>
         <li><a (click)="scrollTo('roles')">🔐 Roles y Permisos</a></li>
         <li><a (click)="scrollTo('seguridad')">🛡️ Seguridad y Sesión</a></li>
       </ul>
@@ -94,6 +99,7 @@
     <app-listado></app-listado>
     <app-panel-estrategico></app-panel-estrategico>
     <app-mantenedores></app-mantenedores>
+    <app-directorio-comunicaciones></app-directorio-comunicaciones>
     <app-roles></app-roles>
     <app-seguridad></app-seguridad>
   </div>
@@ -110,3 +116,4 @@
 >
   <mat-icon>keyboard_arrow_up</mat-icon>
 </button>
+

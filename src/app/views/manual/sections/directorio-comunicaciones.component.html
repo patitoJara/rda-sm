@@ -1,0 +1,238 @@
+﻿<mat-card class="manual-section" id="directorio-comunicaciones">
+
+  <div class="section-header">
+    <mat-icon>contact_mail</mat-icon>
+    <h2>Directorio y comunicaciones</h2>
+  </div>
+
+  <div class="manual-box box-info">
+    <mat-icon>info</mat-icon>
+    <div>
+      El módulo <strong>Directorio y comunicaciones</strong> centraliza la
+      información de contacto de los programas, usuarios del sistema y
+      facultativos asociados.
+    </div>
+  </div>
+
+  <p>
+    Además, permite definir qué usuarios recibirán las notificaciones
+    generadas por las distintas acciones realizadas durante la gestión
+    de una demanda.
+  </p>
+
+  <h3 class="manual-subtitle">Directorio institucional</h3>
+
+  <div class="manual-box box-info">
+    <mat-icon>badge</mat-icon>
+    <div>
+      El directorio organiza la información por programa y reúne los principales
+      antecedentes necesarios para facilitar la comunicación entre los equipos.
+    </div>
+  </div>
+
+  <ul class="manual-list">
+    <li><strong>Correo institucional del programa.</strong></li>
+    <li>Usuarios con acceso al sistema.</li>
+    <li>Facultativos asociados al programa.</li>
+    <li>Correo electrónico y teléfono, cuando estén registrados.</li>
+    <li>Rol o función de los usuarios.</li>
+    <li>Programas asociados a cada persona.</li>
+  </ul>
+
+  <div class="manual-box box-success">
+    <mat-icon>manage_search</mat-icon>
+    <div>
+      También es posible buscar y filtrar contactos, seleccionar correos,
+      copiar direcciones, abrir el cliente de correo, imprimir el directorio
+      y exportar la información a Excel.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Configuración de notificaciones</h3>
+
+  <p>
+    Para cada usuario asociado a un programa puede definirse qué tipos
+    de notificación recibirá.
+  </p>
+
+  <div class="manual-maintainer-groups">
+
+    <div class="manual-maintainer-group">
+      <h4>Gestión de atención</h4>
+      <ul class="manual-list">
+        <li><strong>Citaciones</strong></li>
+        <li><strong>Asistencias</strong></li>
+        <li><strong>Retroalimentaciones</strong></li>
+        <li><strong>Observaciones</strong></li>
+      </ul>
+    </div>
+
+    <div class="manual-maintainer-group">
+      <h4>Gestión del episodio</h4>
+      <ul class="manual-list">
+        <li><strong>Referencias</strong></li>
+        <li><strong>Cierres</strong></li>
+        <li><strong>Documentos</strong></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="manual-box box-warning">
+    <mat-icon>notifications_active</mat-icon>
+    <div>
+      Estas configuraciones determinan los
+      <strong>destinatarios adicionales</strong>.
+      No reemplazan el correo institucional del programa.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">¿Quién recibe una notificación?</h3>
+
+  <div class="access-flow">
+
+    <div class="access-card access-manage">
+      <div class="access-icon">
+        <mat-icon>alternate_email</mat-icon>
+      </div>
+
+      <div>
+        <span class="access-label">OBLIGATORIO</span>
+        <h3>Correo institucional del programa</h3>
+        <p>
+          Se incorpora automáticamente según el programa asociado a la acción.
+        </p>
+      </div>
+    </div>
+
+    <div class="access-card access-readonly">
+      <div class="access-icon">
+        <mat-icon>group</mat-icon>
+      </div>
+
+      <div>
+        <span class="access-label">SEGÚN CONFIGURACIÓN</span>
+        <h3>Usuarios configurados</h3>
+        <p>
+          Se agregan según las opciones definidas en
+          <strong>Directorio y comunicaciones</strong>.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <h3 class="manual-subtitle">Correos institucionales obligatorios</h3>
+
+  <ul class="manual-list">
+    <li>
+      <strong>Citación:</strong>
+      correo institucional del programa que realiza la acción.
+    </li>
+    <li>
+      <strong>Asistencia:</strong>
+      correo institucional del programa correspondiente.
+    </li>
+    <li>
+      <strong>Retroalimentación:</strong>
+      correo institucional del programa responsable de la etapa.
+    </li>
+    <li>
+      <strong>Observación:</strong>
+      correo institucional del programa que registra la acción.
+    </li>
+    <li>
+      <strong>Cierre:</strong>
+      correo institucional del programa al cual pertenece el cierre.
+    </li>
+  </ul>
+
+  <h3 class="manual-subtitle">Referencia entre programas</h3>
+
+  <div class="program-flow">
+
+    <div class="program-flow-card">
+      <div class="program-flow-icon">
+        <mat-icon>outbox</mat-icon>
+      </div>
+      <span class="program-flow-kicker">Programa de origen</span>
+      <h3>Correo institucional obligatorio</h3>
+      <p>
+        El sistema incorpora automáticamente el correo institucional
+        del programa que genera la referencia.
+      </p>
+    </div>
+
+    <div class="program-flow-link">
+      <span>Referencia</span>
+      <mat-icon>arrow_forward</mat-icon>
+    </div>
+
+    <div class="program-flow-card">
+      <div class="program-flow-icon">
+        <mat-icon>move_to_inbox</mat-icon>
+      </div>
+      <span class="program-flow-kicker">Programa de destino</span>
+      <h3>Correo institucional obligatorio</h3>
+      <p>
+        También se incorpora automáticamente el correo institucional
+        del programa que recibe la referencia.
+      </p>
+    </div>
+
+  </div>
+
+  <div class="manual-box box-info">
+    <mat-icon>group_add</mat-icon>
+    <div>
+      A estos correos se agregan los usuarios configurados para recibir
+      referencias y, si corresponde, otros correos incorporados manualmente.
+    </div>
+  </div>
+
+  <div class="manual-box box-success">
+    <mat-icon>lock</mat-icon>
+    <div>
+      Los destinatarios automáticos permanecen protegidos y no pueden
+      eliminarse antes de confirmar la referencia.
+    </div>
+  </div>
+
+  <h3 class="manual-subtitle">Administración de comunicaciones</h3>
+
+  <ul class="manual-list">
+    <li>
+      Los usuarios con permisos administrativos pueden gestionar
+      las configuraciones de comunicaciones.
+    </li>
+    <li>
+      Un administrador de comunicaciones de programa puede administrar
+      las notificaciones correspondientes a su propio programa.
+    </li>
+    <li>
+      Las configuraciones transversales permiten administrar funciones
+      que no dependen de un único programa.
+    </li>
+  </ul>
+
+  <div class="manual-box box-rule">
+    <mat-icon>warning</mat-icon>
+    <div>
+      <strong>Importante:</strong>
+      el correo institucional registrado para cada programa debe mantenerse
+      actualizado, ya que corresponde al destinatario institucional utilizado
+      automáticamente por las notificaciones del sistema.
+    </div>
+  </div>
+
+  <div class="manual-box box-success">
+    <mat-icon>check_circle</mat-icon>
+    <div>
+      <strong>Idea principal:</strong>
+      el correo institucional del programa se incorpora automáticamente,
+      mientras que los demás destinatarios dependen de la configuración
+      definida en <strong>Directorio y comunicaciones</strong>.
+    </div>
+  </div>
+
+</mat-card>
