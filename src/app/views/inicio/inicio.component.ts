@@ -246,6 +246,24 @@ export class InicioComponent implements OnInit, OnDestroy {
   currentSort: string | null = null;
   resultOptions: ResultOption[] = [];
 
+  get visibleResultOptions(): ResultOption[] {
+    if (this.isHistoricalMode) {
+      return this.resultOptions;
+    }
+
+    const activeResultCodes = new Set([
+      'AUN_SIN_RESULTADO',
+      'LISTA_ESPERA',
+      'REFERENCIA',
+      'INGRESO_TRATAMIENTO',
+      'ABANDONO',
+    ]);
+
+    return this.resultOptions.filter((result) =>
+      activeResultCodes.has(result.code),
+    );
+  }
+
   readonly filtersForm = new FormGroup({
     programId: new FormControl<number | null>(null),
     resultCode: new FormControl<string>('', {
