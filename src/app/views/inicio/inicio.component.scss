@@ -2942,3 +2942,214 @@ mat-paginator {
 .table-heading__context:has(.column-help[open]) .column-help[open] {
   flex-basis: 100% !important;
 }
+
+/* ==========================================================
+   AJUSTE VISUAL BANDEJA ABIERTA
+   Comp. BPS / Acción sugerida / Acciones
+   ========================================================== */
+@media (min-width: 901px) {
+  .priority-table-card:not(.priority-table-card--historical) .mat-column-commitment {
+    width: 7% !important;
+  }
+
+  .priority-table-card:not(.priority-table-card--historical) .mat-column-suggestedAction {
+    width: 10% !important;
+  }
+
+  .priority-table-card:not(.priority-table-card--historical) .mat-column-actions {
+    width: 7% !important;
+  }
+
+  .priority-table-card:not(.priority-table-card--historical) .mat-column-commitment .commitment {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .priority-table-card:not(.priority-table-card--historical) .mat-column-actions .row-actions {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+  }
+
+  .priority-table-card:not(.priority-table-card--historical)
+    .mat-column-actions
+    .row-actions
+    .mat-mdc-button {
+    max-width: 100%;
+    box-sizing: border-box;
+    padding-right: 6px;
+    padding-left: 6px;
+  }
+}
+
+/* ==========================================================
+   FILTROS COMPACTOS BANDEJA
+   ========================================================== */
+@media (min-width: 901px) {
+  .filters-card {
+    padding: 10px 14px !important;
+  }
+
+  .filters-form {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) minmax(320px, 1.35fr) minmax(220px, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .filter-field {
+    width: 100%;
+    margin: 0 !important;
+  }
+
+  .filters-form__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .filters-form__actions button {
+    margin: 0 !important;
+  }
+
+  .filters-limitation {
+    margin-top: 6px;
+    padding-top: 6px;
+    font-size: 0.72rem;
+  }
+
+  mat-paginator {
+    min-height: 42px;
+  }
+}
+
+/* ==========================================================
+   PIE INTEGRADO DE BANDEJA
+   Resumen + paginación compacta
+   ========================================================== */
+@media (min-width: 901px) {
+  .table-pagination {
+    display: flex;
+    min-height: 46px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 4px 14px;
+    box-sizing: border-box;
+    border-top: 1px solid #dfe8eb;
+    background: #f7fafb;
+  }
+
+  .table-pagination__summary {
+    flex: 0 0 auto;
+    padding: 0;
+    color: #49616a;
+    font-size: 0.74rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .table-pagination mat-paginator {
+    flex: 0 0 auto;
+    min-height: 38px !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  :host ::ng-deep .table-pagination .mat-mdc-paginator-container {
+    min-height: 38px !important;
+    padding: 0 !important;
+    justify-content: flex-end;
+  }
+
+  :host ::ng-deep .table-pagination .mat-mdc-paginator-page-size {
+    margin-right: 4px;
+  }
+
+  :host ::ng-deep .table-pagination .mat-mdc-paginator-page-size-label {
+    margin: 0 6px 0 0;
+    color: #60757d;
+    font-size: 0.72rem;
+  }
+
+  /* Ya tenemos el resumen propio: evita mostrar 1–20 de 50 dos veces */
+  :host ::ng-deep .table-pagination .mat-mdc-paginator-range-label {
+    display: none !important;
+  }
+
+  :host ::ng-deep .table-pagination .mat-mdc-paginator-navigation-first,
+  :host ::ng-deep .table-pagination .mat-mdc-paginator-navigation-previous,
+  :host ::ng-deep .table-pagination .mat-mdc-paginator-navigation-next,
+  :host ::ng-deep .table-pagination .mat-mdc-paginator-navigation-last {
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+  }
+}
+
+/* ==========================================================
+   PAGINADOR FINAL COMPACTO
+   ========================================================== */
+@media (min-width: 901px) {
+
+  /* "Elementos por página" -> visualmente "Por página" */
+  :host ::ng-deep
+    .table-pagination
+    .mat-mdc-paginator-page-size-label {
+    margin: 0 7px 0 0 !important;
+    color: transparent !important;
+    font-size: 0 !important;
+    white-space: nowrap;
+  }
+
+  :host ::ng-deep
+    .table-pagination
+    .mat-mdc-paginator-page-size-label::after {
+    content: "Por página";
+    color: #60757d;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  /* Selector de cantidad más compacto */
+  :host ::ng-deep
+    .table-pagination
+    .mat-mdc-paginator-page-size-select {
+    width: 68px !important;
+    margin: 0 5px 0 0 !important;
+  }
+
+  :host ::ng-deep
+    .table-pagination
+    .mat-mdc-paginator-page-size {
+    align-items: center;
+    margin-right: 8px !important;
+  }
+
+  /* Navegación más compacta */
+  :host ::ng-deep
+    .table-pagination
+    .mat-mdc-icon-button {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 4px !important;
+  }
+
+  :host ::ng-deep
+    .table-pagination
+    .mat-mdc-paginator-navigation-first,
+  :host ::ng-deep
+    .table-pagination
+    .mat-mdc-paginator-navigation-previous,
+  :host ::ng-deep
+    .table-pagination
+    .mat-mdc-paginator-navigation-next,
+  :host ::ng-deep
+    .table-pagination
+    .mat-mdc-paginator-navigation-last {
+    margin: 0 !important;
+  }
+}

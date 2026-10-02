@@ -260,15 +260,6 @@
 
   <!-- FILTROS -->
   <mat-card class="filters-card">
-    <div class="filters-card__heading">
-      <div>
-        <span>FILTROS DE BANDEJA</span>
-        <h2>Acotar demandas visibles</h2>
-      </div>
-
-
-    </div>
-
     <form
       class="filters-form"
       [formGroup]="filtersForm"
@@ -314,8 +305,8 @@
           type="text"
           formControlName="search"
           autocomplete="off"
-          placeholder="ID, código, nombre, RUN o creador"
-          aria-label="Buscar por ID, código de episodio, nombre, RUN o usuario creador"
+          placeholder="ID, código, nombre o RUN"
+          aria-label="Buscar por ID, código de episodio, nombre o RUN"
         />
       </mat-form-field>
 
