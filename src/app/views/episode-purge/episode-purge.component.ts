@@ -388,11 +388,6 @@ export class EpisodePurgeComponent {
 
           this.correctionDraft.secondarySubstances = secondarySubstances;
         }
-
-        console.log(
-          '[EpisodePurge] Sustancias del episodio:',
-          this.episodeSubstances,
-        );
       },
       error: (error) => {
         console.error('[EpisodePurge] Error cargando sustancias:', error);
@@ -1886,7 +1881,6 @@ export class EpisodePurgeComponent {
           stageWasClosed && !isReferenceClosure,
       };
     }
-    console.log('[EpisodePurge] Administrative correction payload:', payload);
 
     this.correcting = true;
 
@@ -1899,10 +1893,6 @@ export class EpisodePurgeComponent {
       )
       .subscribe({
         next: (response) => {
-          console.log(
-            '[EpisodePurge] Administrative correction response:',
-            response,
-          );
 
           if (
             programReceivedAtChanged &&
@@ -1917,10 +1907,6 @@ export class EpisodePurgeComponent {
               })
               .subscribe({
                 next: (receivedAtResponse) => {
-                  console.log(
-                    '[EpisodePurge] Program receivedAt correction response:',
-                    receivedAtResponse,
-                  );
 
                   this.snackBar.open(
                     'Corrección administrativa y fecha de ingreso al programa aplicadas correctamente.',
@@ -2257,18 +2243,6 @@ export class EpisodePurgeComponent {
 
     this.adminMode = 'correction';
 
-    console.log('[EpisodePurge] Cronología disponible:', {
-      longitudinalKeys: Object.keys(this.longitudinal ?? {}),
-      episodeKeys: Object.keys(this.episode ?? {}),
-      stages: Array.isArray(this.longitudinal?.stages)
-        ? this.longitudinal.stages.map((stage: any) => ({
-            stageId: stage?.id ?? stage?.stageId ?? null,
-            program: stage?.program?.name ?? stage?.programName ?? null,
-            keys: Object.keys(stage ?? {}),
-          }))
-        : [],
-    });
-
     this.loadCorrectionCatalogs();
     this.loadCorrectionSubstances();
 
@@ -2338,13 +2312,6 @@ export class EpisodePurgeComponent {
         this.episode?.resultCode ??
         null,
     };
-
-    console.log('[EpisodePurge] fecha correctionDraft', {
-      episodeOriginalRequestDate: this.episode?.originalRequestDate,
-      episodeRequestDate: this.episode?.requestDate,
-      correctionOriginalRequestDate: this.correctionDraft?.originalRequestDate,
-      isDate: this.correctionDraft?.originalRequestDate instanceof Date,
-    });
 
     const selectedEpisodeId = Number(this.episodeId);
 
@@ -2476,127 +2443,6 @@ export class EpisodePurgeComponent {
           ) {
             this.startCorrection();
           }
-
-          const selectedEpisodeEvents = Array.isArray(response?.events)
-            ? response.events.filter(
-                (event: any) => Number(event?.episodeId) === Number(episodeId),
-              )
-            : [];
-
-          console.log(
-            '[EpisodePurge] CIERRE seleccionado:',
-            selectedEpisodeEvents.find(
-              (event: any) =>
-                String(event?.eventType?.code ?? '')
-                  .trim()
-                  .toUpperCase() === 'CIERRE',
-            ),
-          );
-
-          const selectedFeedback = selectedEpisodeEvents.find(
-            (event: any) =>
-              String(event?.eventType?.code ?? '')
-                .trim()
-                .toUpperCase() === 'RETROALIMENTACION',
-          );
-
-          console.log(
-            '[EpisodePurge] RETROALIMENTACION JSON:',
-            JSON.stringify(selectedFeedback, null, 2),
-          );
-
-          console.log('[EpisodePurge] RETROALIMENTACION hora:', {
-            id: selectedFeedback?.id,
-            eventDate: selectedFeedback?.eventDate,
-            eventTime: selectedFeedback?.eventTime,
-            createdAt: selectedFeedback?.createdAt,
-          });
-
-          if (Array.isArray(response?.events)) {
-            response.events.slice(0, 3).forEach((event: any, index: number) => {
-              console.log(
-                '[EpisodePurge] EVENTO ' + (index + 1) + ':',
-                JSON.stringify(event, null, 2),
-              );
-            });
-          }
-
-          console.log(
-            '[EpisodePurge] Eventos JSON:',
-            JSON.stringify(
-              Array.isArray(response?.events)
-                ? response.events.slice(0, 3)
-                : [],
-              null,
-              2,
-            ),
-          );
-
-          console.log(
-            '[EpisodePurge] Muestra eventos:',
-            Array.isArray(response?.events)
-              ? response.events.slice(0, 12).map((event: any) => ({
-                  keys: Object.keys(event ?? {}),
-                  event,
-                }))
-              : [],
-          );
-
-          console.log(
-            '[EpisodePurge] Claves longitudinal:',
-            Object.keys(response ?? {}),
-          );
-
-          console.log(
-            '[EpisodePurge] Claves episodio:',
-            Object.keys(episode ?? {}),
-          );
-
-          console.log(
-            '[EpisodePurge] Claves etapas:',
-            Array.isArray(response?.stages)
-              ? response.stages.map((stage: any) => ({
-                  stageId: stage?.id ?? stage?.stageId ?? null,
-                  keys: Object.keys(stage ?? {}),
-                }))
-              : [],
-          );
-
-          console.log('[EpisodePurge] Estructura cronológica:', {
-            events: response?.events ?? response?.episodeEvents ?? null,
-
-            stages: Array.isArray(response?.stages)
-              ? response.stages.map((stage: any) => ({
-                  id: stage?.id ?? stage?.stageId ?? null,
-                  program: stage?.program?.name ?? stage?.programName ?? null,
-                  receivedAt: stage?.receivedAt ?? null,
-                  closedAt: stage?.closedAt ?? null,
-                  events: stage?.events ?? stage?.episodeEvents ?? null,
-                }))
-              : [],
-
-            episodeEvents: episode?.events ?? episode?.episodeEvents ?? null,
-          });
-
-          console.log('[EpisodePurge] Datos episodio seleccionado:', {
-            id: episode?.id ?? episode?.episodeId ?? null,
-            episodeCode: episode?.episodeCode ?? episode?.code ?? null,
-
-            originalRequestDate:
-              episode?.originalRequestDate ?? episode?.requestDate ?? null,
-
-            initialProgram: episode?.initialProgram ?? null,
-
-            initialProgramId:
-              episode?.initialProgramId ?? episode?.initialProgram?.id ?? null,
-
-            initialProgramName:
-              episode?.initialProgramName ??
-              episode?.initialProgram?.name ??
-              null,
-
-            currentProgram: episode?.currentProgram ?? null,
-          });
         },
         error: (error: HttpErrorResponse) => {
           this.directPurgeAvailable = error.status !== 404;
