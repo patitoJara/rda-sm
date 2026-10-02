@@ -1,4 +1,4 @@
-// users.dialog.ts
+﻿// users.dialog.ts
 
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -64,6 +64,7 @@ export class UsersDialogComponent implements OnInit {
   hidePassword = true;
   public isEditing = false;
   private originalRut: string | null = null;
+  private originalRoleIds: number[] = [];
   private checkingRut = false;
   private usersCache: User[] = [];
   isSaving = false;
@@ -149,8 +150,12 @@ export class UsersDialogComponent implements OnInit {
     if (this.isEditing) {
       this.usersService.getUserRoles(userData.id!).subscribe({
         next: (roles: Role[]) => {
+          this.originalRoleIds = (roles ?? [])
+            .map((role) => Number(role.id))
+            .filter((id) => Number.isFinite(id) && id > 0);
+
           this.form.patchValue({
-            roles: roles.map((r) => r.id),
+            roles: this.originalRoleIds,
           });
 
           this.updateRutValidators();
@@ -420,6 +425,29 @@ export class UsersDialogComponent implements OnInit {
 
     const payload = this.buildUserPayload(true);
 
+    const emailToCreate = String(payload.email ?? '')
+      .trim()
+      .toLowerCase();
+
+    const existingUsers = await firstValueFrom(
+      this.usersService.listAll(),
+    );
+
+    const emailAlreadyExists = (existingUsers ?? []).some((user: User) =>
+      String(user.email ?? '')
+        .trim()
+        .toLowerCase() === emailToCreate,
+    );
+
+    if (emailAlreadyExists) {
+      this.showWarning(
+        'El correo electrónico ingresado ya se encuentra registrado en el sistema. Verifique el correo informado e inténtelo nuevamente.',
+        'Correo ya registrado',
+      );
+
+      return false;
+    }
+
     const savedUser = await firstValueFrom(this.usersService.save(payload));
 
     const userId = savedUser.id;
@@ -486,13 +514,23 @@ export class UsersDialogComponent implements OnInit {
 
     await this.relationsService.updateRoles(finalUserId, selectedRoles);
 
+    const originalRoles = this.originalRoleIds.map((id) => ({ id }));
+
+    const hadTransversal =
+      this.keepsTransversalCommunication(originalRoles);
+
     const keepsTransversal =
       this.keepsTransversalCommunication(selectedRoles);
 
-    if (!keepsTransversal) {
+    console.log('[UsersDialog] Comunicación transversal:', {
+      userId: finalUserId,
+      hadTransversal,
+      keepsTransversal,
+    });
+
+    if (hadTransversal && !keepsTransversal) {
       await this.relationsService.deleteTransversalUserProgram(finalUserId);
     }
-
     await this.relationsService.updatePrograms(
       finalUserId,
       programRequired ? selectedPrograms : [],
@@ -697,3 +735,9 @@ export class UsersDialogComponent implements OnInit {
     return this.requiresProgram(selectedRoles);
   }
 }
+
+
+
+
+
+
