@@ -1,3 +1,4 @@
+import { episodeIdentity, longitudinalEpisodes, selectEpisodeContext, SelectedEpisodeContext, validateEpisodeOperation } from './utils/demand-new-context.utils';
 import {
   resolveStageEntryContext,
   resolveStageReceptionContext,
@@ -280,6 +281,45 @@ export class DemandNewComponent
   private readonly dialog = inject(MatDialog);
 
   private requestedEpisodeId: number | null = null;
+  /** Full person history; never used directly as an operational episode. */
+  personLongitudinal: any | null = null;
+  private contextGeneration = 0;
+  private selectedContext: SelectedEpisodeContext = selectEpisodeContext(null, null);
+  episodeContextError: string | null = null;
+  get selectedEpisodeId(): number | null { return this.selectedContext.episode?.id ?? null; }
+
+  private clearSelectedEpisode(): void {
+    this.selectedContext = selectEpisodeContext(null, null);
+    this.createdEpisode = null;
+    this.episodeSummary = null;
+    this.longitudinal = null;
+    this.episodeEvents = [];
+    this.currentProgramContext = null;
+    this.episodeLoaded = false;
+    this.stageLoaded = false;
+    this.episodeSubstances = [];
+    this.episodeSubstancesLoaded = false;
+    this.episodeContextError = null;
+    this.activeActionPanel = null;
+    this.showAllHistory = false;
+    this.historyTypeFilter = 'TODOS';
+    this.citationForm?.reset();
+    this.attendanceForm?.reset();
+    this.interviewForm?.reset();
+    this.observationForm?.reset();
+    this.referenceForm?.reset();
+    this.closureForm?.reset();
+  }
+
+  private ensureOperationContext(episodeId: number, payload: any): boolean {
+    const stageId = payload?.stageId ?? payload?.originStageId ?? this.workingStageId;
+    const programId = payload?.programId ?? this.workingProgramId;
+    const valid = episodeId === this.selectedEpisodeId && this.canManageCurrentEpisode &&
+      Number(stageId) === this.workingStageId &&
+      validateEpisodeOperation(this.selectedContext, episodeId, stageId, programId, payload?.relatedEventId);
+    if (!valid) this.episodeContextError = 'La selección cambió o los identificadores no corresponden al episodio, etapa y programa consultados. Recargue el episodio antes de continuar.';
+    return valid;
+  }
   private requestedMode: 'view' | 'manage' | null = null;
 
   searchForm = this.fb.group({
@@ -288,7 +328,7 @@ export class DemandNewComponent
 
   activeProgramName: string | null = null;
   activeProgramId: number | null = null;
-  private currentProgramContext: EpisodeProgramContextAccess | null = null;
+  private currentProgramContext: (EpisodeProgramContextAccess & { episodeId?: number }) | null = null;
   episodeSubstances: EpisodeSubstance[] = [];
   episodeSubstancesLoaded = false;
   highlightedSummarySection: SummarySectionId | null = null;
@@ -1096,6 +1136,12 @@ export class DemandNewComponent
       const loadedRut = formatRut(String(this.selectedPerson.rut ?? ''));
 
       if (enteredRut !== loadedRut) {
+        ++this.contextGeneration;
+        this.personLongitudinal = null;
+        this.requestedEpisodeId = null;
+        this.isSearching = false;
+        this.isLoadingLongitudinal = false;
+        this.clearSelectedEpisode();
         resetLoadedDemandView(this);
       }
     });
@@ -1166,6 +1212,7 @@ export class DemandNewComponent
   }
 
   ngOnDestroy(): void {
+    ++this.contextGeneration;
     this.summarySectionObserver?.disconnect();
     this.summarySectionObserver = null;
 
@@ -1851,6 +1898,10 @@ export class DemandNewComponent
       return;
     }
 
+    const generation = ++this.contextGeneration;
+    this.personLongitudinal = null;
+    this.clearSelectedEpisode();
+    this.isLoadingLongitudinal = false;
     this.isSearching = true;
     this.searched = true;
     this.personNotFound = false;
@@ -1916,120 +1967,28 @@ export class DemandNewComponent
 
     this.demandEpisodeService.getLongitudinalByRut(rut).subscribe({
       next: (data) => {
-        console.log('[DemandNew] Episodios encontrados:', data?.episodes);
-
-        const availableEpisodes = Array.isArray(data?.episodes)
-          ? data.episodes
-          : [];
-
-        const requiresEpisodeSelection =
-          !this.requestedEpisodeId &&
-          availableEpisodes.length > 1;
-
-        if (requiresEpisodeSelection) {
-          this.applyLongitudinalData({
-            ...data,
-            activeEpisode: null,
-            episode: null,
-            stages: [],
-            events: [],
-          });
-
-          this.createdEpisode = null;
-          this.episodeSummary = null;
-          this.episodeLoaded = false;
-          this.stageLoaded = false;
-          this.episodeEvents = [];
-          this.episodeSubstances = [];
-          this.episodeSubstancesLoaded = false;
-
-          this.isSearching = false;
-          return;
-        }
-
-        this.applyLongitudinalData(data);
-
-        const loadedEpisodeId = Number(
-          data?.activeEpisode?.id ?? data?.activeEpisode?.episodeId ?? 0,
-        );
-
-        if (
-          loadedEpisodeId > 0 &&
-          (!this.requestedEpisodeId || this.requestedEpisodeId === loadedEpisodeId)
-        ) {
-          this.episodeSubstances = [];
-          this.episodeSubstancesLoaded = false;
-
-          this.demandService.getEpisodeSubstances(loadedEpisodeId).subscribe({
-            next: (substances) => {
-              this.episodeSubstances = Array.isArray(substances)
-                ? substances
-                : [];
-              this.episodeSubstancesLoaded = true;
-
-              console.log(
-                '[DemandNew] Sustancias episodio:',
-                this.episodeSubstances,
-              );
-            },
-            error: (error) => {
-              console.error(
-                '[DemandNew] Error cargando sustancias del episodio:',
-                error,
-              );
-
-              this.episodeSubstances = [];
-              this.episodeSubstancesLoaded = false;
-            },
-          });
-        }
-
-
-
-        if (
-          this.requestedEpisodeId &&
-          this.requestedEpisodeId !== loadedEpisodeId
-        ) {
-          this.loadEpisodeLongitudinal(this.requestedEpisodeId);
-        } else if (!loadedEpisodeId && availableEpisodes.length === 1) {
-          const onlyEpisodeId = Number(
-            availableEpisodes[0]?.id ??
-              availableEpisodes[0]?.episodeId ??
-              0,
-          );
-
-          if (onlyEpisodeId > 0) {
-            this.requestedEpisodeId = onlyEpisodeId;
-            this.loadEpisodeLongitudinal(onlyEpisodeId);
-          }
-        }
-
+        if (generation !== this.contextGeneration) return;
+        this.personLongitudinal = data;
+        const episodes = longitudinalEpisodes(data);
+        const selectedId = this.requestedEpisodeId ?? (episodes.length === 1 ? episodeIdentity(episodes[0]) : null);
         this.isSearching = false;
+        if (selectedId) this.loadEpisodeLongitudinal(selectedId);
+        else this.applyLongitudinalData(data, null);
       },
-
       error: (error) => {
-        console.error(
-          '[DemandNew] Error consultando ficha longitudinal por RUN:',
-          error,
-        );
-
-        /*
-         * Si el longitudinal está bloqueado o no existe,
-         * buscamos directamente la persona por RUN.
-         */
+        if (generation !== this.contextGeneration) return;
         if (error?.status === 403 || error?.status === 404) {
           this.loadPersonFallbackByRut(rut, Number(error.status));
           return;
         }
-
         this.isSearching = false;
-        this.searchError =
-          'No fue posible consultar la ficha longitudinal. Intente nuevamente o contacte a soporte.';
+        this.searchError = 'No fue posible consultar la ficha longitudinal. Intente nuevamente o contacte a soporte.';
       },
     });
   }
 
   private loadContactByPostulant(postulantId: number): void {
+    const generation = this.contextGeneration;
     if (!Number.isFinite(postulantId) || postulantId <= 0) {
       this.selectedContact = null;
 
@@ -2050,6 +2009,7 @@ export class DemandNewComponent
 
     this.contactService.getByPostulant(postulantId).subscribe({
       next: (contact: Contact) => {
+          if (generation !== this.contextGeneration) return;
         console.log('[DemandNew] Contacto del postulante recuperado:', contact);
 
         this.selectedContact = contact;
@@ -2068,6 +2028,7 @@ export class DemandNewComponent
       },
 
       error: (error: HttpErrorResponse) => {
+          if (generation !== this.contextGeneration) return;
         if (error.status === 404) {
           console.log(
             '[DemandNew] El postulante no posee un contacto registrado.',
@@ -2125,6 +2086,7 @@ export class DemandNewComponent
     rut: string,
     longitudinalStatus: number,
   ): void {
+    const generation = this.contextGeneration;
     console.log(
       '[DemandNew] Intentando recuperar persona directamente por RUN:',
       rut,
@@ -2149,10 +2111,11 @@ export class DemandNewComponent
 
           return this.postulantService.getById(personId);
         }),
-        finalize(() => (this.isSearching = false)),
+        finalize(() => { if (generation === this.contextGeneration) this.isSearching = false; }),
       )
       .subscribe({
         next: (person: Postulant) => {
+          if (generation !== this.contextGeneration) return;
           console.log('[DemandNew] Persona completa recuperada:', person);
 
           this.selectedPerson = person;
@@ -2192,6 +2155,7 @@ export class DemandNewComponent
         },
 
         error: (personError) => {
+          if (generation !== this.contextGeneration) return;
           console.error(
             '[DemandNew] Error recuperando persona completa por RUN:',
             personError,
@@ -2618,7 +2582,7 @@ export class DemandNewComponent
       diverter: null,
 
       previousTreatmentNumber: calculatePreviousTreatmentNumber(
-        this.longitudinal,
+        this.personLongitudinal,
       ),
 
       currentState: 'EN TRÁMITE',
@@ -3045,7 +3009,7 @@ export class DemandNewComponent
           if (
             !this.createdEpisode &&
             !this.episodeSummary &&
-            !this.longitudinal?.activeEpisode
+            !this.longitudinal?.episode
           ) {
             this.stageVisualState = 'Persona registrada sin episodio';
           }
@@ -3060,13 +3024,13 @@ export class DemandNewComponent
 
               postulant: updatedPerson,
 
-              activeEpisode: this.longitudinal.activeEpisode
+              episode: this.longitudinal.episode
                 ? {
-                    ...this.longitudinal.activeEpisode,
+                    ...this.longitudinal.episode,
 
                     postulant: updatedPerson,
                   }
-                : this.longitudinal.activeEpisode,
+                : this.longitudinal.episode,
 
               episodes: Array.isArray(this.longitudinal.episodes)
                 ? this.longitudinal.episodes.map((episode: any) => ({
@@ -3104,7 +3068,7 @@ export class DemandNewComponent
            * postulante completo o fusionarlo con selectedPerson.
            */
           const episodeId =
-            Number(this.longitudinal?.activeEpisode?.id) ||
+            Number(this.longitudinal?.episode?.id) ||
             Number(this.episodeSummary?.id) ||
             Number(this.episodeSummary?.episodeId) ||
             0;
@@ -3156,6 +3120,7 @@ export class DemandNewComponent
   }
 
   saveInterview(): void {
+    const operationGeneration = this.contextGeneration;
     if (!this.ensureCanManageCurrentEpisode()) {
       return;
     }
@@ -3273,6 +3238,8 @@ export class DemandNewComponent
     this.referenceError = null;
     this.referenceSuccess = null;
 
+    if (operationGeneration !== this.contextGeneration || !this.ensureOperationContext(episodeId, feedbackContext.payload)) { this.isSavingInterview = false; return; }
+
     this.demandEpisodeService
       .createEvent(episodeId, feedbackContext.payload)
       .pipe(
@@ -3282,6 +3249,7 @@ export class DemandNewComponent
       )
       .subscribe({
         next: (event: any) => {
+          if (operationGeneration !== this.contextGeneration) return;
           if (event?.id) {
             this.episodeEvents = [
               ...(this.episodeEvents ?? []).filter(
@@ -3327,9 +3295,8 @@ export class DemandNewComponent
             : 'RUN no informado';
 
           const episode =
-            this.longitudinal?.activeEpisode ??
-            this.episodeSummary ??
             this.longitudinal?.episode ??
+            this.episodeSummary ??
             this.createdEpisode ??
             null;
 
@@ -3449,12 +3416,14 @@ export class DemandNewComponent
             )
             .subscribe({
               next: (notificationResult) => {
+          if (operationGeneration !== this.contextGeneration) return;
                 console.log(
                   '[DemandNew] Notificación FEEDBACK procesada:',
                   notificationResult,
                 );
               },
               error: (notificationError) => {
+          if (operationGeneration !== this.contextGeneration) return;
                 console.error(
                   '[DemandNew] Error inesperado enviando notificación FEEDBACK:',
                   notificationError,
@@ -3464,10 +3433,11 @@ export class DemandNewComponent
           this.interviewForm.reset(feedbackResult.resetValue);
 
           this.closeActionPanel();
-          this.loadEpisodeLongitudinal(episodeId);
+          if (this.selectedEpisodeId === episodeId) this.loadEpisodeLongitudinal(episodeId);
         },
 
         error: (error: HttpErrorResponse) => {
+          if (operationGeneration !== this.contextGeneration) return;
           console.error(
             '[DemandNew] Error registrando retroalimentación:',
             error,
@@ -3495,7 +3465,7 @@ export class DemandNewComponent
 
   get currentEpisodeStage(): any | null {
     const episode =
-      this.longitudinal?.activeEpisode ??
+      this.longitudinal?.episode ??
       this.episodeSummary ??
       this.createdEpisode ??
       null;
@@ -3516,20 +3486,16 @@ export class DemandNewComponent
       : null;
   }
   get workingStage(): any | null {
-    return resolveWorkingStage(
-      this.longitudinal?.stages,
-      this.tokenService.getActiveProgramId(),
-    );
+    return resolveWorkingStage(this.longitudinal?.stages, this.tokenService.getActiveProgramId()) ?? this.currentEpisodeStage;
   }
 
   get workingStageId(): number | null {
-    return resolveWorkingStageId(
-      this.longitudinal?.stages,
-      this.tokenService.getActiveProgramId(),
-    );
+    const id = Number(this.workingStage?.id);
+    return Number.isSafeInteger(id) && id > 0 ? id : null;
   }
 
   get workingStageEvents(): any[] {
+    if (!this.workingStageId) return [];
     return filterEventsByStage(
       this.episodeEvents ?? [],
       this.workingStageId,
@@ -3537,7 +3503,7 @@ export class DemandNewComponent
   }
   get resolvedCurrentStageId(): number | null {
     const episode =
-      this.longitudinal?.activeEpisode ??
+      this.longitudinal?.episode ??
       this.episodeSummary ??
       this.createdEpisode ??
       null;
@@ -3553,7 +3519,7 @@ export class DemandNewComponent
   }
   get currentStageResultCode(): string {
     const episode =
-      this.longitudinal?.activeEpisode ??
+      this.longitudinal?.episode ??
       this.episodeSummary ??
       this.createdEpisode ??
       null;
@@ -3563,7 +3529,7 @@ export class DemandNewComponent
 
   get currentStageResultLabel(): string {
     const episode =
-      this.longitudinal?.activeEpisode ??
+      this.longitudinal?.episode ??
       this.episodeSummary ??
       this.createdEpisode ??
       null;
@@ -3576,7 +3542,7 @@ export class DemandNewComponent
 
   get canReferenceCurrentEpisode(): boolean {
     const episode =
-      this.longitudinal?.activeEpisode ??
+      this.longitudinal?.episode ??
       this.episodeSummary ??
       this.createdEpisode ??
       null;
@@ -3632,6 +3598,7 @@ export class DemandNewComponent
   }
 
   saveReference(): void {
+    const operationGeneration = this.contextGeneration;
     if (!this.ensureCanManageCurrentEpisode()) {
       return;
     }
@@ -3718,9 +3685,8 @@ export class DemandNewComponent
       : 'RUN no informado';
 
     const episode =
-      this.longitudinal?.activeEpisode ??
-      this.episodeSummary ??
       this.longitudinal?.episode ??
+      this.episodeSummary ??
       this.createdEpisode ??
       null;
 
@@ -3799,6 +3765,7 @@ export class DemandNewComponent
       )
       .subscribe({
         next: (recipients) => {
+          if (operationGeneration !== this.contextGeneration) return;
           const originProgramEmail =
             String(
               this.programs.find(
@@ -3880,6 +3847,8 @@ export class DemandNewComponent
                 this.referenceSuccess = null;
 
                 // PRIMERO se registra la referencia.
+                if (operationGeneration !== this.contextGeneration || !this.ensureOperationContext(episodeId, referenceContext.payload)) { this.isSavingReference = false; return; }
+
                 this.demandService
                   .createReference(
                     episodeId,
@@ -3893,6 +3862,7 @@ export class DemandNewComponent
                   )
                   .subscribe({
                     next: () => {
+          if (operationGeneration !== this.contextGeneration) return;
                       this.referenceSuccess =
                         getReferenceSuccessMessage();
 
@@ -3956,6 +3926,7 @@ export class DemandNewComponent
   }
 
   saveClosure(): void {
+    const operationGeneration = this.contextGeneration;
     if (!this.ensureCanManageCurrentEpisode()) {
       return;
     }
@@ -4117,6 +4088,8 @@ export class DemandNewComponent
         closureReasonCode,
       };
 
+      if (operationGeneration !== this.contextGeneration || !this.ensureOperationContext(episodeId, closurePayload)) { this.isSavingClosure = false; return; }
+
       this.demandEpisodeService
         .closeEpisode(episodeId, closurePayload)
         .pipe(
@@ -4126,6 +4099,7 @@ export class DemandNewComponent
         )
         .subscribe({
           next: () => {
+          if (operationGeneration !== this.contextGeneration) return;
             this.closureSuccess = getClosureSuccessMessage(isReferenceClosure);
             this.showOperationSuccess(this.closureSuccess);
 
@@ -4167,9 +4141,8 @@ export class DemandNewComponent
                 : 'RUN no informado';
 
               const episode =
-                this.longitudinal?.activeEpisode ??
-                this.episodeSummary ??
                 this.longitudinal?.episode ??
+                this.episodeSummary ??
                 this.createdEpisode ??
                 null;
 
@@ -4273,12 +4246,14 @@ export class DemandNewComponent
                 )
                 .subscribe({
                   next: (notificationResult) => {
+          if (operationGeneration !== this.contextGeneration) return;
                     console.log(
                       '[DemandNew] Notificación CLOSURE procesada:',
                       notificationResult,
                     );
                   },
                   error: (notificationError) => {
+          if (operationGeneration !== this.contextGeneration) return;
                     console.error(
                       '[DemandNew] Error inesperado enviando notificación CLOSURE:',
                       notificationError,
@@ -4292,10 +4267,11 @@ export class DemandNewComponent
             }
 
             this.closeActionPanel();
-            this.loadEpisodeLongitudinal(episodeId);
+            if (this.selectedEpisodeId === episodeId) this.loadEpisodeLongitudinal(episodeId);
           },
 
           error: (error: HttpErrorResponse) => {
+          if (operationGeneration !== this.contextGeneration) return;
             console.error('[DemandNew] Error cerrando demanda:', error);
 
             if (error.status === 403) {
@@ -4356,6 +4332,7 @@ export class DemandNewComponent
   }
 
   saveObservation(): void {
+    const operationGeneration = this.contextGeneration;
     if (!this.ensureCanManageCurrentEpisode()) {
       return;
     }
@@ -4413,11 +4390,14 @@ export class DemandNewComponent
     this.observationError = null;
     this.observationSuccess = null;
 
+    if (operationGeneration !== this.contextGeneration || !this.ensureOperationContext(episodeId, payload)) { this.isSavingObservation = false; return; }
+
     this.demandEpisodeService
       .createEvent(episodeId, payload)
       .pipe(finalize(() => (this.isSavingObservation = false)))
       .subscribe({
         next: (event) => {
+          if (operationGeneration !== this.contextGeneration) return;
           const observationResult = handleObservationSuccess(event);
 
           this.observationSuccess = observationResult.successMessage;
@@ -4460,9 +4440,8 @@ export class DemandNewComponent
             : 'RUN no informado';
 
           const episode =
-            this.longitudinal?.activeEpisode ??
-            this.episodeSummary ??
             this.longitudinal?.episode ??
+            this.episodeSummary ??
             this.createdEpisode ??
             null;
 
@@ -4557,12 +4536,14 @@ export class DemandNewComponent
             )
             .subscribe({
               next: (notificationResult) => {
+          if (operationGeneration !== this.contextGeneration) return;
                 console.log(
                   '[DemandNew] Notificación OBSERVATION procesada:',
                   notificationResult,
                 );
               },
               error: (notificationError) => {
+          if (operationGeneration !== this.contextGeneration) return;
                 console.error(
                   '[DemandNew] Error inesperado enviando notificación OBSERVATION:',
                   notificationError,
@@ -4573,9 +4554,10 @@ export class DemandNewComponent
           this.observationForm.reset(observationResult.resetValue);
 
           this.closeActionPanel();
-          this.loadEpisodeLongitudinal(episodeId);
+          if (this.selectedEpisodeId === episodeId) this.loadEpisodeLongitudinal(episodeId);
         },
         error: (error) => {
+          if (operationGeneration !== this.contextGeneration) return;
           console.error('[DemandNew] Error registrando observación:', error);
 
           if (error?.status === 403) {
@@ -4589,327 +4571,69 @@ export class DemandNewComponent
         },
       });
   }
-  private applyLongitudinalData(data: any): void {
-    const summarizedPostulant =
-      data?.postulant ?? data?.activeEpisode?.postulant ?? null;
-
-    const activeEpisode = data?.activeEpisode ?? null;
-    const stages = Array.isArray(data?.stages) ? data.stages : [];
-
-    const events = Array.isArray(data?.events) ? data.events : [];
-
-    /*
-     * Primero conserva la respuesta longitudinal completa.
-     * La persona resumida será reemplazada después por el GET completo.
-     */
-    this.longitudinal = data;
-    this.episodeEvents = events;
-
-    /*
-     * =====================================================
-     * EPISODIO ACTIVO
-     * =====================================================
-     */
-    if (activeEpisode) {
-this.createdEpisode = activeEpisode;
-      this.episodeSummary = activeEpisode;
-      this.episodeLoaded = true;
-
-      const activeEpisodeId = Number(
-        activeEpisode?.id ?? activeEpisode?.episodeId ?? 0,
-      );
-
-      if (activeEpisodeId > 0) {
-        this.loadEpisodeProgramContext(activeEpisodeId);
-      }
-
-      this.showCreateEpisodeForm = false;
-
-      this.episodeForm.patchValue(
-        {
-          episodeTypeId:
-            activeEpisode?.episodeType?.id ??
-            activeEpisode?.episodeTypeId ??
-            null,
-
-          originalRequestDate:
-            activeEpisode?.originalRequestDate ?? null,
-
-          initialProgramId:
-            activeEpisode?.initialProgram?.id ??
-            activeEpisode?.initialProgramId ??
-            null,
-
-          initialProgramName: activeEpisode?.initialProgram?.name ?? '',
-
-          currentProgramName:
-            activeEpisode?.currentProgram?.name ??
-            activeEpisode?.initialProgram?.name ??
-            '',
-
-          currentState:
-            activeEpisode?.state?.name ?? activeEpisode?.stateCode ?? '',
-
-          currentResult:
-            activeEpisode?.result?.name ?? activeEpisode?.resultCode ?? '',
-        },
-        {
-          emitEvent: false,
-        },
-      );
-
-      this.episodeForm.markAsPristine();
-      this.episodeForm.markAsUntouched();
-    } else {
-      this.createdEpisode = null;
-      this.episodeSummary = null;
-      this.episodeLoaded = false;
-      this.showCreateEpisodeForm = false;
-    }
-
-    /*
-     * =====================================================
-     * ETAPA ACTUAL
-     * =====================================================
-     */
-    const currentStage =
-      stages.find((stage: any) => stage?.current === true) ?? stages[0] ?? null;
-
-    if (currentStage) {
-      this.stageLoaded = true;
-
-      this.stageVisualState = `Etapa activa: ${
-        currentStage?.program?.name ?? 'Sin programa'
-      } · ${currentStage?.daysInStage ?? 0} días`;
-    } else {
-      this.stageLoaded = false;
-      this.stageVisualState = 'Sin etapa activa cargada';
-    }
-
-    /*
-     * =====================================================
-     * PERSONA
-     * =====================================================
-     *
-     * El longitudinal entrega una versión resumida del
-     * postulante. Por eso usamos su ID para consultar:
-     *
-     * GET /api/v1/postulants/{id}
-     *
-     * Esa consulta devuelve:
-     * - lastName
-     * - commune
-     * - sex
-     * - user completo o parcial
-     * - demás datos propios del postulante
-     */
-    const postulantId = Number(summarizedPostulant?.id);
-
-    if (!Number.isFinite(postulantId) || postulantId <= 0) {
-      console.warn(
-        '[DemandNew] El longitudinal no contiene un postulante válido:',
-        summarizedPostulant,
-      );
-
-      this.selectedPerson = null;
-      this.personLoaded = false;
-      this.personNotFound = false;
-      this.showCreatePersonForm = false;
-
-      return;
-    }
-
-    this.postulantService.getById(postulantId).subscribe({
-      next: (fullPostulant: Postulant) => {
-        console.log(
-          '[DemandNew] Postulante completo recuperado:',
-          fullPostulant,
-        );
-
-        /*
-         * Consolida por seguridad.
-         *
-         * El GET completo tiene prioridad, pero se conservan
-         * propiedades del resumen que eventualmente no vengan.
-         */
-        const completePerson: Postulant = {
-          ...summarizedPostulant,
-          ...fullPostulant,
-
-          id: fullPostulant?.id ?? summarizedPostulant?.id,
-
-          firstName:
-            fullPostulant?.firstName ?? summarizedPostulant?.firstName ?? null,
-
-          /*
-           * Segundo nombre del postulante.
-           * No confundir con user.secondName.
-           */
-          lastName:
-            fullPostulant?.lastName ?? summarizedPostulant?.lastName ?? null,
-
-          firstLastName:
-            fullPostulant?.firstLastName ??
-            summarizedPostulant?.firstLastName ??
-            null,
-
-          secondLastName:
-            fullPostulant?.secondLastName ??
-            summarizedPostulant?.secondLastName ??
-            null,
-
-          rut: fullPostulant?.rut ?? summarizedPostulant?.rut ?? null,
-
-          birthdate:
-            fullPostulant?.birthdate ?? summarizedPostulant?.birthdate ?? null,
-
-          email: fullPostulant?.email ?? summarizedPostulant?.email ?? null,
-
-          phone: fullPostulant?.phone ?? summarizedPostulant?.phone ?? null,
-
-          address:
-            fullPostulant?.address ?? summarizedPostulant?.address ?? null,
-
-          commune: fullPostulant?.commune ?? summarizedPostulant?.commune,
-
-          sex: fullPostulant?.sex ?? summarizedPostulant?.sex,
-
-          convPrev: fullPostulant?.convPrev ?? summarizedPostulant?.convPrev,
-
-          user: fullPostulant?.user ?? summarizedPostulant?.user,
-        };
-
-        this.selectedPerson = completePerson;
-        this.personLoaded = true;
-        this.personNotFound = false;
-        this.showCreatePersonForm = false;
-
-        /*
-         * Reemplaza el postulante resumido dentro de todos
-         * los niveles de la ficha longitudinal.
-         */
-        this.longitudinal = {
-          ...data,
-
-          postulant: completePerson,
-
-          activeEpisode: activeEpisode
-            ? {
-                ...activeEpisode,
-                postulant: completePerson,
-              }
-            : null,
-
-          episodes: Array.isArray(data?.episodes)
-            ? data.episodes.map((episode: any) => ({
-                ...episode,
-                postulant: completePerson,
-              }))
-            : [],
-        };
-
-        /*
-         * Actualiza también el resumen del episodio.
-         */
+  private applyLongitudinalData(data: any, selectedId: number | null = this.requestedEpisodeId): void {
+    const generation = this.contextGeneration;
+    this.personLongitudinal = data;
+    this.selectedContext = selectEpisodeContext(data, selectedId);
+    const context = this.selectedContext;
+    this.episodeContextError = context.issues.length ? context.issues.join(' ') + ' La gestión está bloqueada hasta verificar el contexto.' : null;
+    this.longitudinal = {...data, episode: context.episode, stages: context.stages,
+      events: context.events, references: context.references, currentStage: null, activeStage: null};
+    this.episodeSummary = context.episode;
+    this.createdEpisode = context.episode;
+    this.episodeEvents = context.events;
+    this.episodeLoaded = !!context.episode;
+    this.stageLoaded = context.stages.length > 0;
+    this.showCreateEpisodeForm = false;
+    const episode = context.episode;
+    this.episodeForm.reset({
+      episodeTypeId: episode?.episodeType?.id ?? episode?.episodeTypeId ?? null,
+      originalRequestDate: episode?.originalRequestDate ?? null,
+      initialProgramId: episode?.initialProgram?.id ?? episode?.initialProgramId ?? null,
+      initialProgramName: episode?.initialProgram?.name ?? '',
+      currentProgramName: episode?.currentProgram?.name ?? '',
+      currentState: episode?.state?.name ?? episode?.stateCode ?? '',
+      currentResult: episode?.result?.name ?? episode?.resultCode ?? '',
+      previousTreatmentNumber: episode?.previousTreatmentNumber ?? 0,
+      contactType: episode?.contactType?.id ?? episode?.contactTypeId ?? null,
+      sender: episode?.sender?.id ?? episode?.senderId ?? null,
+      diverter: episode?.diverter?.id ?? episode?.diverterId ?? null,
+      initialObservation: episode?.initialObservation ?? '', primarySubstanceId: null, secondarySubstances: [],
+    }, {emitEvent: false});
+    this.stageVisualState = episode ? (this.isHistoricalEpisode ? 'Etapa cerrada' : 'Etapa del episodio seleccionado') : 'Seleccione un episodio';
+    if (context.episodeId && episode) this.loadEpisodeProgramContext(context.episodeId);
+    const person = data?.postulant ?? episode?.postulant ?? null;
+    const personId = Number(person?.id);
+    if (!Number.isFinite(personId) || personId <= 0) return;
+    const samePerson = Number(this.selectedPerson?.id) === personId;
+    this.selectedPerson = {...(samePerson ? this.selectedPerson : {}), ...person};
+    this.personLoaded = true;
+    this.personNotFound = false;
+    this.showCreatePersonForm = false;
+    if (!this.showCreatePersonForm) this.patchPersonForm(this.selectedPerson!);
+    this.postulantService.getById(personId).subscribe({
+      next: (fullPerson) => {
+        if (generation !== this.contextGeneration || Number(fullPerson?.id) !== personId) return;
+        this.selectedPerson = {...this.selectedPerson, ...fullPerson};
+        this.longitudinal = {...this.longitudinal, postulant: this.selectedPerson};
+        this.personLongitudinal = {...this.personLongitudinal, postulant: this.selectedPerson};
         if (this.episodeSummary) {
-          this.episodeSummary = {
-            ...this.episodeSummary,
-            postulant: completePerson,
-          };
+          this.episodeSummary = {...this.episodeSummary, postulant: this.selectedPerson};
+          this.createdEpisode = this.episodeSummary;
         }
-
-        /*
-         * Usa el método único de carga del formulario.
-         * Allí secondName se obtiene desde person.lastName.
-         */
-        this.patchPersonForm(completePerson);
-        this.loadContactByPostulant(postulantId);
-
-        this.personForm.markAsPristine();
-        this.personForm.markAsUntouched();
-
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            this.initializeSummarySectionObserver();
-          });
-        });
+        if (!this.showCreatePersonForm) this.patchPersonForm(this.selectedPerson!);
+        this.loadContactByPostulant(personId);
       },
-
-      error: (error) => {
-        console.error(
-          '[DemandNew] No fue posible recuperar el postulante completo:',
-          error,
-        );
-
-        /*
-         * Respaldo: permite mostrar al menos los datos resumidos.
-         * No utiliza user.secondName para completar al postulante.
-         */
-        const fallbackPerson: Postulant = {
-          id: summarizedPostulant?.id,
-
-          firstName: summarizedPostulant?.firstName ?? null,
-
-          lastName: summarizedPostulant?.lastName ?? null,
-
-          firstLastName: summarizedPostulant?.firstLastName ?? null,
-
-          secondLastName: summarizedPostulant?.secondLastName ?? null,
-
-          rut: summarizedPostulant?.rut ?? null,
-
-          birthdate: summarizedPostulant?.birthdate ?? null,
-
-          email: summarizedPostulant?.email ?? null,
-
-          phone: summarizedPostulant?.phone ?? null,
-
-          address: summarizedPostulant?.address ?? null,
-
-          commune: summarizedPostulant?.commune,
-
-          sex: summarizedPostulant?.sex,
-
-          convPrev: summarizedPostulant?.convPrev,
-
-          user: summarizedPostulant?.user,
-        };
-
-        this.selectedPerson = fallbackPerson;
-        this.personLoaded = true;
-        this.personNotFound = false;
-        this.showCreatePersonForm = false;
-
-        this.longitudinal = {
-          ...data,
-
-          postulant: fallbackPerson,
-
-          activeEpisode: activeEpisode
-            ? {
-                ...activeEpisode,
-                postulant: fallbackPerson,
-              }
-            : null,
-
-          episodes: Array.isArray(data?.episodes)
-            ? data.episodes.map((episode: any) => ({
-                ...episode,
-                postulant: fallbackPerson,
-              }))
-            : [],
-        };
-
-        this.patchPersonForm(fallbackPerson);
-        this.loadContactByPostulant(postulantId);
-
-        this.searchError =
-          'La ficha longitudinal fue cargada, pero no fue posible recuperar todos los datos personales.';
+      error: () => {
+        if (generation !== this.contextGeneration) return;
+        this.loadContactByPostulant(personId);
+        this.searchError = 'La ficha fue cargada, pero no fue posible recuperar todos los datos personales.';
       },
     });
   }
 
   private loadEpisodeProgramContext(episodeId: number): void {
+    const generation = this.contextGeneration;
     const programId = Number(this.activeProgramId);
 
     this.currentProgramContext = null;
@@ -4930,6 +4654,7 @@ this.createdEpisode = activeEpisode;
       })
       .subscribe({
         next: (contexts) => {
+          if (generation !== this.contextGeneration) return;
           this.currentProgramContext =
             (contexts ?? []).find(
               (context) => Number(context.episodeId) === Number(episodeId),
@@ -4941,6 +4666,7 @@ this.createdEpisode = activeEpisode;
           );
         },
         error: (error) => {
+          if (generation !== this.contextGeneration) return;
           this.currentProgramContext = null;
 
           console.error(
@@ -4952,387 +4678,44 @@ this.createdEpisode = activeEpisode;
   }
 
   loadEpisodeLongitudinal(episodeId: number): void {
-    console.log('[DemandNew] loadEpisodeLongitudinal ID:', episodeId);
-    if (!episodeId) {
-      return;
-    }
-
-    this.loadEpisodeProgramContext(episodeId);
-
+    if (!Number.isSafeInteger(episodeId) || episodeId <= 0) return;
+    const generation = ++this.contextGeneration;
+    this.requestedEpisodeId = episodeId;
+    this.clearSelectedEpisode();
     this.isLoadingLongitudinal = true;
     this.longitudinalError = null;
-    this.episodeSubstances = [];
-    this.episodeSubstancesLoaded = false;
-
-    this.demandEpisodeService
-      .getLongitudinalByEpisodeId(episodeId)
-      .pipe(
-        finalize(() => {
-          this.isLoadingLongitudinal = false;
-        }),
-      )
+    this.demandEpisodeService.getLongitudinalByEpisodeId(episodeId)
+      .pipe(finalize(() => { if (generation === this.contextGeneration) this.isLoadingLongitudinal = false; }))
       .subscribe({
         next: (response) => {
-          console.log('[DemandNew] Longitudinal episodio:', response);
-
-          const events = response?.events ?? [];
-
-          /*
-           * Diagnóstico de los eventos recibidos.
-           */
-          console.table(
-            events.map((event: any) => ({
-              id: event?.id,
-
-              eventTypeCode:
-                event?.eventType?.code ??
-                event?.eventTypeCode ??
-                event?.typeCode ??
-                event?.code ??
-                '',
-
-              eventTypeName:
-                event?.eventType?.name ?? event?.eventTypeName ?? '',
-
-              eventDate: event?.eventDate,
-
-              eventTime: event?.eventTime,
-
-              relatedEventId:
-                event?.relatedEventId ??
-                event?.relatedEvent?.id ??
-                event?.citationEventId ??
-                event?.citation?.id ??
-                event?.parentEventId ??
-                '',
-
-              attendanceStatusId:
-                event?.attendanceStatus?.id ?? event?.attendanceStatusId ?? '',
-
-              attendanceStatusName:
-                event?.attendanceStatus?.name ??
-                event?.attendanceStatusName ??
-                '',
-
-              citationTypeCode:
-                event?.citationType?.code ??
-                event?.citationTypeCode ??
-                event?.citation?.type?.code ??
-                '',
-
-              programProfessionalId:
-                event?.programProfessionalId ??
-                event?.programProfessional?.id ??
-                '',
-
-              programProfessionalName:
-                event?.programProfessionalName ??
-                event?.programProfessional?.name ??
-                '',
-
-              professionName:
-                event?.professionName ??
-                event?.profession?.name ??
-                '',
-
-              comment: event?.comment,
-            })),
-          );
-
-          /*
-           * Obtiene solamente los eventos de asistencia.
-           */
-          const attendanceEvents = events.filter((event: any) => {
-            const code = String(
-              event?.eventType?.code ??
-                event?.eventTypeCode ??
-                event?.typeCode ??
-                event?.code ??
-                '',
-            )
-              .toUpperCase()
-              .normalize('NFD')
-              .replace(/[\u0300-\u036f]/g, '');
-
-            return code === 'ASISTENCIA';
-          });
-
-          console.log('[DemandNew] Eventos ASISTENCIA:', attendanceEvents);
-
-          /*
-           * El longitudinal devuelve un postulante resumido.
-           *
-           * Prioridad:
-           * 1. response.postulant
-           * 2. response.activeEpisode.postulant
-           */
-          const responsePostulant = (response?.postulant ??
-            response?.episode?.postulant ??
-            response?.activeEpisode?.postulant ??
-            null) as Partial<Postulant> | null;
-
-          /*
-           * Consolida el postulante recibido con selectedPerson.
-           *
-           * Esto impide que una respuesta longitudinal resumida
-           * elimine lastName, commune, sex, convPrev o user.
-           */
-          let mergedPostulant: Postulant | null = null;
-
-          if (responsePostulant) {
-            mergedPostulant = {
-              ...(this.selectedPerson ?? {}),
-              ...responsePostulant,
-
-              id: responsePostulant.id ?? this.selectedPerson?.id,
-
-              user: responsePostulant.user ?? this.selectedPerson?.user,
-
-              commune:
-                responsePostulant.commune ?? this.selectedPerson?.commune,
-
-              sex: responsePostulant.sex ?? this.selectedPerson?.sex,
-
-              convPrev:
-                responsePostulant.convPrev ?? this.selectedPerson?.convPrev,
-
-              firstName:
-                responsePostulant.firstName ?? this.selectedPerson?.firstName,
-
-              /*
-               * El backend utiliza lastName como segundo nombre.
-               * El longitudinal actualmente puede no devolverlo.
-               */
-              lastName:
-                responsePostulant.lastName ?? this.selectedPerson?.lastName,
-
-              firstLastName:
-                responsePostulant.firstLastName ??
-                this.selectedPerson?.firstLastName,
-
-              secondLastName:
-                responsePostulant.secondLastName ??
-                this.selectedPerson?.secondLastName,
-
-              rut: responsePostulant.rut ?? this.selectedPerson?.rut,
-
-              birthdate:
-                responsePostulant.birthdate ?? this.selectedPerson?.birthdate,
-
-              email: responsePostulant.email ?? this.selectedPerson?.email,
-
-              phone: responsePostulant.phone ?? this.selectedPerson?.phone,
-
-              address:
-                responsePostulant.address ?? this.selectedPerson?.address,
-            };
-          } else if (this.selectedPerson) {
-            mergedPostulant = {
-              ...this.selectedPerson,
-            };
+          if (generation !== this.contextGeneration) return;
+          this.applyLongitudinalData(response, episodeId);
+          if (!this.selectedEpisodeId) {
+            this.longitudinalError = 'La respuesta no contiene el episodio solicitado. No se seleccionó otro episodio.';
+            return;
           }
-
-          /*
-           * Mantiene sincronizada la persona seleccionada.
-           */
-          if (mergedPostulant) {
-            this.selectedPerson = mergedPostulant;
-            this.personLoaded = true;
-            this.personNotFound = false;
-          }
-
-          /*
-           * El endpoint por ID puede devolver un episodio cerrado
-           * en response.episode, mientras activeEpisode queda vacío.
-           */
-          const responseEpisodes = Array.isArray(response?.episodes)
-            ? response.episodes
-            : [];
-
-          const requestedEpisode = this.requestedEpisodeId
-            ? responseEpisodes.find(
-                (episode: any) =>
-                  Number(episode?.id ?? episode?.episodeId ?? 0) ===
-                  this.requestedEpisodeId,
-              )
-            : null;
-
-          const rawResponseEpisode =
-            response?.episode ??
-            requestedEpisode ??
-            response?.activeEpisode ??
-            null;
-
-          const responseEpisode = rawResponseEpisode
-            ? {
-                ...rawResponseEpisode,
-                id: rawResponseEpisode?.id ?? rawResponseEpisode?.episodeId,
-              }
-            : null;
-
-          /*
-           * Mantiene toda la respuesta longitudinal,
-           * pero reemplaza sus postulantes resumidos por
-           * el objeto consolidado.
-           */
-          this.longitudinal = {
-            ...response,
-
-            postulant: mergedPostulant ?? response?.postulant,
-
-            episode: responseEpisode
-              ? {
-                  ...responseEpisode,
-
-                  postulant: mergedPostulant ?? responseEpisode.postulant,
-                }
-              : responseEpisode,
-
-            activeEpisode: response?.activeEpisode
-              ? {
-                  ...response.activeEpisode,
-
-                  postulant:
-                    mergedPostulant ?? response.activeEpisode.postulant,
-                }
-              : response?.activeEpisode,
-
-            episodes: Array.isArray(response?.episodes)
-              ? response.episodes.map((episode: any) => ({
-                  ...episode,
-
-                  postulant: mergedPostulant ?? episode?.postulant,
-                }))
-              : response?.episodes,
-          };
-
-          this.episodeEvents = events;
-
-          /*
-           * Mantiene actualizado el resumen del episodio mostrado.
-           * Puede corresponder a una demanda activa o cerrada.
-           */
-
-          if (responseEpisode?.id) {
-            this.episodeSummary = {
-              ...this.episodeSummary,
-              ...responseEpisode,
-
-              postulant: mergedPostulant ?? responseEpisode.postulant,
-            };
-
-
-            this.episodeLoaded = true;
-            this.showCreateEpisodeForm = false;
-
-            const responseStages = Array.isArray(response?.stages)
-              ? response.stages
-              : [];
-
-            const currentStageId = Number(responseEpisode?.currentStageId ?? 0);
-
-            const displayedStage =
-              responseStages.find(
-                (stage: any) => Number(stage?.id) === currentStageId,
-              ) ??
-              responseStages.find(
-                (stage: any) =>
-                  stage?.current === true ||
-                  stage?.isCurrent === true ||
-                  stage?.active === true,
-              ) ??
-              responseStages[responseStages.length - 1] ??
-              null;
-
-            this.stageLoaded = Boolean(displayedStage || currentStageId > 0);
-
-            this.stageVisualState = displayedStage
-              ? `${
-                  this.isHistoricalEpisode ? 'Etapa cerrada' : 'Etapa activa'
-                }: ${displayedStage?.program?.name ?? 'Sin programa'} · ${
-                  displayedStage?.daysInStage ?? 0
-                } días`
-              : this.isHistoricalEpisode
-                ? 'Etapa cerrada'
-                : 'Sin etapa activa cargada';
-          }
-
-          /*
-           * Actualiza el formulario solamente cuando existe
-           * una persona consolidada.
-           *
-           * No se ejecuta mientras el usuario está editando,
-           * para evitar sobrescribir cambios todavía no guardados.
-           */
-          if (mergedPostulant && !this.showCreatePersonForm) {
-            this.patchPersonForm(mergedPostulant);
-
-            this.personForm.markAsPristine();
-            this.personForm.markAsUntouched();
-          }
-
           this.demandService.getEpisodeSubstances(episodeId).subscribe({
             next: (substances) => {
-              this.episodeSubstances = Array.isArray(substances)
-                ? substances
-                : [];
+              if (generation !== this.contextGeneration) return;
+              this.episodeSubstances = Array.isArray(substances) ? substances : [];
               this.episodeSubstancesLoaded = true;
-
-              console.log(
-                '[DemandNew] Sustancias episodio:',
-                this.episodeSubstances,
-              );
             },
-            error: (error) => {
-              console.error(
-                '[DemandNew] Error cargando sustancias del episodio:',
-                error,
-              );
-
+            error: () => {
+              if (generation !== this.contextGeneration) return;
               this.episodeSubstances = [];
               this.episodeSubstancesLoaded = false;
             },
           });
-
-          /*
-           * Reinicializa el observador una vez que Angular
-           * haya renderizado las secciones longitudinales.
-           */
           requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              this.initializeSummarySectionObserver();
-            });
+            if (generation === this.contextGeneration) this.initializeSummarySectionObserver();
           });
         },
-
         error: (error) => {
-          console.error('[DemandNew] Error cargando longitudinal:', error);
-
-          if (error?.status === 403) {
-            this.longitudinalError =
-              'No tiene permisos para consultar el historial del episodio.';
-            return;
-          }
-
-          if (error?.status === 404) {
-            this.longitudinalError =
-              'No se encontró el historial longitudinal del episodio.';
-            return;
-          }
-
-          if (
-            error?.status === 0 ||
-            error?.status === 502 ||
-            error?.status === 503 ||
-            error?.status === 504
-          ) {
-            this.longitudinalError =
-              'El servicio de Gestión de Demanda no respondió correctamente.';
-            return;
-          }
-
-          this.longitudinalError =
-            'No fue posible cargar el historial del episodio.';
+          if (generation !== this.contextGeneration) return;
+          this.longitudinalError = error?.status === 403
+            ? 'No tiene permisos para consultar el historial del episodio.'
+            : error?.status === 404 ? 'No se encontró el historial del episodio solicitado.'
+            : 'No fue posible cargar el episodio. No se reutilizaron datos de otro episodio.';
         },
       });
   }
@@ -5426,17 +4809,29 @@ this.createdEpisode = activeEpisode;
       null;
 
     const observations = this.observationEvents
-      .map((event: any) =>
-        String(
-          event?.comment ??
-          event?.observation ??
-          event?.comments ??
-          event?.description ??
-          '',
-        ).trim(),
-      )
+      .map((event: any) => {
+        const comment = String(
+          event?.comment ?? event?.comments ?? '',
+        ).trim();
+
+        const additional = String(
+          event?.observation ?? event?.description ?? '',
+        ).trim();
+
+        const parts: string[] = [];
+
+        if (comment) {
+          parts.push(`Comentario: ${comment}`);
+        }
+
+        if (additional && additional !== comment) {
+          parts.push(`Observación adicional: ${additional}`);
+        }
+
+        return parts.join('\n');
+      })
       .filter((value: string) => value.length > 0)
-      .join(' · ');
+      .join('\n\n');
 
 
 
@@ -5525,6 +4920,16 @@ this.createdEpisode = activeEpisode;
         cesfam: '',
       },
       demand: {
+        episodeCode: this.selectedEpisodeId
+          ? `DEM-${String(this.selectedEpisodeId).padStart(6, '0')}`
+          : 'No identificado',
+        episodeType: this.currentEpisodeTypeName,
+        episodeStatus: this.isHistoricalEpisode ? 'Cerrado' : 'En trámite',
+        programName:
+          this.workingStage?.program?.name ??
+          this.episodeSummary?.currentProgram?.name ??
+          this.episodeSummary?.initialProgram?.name ??
+          'No informado',
         primarySubstance:
           demand.primarySubstance ===
           'Pendiente de recuperación desde API'
@@ -5977,6 +5382,11 @@ this.createdEpisode = activeEpisode;
   }
 
   printCitation(citation: any): void {
+    if (!this.selectedEpisodeId || !this.episodeEvents.some(event => Number(event.id) === Number(citation?.id)) ||
+        Number(citation?.episodeId) !== this.selectedEpisodeId) {
+      this.episodeContextError = 'La citación no corresponde al episodio consultado.';
+      return;
+    }
     const person: any = this.selectedPerson ?? {};
     const personFormValue = this.personForm.getRawValue();
 
@@ -5995,9 +5405,8 @@ this.createdEpisode = activeEpisode;
       'Persona no informada';
 
     const episode =
-      this.longitudinal?.activeEpisode ??
-      this.episodeSummary ??
       this.longitudinal?.episode ??
+      this.episodeSummary ??
       this.createdEpisode ??
       null;
 
@@ -6142,6 +5551,7 @@ this.createdEpisode = activeEpisode;
   }
 
   saveCitation(): void {
+    const operationGeneration = this.contextGeneration;
     if (!this.ensureCanManageCurrentEpisode()) {
       return;
     }
@@ -6215,6 +5625,8 @@ this.createdEpisode = activeEpisode;
     this.citationError = null;
     this.citationSuccess = null;
 
+    if (operationGeneration !== this.contextGeneration || !this.ensureOperationContext(episodeId, payload)) { this.isSavingCitation = false; return; }
+
     this.demandEpisodeService
       .createCitation(episodeId, payload)
       .pipe(
@@ -6224,6 +5636,7 @@ this.createdEpisode = activeEpisode;
       )
       .subscribe({
         next: (event: any) => {
+          if (operationGeneration !== this.contextGeneration) return;
           const citationResult = handleCitationSuccess(event);
 
           this.citationSuccess = citationResult.successMessage;
@@ -6258,9 +5671,8 @@ this.createdEpisode = activeEpisode;
             : 'RUN no informado';
 
           const episode =
-            this.longitudinal?.activeEpisode ??
-            this.episodeSummary ??
             this.longitudinal?.episode ??
+            this.episodeSummary ??
             this.createdEpisode ??
             null;
 
@@ -6377,12 +5789,14 @@ this.createdEpisode = activeEpisode;
             )
             .subscribe({
               next: (notificationResult) => {
+          if (operationGeneration !== this.contextGeneration) return;
                 console.log(
                   '[DemandNew] Notificación CITATION procesada:',
                   notificationResult,
                 );
               },
               error: (notificationError) => {
+          if (operationGeneration !== this.contextGeneration) return;
                 console.error(
                   '[DemandNew] Error inesperado enviando notificación CITATION:',
                   notificationError,
@@ -6393,10 +5807,11 @@ this.createdEpisode = activeEpisode;
           this.citationForm.reset(citationResult.resetValue);
 
           this.closeActionPanel();
-          this.loadEpisodeLongitudinal(episodeId);
+          if (this.selectedEpisodeId === episodeId) this.loadEpisodeLongitudinal(episodeId);
         },
 
         error: (error: HttpErrorResponse) => {
+          if (operationGeneration !== this.contextGeneration) return;
           console.error('[DemandNew] Error registrando citación:', error);
 
           if (error.status === 403) {
@@ -6419,6 +5834,7 @@ this.createdEpisode = activeEpisode;
   }
 
   saveAttendance(): void {
+    const operationGeneration = this.contextGeneration;
     if (!this.ensureCanManageCurrentEpisode()) {
       return;
     }
@@ -6480,6 +5896,8 @@ this.createdEpisode = activeEpisode;
     this.attendanceError = null;
     this.attendanceSuccess = null;
 
+    if (operationGeneration !== this.contextGeneration || !this.ensureOperationContext(validEpisodeId, payload)) { this.isSavingAttendance = false; return; }
+
     this.demandEpisodeService
       .createEvent(validEpisodeId, payload)
       .pipe(
@@ -6489,6 +5907,7 @@ this.createdEpisode = activeEpisode;
       )
       .subscribe({
         next: (event: any) => {
+          if (operationGeneration !== this.contextGeneration) return;
           logAttendanceResponse(event);
           const attendanceResult = handleAttendanceSuccess({
             event,
@@ -6547,9 +5966,8 @@ this.createdEpisode = activeEpisode;
             : 'RUN no informado';
 
           const episode =
-            this.longitudinal?.activeEpisode ??
-            this.episodeSummary ??
             this.longitudinal?.episode ??
+            this.episodeSummary ??
             this.createdEpisode ??
             null;
 
@@ -6684,12 +6102,14 @@ this.createdEpisode = activeEpisode;
             )
             .subscribe({
               next: (notificationResult) => {
+          if (operationGeneration !== this.contextGeneration) return;
                 console.log(
                   '[DemandNew] Notificación ATTENDANCE procesada:',
                   notificationResult,
                 );
               },
               error: (notificationError) => {
+          if (operationGeneration !== this.contextGeneration) return;
                 console.error(
                   '[DemandNew] Error inesperado enviando notificación ATTENDANCE:',
                   notificationError,
@@ -6699,6 +6119,7 @@ this.createdEpisode = activeEpisode;
         },
 
         error: (error: any) => {
+          if (operationGeneration !== this.contextGeneration) return;
           console.error('[DemandNew] Error registrando asistencia:', error);
 
           this.attendanceError = getAttendanceErrorMessage(error);
@@ -6788,7 +6209,7 @@ this.createdEpisode = activeEpisode;
     const episode =
       this.episodeSummary ??
       this.createdEpisode ??
-      this.longitudinal?.activeEpisode ??
+      this.longitudinal?.episode ??
       {};
 
     const operationalStage = this.workingStage ?? this.currentEpisodeStage;
@@ -6924,10 +6345,9 @@ this.createdEpisode = activeEpisode;
       episode?.currentProgram?.name ?? 'el programa responsable actual';
 
     const nextActionDetail = stageHistorical
-      ? (
-          `La etapa de ${program} se encuentra cerrada. ` +
-          `El episodio continúa actualmente en ${currentProgramName}.`
-        )
+      ? this.isHistoricalEpisode
+        ? `La etapa de ${program} y el episodio consultado se encuentran cerrados. Su información se conserva para consulta histórica.`
+        : `La etapa de ${program} se encuentra cerrada. El episodio continúa actualmente en ${currentProgramName}.`
       : referenceClosurePending
         ? 'La referencia ya fue registrada. Falta cerrar formalmente esta etapa del programa de origen.'
         : workflowNextAction.detail;
@@ -6983,7 +6403,7 @@ this.createdEpisode = activeEpisode;
     const episode =
       this.episodeSummary ??
       this.createdEpisode ??
-      this.longitudinal?.activeEpisode ??
+      this.longitudinal?.episode ??
       {};
 
     const raw = this.episodeForm.getRawValue();
@@ -7103,7 +6523,7 @@ this.createdEpisode = activeEpisode;
     const episode =
       this.episodeSummary ??
       this.createdEpisode ??
-      this.longitudinal?.activeEpisode ??
+      this.longitudinal?.episode ??
       {};
 
     const operationalStage = this.workingStage ?? this.currentEpisodeStage;
@@ -7324,14 +6744,14 @@ this.createdEpisode = activeEpisode;
     return (
       this.episodeSummary?.originalRequestDate ??
       this.createdEpisode?.originalRequestDate ??
-      this.longitudinal?.activeEpisode?.originalRequestDate ??
+      this.longitudinal?.episode?.originalRequestDate ??
       null
     );
   }
 
   get episodeOriginRegisteredByName(): string | null {
     const episode =
-      this.longitudinal?.activeEpisode ??
+      this.longitudinal?.episode ??
       this.episodeSummary ??
       this.createdEpisode ??
       null;
@@ -7345,7 +6765,7 @@ this.createdEpisode = activeEpisode;
 
   get episodeOriginCreatedAt(): string | null {
     const episode =
-      this.longitudinal?.activeEpisode ??
+      this.longitudinal?.episode ??
       this.episodeSummary ??
       this.createdEpisode ??
       null;
@@ -7386,6 +6806,7 @@ this.createdEpisode = activeEpisode;
   }
 
   get feedbackEvents(): any[] {
+    if (!this.workingStageId) return [];
     return filterFeedbackEvents(
       this.episodeEvents ?? [],
       this.workingStageId,
@@ -7419,8 +6840,8 @@ this.createdEpisode = activeEpisode;
       this.episodeSummary?.closureDate ??
       this.createdEpisode?.closedAt ??
       this.createdEpisode?.closureDate ??
-      this.longitudinal?.activeEpisode?.closedAt ??
-      this.longitudinal?.activeEpisode?.closureDate ??
+      this.longitudinal?.episode?.closedAt ??
+      this.longitudinal?.episode?.closureDate ??
       null
     );
   }
@@ -7462,7 +6883,7 @@ this.createdEpisode = activeEpisode;
     const episode =
       this.episodeSummary ??
       this.createdEpisode ??
-      this.longitudinal?.activeEpisode ??
+      this.longitudinal?.episode ??
       {};
 
     const stageEntryContext = resolveStageEntryContext(
@@ -7902,6 +7323,7 @@ this.createdEpisode = activeEpisode;
     });
   }
   get citationEvents(): any[] {
+    if (!this.workingStageId) return [];
     return filterEventsByStage(
       this.allCitationEvents,
       this.workingStageId,
@@ -7984,43 +7406,10 @@ this.createdEpisode = activeEpisode;
     return !!getCurrentEpisodeId(this.createdEpisode, this.episodeSummary);
   }
 
-  get currentDocumentEpisodeId(): number | null {
-    const episodeId =
-      getCurrentEpisodeId(this.createdEpisode, this.episodeSummary) ??
-      this.longitudinal?.activeEpisode?.id ??
-      this.longitudinal?.episode?.id ??
-      null;
-
-    const numericEpisodeId = Number(episodeId);
-
-    return Number.isFinite(numericEpisodeId) && numericEpisodeId > 0
-      ? numericEpisodeId
-      : null;
-  }
+  get currentDocumentEpisodeId(): number | null { return this.selectedEpisodeId; }
 
   get currentDocumentStageId(): number | null {
-    const stages = Array.isArray(this.longitudinal?.stages)
-      ? this.longitudinal.stages
-      : [];
-
-    const currentStage = stages.find(
-      (stage: any) => stage?.isCurrent === true || stage?.active === true,
-    );
-
-    const stageId =
-      this.createdEpisode?.currentStageId ??
-      this.episodeSummary?.currentStageId ??
-      this.longitudinal?.activeEpisode?.currentStageId ??
-      this.longitudinal?.currentStage?.id ??
-      this.longitudinal?.activeStage?.id ??
-      currentStage?.id ??
-      null;
-
-    const numericStageId = Number(stageId);
-
-    return Number.isFinite(numericStageId) && numericStageId > 0
-      ? numericStageId
-      : null;
+    return this.workingStageId ?? this.resolvedCurrentStageId;
   }
 
   getTrajectoryStageEvents(stageId: number): any[] {
@@ -8128,13 +7517,13 @@ this.createdEpisode = activeEpisode;
       this.episodeEvents ?? [],
       this.episodeSummary?.originalRequestDate ??
         this.createdEpisode?.originalRequestDate ??
-        this.longitudinal?.activeEpisode?.originalRequestDate ??
+        this.longitudinal?.episode?.originalRequestDate ??
         this.episodeOriginDate,
     );
   }
   get currentEpisodeTypeName(): string {
     const episode =
-      this.longitudinal?.activeEpisode ??
+      this.longitudinal?.episode ??
       this.episodeSummary ??
       this.createdEpisode ??
       null;
@@ -8227,9 +7616,7 @@ this.createdEpisode = activeEpisode;
   }
 
   get availableEpisodes(): any[] {
-    const episodes = Array.isArray(this.longitudinal?.episodes)
-      ? [...this.longitudinal.episodes]
-      : [];
+    const episodes = this.personLongitudinal ? longitudinalEpisodes(this.personLongitudinal) : [];
 
     return episodes.sort((a: any, b: any) => {
       const dateA = String(
@@ -8249,12 +7636,17 @@ this.createdEpisode = activeEpisode;
       return dateB.localeCompare(dateA);
     });
   }
+  get openAvailableEpisode(): any | null {
+    return this.availableEpisodes.find(
+      (episode) => hasOpenEpisode([episode])
+    ) ?? null;
+  }
   get hasOpenAvailableEpisode(): boolean {
     return hasOpenEpisode(this.availableEpisodes);
   }
 
   get hasMultipleAvailableEpisodes(): boolean {
-    return !this.hasCurrentEpisode && this.availableEpisodes.length > 1;
+    return this.availableEpisodes.length > 1;
   }
 
   trackAvailableEpisode(index: number, episode: any): number | string {
@@ -8262,12 +7654,19 @@ this.createdEpisode = activeEpisode;
   }
 
   selectAvailableEpisode(episode: any): void {
+    if (this.isSavingCitation || this.isSavingAttendance || this.isSavingInterview || this.isSavingObservation || this.isSavingClosure || this.isSavingReference || this.isSavingEpisode || this.isSavingPerson) {
+      this.searchError = 'Espere a que termine la operación antes de cambiar de episodio.';
+      return;
+    }
     const episodeId = Number(episode?.id ?? episode?.episodeId ?? 0);
 
     if (!Number.isFinite(episodeId) || episodeId <= 0) {
       return;
     }
 
+    if (this.requestedEpisodeId !== episodeId) {
+      this.requestedMode = null;
+    }
     this.requestedEpisodeId = episodeId;
     this.loadEpisodeLongitudinal(episodeId);
   }
@@ -8276,7 +7675,7 @@ this.createdEpisode = activeEpisode;
     return (
       !!this.createdEpisode ||
       !!this.episodeSummary ||
-      !!this.longitudinal?.activeEpisode ||
+      !!this.longitudinal?.episode ||
       !!this.longitudinal?.episode
     );
   }
@@ -8286,7 +7685,7 @@ this.createdEpisode = activeEpisode;
       this.episodeSummary ??
       this.longitudinal?.episode ??
       this.createdEpisode ??
-      this.longitudinal?.activeEpisode ??
+      this.longitudinal?.episode ??
       null;
 
     const stateCode = String(
@@ -8303,7 +7702,26 @@ this.createdEpisode = activeEpisode;
     );
   }
 
+  get isConsultationRole(): boolean {
+    const role = String(this.tokenService.getActiveRole() ?? '')
+      .trim()
+      .toUpperCase();
+
+    return role === 'ADMIN' || role === 'SUPERVISOR' || role === 'PROFESIONAL';
+  }
+  get isEpisodeViewMode(): boolean {
+    return this.requestedMode === 'view';
+  }
   get canManageCurrentEpisode(): boolean {
+    const role = String(this.tokenService.getActiveRole() ?? '').trim().toUpperCase();
+    if (role !== 'ADMINISTRATIVO') return false;
+    if (this.isLoadingLongitudinal || this.longitudinalError || this.episodeContextError) return false;
+    if (this.hasCurrentEpisode && (
+      this.selectedEpisodeId !== episodeIdentity(this.episodeSummary) ||
+      this.selectedEpisodeId !== episodeIdentity(this.createdEpisode) ||
+      Number(this.currentProgramContext?.episodeId) !== this.selectedEpisodeId ||
+      Number(this.currentProgramContext?.stageId) !== this.workingStageId
+    )) return false;
     if (
       this.requestedMode === 'view' ||
       this.isHistoricalEpisode
@@ -8334,7 +7752,7 @@ this.createdEpisode = activeEpisode;
     }
 
     this.activeActionPanel = null;
-
+    this.episodeContextError = this.episodeContextError ?? 'El episodio no está disponible para gestión en este contexto. Revise la selección y el modo de consulta.';
     return false;
   }
 }

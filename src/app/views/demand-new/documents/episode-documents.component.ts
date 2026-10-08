@@ -6,6 +6,7 @@ import {
   Input,
   OnChanges,
   OnInit,
+  OnDestroy,
   Output,
   SimpleChanges,
   inject,
@@ -46,7 +47,7 @@ import { ConfirmDialogComponent } from '../../../shared/confirm-dialog/confirm-d
   templateUrl: './episode-documents.component.html',
   styleUrls: ['./episode-documents.component.scss'],
 })
-export class EpisodeDocumentsComponent implements OnInit, OnChanges {
+export class EpisodeDocumentsComponent implements OnInit, OnChanges, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly documentService = inject(DemandDocumentService);
   private readonly dialog = inject(MatDialog);
@@ -66,6 +67,17 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
 
   selectedFile: File | null = null;
 
+  private requestGeneration = 0;
+  ngOnDestroy(): void { ++this.requestGeneration; }
+
+  private acceptsDocument(item: EpisodeDocumentDTO, write = false): boolean {
+    const valid = !this.loading && Number(item.episodeId) === this.episodeId &&
+      this.documents.some(document => document.id === item.id) &&
+      (!write || (this.canManage && (!item.stageId || item.stageId === this.stageId)));
+    if (!valid) this.errorMessage = 'El documento no corresponde al contexto habilitado. Recargue el episodio antes de continuar.';
+    return valid;
+  }
+
   loading = false;
   loadingTypes = false;
   uploading = false;
@@ -84,7 +96,10 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     const episodeChange = changes['episodeId'];
 
-    if (episodeChange && !episodeChange.firstChange) {
+    if ((episodeChange && !episodeChange.firstChange) || (changes['stageId'] && !changes['stageId'].firstChange)) {
+      this.resetUploadForm();
+      this.showUploadForm = false;
+      this.clearMessages();
       this.loadDocuments();
     }
   }
@@ -100,7 +115,7 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
   get canUpload(): boolean {
     return (
       this.canManage &&
-      !!this.episodeId &&
+      !!this.episodeId && !!this.stageId && !this.loading &&
       this.hasSelectedDocumentType &&
       this.hasSelectedFile &&
       !this.uploading
@@ -131,6 +146,7 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
 
   uploadDocument(): void {
     if (
+      !this.canManage || this.loading || !this.stageId ||
       !this.episodeId ||
       !this.selectedFile ||
       this.uploadForm.invalid ||
@@ -145,6 +161,7 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
       return;
     }
 
+    const generation = this.requestGeneration;
     const documentTypeCode = this.uploadForm.controls.documentTypeCode.value;
 
     this.uploading = true;
@@ -154,9 +171,10 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
       .uploadDocument(this.episodeId, this.selectedFile, documentTypeCode, {
         stageId: this.stageId,
       })
-      .pipe(finalize(() => (this.uploading = false)))
+      .pipe(finalize(() => { if (generation === this.requestGeneration) this.uploading = false; }))
       .subscribe({
         next: () => {
+          if (generation !== this.requestGeneration) return;
           this.successMessage = 'El documento fue cargado correctamente.';
 
           this.showUploadForm = false;
@@ -165,6 +183,7 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
           this.documentsChanged.emit();
         },
         error: (error) => {
+          if (generation !== this.requestGeneration) return;
           console.error('[EpisodeDocuments] Error subiendo documento:', error);
 
           this.errorMessage = this.getActionErrorMessage(
@@ -176,6 +195,8 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
   }
 
   openDocument(item: EpisodeDocumentDTO): void {
+    if (!this.acceptsDocument(item, false)) return;
+    const generation = this.requestGeneration;
     if (this.actionDocumentId !== null) {
       return;
     }
@@ -187,11 +208,12 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
       .downloadDocument(item.id, 'inline')
       .pipe(
         finalize(() => {
-          this.actionDocumentId = null;
+          if (generation === this.requestGeneration) this.actionDocumentId = null;
         }),
       )
       .subscribe({
         next: (response) => {
+          if (generation !== this.requestGeneration) return;
           const blob = response.body;
 
           if (!blob) {
@@ -213,6 +235,7 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
           }, 60_000);
         },
         error: (error) => {
+          if (generation !== this.requestGeneration) return;
           console.error(
             '[EpisodeDocuments] Error visualizando documento:',
             error,
@@ -227,6 +250,8 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
   }
 
   downloadDocument(item: EpisodeDocumentDTO): void {
+    if (!this.acceptsDocument(item, false)) return;
+    const generation = this.requestGeneration;
     if (this.actionDocumentId !== null) {
       return;
     }
@@ -238,11 +263,12 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
       .downloadDocument(item.id, 'attachment')
       .pipe(
         finalize(() => {
-          this.actionDocumentId = null;
+          if (generation === this.requestGeneration) this.actionDocumentId = null;
         }),
       )
       .subscribe({
         next: (response) => {
+          if (generation !== this.requestGeneration) return;
           const blob = response.body;
 
           if (!blob) {
@@ -263,6 +289,7 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
           });
         },
         error: (error) => {
+          if (generation !== this.requestGeneration) return;
           console.error(
             '[EpisodeDocuments] Error descargando documento:',
             error,
@@ -277,6 +304,8 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
   }
 
   replaceDocument(item: EpisodeDocumentDTO, event: Event): void {
+    if (!this.acceptsDocument(item, true)) return;
+    const generation = this.requestGeneration;
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] ?? null;
 
@@ -306,7 +335,7 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
     });
 
     ref.afterClosed().subscribe((confirmed: boolean) => {
-      if (!confirmed) {
+      if (!confirmed || generation !== this.requestGeneration || !this.acceptsDocument(item, true)) {
         return;
       }
 
@@ -321,17 +350,19 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
         })
         .pipe(
           finalize(() => {
-            this.actionDocumentId = null;
+            if (generation === this.requestGeneration) this.actionDocumentId = null;
           }),
         )
         .subscribe({
           next: () => {
+          if (generation !== this.requestGeneration) return;
             this.successMessage = 'El documento fue reemplazado correctamente.';
 
             this.loadDocuments();
             this.documentsChanged.emit();
           },
           error: (error) => {
+          if (generation !== this.requestGeneration) return;
             console.error(
               '[EpisodeDocuments] Error reemplazando documento:',
               error,
@@ -347,6 +378,8 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
   }
 
   deleteDocument(item: EpisodeDocumentDTO): void {
+    if (!this.acceptsDocument(item, true)) return;
+    const generation = this.requestGeneration;
     if (!this.canManage || this.actionDocumentId !== null) {
       return;
     }
@@ -371,7 +404,7 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
     });
 
     ref.afterClosed().subscribe((confirmed: boolean) => {
-      if (!confirmed) {
+      if (!confirmed || generation !== this.requestGeneration || !this.acceptsDocument(item, true)) {
         return;
       }
 
@@ -382,17 +415,19 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
         .deleteDocument(item.id)
         .pipe(
           finalize(() => {
-            this.actionDocumentId = null;
+            if (generation === this.requestGeneration) this.actionDocumentId = null;
           }),
         )
         .subscribe({
           next: () => {
+          if (generation !== this.requestGeneration) return;
             this.successMessage = 'El documento fue eliminado correctamente.';
 
             this.loadDocuments();
             this.documentsChanged.emit();
           },
           error: (error) => {
+          if (generation !== this.requestGeneration) return;
             console.error(
               '[EpisodeDocuments] Error eliminando documento:',
               error,
@@ -498,36 +533,27 @@ export class EpisodeDocumentsComponent implements OnInit, OnChanges {
   }
 
   private loadDocuments(): void {
-    if (!this.episodeId) {
-      this.documents = [];
-      return;
-    }
-
+    const generation = ++this.requestGeneration;
+    const episodeId = this.episodeId;
+    this.documents = [];
+    this.loading = false;
+    this.uploading = false;
+    this.actionDocumentId = null;
+    if (!episodeId) return;
     this.loading = true;
-
-    this.documentService
-      .listDocuments(this.episodeId)
-      .pipe(
-        finalize(() => {
-          this.loading = false;
-        }),
-      )
+    this.documentService.listDocuments(episodeId)
+      .pipe(finalize(() => { if (generation === this.requestGeneration) this.loading = false; }))
       .subscribe({
         next: (documents) => {
-this.documents = [...(documents ?? [])].sort(
-            (a, b) =>
-              new Date(b.uploadedAt).getTime() -
-              new Date(a.uploadedAt).getTime(),
-          );
+          if (generation !== this.requestGeneration || episodeId !== this.episodeId) return;
+          const matching = (documents ?? []).filter(item => Number(item.episodeId) === episodeId);
+          if (matching.length !== (documents ?? []).length) this.errorMessage = 'Se recibieron documentos de otro episodio. No se incorporaron al listado.';
+          this.documents = matching.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
         },
         error: (error) => {
-          console.error('[EpisodeDocuments] Error cargando documentos:', error);
-
+          if (generation !== this.requestGeneration) return;
           this.documents = [];
-          this.errorMessage = this.getActionErrorMessage(
-            error,
-            'No fue posible cargar los documentos del episodio.',
-          );
+          this.errorMessage = this.getActionErrorMessage(error, 'No fue posible cargar los documentos del episodio.');
         },
       });
   }

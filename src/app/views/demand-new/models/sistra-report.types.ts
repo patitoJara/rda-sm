@@ -12,6 +12,10 @@ export interface SistraReportPersonData {
 }
 
 export interface SistraReportDemandData {
+  episodeCode: string;
+  episodeType: string;
+  episodeStatus: string;
+  programName: string;
   primarySubstance: string | null;
   secondarySubstances: string | null;
   previousTreatmentNumber: number | null;

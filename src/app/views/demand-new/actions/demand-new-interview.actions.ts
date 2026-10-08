@@ -1,3 +1,4 @@
+import { resolveWorkingStageId } from '../utils/demand-new-stage.utils';
 import {
   formatDateForBackend,
   toStringOrNull,
@@ -104,11 +105,7 @@ export function buildFeedbackContext(
   }
 
   const stageId =
-    longitudinal?.activeEpisode?.currentStageId ??
-    longitudinal?.stages?.find(
-      (stage: any) => stage?.current,
-    )?.id ??
-    null;
+    resolveWorkingStageId(longitudinal?.stages, programId);
 
   if (!stageId) {
     return {

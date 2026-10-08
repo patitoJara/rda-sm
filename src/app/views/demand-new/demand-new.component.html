@@ -146,7 +146,7 @@
       <div class="empty-banner success" *ngIf="selectedPerson">
         <mat-icon>check_circle</mat-icon>
 
-        <span *ngIf="hasCurrentEpisode; else personWithoutEpisodeMessage">
+        <span *ngIf="selectedEpisodeId; else personWithoutEpisodeMessage">
           {{
             isHistoricalEpisode
               ? "Persona encontrada. Episodio cerrado cargado en modo de consulta."
@@ -155,8 +155,14 @@
         </span>
 
         <ng-template #personWithoutEpisodeMessage>
+          <span *ngIf="availableEpisodes.length > 0; else personHasNoEpisodesMessage">
+            Persona encontrada. Seleccione un episodio para consultar su información.
+          </span>
+        </ng-template>
+
+        <ng-template #personHasNoEpisodesMessage>
           <span>
-            Persona registrada. Puede preparar un episodio de demanda.
+            Persona registrada. No existen episodios disponibles para consulta.
           </span>
         </ng-template>
       </div>
@@ -165,6 +171,8 @@
         <mat-icon>error</mat-icon>
         <span>{{ searchError }}</span>
       </div>
+      <div class="empty-banner error" *ngIf="episodeContextError" role="alert"><mat-icon>error</mat-icon><span>{{ episodeContextError }}</span></div>
+      <div class="empty-banner error" *ngIf="longitudinalError && !hasCurrentEpisode" role="alert"><mat-icon>error</mat-icon><span>{{ longitudinalError }}</span></div>
       <section
         class="available-episodes"
         *ngIf="hasMultipleAvailableEpisodes && !showCreateEpisodeForm"
@@ -228,9 +236,10 @@
                 mat-stroked-button
                 type="button"
                 (click)="selectAvailableEpisode(episode)"
+                [attr.aria-current]="selectedEpisodeId === (episode.id || episode.episodeId) ? 'true' : null"
               >
                 <mat-icon>visibility</mat-icon>
-                Ver episodio
+                {{ selectedEpisodeId === (episode.id || episode.episodeId) ? "Episodio consultado" : "Ver episodio" }}
               </button>
             </div>
           </article>
@@ -684,7 +693,12 @@
           }}. Se conserva su información para revisión histórica.
         </span>
 
-        <span *ngIf="!isHistoricalEpisode">
+        <span *ngIf="!isHistoricalEpisode && isConsultationRole">
+          Esta ficha se encuentra en modo consulta. Puedes revisar sus antecedentes,
+          pero no realizar gestiones operativas desde este acceso.
+        </span>
+
+        <span *ngIf="!isHistoricalEpisode && !isConsultationRole">
           La demanda es gestionada por
           {{
             episodeSummary?.currentProgram?.name ||
@@ -771,11 +785,15 @@
 
           <strong>
             {{
-              episodeSummary?.state?.name ||
-                createdEpisode?.state?.name ||
-                formatStateLabel(
-                  episodeSummary?.stateCode || createdEpisode?.stateCode
-                )
+              !selectedEpisodeId
+                ? (availableEpisodes.length > 0
+                    ? "Seleccione un episodio"
+                    : "Sin episodio registrado")
+                : (episodeSummary?.state?.name ||
+                    createdEpisode?.state?.name ||
+                    formatStateLabel(
+                      episodeSummary?.stateCode || createdEpisode?.stateCode
+                    ))
             }}
           </strong>
         </div>
@@ -2354,8 +2372,8 @@
                   createdEpisode?.episodeCode ||
                   longitudinal?.episode?.code ||
                   longitudinal?.episode?.episodeCode ||
-                  longitudinal?.activeEpisode?.code ||
-                  longitudinal?.activeEpisode?.episodeCode ||
+                  longitudinal?.episode?.code ||
+                  longitudinal?.episode?.episodeCode ||
                   ""
               }}
             </span>
@@ -2633,7 +2651,7 @@
                     class="trajectory-activity__item"
                     *ngIf="
                       event.code !== 'REFERENCIA' &&
-                      event.code !== 'CIERRE' &&
+
                       event.code !== 'REVERSION'
                     "
                     [class.trajectory-activity__item--deleted]="event.deleted"
@@ -2986,15 +3004,15 @@
     </button>
 
     <button
-      *ngIf="isHistoricalEpisode"
+      *ngIf="isHistoricalEpisode && openAvailableEpisode as episode"
       type="button"
       class="navigation-assist__item navigation-assist__item--context"
-      matTooltip="Ir a crear un nuevo episodio"
-      aria-label="Ir a crear un nuevo episodio"
-      (click)="scrollToSummarySection('demanda-actual')"
+      matTooltip="Consultar el episodio abierto de esta persona"
+      aria-label="Ver episodio activo"
+      (click)="selectAvailableEpisode(episode)"
     >
-      <mat-icon>add_circle</mat-icon>
-      <span>Crear nuevo episodio</span>
+      <mat-icon>folder_open</mat-icon>
+      <span>Ver episodio activo</span>
       <i class="navigation-assist__badge"></i>
     </button>
   </aside>
@@ -3397,7 +3415,7 @@
 
           <strong>
             {{
-              workingStage?.program?.name || activeProgramName || "Sin programa"
+              workingStage?.program?.name || episodeSummary?.currentProgram?.name || episodeSummary?.initialProgram?.name || "Programa no informado"
             }}
           </strong>
         </div>

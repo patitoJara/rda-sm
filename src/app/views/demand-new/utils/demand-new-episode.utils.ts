@@ -1,22 +1,15 @@
-﻿export function calculatePreviousTreatmentNumber(data: any): number {
-  const episodes = Array.isArray(data?.previousEpisodes)
-    ? data.previousEpisodes
-    : Array.isArray(data?.episodes)
-      ? data.episodes
-      : [];
-
+import { episodeIdentity, longitudinalEpisodes, ownerEpisodeId } from './demand-new-context.utils';
+﻿export function calculatePreviousTreatmentNumber(data: any, beforeEpisodeId: number | null = null): number {
+  const episodes = longitudinalEpisodes(data);
+  const before = episodes.find(episode => episodeIdentity(episode) === beforeEpisodeId);
   const events = Array.isArray(data?.events) ? data.events : [];
-
-  const completedEpisodes = [...episodes]
-    .filter((episode: any) => {
-      const isStillActive =
-        episode?.active === true &&
-        !episode?.egressAt &&
-        !episode?.closedAt;
-
-      return !isStillActive;
-    })
-    .sort(compareEpisodesChronologically);
+  const completedEpisodes = episodes.filter((episode: any) => {
+    if (episodeIdentity(episode) === beforeEpisodeId || episode?.deletedAt || episode?.deleted_at) return false;
+    if (before && compareEpisodesChronologically(episode, before) >= 0) return false;
+    const state = String(episode?.state?.code ?? episode?.stateCode ?? episode?.status ?? '').toUpperCase();
+    return !!(episode?.closedAt || episode?.closureDate || episode?.egressAt ||
+      state === 'CERRADO' || state === 'CERRADA' || episode?.active === false);
+  }).sort(compareEpisodesChronologically);
 
   return completedEpisodes.reduce((total: number, episode: any) => {
     const registeredNumber = normalizePreviousTreatmentNumber(
@@ -54,7 +47,7 @@ function hasTreatmentEntry(episode: any, events: any[]): boolean {
   const episodeId = Number(episode?.id ?? episode?.episodeId);
 
   const hasNestedEntryEvent = Array.isArray(episode?.events)
-    ? episode.events.some(isTreatmentEntryEvent)
+    ? episode.events.some((event: any) => ownerEpisodeId(event) === episodeId && isTreatmentEntryEvent(event))
     : false;
 
   const hasLongitudinalEntryEvent =
@@ -80,7 +73,7 @@ function isTreatmentEntryEvent(event: any): boolean {
     event?.event_type_code ??
     '';
 
-  return eventCode === 'INGRESO_TRATAMIENTO';
+  return eventCode === 'INGRESO_TRATAMIENTO' && !event?.deletedAt && !event?.deleted_at;
 }
 
 function normalizePreviousTreatmentNumber(value: unknown): number {
@@ -122,14 +115,8 @@ export function getCurrentEpisodeId(
   createdEpisode: any,
   episodeSummary: any,
 ): number | null {
-  const id =
-    createdEpisode?.id ??
-    createdEpisode?.episodeId ??
-    episodeSummary?.id ??
-    episodeSummary?.episodeId ??
-    null;
-
-  const parsed = Number(id);
-
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+  const selectedId = episodeIdentity(episodeSummary);
+  const createdId = episodeIdentity(createdEpisode);
+  if (selectedId && createdId && selectedId !== createdId) return null;
+  return selectedId ?? createdId;
 }

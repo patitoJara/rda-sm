@@ -14,6 +14,9 @@ export function resolveCurrentEpisodeStage(
     ? longitudinal.stages
     : [];
 
+  const selectedStageId = toPositiveId(episode?.currentStageId ?? longitudinal?.episode?.currentStageId);
+  if (selectedStageId) return stages.find((stage: any) => toPositiveId(stage?.id) === selectedStageId) ?? null;
+
   const stageMarkedAsCurrent =
     stages.find(
       (stage: any) =>
@@ -28,7 +31,7 @@ export function resolveCurrentEpisodeStage(
 
   const currentStageId =
     toPositiveId(episode?.currentStageId) ??
-    toPositiveId(longitudinal?.activeEpisode?.currentStageId) ??
+    toPositiveId(longitudinal?.episode?.currentStageId) ??
     toPositiveId(longitudinal?.currentStage?.id) ??
     toPositiveId(longitudinal?.activeStage?.id);
 

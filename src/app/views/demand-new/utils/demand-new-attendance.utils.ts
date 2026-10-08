@@ -1,3 +1,4 @@
+import { resolveWorkingStageId } from './demand-new-stage.utils';
 import { toStringOrNull } from './demand-new-format.utils';
 
 export interface BuildAttendancePayloadParams {
@@ -26,9 +27,7 @@ export function buildAttendancePayload({
     eventTime: selectedCitation?.eventTime ?? null,
 
     stageId:
-      longitudinal?.activeEpisode?.currentStageId ??
-      longitudinal?.stages?.find((stage: any) => stage?.current)?.id ??
-      null,
+      resolveWorkingStageId(longitudinal?.stages, programId),
 
     programId: Number(programId),
 

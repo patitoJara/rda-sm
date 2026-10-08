@@ -10,10 +10,22 @@ export class SistraReportService {
       const result = String(value ?? '').trim();
       return result || fallback;
     };
+    const tieneFecha = (fecha: unknown): boolean => {
+      const valor = String(fecha ?? '').trim().toLowerCase();
+      return !!valor &&
+        valor !== 'sin fecha' &&
+        valor !== 'no informada' &&
+        valor !== 'no informado';
+    };
+
+    const mostrarRetroalimentacion = tieneFecha(data.feedback.date);
+    const mostrarCierre = tieneFecha(data.closure.date);
+    const mostrarObservaciones = !!String(data.observations ?? '').trim();
+
     const citationBlock = (
       title: string,
       citation: SistraReportData['firstCitationFirstInterview'],
-    ): string => `
+    ): string => citation?.date ? `
       <div class="section-title citation-title">${title}</div>
 
       <table class="citation-table">
@@ -38,8 +50,7 @@ export class SistraReportService {
           <td>${text(citation.attendance, '')}</td>
         </tr>
       </table>
-    `;
-
+    ` : "";
     return `
       <div class="sistra-report">
         <div class="report-header">
@@ -90,8 +101,19 @@ export class SistraReportService {
         </table>
 
         <div class="section-title">ANTECEDENTES DE LA DEMANDA</div>
-
         <table>
+          <tr>
+            <th>EPISODIO</th>
+            <td>${text(data.demand.episodeCode)}</td>
+            <th>ESTADO</th>
+            <td>${text(data.demand.episodeStatus)}</td>
+          </tr>
+          <tr>
+            <th>TIPO DE EPISODIO</th>
+            <td>${text(data.demand.episodeType)}</td>
+            <th>PROGRAMA RESPONSABLE</th>
+            <td>${text(data.demand.programName)}</td>
+          </tr>
           <tr>
             <th>SUSTANCIA PRINCIPAL</th>
             <td>${text(data.demand.primarySubstance)}</td>
@@ -151,9 +173,9 @@ export class SistraReportService {
           data.optionalInterview,
         )}
 
-        <div class="section-title">RETROALIMENTACIÓN</div>
+        <div class="section-title" style="${mostrarRetroalimentacion ? "" : "display:none"}">RETROALIMENTACIÓN</div>
 
-        <table class="feedback-table">
+        <table class="feedback-table" style="${mostrarRetroalimentacion ? "" : "display:none"}">
           <colgroup>
             <col style="width: 7%;" />
             <col style="width: 11%;" />
@@ -183,9 +205,9 @@ export class SistraReportService {
           </tr>
         </table>
 
-        <div class="section-title">CIERRE</div>
+        <div class="section-title" style="${mostrarCierre ? "" : "display:none"}">CIERRE</div>
 
-        <table class="closure-table">
+        <table class="closure-table" style="${mostrarCierre ? "" : "display:none"}">
           <colgroup>
             <col style="width: 9%;" />
             <col style="width: 16%;" />
@@ -200,7 +222,7 @@ export class SistraReportService {
           </tr>
         </table>
 
-        <table class="responsible-table">
+        <table class="responsible-table" style="${mostrarCierre ? "" : "display:none"}">
           <colgroup>
             <col style="width: 15%;" />
             <col style="width: 85%;" />
@@ -211,9 +233,9 @@ export class SistraReportService {
           </tr>
         </table>
 
-        <div class="section-title">OBSERVACIONES</div>
+        <div class="section-title" style="${mostrarObservaciones ? "" : "display:none"}">OBSERVACIONES</div>
 
-        <table class="observations-table">
+        <table class="observations-table" style="${mostrarObservaciones ? "" : "display:none"}">
           <tr>
             <td class="observations-cell">${text(data.observations, '')}</td>
           </tr>
@@ -519,6 +541,7 @@ export class SistraReportService {
             }
 
             .observations-cell {
+              white-space: pre-line;
               height: 42px;
               vertical-align: top;
             }
