@@ -109,15 +109,35 @@ export function resolveLatestOperationalStageEvent(
   }
 
   return [...operationalEvents].sort((left: any, right: any) => {
+    const operationalTime = (event: any): string => {
+      const code = String(
+        event?.eventType?.code ??
+        event?.eventTypeCode ??
+        event?.event_type_code ??
+        '',
+      ).toUpperCase();
+
+      const time = String(event?.eventTime ?? '00:00:00');
+
+      if (
+        stageIsClosed &&
+        code === 'CIERRE' &&
+        /^00:00(?::00)?$/.test(time)
+      ) {
+        return '23:59:59';
+      }
+
+      return time;
+    };
     const leftTimestamp =
       String(left?.eventDate ?? '') +
       'T' +
-      String(left?.eventTime ?? '00:00:00');
+      operationalTime(left);
 
     const rightTimestamp =
       String(right?.eventDate ?? '') +
       'T' +
-      String(right?.eventTime ?? '00:00:00');
+      operationalTime(right);
 
     const operationalComparison =
       rightTimestamp.localeCompare(leftTimestamp);
@@ -156,6 +176,27 @@ export function resolveCurrentStageResultValue(
 ): unknown {
   const source = currentStage ?? fallbackEpisode;
 
+  const resultCode = resolveCurrentStageResultCode(
+    currentStage,
+    fallbackEpisode,
+  );
+
+  const closureReason =
+    currentStage?.closureReason ??
+    fallbackEpisode?.closureReason ??
+    null;
+
+  const closureCode = String(closureReason?.code ?? '')
+    .trim()
+    .toUpperCase();
+
+  if (
+    resultCode.startsWith('EXTERN_') &&
+    resultCode === closureCode &&
+    closureReason?.name
+  ) {
+    return closureReason.name;
+  }
   return (
     source?.result?.name ??
     source?.resultName ??

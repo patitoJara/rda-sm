@@ -66,13 +66,15 @@ export type DemandActionKey =
 export type DemandClosureOption =
   | 'REFERENCIA'
   | 'INGRESO_TRATAMIENTO'
-  | 'ABANDONO';
+  | 'ABANDONO'
+  | `EXTERN_${string}`;
 
 export type DemandFeedbackResult =
   | 'LISTA_ESPERA'
   | 'REFERENCIA'
   | 'INGRESO_TRATAMIENTO'
-  | 'ABANDONO';
+  | 'ABANDONO'
+  | 'RED_EXTERNA';
 
 export type DemandMatrixScenario =
   | 'ACTIVE_INITIAL'
@@ -80,6 +82,7 @@ export type DemandMatrixScenario =
   | 'ACTIVE_CITATIONS_RESOLVED'
   | 'FEEDBACK_WAITING_LIST'
   | 'FEEDBACK_REFERENCE'
+  | 'FEEDBACK_EXTERNAL_NETWORK'
   | 'FEEDBACK_TREATMENT_ENTRY'
   | 'FEEDBACK_ABANDONMENT'
   | 'REFERENCE_EXECUTED'
@@ -241,8 +244,7 @@ export function resolveFeedbackSaveAction(
   }
 
   if (
-    matrix.scenario === 'ACTIVE_PENDING_CITATIONS' &&
-    normalizedResult !== 'ABANDONO'
+    matrix.scenario === 'ACTIVE_PENDING_CITATIONS'
   ) {
     return action(
       false,
@@ -373,6 +375,46 @@ export function resolveDemandActionMatrix(
   /*
    * RETROALIMENTACIÓN = INGRESO A TRATAMIENTO
    */
+  /*
+   * RETROALIMENTACIÓN = DESTINO DE RED EXTERNA
+   * Cierre definitivo, sin crear referencia interna.
+   */
+  if (hasFeedback(input, 'RED_EXTERNA')) {
+    return {
+      scenario: 'FEEDBACK_EXTERNAL_NETWORK',
+
+      citation: action(
+        false,
+        DEMAND_ACTION_MATRIX_MESSAGES.citationsBlockedByFeedback,
+      ),
+
+      attendance: action(
+        false,
+        DEMAND_ACTION_MATRIX_MESSAGES.attendanceBlockedByFeedback,
+      ),
+
+      feedback: action(
+        false,
+        'Ya existe una retroalimentación registrada para esta etapa.',
+      ),
+
+      observation: action(true),
+
+      reference: action(
+        false,
+        'El destino externo no corresponde a una referencia entre programas.',
+      ),
+
+      closure: action(true),
+
+      allowedClosureOptions: ['ABANDONO'],
+
+      historical: false,
+      readonly: false,
+      refreshAfterClosure: true,
+    };
+  }
+
   if (hasFeedback(input, 'INGRESO_TRATAMIENTO')) {
     return {
       scenario: 'FEEDBACK_TREATMENT_ENTRY',
@@ -490,7 +532,7 @@ export function resolveDemandActionMatrix(
       attendance: action(true),
 
       feedback: action(
-        true,
+        false,
         DEMAND_ACTION_MATRIX_MESSAGES.feedbackPendingCitations,
       ),
 
@@ -553,7 +595,7 @@ export function resolveDemandActionMatrix(
       DEMAND_ACTION_MATRIX_MESSAGES.attendanceNoPending,
     ),
 
-    feedback: action(true),
+    feedback: action(false, 'Debe registrar una citación y su asistencia antes de continuar.'),
 
     observation: action(true),
 
@@ -586,4 +628,6 @@ export function getClosureConfirmationMessage(
     case 'ABANDONO':
       return DEMAND_ACTION_MATRIX_MESSAGES.abandonment;
   }
+
+  return 'Se cerrará la etapa del programa y el episodio por destino de red externa. La información quedará en modo solo lectura.';
 }

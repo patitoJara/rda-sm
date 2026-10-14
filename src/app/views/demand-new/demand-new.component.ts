@@ -374,21 +374,10 @@ export class DemandNewComponent
     'INGRESO_TRATAMIENTO',
     'REFERENCIA',
     'ABANDONO',
+    'RED_EXTERNA',
   ]);
 
   get availableFeedbackResults(): any[] {
-    if (
-      this.demandActionMatrix.scenario ===
-      'ACTIVE_PENDING_CITATIONS'
-    ) {
-      return this.results.filter(
-        (item: any) =>
-          String(item?.code ?? '')
-            .trim()
-            .toUpperCase() === 'ABANDONO',
-      );
-    }
-
     return this.results;
   }
 
@@ -907,6 +896,7 @@ export class DemandNewComponent
           'REFERENCIA',
           'INGRESO_TRATAMIENTO',
           'ABANDONO',
+          'RED_EXTERNA',
         ].includes(code),
       ) as DemandFeedbackResult[];
 
@@ -975,6 +965,9 @@ export class DemandNewComponent
     ) === 'REFERENCIA';
   }
   get availableClosureReasons() {
+    const isExternal =
+      this.demandActionMatrix.scenario === 'FEEDBACK_EXTERNAL_NETWORK';
+
     const allowedCodes = new Set(
       this.demandActionMatrix.allowedClosureOptions.map((code) =>
         normalizeText(code),
@@ -982,9 +975,15 @@ export class DemandNewComponent
     );
 
     return this.closureReasons
-      .filter((item) =>
-        allowedCodes.has(normalizeText(item.code)),
-      )
+      .filter((item) => {
+        const code = normalizeText(item.code);
+
+        if (isExternal) {
+          return code.startsWith('EXTERN_') || code === 'ABANDONO';
+        }
+
+        return allowedCodes.has(code);
+      })
       .sort((a: any, b: any) =>
         String(a?.name ?? '').localeCompare(String(b?.name ?? ''), 'es', {
           sensitivity: 'base',
@@ -7466,21 +7465,56 @@ export class DemandNewComponent
 
         const sortValue = new Date(
           `${String(eventDate ?? '').slice(0, 10)}T${
-            eventTime || '00:00:00'
+            (code === 'CIERRE' && (!eventTime || /^00:00(?::00)?$/.test(String(eventTime))) ? '23:59:59' : eventTime || '00:00:00')
           }`,
         ).getTime();
 
         const createdAtSort =
           new Date(event?.createdAt ?? '').getTime();
+        const attendanceRaw =
+          event?.attendanceStatus?.name ??
+          event?.attendanceStatusName ??
+          event?.attendanceStatus?.code ??
+          event?.attendanceStatusCode ??
+          '';
+
+        const attendanceNormalized = String(attendanceRaw)
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .trim()
+          .toUpperCase()
+          .replace(/_/g, ' ');
+
+        const attendanceLabel =
+          code !== 'ASISTENCIA'
+            ? ''
+            : attendanceNormalized.includes('NO SE PRESENTO') ||
+                attendanceNormalized === 'NO ASISTIO'
+              ? 'No asistió'
+              : attendanceNormalized.includes('SE PRESENTO') ||
+                  attendanceNormalized === 'ASISTIO'
+                ? 'Asistió'
+                : '';
 
         return {
           id: event?.id ?? null,
           code,
           label:
-            eventLabels[code] ??
-            this.formatResultLabel(code, code || 'Gestión'),
+            code === 'ASISTENCIA' && attendanceLabel
+              ? `Asistencia - ${attendanceLabel}`
+              :
+            code === 'RETROALIMENTACION' &&
+            (event?.result?.name || event?.resultName || event?.resultCode)
+              ? `Retroalimentación - ${this.formatResultLabel(
+                  event?.result?.name ||
+                    event?.resultName ||
+                    event?.resultCode,
+                  '',
+                )}`
+              : eventLabels[code] ??
+                this.formatResultLabel(code, code || 'Gestión'),
           date: eventDate,
-          time: eventTime,
+          time: code === 'CIERRE' && (!eventTime || /^00:00(?::00)?$/.test(String(eventTime))) ? null : eventTime,
           deleted: !!deletedAt,
           deletedAt,
           sortValue: Number.isNaN(sortValue)

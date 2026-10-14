@@ -1,4 +1,4 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
   Component,
   EventEmitter,
@@ -113,6 +113,16 @@ export class FeedbackPanelComponent {
         message:
           'Se cerrará la atención del programa actual, se cerrará el episodio y se detendrá el conteo de espera.',
         tone: 'success',
+      };
+    }
+
+    if (value.includes('RED_EXTERNA')) {
+      return {
+        icon: 'exit_to_app',
+        title: 'Destino de red externa',
+        message:
+          'El cierre del programa actual y del episodio se formaliza posteriormente, seleccionando una causal externa o Abandono.',
+        tone: 'warning',
       };
     }
 

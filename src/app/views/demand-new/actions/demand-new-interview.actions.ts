@@ -50,6 +50,7 @@ const allowedResultCodes = new Set([
   'INGRESO_TRATAMIENTO',
   'REFERENCIA',
   'ABANDONO',
+    'RED_EXTERNA',
 ]);
 
 export function buildFeedbackContext(
@@ -149,6 +150,7 @@ export function buildFeedbackConfirmation(
     REFERENCIA: 'Referencia',
     INGRESO_TRATAMIENTO: 'Ingreso a tratamiento',
     ABANDONO: 'Abandono',
+    RED_EXTERNA: 'Destino de red externa',
   };
 
   const effectMap: Record<string, string> = {
@@ -160,6 +162,8 @@ export function buildFeedbackConfirmation(
       'Se cerrará la atención del programa actual, se cerrará el episodio y se detendrá el conteo de días.',
     ABANDONO:
       'Se cerrará la atención del programa actual, se cerrará el episodio y se detendrá el conteo de días.',
+    RED_EXTERNA:
+      'La retroalimentación define un destino externo. El cierre del programa y del episodio se realizará posteriormente mediante una causal externa o Abandono.',
   };
 
   const resultName =
