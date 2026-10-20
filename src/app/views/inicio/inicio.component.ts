@@ -324,9 +324,10 @@ export class InicioComponent implements OnInit, OnDestroy {
 
   openProgramAnalysis(): void {
     this.dialog.open(ProgramAnalysisDialogComponent, {
-      width: '1180px',
-      maxWidth: '96vw',
-      maxHeight: '92vh',
+      width: '100vw',
+      maxWidth: '100vw',
+      height: '100dvh',
+      maxHeight: '100dvh',
       autoFocus: false,
       restoreFocus: true,
     });

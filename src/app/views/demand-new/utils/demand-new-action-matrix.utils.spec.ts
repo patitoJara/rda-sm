@@ -21,13 +21,13 @@ function buildInput(
 }
 
 describe('resolveDemandActionMatrix', () => {
-  it('debe iniciar una etapa permitiendo citar, retroalimentar y observar', () => {
+  it('debe iniciar una etapa sin citaciones permitiendo citar y observar, pero bloqueando retroalimentación y cierre', () => {
     const matrix = resolveDemandActionMatrix(buildInput());
 
     expect(matrix.scenario).toBe('ACTIVE_INITIAL');
     expect(matrix.citation.enabled).toBeTrue();
     expect(matrix.attendance.enabled).toBeFalse();
-    expect(matrix.feedback.enabled).toBeTrue();
+    expect(matrix.feedback.enabled).toBeFalse();
     expect(matrix.observation.enabled).toBeTrue();
     expect(matrix.reference.enabled).toBeFalse();
     expect(matrix.closure.enabled).toBeFalse();

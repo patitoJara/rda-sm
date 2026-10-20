@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { FormComponent } from './form.component';
 
@@ -8,7 +9,11 @@ describe('FormComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FormComponent]
+      imports: [FormComponent],
+      providers: [
+        { provide: MatDialogRef, useValue: jasmine.createSpyObj('MatDialogRef', ['close']) },
+        { provide: MAT_DIALOG_DATA, useValue: null },
+      ],
     })
     .compileComponents();
 
