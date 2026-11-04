@@ -132,6 +132,7 @@ export interface DemandActionMatrixInput {
   firstInterviewCompleted: boolean;
 
   feedbackResults: DemandFeedbackResult[];
+  feedbackCount?: number;
 
   referenceExecuted: boolean;
 
@@ -250,6 +251,10 @@ export function resolveFeedbackSaveAction(
       false,
       DEMAND_ACTION_MATRIX_MESSAGES.feedbackPendingCitations,
     );
+  }
+
+  if (matrix.scenario === 'FEEDBACK_WAITING_LIST' && normalizedResult !== 'REFERENCIA') {
+    return action(false, 'Después de Lista de espera solo se permite Referencia.');
   }
 
   return action(true);
@@ -495,7 +500,11 @@ export function resolveDemandActionMatrix(
         DEMAND_ACTION_MATRIX_MESSAGES.attendanceBlockedByFeedback,
       ),
 
-      feedback: action(false, 'Ya existe una retroalimentación registrada para esta etapa.'),
+      feedback: action(
+        (input.feedbackCount ?? input.feedbackResults.length) === 1 &&
+        input.feedbackResults.length === 1,
+        'Después de Lista de espera solo se permite una segunda decisión Referencia.',
+      ),
 
       observation: action(true),
 

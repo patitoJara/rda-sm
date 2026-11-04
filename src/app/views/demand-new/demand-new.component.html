@@ -73,7 +73,9 @@
 
   <!-- BUSCADOR COMPACTO -->
   <div id="quick-search-person" class="navigation-quick-anchor"></div>
-  <mat-card class="search-card" [class.search-card--compact]="selectedPerson">
+  <!-- RDA-ENC-001-HEADER -->
+<div class="demand-header-grid" [class.demand-header-grid--loaded]="selectedPerson">
+<mat-card class="search-card" [class.search-card--compact]="selectedPerson">
     <div class="search-card__title">
       <mat-icon>person_search</mat-icon>
       <div>
@@ -89,7 +91,7 @@
     <form
       [formGroup]="searchForm"
       (ngSubmit)="searchPerson()"
-      class="search-form"
+      class="search-form" style="display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:8px;align-items:start;width:100%;min-width:0"
     >
       <mat-form-field
         appearance="outline"
@@ -173,25 +175,21 @@
       </div>
       <div class="empty-banner error" *ngIf="episodeContextError" role="alert"><mat-icon>error</mat-icon><span>{{ episodeContextError }}</span></div>
       <div class="empty-banner error" *ngIf="longitudinalError && !hasCurrentEpisode" role="alert"><mat-icon>error</mat-icon><span>{{ longitudinalError }}</span></div>
-      <section
+
+    </div>
+  </mat-card>
+<mat-card
+  class="demand-header-episodes-card"
+  *ngIf="hasMultipleAvailableEpisodes && !showCreateEpisodeForm"
+>
+<!-- RDA-ENC-001-REV2-HTML -->
+<section
         class="available-episodes"
-        *ngIf="hasMultipleAvailableEpisodes && !showCreateEpisodeForm"
       >
-        <div class="available-episodes__header">
-          <mat-icon>history</mat-icon>
-
-          <div>
-            <strong>Episodios disponibles</strong>
-            <span>
-              La persona posee más de un episodio. Seleccione el que desea
-              revisar.
-            </span>
-          </div>
-        </div>
-
         <div class="available-episodes__list">
           <article
             class="available-episode-card"
+
             *ngFor="
               let episode of availableEpisodes;
               trackBy: trackAvailableEpisode
@@ -204,14 +202,6 @@
                 }}
               </strong>
 
-              <span>
-                {{
-                  episode?.currentProgram?.name ||
-                    episode?.initialProgram?.name ||
-                    "Programa no informado"
-                }}
-              </span>
-
               <small>
                 Solicitud:
                 {{
@@ -222,31 +212,58 @@
               </small>
             </div>
 
-            <div class="available-episode-card__status">
-              <span>
-                {{
-                  episode?.state?.name ||
-                    episode?.stateCode ||
-                    episode?.status ||
-                    "Sin estado"
-                }}
-              </span>
+            <div
+              class="available-episode-stages" style="display:grid;grid-template-columns:minmax(0,1fr);gap:3px;margin:4px 0 0"
+              *ngIf="getAvailableEpisodeStages(episode).length > 0"
 
-              <button
-                mat-stroked-button
-                type="button"
-                (click)="selectAvailableEpisode(episode)"
-                [attr.aria-current]="selectedEpisodeId === (episode.id || episode.episodeId) ? 'true' : null"
+            >
+              <div
+                *ngFor="let stage of getAvailableEpisodeStages(episode)" style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:4px 6px"
+
               >
-                <mat-icon>visibility</mat-icon>
-                {{ selectedEpisodeId === (episode.id || episode.episodeId) ? "Episodio consultado" : "Ver episodio" }}
-              </button>
+                <div >
+                  <strong>
+                    Etapa {{ stage?.id || stage?.stageId }}
+                  </strong>
+
+                  <span>
+                    {{
+                      stage?.program?.name ||
+                      stage?.programName ||
+                      stage?.program?.description ||
+                      "Programa no informado"
+                    }}
+                  </span>
+
+                  <small>
+                    Estado:
+                    {{
+                      stage?.state?.name ||
+                      stage?.stageStateCode ||
+                      stage?.stateCode ||
+                      stage?.status ||
+                      "Sin estado"
+                    }}
+                  </small>
+                </div>
+
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="selectAvailableEpisodeStage(episode, stage)"
+                  [attr.aria-current]="isAvailableStageSelected(episode, stage) ? 'true' : null"
+                >
+                  <mat-icon>visibility</mat-icon>
+                  {{ isAvailableStageSelected(episode, stage) && canManageCurrentEpisode ? "Gestionar" : "Ver" }}
+                </button>
+              </div>
             </div>
+
           </article>
         </div>
       </section>
-    </div>
-  </mat-card>
+</mat-card>
+</div>
 
   <!-- CREAR PERSONA -->
   <mat-card

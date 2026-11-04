@@ -1,5 +1,6 @@
-﻿import {
+import {
   resolveDemandActionMatrix,
+  resolveFeedbackSaveAction,
   DemandActionMatrixInput,
   DemandFeedbackResult,
 } from './demand-new-action-matrix.utils';
@@ -60,7 +61,7 @@ describe('resolveDemandActionMatrix', () => {
     expect(matrix.scenario).toBe('FEEDBACK_WAITING_LIST');
     expect(matrix.citation.enabled).toBeFalse();
     expect(matrix.attendance.enabled).toBeFalse();
-    expect(matrix.feedback.enabled).toBeFalse();
+    expect(matrix.feedback.enabled).toBeTrue();
     expect(matrix.observation.enabled).toBeTrue();
     expect(matrix.reference.enabled).toBeTrue();
     expect(matrix.closure.enabled).toBeTrue();
@@ -72,7 +73,7 @@ describe('resolveDemandActionMatrix', () => {
 
   (
     [
-      'LISTA_ESPERA',
+
       'REFERENCIA',
       'INGRESO_TRATAMIENTO',
       'ABANDONO',
@@ -91,6 +92,33 @@ describe('resolveDemandActionMatrix', () => {
     });
   });
 
+  it('LISTA_ESPERA permite una segunda decision solamente Referencia', () => {
+    const matrix = resolveDemandActionMatrix(buildInput({
+      feedbackResults: ['LISTA_ESPERA'],
+      feedbackCount: 1,
+    }));
+
+    expect(matrix.scenario).toBe('FEEDBACK_WAITING_LIST');
+    expect(matrix.citation.enabled).toBeFalse();
+    expect(matrix.attendance.enabled).toBeFalse();
+    expect(matrix.feedback.enabled).toBeTrue();
+
+    expect(resolveFeedbackSaveAction(matrix, 'REFERENCIA').enabled).toBeTrue();
+
+    for (const result of ['LISTA_ESPERA', 'INGRESO_TRATAMIENTO', 'ABANDONO', 'RED_EXTERNA', '']) {
+      expect(resolveFeedbackSaveAction(matrix, result).enabled).toBeFalse();
+    }
+  });
+
+  it('LISTA_ESPERA bloquea retroalimentacion si ya existen dos decisiones', () => {
+    const matrix = resolveDemandActionMatrix(buildInput({
+      feedbackResults: ['LISTA_ESPERA'],
+      feedbackCount: 2,
+    }));
+
+    expect(matrix.feedback.enabled).toBeFalse();
+    expect(resolveFeedbackSaveAction(matrix, 'REFERENCIA').enabled).toBeFalse();
+  });
   it('debe permitir retroalimentación cuando las citaciones están resueltas y aún no existe retroalimentación', () => {
     const matrix = resolveDemandActionMatrix(
       buildInput({

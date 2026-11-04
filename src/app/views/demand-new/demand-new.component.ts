@@ -6,6 +6,8 @@ import {
   resolveOperationalEventDate,
   resolveWorkingStage,
   resolveWorkingStageId,
+  resolveStageById,
+  resolveStageProgramId,
 } from './utils/demand-new-stage.utils';
 import { DEMAND_CITATION_CODES } from '../../shared/utils/demand-workflow.utils';
 import { CommonModule } from '@angular/common';
@@ -321,6 +323,7 @@ export class DemandNewComponent
     return valid;
   }
   private requestedMode: 'view' | 'manage' | null = null;
+  private requestedStageId: number | null = null;
 
   searchForm = this.fb.group({
     rut: ['', [Validators.required, rutValidator()]],
@@ -378,7 +381,9 @@ export class DemandNewComponent
   ]);
 
   get availableFeedbackResults(): any[] {
-    return this.results;
+    return this.demandActionMatrix.scenario === 'FEEDBACK_WAITING_LIST'
+      ? this.results.filter((item: any) => normalizeText(item?.code ?? '') === 'REFERENCIA')
+      : this.results;
   }
 
   interviewForm = this.fb.group({
@@ -942,6 +947,7 @@ export class DemandNewComponent
       pendingCitationCount,
       firstInterviewCompleted,
       feedbackResults,
+      feedbackCount: this.feedbackEvents.length,
       referenceExecuted,
       closureResult: null,
     });
@@ -1106,7 +1112,11 @@ export class DemandNewComponent
     const queryParamMap = this.route.snapshot.queryParamMap;
     const requestedRut = formatRut(queryParamMap.get('rut'));
     const requestedEpisodeId = Number(queryParamMap.get('episodeId'));
+    const stageParam = queryParamMap.get('stageId');
+    const requestedStageId = stageParam === null ? NaN : Number(stageParam);
     const requestedMode = queryParamMap.get('mode');
+    this.requestedStageId = Number.isSafeInteger(requestedStageId) && requestedStageId > 0
+      ? requestedStageId : null;
 
     this.requestedEpisodeId =
       Number.isFinite(requestedEpisodeId) && requestedEpisodeId > 0
@@ -1126,24 +1136,10 @@ export class DemandNewComponent
      * Si el usuario cambia el RUN mientras existe una ficha cargada,
      * se limpia la vista anterior sin salir del frontend.
      */
-    this.searchForm.controls.rut.valueChanges.subscribe((value) => {
-      if (!this.selectedPerson) {
-        return;
-      }
-
-      const enteredRut = formatRut(String(value ?? ''));
-      const loadedRut = formatRut(String(this.selectedPerson.rut ?? ''));
-
-      if (enteredRut !== loadedRut) {
-        ++this.contextGeneration;
-        this.personLongitudinal = null;
-        this.requestedEpisodeId = null;
-        this.isSearching = false;
-        this.isLoadingLongitudinal = false;
-        this.clearSelectedEpisode();
-        resetLoadedDemandView(this);
-      }
-    });
+    /* RDA-ENC-001-RECUPERACION-RUN
+   La persona cargada se conserva mientras se edita el RUN.
+   searchPerson() efectua el cambio de contexto al buscar.
+*/
 
     /*
      * Cuando el usuario cambia manualmente el tipo de previsión,
@@ -1871,6 +1867,7 @@ export class DemandNewComponent
   searchPerson(preserveRequestedEpisode = false): void {
     if (!preserveRequestedEpisode) {
       this.requestedEpisodeId = null;
+      this.requestedStageId = null;
       this.requestedMode = null;
     }
     this.showDemandantDetails = false;
@@ -2514,7 +2511,27 @@ export class DemandNewComponent
     const activeProgramId = Number(this.tokenService.getActiveProgramId());
 
     if (!Number.isFinite(activeProgramId) || activeProgramId <= 0) {
-      this.episodeSaveError = 'No fue posible identificar el programa activo.';
+      // RDA-ENC-001-M01: advertencia institucional
+      this.episodeSaveError = null;
+
+      if (!this.dialog.getDialogById('rda-enc-001-no-program')) {
+        this.dialog.open(ConfirmDialogOkComponent, {
+          id: 'rda-enc-001-no-program',
+          width: '460px',
+          maxWidth: '95vw',
+          disableClose: true,
+          panelClass: 'rda-confirm-dialog',
+          backdropClass: 'app-backdrop',
+          data: {
+            title: 'Acción no permitida',
+            message:
+              'El perfil actual no tiene un programa activo habilitado para crear episodios de demanda. Selecciona un perfil asociado a un programa para continuar.',
+            confirmText: 'Aceptar',
+            icon: 'warning',
+            color: 'warn',
+          },
+        });
+      }
       return;
     }
 
@@ -3118,6 +3135,26 @@ export class DemandNewComponent
       });
   }
 
+  private validateFeedbackContinuation(payload: { resultCode: string; eventDate: string; eventTime: string }): string | null {
+    const previous = this.feedbackEvents;
+    if (!previous.length) return null;
+    const decision = resolveFeedbackSaveAction(this.demandActionMatrix, payload.resultCode);
+    if (!decision.enabled) return decision.message ?? 'No se permite otra retroalimentación.';
+    const original = previous[0];
+    if (previous.length !== 1 || !original?.id || !original?.eventDate ||
+        !/^([01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(String(original?.eventTime ?? original?.eventHour ?? ''))) {
+      return 'No es posible verificar la fecha y hora de la retroalimentación original.';
+    }
+    const validation = validateDemandChronology({
+      current: { type: 'FEEDBACK', label: 'Referencia', date: payload.eventDate, time: payload.eventTime },
+      previousPoints: [{ type: 'FEEDBACK', label: 'la retroalimentación Lista de espera',
+        date: original.eventDate, time: original.eventTime ?? original.eventHour }],
+    });
+    return !validation.previousPoint
+      ? 'No es posible verificar la fecha de la retroalimentación original.'
+      : validation.valid ? null : validation.errorMessage;
+  }
+
   saveInterview(): void {
     const operationGeneration = this.contextGeneration;
     if (!this.ensureCanManageCurrentEpisode()) {
@@ -3167,6 +3204,11 @@ export class DemandNewComponent
       return;
     }
 
+    const continuationError = this.validateFeedbackContinuation(feedbackContext.payload);
+    if (continuationError) {
+      this.interviewError = continuationError;
+      return;
+    }
     const feedbackChronologyPreviousPoints = [
       ...(this.workingStage?.receivedAt
         ? [
@@ -3230,6 +3272,14 @@ export class DemandNewComponent
         return;
       }
 
+    // Revalidate after confirmation to reject stale or duplicate decisions.
+    if (this.isSavingInterview) return;
+    const currentDecision = resolveFeedbackSaveAction(this.demandActionMatrix, feedbackContext.payload.resultCode);
+    const currentContinuationError = this.validateFeedbackContinuation(feedbackContext.payload);
+    if (!currentDecision.enabled || currentContinuationError) {
+      this.interviewError = currentContinuationError ?? currentDecision.message;
+      return;
+    }
     this.isSavingInterview = true;
     this.interviewError = null;
     this.interviewSuccess = null;
@@ -3485,6 +3535,14 @@ export class DemandNewComponent
       : null;
   }
   get workingStage(): any | null {
+    // Una fila consultiva puede pertenecer a otro programa. La selección
+    // explícita nunca concede permisos de escritura por sí misma.
+    if (this.requestedStageId && this.selectedEpisodeId === this.requestedEpisodeId) {
+      const selected = resolveStageById(this.longitudinal?.stages, this.requestedStageId);
+      if (selected) return selected;
+      // No sustituir silenciosamente la etapa solicitada por otra.
+      return null;
+    }
     return resolveWorkingStage(this.longitudinal?.stages, this.tokenService.getActiveProgramId()) ?? this.currentEpisodeStage;
   }
 
@@ -7667,8 +7725,80 @@ export class DemandNewComponent
           '',
       );
 
-      return dateB.localeCompare(dateA);
+      return dateA.localeCompare(dateB);
     });
+  }
+  getAvailableEpisodeStages(episode: any): any[] {
+    const episodeId = episodeIdentity(episode);
+    if (!episodeId || !this.personLongitudinal) {
+      return [];
+    }
+
+    const context = selectEpisodeContext(
+      this.personLongitudinal,
+      episodeId,
+    );
+
+    const uniqueStages = new Map<number, any>();
+
+    for (const stage of context.stages) {
+      const id = Number(stage?.id ?? stage?.stageId);
+      if (Number.isSafeInteger(id) && id > 0) {
+        uniqueStages.set(id, stage);
+      }
+    }
+
+    return [...uniqueStages.values()].sort(
+      (a: any, b: any) =>
+        Number(a.id) - Number(b.id),
+    );
+  }
+  isAvailableStageSelected(episode: any, stage: any): boolean {
+    const episodeId = Number(episode?.id ?? episode?.episodeId);
+    const stageId = Number(stage?.id ?? stage?.stageId);
+
+    return this.selectedEpisodeId === episodeId &&
+      this.workingStageId === stageId;
+  }
+
+  selectAvailableEpisodeStage(episode: any, stage: any): void {
+    if (
+      this.isSavingCitation ||
+      this.isSavingAttendance ||
+      this.isSavingInterview ||
+      this.isSavingObservation ||
+      this.isSavingClosure ||
+      this.isSavingReference ||
+      this.isSavingEpisode ||
+      this.isSavingPerson
+    ) {
+      this.searchError =
+        'Espere a que termine la operación antes de cambiar de etapa.';
+      return;
+    }
+
+    const episodeId = Number(episode?.id ?? episode?.episodeId);
+    const stageId = Number(stage?.id ?? stage?.stageId);
+
+    if (
+      !Number.isSafeInteger(episodeId) ||
+      episodeId <= 0 ||
+      !Number.isSafeInteger(stageId) ||
+      stageId <= 0 ||
+      !this.getAvailableEpisodeStages(episode).some(
+        (item: any) => Number(item?.id ?? item?.stageId) === stageId
+      )
+    ) {
+      return;
+    }
+
+    if (this.requestedEpisodeId !== episodeId) {
+      this.requestedMode = null;
+    }
+
+    this.requestedEpisodeId = episodeId;
+    this.requestedStageId = stageId;
+    this.loadEpisodeLongitudinal(episodeId);
   }
   get openAvailableEpisode(): any | null {
     return this.availableEpisodes.find(
@@ -7680,7 +7810,7 @@ export class DemandNewComponent
   }
 
   get hasMultipleAvailableEpisodes(): boolean {
-    return this.availableEpisodes.length > 1;
+    return this.availableEpisodes.length > 1 || this.availableEpisodes.some((episode) => this.getAvailableEpisodeStages(episode).length > 1);
   }
 
   trackAvailableEpisode(index: number, episode: any): number | string {
@@ -7702,6 +7832,7 @@ export class DemandNewComponent
       this.requestedMode = null;
     }
     this.requestedEpisodeId = episodeId;
+    this.requestedStageId = null;
     this.loadEpisodeLongitudinal(episodeId);
   }
 
@@ -7749,6 +7880,8 @@ export class DemandNewComponent
   get canManageCurrentEpisode(): boolean {
     const role = String(this.tokenService.getActiveRole() ?? '').trim().toUpperCase();
     if (role !== 'ADMINISTRATIVO') return false;
+    if (this.requestedStageId && this.workingStageId !== this.requestedStageId) return false;
+    if (this.requestedStageId && resolveStageProgramId(this.workingStage) !== Number(this.activeProgramId)) return false;
     if (this.isLoadingLongitudinal || this.longitudinalError || this.episodeContextError) return false;
     if (this.hasCurrentEpisode && (
       this.selectedEpisodeId !== episodeIdentity(this.episodeSummary) ||
