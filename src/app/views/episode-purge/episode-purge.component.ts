@@ -585,35 +585,42 @@ export class EpisodePurgeComponent {
 
   private resolveSelectedProgramStageId(): number | null {
     const programId = Number(this.selectedProgramForAdminAction);
+    const episodeId = Number(this.episodeId);
+    const loadedEpisodeId = Number(this.episode?.id ?? this.episode?.episodeId ?? 0);
 
-    if (!programId) {
+    if (!programId || !episodeId || loadedEpisodeId !== episodeId) {
       return null;
     }
 
-    const programStages = Array.isArray(this.longitudinal?.stages)
-      ? this.longitudinal.stages.filter(
-          (stage: any) =>
-            Number(stage?.program?.id ?? stage?.programId ?? 0) === programId,
-        )
+    const stages = Array.isArray(this.longitudinal?.stages)
+      ? this.longitudinal.stages.filter((stage: any) => {
+          const stageId = Number(stage?.id ?? stage?.stageId ?? 0);
+          const stageProgramId = Number(stage?.program?.id ?? stage?.programId ?? 0);
+          const declaredEpisodeId = Number(stage?.episode?.id ?? stage?.episodeId ?? 0);
+          return (
+            stageId > 0 &&
+            stageProgramId === programId &&
+            (declaredEpisodeId === 0 || declaredEpisodeId === episodeId)
+          );
+        })
       : [];
 
-    if (programStages.length === 1) {
-      const stageId = Number(
-        programStages[0]?.id ?? programStages[0]?.stageId ?? 0,
-      );
+    const stageIdOf = (stage: any): number =>
+      Number(stage?.id ?? stage?.stageId ?? 0);
+    const currentStageId = Number(this.episode?.currentStageId ?? this.episode?.currentStage?.id ?? 0);
 
-      return stageId > 0 ? stageId : null;
+    if (currentStageId > 0) {
+      const matches = stages.filter((stage: any) => stageIdOf(stage) === currentStageId);
+      return matches.length === 1 ? currentStageId : null;
     }
 
-    const stageIds = Array.from(
-      new Set(
-        this.correctionEvents
-          .map((event: any) => Number(event?.stageId ?? event?.stage?.id ?? 0))
-          .filter((stageId: number) => stageId > 0),
-      ),
+    // Sin un currentStageId contractual, no usar current=true ni eventos de
+    // correcciÃ³n como prueba de pertenencia a este episodio.
+    const explicitlyLinked = stages.filter(
+      (stage: any) =>
+        Number(stage?.episode?.id ?? stage?.episodeId ?? 0) === episodeId,
     );
-
-    return stageIds.length === 1 ? stageIds[0] : null;
+    return explicitlyLinked.length === 1 ? stageIdOf(explicitlyLinked[0]) : null;
   }
 
   addCorrectionCitation(row: any): void {
@@ -2419,13 +2426,16 @@ export class EpisodePurgeComponent {
               Number(item?.id ?? item?.episodeId ?? 0) === episodeId,
           );
 
-          const episode =
-            response?.episode ??
-            requestedEpisode ??
-            response?.activeEpisode ??
-            (Number(response?.id ?? response?.episodeId ?? 0) === episodeId
-              ? response
-              : null);
+          const candidates = [
+            response?.episode,
+            requestedEpisode,
+            response?.activeEpisode,
+            response,
+          ];
+          const episode = candidates.find(
+            (item: any) =>
+              Number(item?.id ?? item?.episodeId ?? 0) === episodeId,
+          ) ?? null;
 
           if (!episode) {
             this.errorMessage =
