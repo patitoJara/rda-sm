@@ -648,7 +648,7 @@
           [disabled]="
             personForm.invalid ||
             isSavingPerson ||
-            (!!selectedPerson?.id && !canManageCurrentEpisode)
+            (!!selectedPerson?.id && !canEditPerson)
           "
           (click)="savePerson()"
         >
@@ -879,6 +879,17 @@
     <!-- =====================================================
      BOTÓN EXPANDIR DATOS COMPLETOS
     ====================================================== -->
+    <div class="demandant-detail-actions">
+      <button *ngIf="showModifyDemandantButton" mat-flat-button type="button" class="edit-person-btn"
+        [disabled]="!!personEditRestriction" (click)="openEditPersonForm()">
+        <mat-icon>edit</mat-icon><span>Modificar demandante</span>
+      </button>
+      <button mat-stroked-button type="button"
+        *ngIf="isEpisodeViewMode && canEnterEpisodeManagement"
+        [disabled]="isSavingPerson" (click)="enterEpisodeManagement()">Gestionar</button>
+    </div>
+    <p *ngIf="hasCurrentEpisode && personEditRestriction" role="status">{{ personEditRestriction }}</p>
+    <div class="empty-banner" *ngIf="personSaveStatus" role="status">{{ personSaveStatus }}</div>
     <div class="demandant-detail-actions" *ngIf="!showDemandantDetails">
       <button
         mat-stroked-button
@@ -914,7 +925,7 @@
 
           <p>
             {{
-              canManageCurrentEpisode
+              canEditPerson
                 ? "Revise la información antes de decidir si necesita modificarla."
                 : "Toda la información se encuentra disponible exclusivamente para consulta."
             }}
@@ -934,7 +945,7 @@
           </button>
 
           <button
-            *ngIf="canManageCurrentEpisode"
+            *ngIf="canEditPerson"
             mat-flat-button
             type="button"
             class="edit-person-btn"

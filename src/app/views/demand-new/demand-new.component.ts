@@ -55,7 +55,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 
-import { forkJoin, throwError } from 'rxjs';
+import { EMPTY, forkJoin, of, throwError } from 'rxjs';
 import { finalize, map, switchMap } from 'rxjs/operators';
 
 import { ConfirmDialogYesNoComponent } from '@app/shared/confirm-dialog/confirm-dialog-yes-no.component';
@@ -1796,12 +1796,14 @@ export class DemandNewComponent
   }
 
   openEditPersonForm(): void {
+    if (this.isSavingPerson) return;
+    this.personSaveStatus = null;
     if (!this.selectedPerson?.id) {
       this.personSaveError = 'No existe una persona seleccionada para editar.';
       return;
     }
 
-    if (!this.canManageCurrentEpisode) {
+    if (!this.canEditPerson) {
       this.personSaveError = null;
       this.showCreatePersonForm = false;
       return;
@@ -1865,6 +1867,11 @@ export class DemandNewComponent
   }
 
   searchPerson(preserveRequestedEpisode = false): void {
+    if (this.isSavingPerson) {
+      this.searchError = 'Espere a que termine el guardado antes de buscar otra persona.';
+      return;
+    }
+    this.personSaveStatus = null;
     if (!preserveRequestedEpisode) {
       this.requestedEpisodeId = null;
       this.requestedStageId = null;
@@ -2675,8 +2682,10 @@ export class DemandNewComponent
     });
   }
 
+  personSaveStatus: string | null = null;
+
   savePerson(): void {
-    if (this.selectedPerson?.id && !this.canManageCurrentEpisode) {
+    if (this.selectedPerson?.id && !this.canEditPerson) {
       this.personSaveError =
         'La ficha está disponible únicamente en modo consulta.';
       return;
@@ -2687,6 +2696,14 @@ export class DemandNewComponent
       return;
     }
 
+    const operationGeneration = this.contextGeneration;
+    const originalPerson = this.selectedPerson;
+    const originalContactId = Number(this.selectedContact?.id);
+    const isCurrent = () => operationGeneration === this.contextGeneration;
+    let phase: 'person' | 'contact' | 'reload' = 'person';
+    let personSaved = false;
+    let contactSaved = false;
+    this.personSaveStatus = null;
     const raw = this.personForm.getRawValue();
 
     if (!raw.intPrev) {
@@ -2806,9 +2823,9 @@ export class DemandNewComponent
 
     const contactPayload: ContactCreateDto = {
       name: raw.contactName?.trim() ?? '',
-      description: toStringOrNull(raw.contactDescription) ?? undefined,
-      cellphone: toStringOrNull(raw.contactCellphone) ?? undefined,
-      email: toStringOrNull(raw.contactEmail) ?? undefined,
+      description: raw.contactDescription?.trim() ?? '',
+      cellphone: raw.contactCellphone?.trim() ?? '',
+      email: raw.contactEmail?.trim() ?? '',
 
       /*
        * Se asignará el ID definitivo después de guardar
@@ -2834,6 +2851,8 @@ export class DemandNewComponent
          * Después de guardar consultamos el postulante completo.
          */
         switchMap((savedPerson: Postulant) => {
+          if (!isCurrent()) return EMPTY;
+          personSaved = true;
           const savedPersonId = Number(savedPerson?.id ?? existingPersonId);
 
           if (!Number.isFinite(savedPersonId) || savedPersonId <= 0) {
@@ -2845,6 +2864,8 @@ export class DemandNewComponent
             );
           }
 
+          // Retain the persisted identity even if the following contact/GET request fails.
+          this.selectedPerson = { ...(originalPerson ?? {}), ...payload, ...savedPerson, id: savedPersonId };
           const completeContactPayload: ContactCreateDto = {
             ...contactPayload,
             postulantId: savedPersonId,
@@ -2857,13 +2878,17 @@ export class DemandNewComponent
             completeContactPayload.email,
           );
 
-          const existingContactId = Number(this.selectedContact?.id);
+          const existingContactId = originalContactId;
 
+          phase = 'contact';
           if (Number.isFinite(existingContactId) && existingContactId > 0) {
             return this.contactService
               .update(existingContactId, completeContactPayload)
               .pipe(
                 switchMap((savedContact: Contact) => {
+                  if (!isCurrent()) return EMPTY;
+                  contactSaved = true;
+                  phase = 'reload';
                   console.log(
                     '[DemandNew] Contacto actualizado correctamente:',
                     savedContact,
@@ -2879,6 +2904,9 @@ export class DemandNewComponent
           if (hasContactData) {
             return this.contactService.createDto(completeContactPayload).pipe(
               switchMap((savedContact: Contact) => {
+                if (!isCurrent()) return EMPTY;
+                contactSaved = true;
+                phase = 'reload';
                 console.log(
                   '[DemandNew] Contacto creado correctamente:',
                   savedContact,
@@ -2892,8 +2920,18 @@ export class DemandNewComponent
           }
 
           this.selectedContact = null;
-
+          phase = 'reload';
           return this.postulantService.getById(savedPersonId);
+        }),
+        switchMap((fullPostulant: Postulant) => {
+          if (!isCurrent()) return EMPTY;
+          if (!contactSaved) return of(fullPostulant);
+          return this.contactService.getByPostulant(Number(this.selectedPerson?.id)).pipe(
+            map((contact) => {
+              if (isCurrent()) this.selectedContact = contact;
+              return fullPostulant;
+            }),
+          );
         }),
 
         finalize(() => {
@@ -2902,117 +2940,26 @@ export class DemandNewComponent
       )
       .subscribe({
         next: (fullPostulant: Postulant) => {
+          if (!isCurrent()) return;
           console.log(
             '[DemandNew] Persona completa después de guardar:',
             fullPostulant,
           );
 
-          const previousPerson = this.selectedPerson;
-
-          /*
-           * Consolidamos por seguridad.
-           *
-           * GET /postulants/{id} tiene prioridad.
-           * Se conservan relaciones anteriores cuando el GET
-           * no las devuelve, por ejemplo convPrev.
-           */
+          // undefined means absent; null is an explicit server value (including clearing).
+          // The submitted values take precedence over the previous snapshot when GET omits a field.
+          const informedServerValues = Object.fromEntries(
+            Object.entries(fullPostulant).filter(([, value]) => value !== undefined),
+          );
           const updatedPerson: Postulant = {
-            ...(previousPerson ?? {}),
-            ...fullPostulant,
-
-            id: fullPostulant.id ?? previousPerson?.id,
-
-            user: fullPostulant.user ?? previousPerson?.user ?? payload.user,
-
-            commune: {
-              ...(previousPerson?.commune ?? {}),
-              ...(fullPostulant.commune ?? {}),
-
-              id: Number(raw.commune),
-            },
-
-            sex: {
-              ...(previousPerson?.sex ?? {}),
-              ...(fullPostulant.sex ?? {}),
-
-              id: Number(raw.sex),
-            },
-
-            firstName:
-              fullPostulant.firstName ??
-              payload.firstName ??
-              previousPerson?.firstName ??
-              null,
-
-            /*
-             * Segundo nombre del postulante.
-             */
-            lastName:
-              fullPostulant.lastName ??
-              payload.lastName ??
-              previousPerson?.lastName ??
-              null,
-
-            firstLastName:
-              fullPostulant.firstLastName ??
-              payload.firstLastName ??
-              previousPerson?.firstLastName ??
-              null,
-
-            secondLastName:
-              fullPostulant.secondLastName ??
-              payload.secondLastName ??
-              previousPerson?.secondLastName ??
-              null,
-
-            rut:
-              fullPostulant.rut ?? payload.rut ?? previousPerson?.rut ?? null,
-
-            birthdate:
-              fullPostulant.birthdate ??
-              payload.birthdate ??
-              previousPerson?.birthdate ??
-              null,
-
-            email:
-              fullPostulant.email ??
-              payload.email ??
-              previousPerson?.email ??
-              null,
-
-            phone:
-              fullPostulant.phone ??
-              payload.phone ??
-              previousPerson?.phone ??
-              null,
-
-            address:
-              fullPostulant.address ??
-              payload.address ??
-              previousPerson?.address ??
-              null,
-
-            /*
-             * El GET actual puede no devolver convPrev.
-             * Conservamos los datos enviados en el formulario.
-             */
-            convPrev:
-              raw.convPrev && raw.intPrev
-                ? {
-                    ...(previousPerson?.convPrev ?? {}),
-                    ...(fullPostulant.convPrev ?? {}),
-
-                    id: Number(raw.convPrev),
-
-                    intPrev: {
-                      ...(previousPerson?.convPrev?.intPrev ?? {}),
-                      ...(fullPostulant.convPrev?.intPrev ?? {}),
-
-                      id: Number(raw.intPrev),
-                    },
-                  }
-                : (fullPostulant.convPrev ?? previousPerson?.convPrev),
+            ...(originalPerson ?? {}),
+            ...payload,
+            ...informedServerValues,
+            id: fullPostulant.id ?? this.selectedPerson?.id,
           };
+          this.personSaveStatus = contactSaved
+            ? 'Persona y referente guardados y recuperados del servidor.'
+            : 'Persona guardada y recuperada del servidor.';
 
           this.selectedPerson = updatedPerson;
 
@@ -3095,6 +3042,13 @@ export class DemandNewComponent
         },
 
         error: (error) => {
+          if (!isCurrent()) return;
+          if (personSaved) {
+            this.personSaveError = phase === 'contact'
+              ? 'La persona fue guardada, pero falló el guardado del referente. Revise el referente antes de reintentar.'
+              : `La persona${contactSaved ? ' y el referente fueron guardados' : ' fue guardada'}, pero falló la recuperación posterior. Recargue la ficha para verificar los datos persistidos.`;
+            return;
+          }
           console.error(
             '[DemandNew] Error guardando persona o referente de contacto:',
             error,
@@ -7792,9 +7746,8 @@ export class DemandNewComponent
       return;
     }
 
-    if (this.requestedEpisodeId !== episodeId) {
-      this.requestedMode = null;
-    }
+    this.requestedMode = 'view';
+    this.showCreatePersonForm = false;
 
     this.requestedEpisodeId = episodeId;
     this.requestedStageId = stageId;
@@ -7878,6 +7831,48 @@ export class DemandNewComponent
     return this.requestedMode === 'view';
   }
   get canManageCurrentEpisode(): boolean {
+    return this.requestedMode !== 'view' && this.canEnterEpisodeManagement;
+  }
+
+  enterEpisodeManagement(): void {
+    if (this.isSavingPerson || !this.canEnterEpisodeManagement) return;
+    this.requestedMode = 'manage';
+  }
+
+  get personEditRestriction(): string | null {
+    if (this.isSavingPerson) return 'Hay un guardado en curso.';
+    if (this.canEditPerson) return null;
+    if (String(this.tokenService.getActiveRole() ?? '').trim().toUpperCase() !== 'ADMINISTRATIVO')
+      return 'El perfil activo tiene acceso de consulta; se requiere el perfil Administrativo.';
+    if (this.isHistoricalEpisode) return 'No se ha verificado la vinculación histórica del programa activo con este episodio.';
+    if (this.isLoadingLongitudinal) return 'Espere a que termine la carga del episodio.';
+    if (this.canEnterEpisodeManagement && this.isEpisodeViewMode)
+      return 'Está en modo consulta. Seleccione Gestionar para habilitar la modificación.';
+    return 'La etapa y el programa activo no tienen un contexto compatible habilitado para gestión.';
+  }
+
+  // R06: editar a la persona no concede gestión sobre un episodio cerrado.
+  get canEditPerson(): boolean {
+    if (!this.selectedPerson?.id) return false;
+    if (!this.hasCurrentEpisode || !this.isHistoricalEpisode) {
+      return this.canManageCurrentEpisode;
+    }
+    const role = String(this.tokenService.getActiveRole() ?? '').trim().toUpperCase();
+    const programId = Number(this.activeProgramId);
+    if (role !== 'ADMINISTRATIVO' || !Number.isSafeInteger(programId) || programId <= 0) return false;
+    if (this.isLoadingLongitudinal || this.longitudinalError || this.episodeContextError) return false;
+    const episodeId = this.selectedEpisodeId;
+    if (!episodeId || episodeId !== episodeIdentity(this.episodeSummary) ||
+        episodeId !== episodeIdentity(this.createdEpisode) || this.selectedContext.issues.length) return false;
+    // selectEpisodeContext ya verifica la pertenencia de cada etapa al episodio.
+    return this.selectedContext.stages.some(stage => resolveStageProgramId(stage) === programId);
+  }
+
+  get showModifyDemandantButton(): boolean {
+    return this.hasCurrentEpisode && this.canEditPerson;
+  }
+
+  get canEnterEpisodeManagement(): boolean {
     const role = String(this.tokenService.getActiveRole() ?? '').trim().toUpperCase();
     if (role !== 'ADMINISTRATIVO') return false;
     if (this.requestedStageId && this.workingStageId !== this.requestedStageId) return false;
@@ -7890,7 +7885,6 @@ export class DemandNewComponent
       Number(this.currentProgramContext?.stageId) !== this.workingStageId
     )) return false;
     if (
-      this.requestedMode === 'view' ||
       this.isHistoricalEpisode
     ) {
       return false;
