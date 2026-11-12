@@ -6,6 +6,8 @@ import {
   resolveOperationalEventDate,
   resolveWorkingStage,
   resolveWorkingStageId,
+  resolveStageById,
+  resolveStageProgramId,
 } from './utils/demand-new-stage.utils';
 import { DEMAND_CITATION_CODES } from '../../shared/utils/demand-workflow.utils';
 import { CommonModule } from '@angular/common';
@@ -53,7 +55,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 
-import { forkJoin, throwError } from 'rxjs';
+import { EMPTY, forkJoin, of, throwError } from 'rxjs';
 import { finalize, map, switchMap } from 'rxjs/operators';
 
 import { ConfirmDialogYesNoComponent } from '@app/shared/confirm-dialog/confirm-dialog-yes-no.component';
@@ -321,6 +323,7 @@ export class DemandNewComponent
     return valid;
   }
   private requestedMode: 'view' | 'manage' | null = null;
+  private requestedStageId: number | null = null;
 
   searchForm = this.fb.group({
     rut: ['', [Validators.required, rutValidator()]],
@@ -378,7 +381,9 @@ export class DemandNewComponent
   ]);
 
   get availableFeedbackResults(): any[] {
-    return this.results;
+    return this.demandActionMatrix.scenario === 'FEEDBACK_WAITING_LIST'
+      ? this.results.filter((item: any) => normalizeText(item?.code ?? '') === 'REFERENCIA')
+      : this.results;
   }
 
   interviewForm = this.fb.group({
@@ -942,6 +947,7 @@ export class DemandNewComponent
       pendingCitationCount,
       firstInterviewCompleted,
       feedbackResults,
+      feedbackCount: this.feedbackEvents.length,
       referenceExecuted,
       closureResult: null,
     });
@@ -1106,7 +1112,11 @@ export class DemandNewComponent
     const queryParamMap = this.route.snapshot.queryParamMap;
     const requestedRut = formatRut(queryParamMap.get('rut'));
     const requestedEpisodeId = Number(queryParamMap.get('episodeId'));
+    const stageParam = queryParamMap.get('stageId');
+    const requestedStageId = stageParam === null ? NaN : Number(stageParam);
     const requestedMode = queryParamMap.get('mode');
+    this.requestedStageId = Number.isSafeInteger(requestedStageId) && requestedStageId > 0
+      ? requestedStageId : null;
 
     this.requestedEpisodeId =
       Number.isFinite(requestedEpisodeId) && requestedEpisodeId > 0
@@ -1126,24 +1136,10 @@ export class DemandNewComponent
      * Si el usuario cambia el RUN mientras existe una ficha cargada,
      * se limpia la vista anterior sin salir del frontend.
      */
-    this.searchForm.controls.rut.valueChanges.subscribe((value) => {
-      if (!this.selectedPerson) {
-        return;
-      }
-
-      const enteredRut = formatRut(String(value ?? ''));
-      const loadedRut = formatRut(String(this.selectedPerson.rut ?? ''));
-
-      if (enteredRut !== loadedRut) {
-        ++this.contextGeneration;
-        this.personLongitudinal = null;
-        this.requestedEpisodeId = null;
-        this.isSearching = false;
-        this.isLoadingLongitudinal = false;
-        this.clearSelectedEpisode();
-        resetLoadedDemandView(this);
-      }
-    });
+    /* RDA-ENC-001-RECUPERACION-RUN
+   La persona cargada se conserva mientras se edita el RUN.
+   searchPerson() efectua el cambio de contexto al buscar.
+*/
 
     /*
      * Cuando el usuario cambia manualmente el tipo de previsión,
@@ -1800,12 +1796,14 @@ export class DemandNewComponent
   }
 
   openEditPersonForm(): void {
+    if (this.isSavingPerson) return;
+    this.personSaveStatus = null;
     if (!this.selectedPerson?.id) {
       this.personSaveError = 'No existe una persona seleccionada para editar.';
       return;
     }
 
-    if (!this.canManageCurrentEpisode) {
+    if (!this.canEditPerson) {
       this.personSaveError = null;
       this.showCreatePersonForm = false;
       return;
@@ -1869,8 +1867,14 @@ export class DemandNewComponent
   }
 
   searchPerson(preserveRequestedEpisode = false): void {
+    if (this.isSavingPerson) {
+      this.searchError = 'Espere a que termine el guardado antes de buscar otra persona.';
+      return;
+    }
+    this.personSaveStatus = null;
     if (!preserveRequestedEpisode) {
       this.requestedEpisodeId = null;
+      this.requestedStageId = null;
       this.requestedMode = null;
     }
     this.showDemandantDetails = false;
@@ -2514,7 +2518,27 @@ export class DemandNewComponent
     const activeProgramId = Number(this.tokenService.getActiveProgramId());
 
     if (!Number.isFinite(activeProgramId) || activeProgramId <= 0) {
-      this.episodeSaveError = 'No fue posible identificar el programa activo.';
+      // RDA-ENC-001-M01: advertencia institucional
+      this.episodeSaveError = null;
+
+      if (!this.dialog.getDialogById('rda-enc-001-no-program')) {
+        this.dialog.open(ConfirmDialogOkComponent, {
+          id: 'rda-enc-001-no-program',
+          width: '460px',
+          maxWidth: '95vw',
+          disableClose: true,
+          panelClass: 'rda-confirm-dialog',
+          backdropClass: 'app-backdrop',
+          data: {
+            title: 'Acción no permitida',
+            message:
+              'El perfil actual no tiene un programa activo habilitado para crear episodios de demanda. Selecciona un perfil asociado a un programa para continuar.',
+            confirmText: 'Aceptar',
+            icon: 'warning',
+            color: 'warn',
+          },
+        });
+      }
       return;
     }
 
@@ -2658,8 +2682,10 @@ export class DemandNewComponent
     });
   }
 
+  personSaveStatus: string | null = null;
+
   savePerson(): void {
-    if (this.selectedPerson?.id && !this.canManageCurrentEpisode) {
+    if (this.selectedPerson?.id && !this.canEditPerson) {
       this.personSaveError =
         'La ficha está disponible únicamente en modo consulta.';
       return;
@@ -2670,6 +2696,14 @@ export class DemandNewComponent
       return;
     }
 
+    const operationGeneration = this.contextGeneration;
+    const originalPerson = this.selectedPerson;
+    const originalContactId = Number(this.selectedContact?.id);
+    const isCurrent = () => operationGeneration === this.contextGeneration;
+    let phase: 'person' | 'contact' | 'reload' = 'person';
+    let personSaved = false;
+    let contactSaved = false;
+    this.personSaveStatus = null;
     const raw = this.personForm.getRawValue();
 
     if (!raw.intPrev) {
@@ -2789,9 +2823,9 @@ export class DemandNewComponent
 
     const contactPayload: ContactCreateDto = {
       name: raw.contactName?.trim() ?? '',
-      description: toStringOrNull(raw.contactDescription) ?? undefined,
-      cellphone: toStringOrNull(raw.contactCellphone) ?? undefined,
-      email: toStringOrNull(raw.contactEmail) ?? undefined,
+      description: raw.contactDescription?.trim() ?? '',
+      cellphone: raw.contactCellphone?.trim() ?? '',
+      email: raw.contactEmail?.trim() ?? '',
 
       /*
        * Se asignará el ID definitivo después de guardar
@@ -2817,6 +2851,8 @@ export class DemandNewComponent
          * Después de guardar consultamos el postulante completo.
          */
         switchMap((savedPerson: Postulant) => {
+          if (!isCurrent()) return EMPTY;
+          personSaved = true;
           const savedPersonId = Number(savedPerson?.id ?? existingPersonId);
 
           if (!Number.isFinite(savedPersonId) || savedPersonId <= 0) {
@@ -2828,6 +2864,8 @@ export class DemandNewComponent
             );
           }
 
+          // Retain the persisted identity even if the following contact/GET request fails.
+          this.selectedPerson = { ...(originalPerson ?? {}), ...payload, ...savedPerson, id: savedPersonId };
           const completeContactPayload: ContactCreateDto = {
             ...contactPayload,
             postulantId: savedPersonId,
@@ -2840,13 +2878,17 @@ export class DemandNewComponent
             completeContactPayload.email,
           );
 
-          const existingContactId = Number(this.selectedContact?.id);
+          const existingContactId = originalContactId;
 
+          phase = 'contact';
           if (Number.isFinite(existingContactId) && existingContactId > 0) {
             return this.contactService
               .update(existingContactId, completeContactPayload)
               .pipe(
                 switchMap((savedContact: Contact) => {
+                  if (!isCurrent()) return EMPTY;
+                  contactSaved = true;
+                  phase = 'reload';
                   console.log(
                     '[DemandNew] Contacto actualizado correctamente:',
                     savedContact,
@@ -2862,6 +2904,9 @@ export class DemandNewComponent
           if (hasContactData) {
             return this.contactService.createDto(completeContactPayload).pipe(
               switchMap((savedContact: Contact) => {
+                if (!isCurrent()) return EMPTY;
+                contactSaved = true;
+                phase = 'reload';
                 console.log(
                   '[DemandNew] Contacto creado correctamente:',
                   savedContact,
@@ -2875,8 +2920,18 @@ export class DemandNewComponent
           }
 
           this.selectedContact = null;
-
+          phase = 'reload';
           return this.postulantService.getById(savedPersonId);
+        }),
+        switchMap((fullPostulant: Postulant) => {
+          if (!isCurrent()) return EMPTY;
+          if (!contactSaved) return of(fullPostulant);
+          return this.contactService.getByPostulant(Number(this.selectedPerson?.id)).pipe(
+            map((contact) => {
+              if (isCurrent()) this.selectedContact = contact;
+              return fullPostulant;
+            }),
+          );
         }),
 
         finalize(() => {
@@ -2885,117 +2940,26 @@ export class DemandNewComponent
       )
       .subscribe({
         next: (fullPostulant: Postulant) => {
+          if (!isCurrent()) return;
           console.log(
             '[DemandNew] Persona completa después de guardar:',
             fullPostulant,
           );
 
-          const previousPerson = this.selectedPerson;
-
-          /*
-           * Consolidamos por seguridad.
-           *
-           * GET /postulants/{id} tiene prioridad.
-           * Se conservan relaciones anteriores cuando el GET
-           * no las devuelve, por ejemplo convPrev.
-           */
+          // undefined means absent; null is an explicit server value (including clearing).
+          // The submitted values take precedence over the previous snapshot when GET omits a field.
+          const informedServerValues = Object.fromEntries(
+            Object.entries(fullPostulant).filter(([, value]) => value !== undefined),
+          );
           const updatedPerson: Postulant = {
-            ...(previousPerson ?? {}),
-            ...fullPostulant,
-
-            id: fullPostulant.id ?? previousPerson?.id,
-
-            user: fullPostulant.user ?? previousPerson?.user ?? payload.user,
-
-            commune: {
-              ...(previousPerson?.commune ?? {}),
-              ...(fullPostulant.commune ?? {}),
-
-              id: Number(raw.commune),
-            },
-
-            sex: {
-              ...(previousPerson?.sex ?? {}),
-              ...(fullPostulant.sex ?? {}),
-
-              id: Number(raw.sex),
-            },
-
-            firstName:
-              fullPostulant.firstName ??
-              payload.firstName ??
-              previousPerson?.firstName ??
-              null,
-
-            /*
-             * Segundo nombre del postulante.
-             */
-            lastName:
-              fullPostulant.lastName ??
-              payload.lastName ??
-              previousPerson?.lastName ??
-              null,
-
-            firstLastName:
-              fullPostulant.firstLastName ??
-              payload.firstLastName ??
-              previousPerson?.firstLastName ??
-              null,
-
-            secondLastName:
-              fullPostulant.secondLastName ??
-              payload.secondLastName ??
-              previousPerson?.secondLastName ??
-              null,
-
-            rut:
-              fullPostulant.rut ?? payload.rut ?? previousPerson?.rut ?? null,
-
-            birthdate:
-              fullPostulant.birthdate ??
-              payload.birthdate ??
-              previousPerson?.birthdate ??
-              null,
-
-            email:
-              fullPostulant.email ??
-              payload.email ??
-              previousPerson?.email ??
-              null,
-
-            phone:
-              fullPostulant.phone ??
-              payload.phone ??
-              previousPerson?.phone ??
-              null,
-
-            address:
-              fullPostulant.address ??
-              payload.address ??
-              previousPerson?.address ??
-              null,
-
-            /*
-             * El GET actual puede no devolver convPrev.
-             * Conservamos los datos enviados en el formulario.
-             */
-            convPrev:
-              raw.convPrev && raw.intPrev
-                ? {
-                    ...(previousPerson?.convPrev ?? {}),
-                    ...(fullPostulant.convPrev ?? {}),
-
-                    id: Number(raw.convPrev),
-
-                    intPrev: {
-                      ...(previousPerson?.convPrev?.intPrev ?? {}),
-                      ...(fullPostulant.convPrev?.intPrev ?? {}),
-
-                      id: Number(raw.intPrev),
-                    },
-                  }
-                : (fullPostulant.convPrev ?? previousPerson?.convPrev),
+            ...(originalPerson ?? {}),
+            ...payload,
+            ...informedServerValues,
+            id: fullPostulant.id ?? this.selectedPerson?.id,
           };
+          this.personSaveStatus = contactSaved
+            ? 'Persona y referente guardados y recuperados del servidor.'
+            : 'Persona guardada y recuperada del servidor.';
 
           this.selectedPerson = updatedPerson;
 
@@ -3078,6 +3042,13 @@ export class DemandNewComponent
         },
 
         error: (error) => {
+          if (!isCurrent()) return;
+          if (personSaved) {
+            this.personSaveError = phase === 'contact'
+              ? 'La persona fue guardada, pero falló el guardado del referente. Revise el referente antes de reintentar.'
+              : `La persona${contactSaved ? ' y el referente fueron guardados' : ' fue guardada'}, pero falló la recuperación posterior. Recargue la ficha para verificar los datos persistidos.`;
+            return;
+          }
           console.error(
             '[DemandNew] Error guardando persona o referente de contacto:',
             error,
@@ -3116,6 +3087,26 @@ export class DemandNewComponent
             'No fue posible guardar todos los datos de la persona y su referente de contacto.';
         },
       });
+  }
+
+  private validateFeedbackContinuation(payload: { resultCode: string; eventDate: string; eventTime: string }): string | null {
+    const previous = this.feedbackEvents;
+    if (!previous.length) return null;
+    const decision = resolveFeedbackSaveAction(this.demandActionMatrix, payload.resultCode);
+    if (!decision.enabled) return decision.message ?? 'No se permite otra retroalimentación.';
+    const original = previous[0];
+    if (previous.length !== 1 || !original?.id || !original?.eventDate ||
+        !/^([01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(String(original?.eventTime ?? original?.eventHour ?? ''))) {
+      return 'No es posible verificar la fecha y hora de la retroalimentación original.';
+    }
+    const validation = validateDemandChronology({
+      current: { type: 'FEEDBACK', label: 'Referencia', date: payload.eventDate, time: payload.eventTime },
+      previousPoints: [{ type: 'FEEDBACK', label: 'la retroalimentación Lista de espera',
+        date: original.eventDate, time: original.eventTime ?? original.eventHour }],
+    });
+    return !validation.previousPoint
+      ? 'No es posible verificar la fecha de la retroalimentación original.'
+      : validation.valid ? null : validation.errorMessage;
   }
 
   saveInterview(): void {
@@ -3167,6 +3158,11 @@ export class DemandNewComponent
       return;
     }
 
+    const continuationError = this.validateFeedbackContinuation(feedbackContext.payload);
+    if (continuationError) {
+      this.interviewError = continuationError;
+      return;
+    }
     const feedbackChronologyPreviousPoints = [
       ...(this.workingStage?.receivedAt
         ? [
@@ -3230,6 +3226,14 @@ export class DemandNewComponent
         return;
       }
 
+    // Revalidate after confirmation to reject stale or duplicate decisions.
+    if (this.isSavingInterview) return;
+    const currentDecision = resolveFeedbackSaveAction(this.demandActionMatrix, feedbackContext.payload.resultCode);
+    const currentContinuationError = this.validateFeedbackContinuation(feedbackContext.payload);
+    if (!currentDecision.enabled || currentContinuationError) {
+      this.interviewError = currentContinuationError ?? currentDecision.message;
+      return;
+    }
     this.isSavingInterview = true;
     this.interviewError = null;
     this.interviewSuccess = null;
@@ -3485,6 +3489,14 @@ export class DemandNewComponent
       : null;
   }
   get workingStage(): any | null {
+    // Una fila consultiva puede pertenecer a otro programa. La selección
+    // explícita nunca concede permisos de escritura por sí misma.
+    if (this.requestedStageId && this.selectedEpisodeId === this.requestedEpisodeId) {
+      const selected = resolveStageById(this.longitudinal?.stages, this.requestedStageId);
+      if (selected) return selected;
+      // No sustituir silenciosamente la etapa solicitada por otra.
+      return null;
+    }
     return resolveWorkingStage(this.longitudinal?.stages, this.tokenService.getActiveProgramId()) ?? this.currentEpisodeStage;
   }
 
@@ -7667,8 +7679,79 @@ export class DemandNewComponent
           '',
       );
 
-      return dateB.localeCompare(dateA);
+      return dateA.localeCompare(dateB);
     });
+  }
+  getAvailableEpisodeStages(episode: any): any[] {
+    const episodeId = episodeIdentity(episode);
+    if (!episodeId || !this.personLongitudinal) {
+      return [];
+    }
+
+    const context = selectEpisodeContext(
+      this.personLongitudinal,
+      episodeId,
+    );
+
+    const uniqueStages = new Map<number, any>();
+
+    for (const stage of context.stages) {
+      const id = Number(stage?.id ?? stage?.stageId);
+      if (Number.isSafeInteger(id) && id > 0) {
+        uniqueStages.set(id, stage);
+      }
+    }
+
+    return [...uniqueStages.values()].sort(
+      (a: any, b: any) =>
+        Number(a.id) - Number(b.id),
+    );
+  }
+  isAvailableStageSelected(episode: any, stage: any): boolean {
+    const episodeId = Number(episode?.id ?? episode?.episodeId);
+    const stageId = Number(stage?.id ?? stage?.stageId);
+
+    return this.selectedEpisodeId === episodeId &&
+      this.workingStageId === stageId;
+  }
+
+  selectAvailableEpisodeStage(episode: any, stage: any): void {
+    if (
+      this.isSavingCitation ||
+      this.isSavingAttendance ||
+      this.isSavingInterview ||
+      this.isSavingObservation ||
+      this.isSavingClosure ||
+      this.isSavingReference ||
+      this.isSavingEpisode ||
+      this.isSavingPerson
+    ) {
+      this.searchError =
+        'Espere a que termine la operación antes de cambiar de etapa.';
+      return;
+    }
+
+    const episodeId = Number(episode?.id ?? episode?.episodeId);
+    const stageId = Number(stage?.id ?? stage?.stageId);
+
+    if (
+      !Number.isSafeInteger(episodeId) ||
+      episodeId <= 0 ||
+      !Number.isSafeInteger(stageId) ||
+      stageId <= 0 ||
+      !this.getAvailableEpisodeStages(episode).some(
+        (item: any) => Number(item?.id ?? item?.stageId) === stageId
+      )
+    ) {
+      return;
+    }
+
+    this.requestedMode = 'view';
+    this.showCreatePersonForm = false;
+
+    this.requestedEpisodeId = episodeId;
+    this.requestedStageId = stageId;
+    this.loadEpisodeLongitudinal(episodeId);
   }
   get openAvailableEpisode(): any | null {
     return this.availableEpisodes.find(
@@ -7680,7 +7763,7 @@ export class DemandNewComponent
   }
 
   get hasMultipleAvailableEpisodes(): boolean {
-    return this.availableEpisodes.length > 1;
+    return this.availableEpisodes.length > 1 || this.availableEpisodes.some((episode) => this.getAvailableEpisodeStages(episode).length > 1);
   }
 
   trackAvailableEpisode(index: number, episode: any): number | string {
@@ -7702,6 +7785,7 @@ export class DemandNewComponent
       this.requestedMode = null;
     }
     this.requestedEpisodeId = episodeId;
+    this.requestedStageId = null;
     this.loadEpisodeLongitudinal(episodeId);
   }
 
@@ -7747,8 +7831,52 @@ export class DemandNewComponent
     return this.requestedMode === 'view';
   }
   get canManageCurrentEpisode(): boolean {
+    return this.requestedMode !== 'view' && this.canEnterEpisodeManagement;
+  }
+
+  enterEpisodeManagement(): void {
+    if (this.isSavingPerson || !this.canEnterEpisodeManagement) return;
+    this.requestedMode = 'manage';
+  }
+
+  get personEditRestriction(): string | null {
+    if (this.isSavingPerson) return 'Hay un guardado en curso.';
+    if (this.canEditPerson) return null;
+    if (String(this.tokenService.getActiveRole() ?? '').trim().toUpperCase() !== 'ADMINISTRATIVO')
+      return 'El perfil activo tiene acceso de consulta; se requiere el perfil Administrativo.';
+    if (this.isHistoricalEpisode) return 'No se ha verificado la vinculación histórica del programa activo con este episodio.';
+    if (this.isLoadingLongitudinal) return 'Espere a que termine la carga del episodio.';
+    if (this.canEnterEpisodeManagement && this.isEpisodeViewMode)
+      return 'Está en modo consulta. Seleccione Gestionar para habilitar la modificación.';
+    return 'La etapa y el programa activo no tienen un contexto compatible habilitado para gestión.';
+  }
+
+  // R06: editar a la persona no concede gestión sobre un episodio cerrado.
+  get canEditPerson(): boolean {
+    if (!this.selectedPerson?.id) return false;
+    if (!this.hasCurrentEpisode || !this.isHistoricalEpisode) {
+      return this.canManageCurrentEpisode;
+    }
+    const role = String(this.tokenService.getActiveRole() ?? '').trim().toUpperCase();
+    const programId = Number(this.activeProgramId);
+    if (role !== 'ADMINISTRATIVO' || !Number.isSafeInteger(programId) || programId <= 0) return false;
+    if (this.isLoadingLongitudinal || this.longitudinalError || this.episodeContextError) return false;
+    const episodeId = this.selectedEpisodeId;
+    if (!episodeId || episodeId !== episodeIdentity(this.episodeSummary) ||
+        episodeId !== episodeIdentity(this.createdEpisode) || this.selectedContext.issues.length) return false;
+    // selectEpisodeContext ya verifica la pertenencia de cada etapa al episodio.
+    return this.selectedContext.stages.some(stage => resolveStageProgramId(stage) === programId);
+  }
+
+  get showModifyDemandantButton(): boolean {
+    return this.hasCurrentEpisode && this.canEditPerson;
+  }
+
+  get canEnterEpisodeManagement(): boolean {
     const role = String(this.tokenService.getActiveRole() ?? '').trim().toUpperCase();
     if (role !== 'ADMINISTRATIVO') return false;
+    if (this.requestedStageId && this.workingStageId !== this.requestedStageId) return false;
+    if (this.requestedStageId && resolveStageProgramId(this.workingStage) !== Number(this.activeProgramId)) return false;
     if (this.isLoadingLongitudinal || this.longitudinalError || this.episodeContextError) return false;
     if (this.hasCurrentEpisode && (
       this.selectedEpisodeId !== episodeIdentity(this.episodeSummary) ||
@@ -7757,7 +7885,6 @@ export class DemandNewComponent
       Number(this.currentProgramContext?.stageId) !== this.workingStageId
     )) return false;
     if (
-      this.requestedMode === 'view' ||
       this.isHistoricalEpisode
     ) {
       return false;
