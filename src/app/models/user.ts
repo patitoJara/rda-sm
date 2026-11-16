@@ -19,6 +19,8 @@ export interface User {
   createdAt?: string | null;
   updatedAt?: string | null;
   deletedAt?: string | null;
+  /** Habilitación operativa; independiente del borrado lógico. */
+  active?: boolean;
 
   programs?: Program[];
   roles?: Role[];

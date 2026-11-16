@@ -21,6 +21,17 @@ export interface FeedbackContextInput {
   raw: any;
   programId: number | string;
   longitudinal: any;
+  commitmentLevels?: { code: string; name: string }[];
+}
+
+export function isMildCommitment(
+  code: unknown,
+  levels: { code: string; name: string }[] = [],
+): boolean {
+  const normalize = (value: unknown) => String(value ?? '').trim().toUpperCase();
+  if (!normalize(code)) return false;
+  const selected = levels.find((item) => normalize(item.code) === normalize(code));
+  return !!selected && (normalize(selected.code) === 'LEVE' || normalize(selected.name) === 'LEVE');
 }
 
 export interface FeedbackPayload {
@@ -46,6 +57,7 @@ export type FeedbackContextResult =
     };
 
 const allowedResultCodes = new Set([
+  'NO_ES_PERFIL',
   'LISTA_ESPERA',
   'INGRESO_TRATAMIENTO',
   'REFERENCIA',
@@ -105,6 +117,10 @@ export function buildFeedbackContext(
     };
   }
 
+  if (resultCode === 'NO_ES_PERFIL' && !isMildCommitment(commitmentCode, input.commitmentLevels)) {
+    return { valid: false, errorMessage: 'No es perfil requiere clasificación psicosocial Leve.' };
+  }
+
   const stageId =
     resolveWorkingStageId(longitudinal?.stages, programId);
 
@@ -146,6 +162,7 @@ export function buildFeedbackConfirmation(
     .toUpperCase();
 
   const resultNameMap: Record<string, string> = {
+    NO_ES_PERFIL: 'No es perfil',
     LISTA_ESPERA: 'Lista de espera',
     REFERENCIA: 'Referencia',
     INGRESO_TRATAMIENTO: 'Ingreso a tratamiento',
@@ -154,6 +171,7 @@ export function buildFeedbackConfirmation(
   };
 
   const effectMap: Record<string, string> = {
+    NO_ES_PERFIL: 'El cierre formal del episodio se registra posteriormente con la causal No es perfil.',
     LISTA_ESPERA:
       'La demanda permanecerá abierta en el programa actual y continuará el conteo de días.',
     REFERENCIA:

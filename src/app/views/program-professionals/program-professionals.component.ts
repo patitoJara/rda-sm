@@ -25,7 +25,7 @@ import { ProfessionService } from '../../services/profession.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
 
-type StatusFilter = 'ACTIVE' | 'DELETED' | 'ALL';
+type StatusFilter = 'ACTIVE' | 'INACTIVE' | 'DELETED' | 'ALL';
 
 interface CatalogOption {
   id: number;
@@ -108,6 +108,7 @@ export class ProgramProfessionalsComponent implements OnInit {
   showForm = false;
   isLoading = false;
   isSaving = false;
+  isChangingStatus = false;
 
   readonly filtersForm = this.fb.group({
     search: [''],
@@ -172,7 +173,7 @@ export class ProgramProfessionalsComponent implements OnInit {
         response = await firstValueFrom(
           this.programProfessionalService.getDeleted(),
         );
-      } else if (status === 'ALL') {
+      } else if (status === 'ALL' || status === 'INACTIVE') {
         response = await firstValueFrom(
           this.programProfessionalService.getAll(),
         );
@@ -397,7 +398,7 @@ export class ProgramProfessionalsComponent implements OnInit {
       email: raw.email?.trim() || null,
       phone: this.buildPhoneNumber(raw.phone),
       observation: raw.observation?.trim() || null,
-      active: true,
+      active: this.selectedProfessional?.active === false ? false : true,
       programIds: (raw.programIds ?? []).map((id) => Number(id)),
     };
 
@@ -441,6 +442,86 @@ export class ProgramProfessionalsComponent implements OnInit {
     }
   }
 
+  async changeActiveStatus(professional: ProgramProfessional): Promise<void> {
+    const id = Number(professional?.id);
+    if (!Number.isSafeInteger(id) || id <= 0 ||
+        professional.deletedAt || this.isLoading ||
+        this.isSaving || this.isChangingStatus) {
+      return;
+    }
+
+    const activating = professional.active === false;
+    const action = activating ? 'Activar' : 'Inactivar';
+
+    const confirmed = await this.confirmAction(
+      `${action} facultativo`,
+      `¿Deseas ${action.toLowerCase()} a “${professional.name}” (ID: ${id})?`,
+      action,
+      activating ? 'primary' : 'warn',
+      activating ? 'check_circle' : 'block',
+    );
+    if (!confirmed) return;
+
+    this.isChangingStatus = true;
+    try {
+      const current = this.normalizeProfessional(
+        await firstValueFrom(this.programProfessionalService.findById(id)),
+      );
+
+      if (current.id !== id || current.deletedAt ||
+          (current.active === false) !==
+          (professional.active === false)) {
+        throw new Error('El estado cambió. Recarga el listado.');
+      }
+
+      const programIds = [...new Set(current.programIds)];
+      const professionId = Number(current.professionId);
+
+      if (!Number.isSafeInteger(professionId) ||
+          professionId <= 0 ||
+          !programIds.length ||
+          programIds.some(id => !Number.isSafeInteger(id) || id <= 0)) {
+        throw new Error(
+          'Profesión o programas incompletos. Operación bloqueada.',
+        );
+      }
+
+      await firstValueFrom(
+        this.programProfessionalService.update(id, {
+          name: current.name,
+          professionId,
+          email: current.email ?? null,
+          phone: current.phone ?? null,
+          observation: current.observation ?? null,
+          active: activating,
+          programIds,
+        }),
+      );
+
+      const verified = this.normalizeProfessional(
+        await firstValueFrom(this.programProfessionalService.findById(id)),
+      );
+
+      const samePrograms =
+        [...verified.programIds].sort((a, b) => a - b).join(',') ===
+        [...programIds].sort((a, b) => a - b).join(',');
+
+      if (verified.active !== activating ||
+          verified.professionId !== professionId ||
+          !samePrograms) {
+        throw new Error(
+          'Verificación posterior no conforme. Revisar relaciones.',
+        );
+      }
+
+      await this.loadProfessionals();
+    } catch (error) {
+      console.error(`No fue posible ${action.toLowerCase()} facultativo`, error);
+      alert('No se pudo completar o verificar el cambio. Revisa el registro antes de reintentar.');
+    } finally {
+      this.isChangingStatus = false;
+    }
+  }
   async delete(professional: ProgramProfessional): Promise<void> {
     if (!professional?.id) {
       return;
@@ -712,7 +793,7 @@ export class ProgramProfessionalsComponent implements OnInit {
         return professional.email || professional.phone || '';
 
       case 'status':
-        return professional.deletedAt ? 'Eliminado' : 'Activo';
+        return professional.deletedAt ? 'Eliminado' : professional.active === false ? 'Inactivo' : 'Activo';
 
       default:
         return professional.name ?? '';
@@ -730,7 +811,8 @@ export class ProgramProfessionalsComponent implements OnInit {
 
       const matchesStatus =
         status === 'ALL' ||
-        (status === 'ACTIVE' && !professional.deletedAt) ||
+        (status === 'ACTIVE' && !professional.deletedAt && professional.active !== false) ||
+        (status === 'INACTIVE' && !professional.deletedAt && professional.active === false) ||
         (status === 'DELETED' && !!professional.deletedAt);
 
       const matchesProgram =

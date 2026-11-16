@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { isMildCommitment } from '../../actions/demand-new-interview.actions';
 import {
   Component,
   EventEmitter,
@@ -64,6 +65,10 @@ export class FeedbackPanelComponent {
   @Output() professionalChange = new EventEmitter<number | null>();
   @Output() hourBlur = new EventEmitter<void>();
 
+  get isMildCommitmentSelected(): boolean {
+    return isMildCommitment(this.form?.get('biopsychosocialCommitmentCode')?.value, this.commitmentLevels);
+  }
+
   get selectedResultHelp(): FeedbackResultHelp {
     const selectedCode = this.form?.get('resultCode')?.value;
 
@@ -122,6 +127,15 @@ export class FeedbackPanelComponent {
         title: 'Destino de red externa',
         message:
           'El cierre del programa actual y del episodio se formaliza posteriormente, seleccionando una causal externa o Abandono.',
+        tone: 'warning',
+      };
+    }
+
+    if (selectedCode === 'NO_ES_PERFIL') {
+      return {
+        icon: 'info',
+        title: 'No es perfil',
+        message: 'El cierre formal del episodio se registra posteriormente con la causal No es perfil.',
         tone: 'warning',
       };
     }

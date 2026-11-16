@@ -43,6 +43,16 @@ export class UsersService {
     return this.http.put<User>(`${this.resourceUrl}/${id}`, user);
   }
 
+  /** No modifica roles, programas ni borrado lógico. */
+  setActive(id: number, active: boolean): Observable<void> {
+    return this.http.patch<void>(`${this.resourceUrl}/${id}/active`, { active });
+  }
+
+  /** No modifica otros datos ni relaciones del usuario. */
+  updateEmail(id: number, email: string): Observable<void> {
+    return this.http.patch<void>(`${this.resourceUrl}/${id}/email`, { email });
+  }
+
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.resourceUrl}/${id}`);
   }

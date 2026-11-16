@@ -185,6 +185,7 @@ import {
 } from './actions/demand-new-reference.actions';
 import {
   buildFeedbackContext,
+  isMildCommitment,
   handleFeedbackSuccess,
 } from './actions/demand-new-interview.actions';
 import {
@@ -373,6 +374,7 @@ export class DemandNewComponent
   });
 
   readonly allowedFeedbackResultCodes = new Set([
+    'NO_ES_PERFIL',
     'LISTA_ESPERA',
     'INGRESO_TRATAMIENTO',
     'REFERENCIA',
@@ -383,7 +385,13 @@ export class DemandNewComponent
   get availableFeedbackResults(): any[] {
     return this.demandActionMatrix.scenario === 'FEEDBACK_WAITING_LIST'
       ? this.results.filter((item: any) => normalizeText(item?.code ?? '') === 'REFERENCIA')
-      : this.results;
+      : this.results.filter((item: any) =>
+          normalizeText(item?.code ?? '') !== 'NO_ES_PERFIL' || this.isMildFeedbackCommitment);
+  }
+
+  get isMildFeedbackCommitment(): boolean {
+    return isMildCommitment(this.interviewForm.controls.biopsychosocialCommitmentCode.value,
+      this.biopsychosocialCommitmentLevels);
   }
 
   interviewForm = this.fb.group({
@@ -898,6 +906,7 @@ export class DemandNewComponent
       .filter((code: string) =>
         [
           'LISTA_ESPERA',
+          'NO_ES_PERFIL',
           'REFERENCIA',
           'INGRESO_TRATAMIENTO',
           'ABANDONO',
@@ -1172,6 +1181,9 @@ export class DemandNewComponent
 
     this.interviewForm.valueChanges.subscribe(() => {
       this.interviewError = null;
+      if (!this.isMildFeedbackCommitment && this.interviewForm.controls.resultCode.value === 'NO_ES_PERFIL') {
+        this.interviewForm.controls.resultCode.setValue('', { emitEvent: false });
+      }
     });
 
     this.observationForm.valueChanges.subscribe(() => {
@@ -3092,7 +3104,7 @@ export class DemandNewComponent
   private validateFeedbackContinuation(payload: { resultCode: string; eventDate: string; eventTime: string }): string | null {
     const previous = this.feedbackEvents;
     if (!previous.length) return null;
-    const decision = resolveFeedbackSaveAction(this.demandActionMatrix, payload.resultCode);
+    const decision = resolveFeedbackSaveAction(this.demandActionMatrix, payload.resultCode, this.isMildFeedbackCommitment);
     if (!decision.enabled) return decision.message ?? 'No se permite otra retroalimentación.';
     const original = previous[0];
     if (previous.length !== 1 || !original?.id || !original?.eventDate ||
@@ -3151,6 +3163,7 @@ export class DemandNewComponent
       raw: this.interviewForm.getRawValue(),
       programId,
       longitudinal: this.longitudinal,
+      commitmentLevels: this.biopsychosocialCommitmentLevels,
     });
 
     if (!feedbackContext.valid) {
@@ -3201,6 +3214,7 @@ export class DemandNewComponent
     const feedbackSaveAction = resolveFeedbackSaveAction(
       this.demandActionMatrix,
       feedbackContext.payload.resultCode,
+      this.isMildFeedbackCommitment,
     );
 
     if (!feedbackSaveAction.enabled) {
@@ -3228,7 +3242,7 @@ export class DemandNewComponent
 
     // Revalidate after confirmation to reject stale or duplicate decisions.
     if (this.isSavingInterview) return;
-    const currentDecision = resolveFeedbackSaveAction(this.demandActionMatrix, feedbackContext.payload.resultCode);
+    const currentDecision = resolveFeedbackSaveAction(this.demandActionMatrix, feedbackContext.payload.resultCode, this.isMildFeedbackCommitment);
     const currentContinuationError = this.validateFeedbackContinuation(feedbackContext.payload);
     if (!currentDecision.enabled || currentContinuationError) {
       this.interviewError = currentContinuationError ?? currentDecision.message;

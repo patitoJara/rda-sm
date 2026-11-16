@@ -26,3 +26,32 @@ Regla adicional:
 
 Mantener literal la indicación "sin quit".
 No reinterpretarla sin confirmación del usuario.
+
+
+## CG-22 - ORGANIZACION DEL CONDOMINIO
+
+Regla general:
+C:\Users\pjara\Documents\DESARROLLO\CONDOMINIO-SIRUS\SIRUS-APOYO\99-COMPARTIDO\06-documentacion\CG-22-ORGANIZACION-DE-ARCHIVOS.md
+
+Los respaldos, scripts auxiliares, diagnosticos, informes,
+archivos temporales y materiales de coordinacion deben
+guardarse en SIRUS-APOYO, fuera del codigo de los sistemas.
+
+Conservar las instrucciones necesarias para cada herramienta.
+No alterar reglas funcionales existentes.
+
+## CG-23 - CONTROL DE ORDENES
+
+Norma oficial:
+C:\Users\pjara\Documents\DESARROLLO\CONDOMINIO-SIRUS\SIRUS-APOYO\99-COMPARTIDO\06-documentacion\CG-23-CONTROL-DE-ORDENES.md
+
+Registro maestro:
+C:\Users\pjara\Documents\DESARROLLO\CONDOMINIO-SIRUS\SIRUS-APOYO\99-COMPARTIDO\06-documentacion\REGISTRO-ORDENES.md
+
+Toda orden y respuesta debe usar el mismo identificador.
+Los especialistas trabajan con autonomia dentro del alcance
+autorizado y responden al terminar y probar su encargo,
+o ante un impedimento real.
+
+No duplicar ordenes ni renumerar trabajos historicos.
+Aplicar conjuntamente CG-21, CG-22 y CG-23.

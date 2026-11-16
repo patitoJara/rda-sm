@@ -64,12 +64,14 @@ export type DemandActionKey =
   | 'closure';
 
 export type DemandClosureOption =
+  | 'NO_ES_PERFIL'
   | 'REFERENCIA'
   | 'INGRESO_TRATAMIENTO'
   | 'ABANDONO'
   | `EXTERN_${string}`;
 
 export type DemandFeedbackResult =
+  | 'NO_ES_PERFIL'
   | 'LISTA_ESPERA'
   | 'REFERENCIA'
   | 'INGRESO_TRATAMIENTO'
@@ -77,6 +79,7 @@ export type DemandFeedbackResult =
   | 'RED_EXTERNA';
 
 export type DemandMatrixScenario =
+  | 'FEEDBACK_NOT_PROFILE'
   | 'ACTIVE_INITIAL'
   | 'ACTIVE_PENDING_CITATIONS'
   | 'ACTIVE_CITATIONS_RESOLVED'
@@ -132,6 +135,7 @@ export interface DemandActionMatrixInput {
   firstInterviewCompleted: boolean;
 
   feedbackResults: DemandFeedbackResult[];
+  feedbackCount?: number;
 
   referenceExecuted: boolean;
 
@@ -234,6 +238,7 @@ function blockedMatrix(
 export function resolveFeedbackSaveAction(
   matrix: DemandActionMatrix,
   resultCode: string | null | undefined,
+  isMildCommitment = false,
 ): DemandMatrixAction {
   const normalizedResult = String(resultCode ?? '')
     .trim()
@@ -252,6 +257,12 @@ export function resolveFeedbackSaveAction(
     );
   }
 
+  if (matrix.scenario === 'FEEDBACK_WAITING_LIST' && normalizedResult !== 'REFERENCIA') {
+    return action(false, 'Después de Lista de espera solo se permite Referencia.');
+  }
+  if (normalizedResult === 'NO_ES_PERFIL' && !isMildCommitment) {
+    return action(false, 'No es perfil requiere clasificación psicosocial Leve.');
+  }
   return action(true);
 }
 
@@ -415,6 +426,22 @@ export function resolveDemandActionMatrix(
     };
   }
 
+  if (hasFeedback(input, 'NO_ES_PERFIL')) {
+    return {
+      scenario: 'FEEDBACK_NOT_PROFILE',
+      citation: action(false, DEMAND_ACTION_MATRIX_MESSAGES.citationsBlockedByFeedback),
+      attendance: action(false, DEMAND_ACTION_MATRIX_MESSAGES.attendanceBlockedByFeedback),
+      feedback: action(false, 'Ya existe una retroalimentación registrada para esta etapa.'),
+      observation: action(true),
+      reference: action(false, 'No es perfil requiere cierre formal del episodio.'),
+      closure: action(true),
+      allowedClosureOptions: ['NO_ES_PERFIL'],
+      historical: false,
+      readonly: false,
+      refreshAfterClosure: true,
+    };
+  }
+
   if (hasFeedback(input, 'INGRESO_TRATAMIENTO')) {
     return {
       scenario: 'FEEDBACK_TREATMENT_ENTRY',
@@ -495,7 +522,8 @@ export function resolveDemandActionMatrix(
         DEMAND_ACTION_MATRIX_MESSAGES.attendanceBlockedByFeedback,
       ),
 
-      feedback: action(false, 'Ya existe una retroalimentación registrada para esta etapa.'),
+      feedback: action((input.feedbackCount ?? input.feedbackResults.length) === 1 && input.feedbackResults.length === 1,
+        'Después de Lista de espera solo se permite una segunda decisión Referencia.'),
 
       observation: action(true),
 
@@ -619,6 +647,8 @@ export function getClosureConfirmationMessage(
   option: DemandClosureOption,
 ): string {
   switch (option) {
+    case 'NO_ES_PERFIL':
+      return 'Se registrará el cierre formal del episodio por No es perfil.';
     case 'REFERENCIA':
       return DEMAND_ACTION_MATRIX_MESSAGES.reference;
 

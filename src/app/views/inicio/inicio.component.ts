@@ -1,4 +1,4 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -125,8 +125,8 @@ export class InicioComponent implements OnInit, OnDestroy {
   appliedFilters: InicioMetricsFilter = normalizeInicioMetricsFilter({});
   episodes: PrioritizedEpisodeDTO[] = [];
 
-  readonly programContextsByEpisodeId = new Map<
-    number,
+  readonly programContextsByStage = new Map<
+    string,
     DemandEpisodeProgramContextDTO
   >();
 
@@ -292,7 +292,7 @@ export class InicioComponent implements OnInit, OnDestroy {
         this.activeProgram = this.tokenService.getActiveProgram();
 
         if (nextProgramId === null) {
-          this.programContextsByEpisodeId.clear();
+          this.programContextsByStage.clear();
           return;
         }
 
@@ -324,9 +324,10 @@ export class InicioComponent implements OnInit, OnDestroy {
 
   openProgramAnalysis(): void {
     this.dialog.open(ProgramAnalysisDialogComponent, {
-      width: '1180px',
-      maxWidth: '96vw',
-      maxHeight: '92vh',
+      width: '100vw',
+      maxWidth: '100vw',
+      height: '100dvh',
+      maxHeight: '100dvh',
       autoFocus: false,
       restoreFocus: true,
     });
@@ -446,6 +447,13 @@ export class InicioComponent implements OnInit, OnDestroy {
     });
   }
 
+  private getProgramStageContextKey(
+    episodeId: number,
+    programId: number,
+    stageId: number,
+  ): string {
+    return `${episodeId}:${programId}:${stageId}`;
+  }
   getEpisodeOpenMode(episode: PrioritizedEpisodeDTO): 'view' | 'manage' {
     if (
       this.isHistoricalMode ||
@@ -454,7 +462,24 @@ export class InicioComponent implements OnInit, OnDestroy {
       return 'view';
     }
 
-    const context = this.programContextsByEpisodeId.get(episode.episodeId);
+    const context = this.programContextsByStage.get(
+      this.getProgramStageContextKey(
+        episode.episodeId,
+        Number(episode.currentProgram?.id),
+        Number(episode.currentStageId),
+      ),
+    );
+
+    // La fila debe identificar la misma etapa que autoriza el backend.
+    if (
+      !context ||
+      Number(episode.currentProgram?.id) !== Number(this.activeProgramId) ||
+      Number(context.stageId) !== Number(episode.currentStageId) ||
+      this.getEpisodeStageStateCode(episode) !== 'EN_TRAMITE'
+    ) {
+      return 'view';
+    }
+
 
     const accessMode = resolveEpisodeAccessModeFromProgramContext(
       this.activeProgramId,
@@ -501,10 +526,6 @@ export class InicioComponent implements OnInit, OnDestroy {
     return Number.isFinite(stageDays) && stageDays >= 0 ? stageDays : 0;
   }
   getEpisodeDisplayDays(episode: PrioritizedEpisodeDTO): number {
-    if (!this.isHistoricalMode) {
-      return Number(episode.accumulatedDays ?? 0);
-    }
-
     const stageDays = Number(episode.currentStageDays);
 
     if (Number.isFinite(stageDays) && stageDays >= 0) {
@@ -528,7 +549,10 @@ export class InicioComponent implements OnInit, OnDestroy {
       queryParams: {
         rut: episode.rut,
         episodeId: episode.episodeId,
-        mode,
+        stageId: episode.currentStageId,
+        mode: mode === 'manage' && this.getEpisodeOpenMode(episode) === 'manage'
+          ? 'manage'
+          : 'view',
       },
     });
   }
@@ -767,11 +791,7 @@ export class InicioComponent implements OnInit, OnDestroy {
   }
 
   trackByEpisodeId(_index: number, item: PrioritizedEpisodeDTO): string {
-    if (this.isHistoricalMode) {
-      return `${item.episodeId}-${item.currentStageId ?? 'stage'}`;
-    }
-
-    return String(item.episodeId);
+    return `${item.episodeId}-${item.currentStageId ?? 'stage'}`;
   }
   private loadClosedMetrics(): void {
     this.loadingClosedMetrics = true;
@@ -1032,16 +1052,16 @@ export class InicioComponent implements OnInit, OnDestroy {
       sort: this.currentSort,
     };
 
-    const request$ = this.isHistoricalMode
-      ? this.demandService.getPrioritizedEpisodeStages(query).pipe(
-          map((response) => ({
-            ...response,
-            content: (response?.content ?? []).map((stage) =>
-              this.mapHistoricalStageToPrioritizedEpisode(stage),
-            ),
-          })),
-        )
-      : this.demandService.getPrioritizedEpisodes(query);
+    // Ambas bandejas representan etapas; los indicadores institucionales
+    // siguen calculándose por su servicio independiente de episodios únicos.
+    const request$ = this.demandService.getPrioritizedEpisodeStages(query).pipe(
+      map((response) => ({
+        ...response,
+        content: (response?.content ?? []).map((stage) =>
+          this.mapHistoricalStageToPrioritizedEpisode(stage),
+        ),
+      })),
+    );
 
     request$
       .pipe(
@@ -1078,7 +1098,7 @@ export class InicioComponent implements OnInit, OnDestroy {
           this.totalElements = totalElements;
 
           if (this.isHistoricalMode) {
-            this.programContextsByEpisodeId.clear();
+            this.programContextsByStage.clear();
           } else {
             this.loadEpisodeProgramContexts(this.episodes);
           }
@@ -1089,7 +1109,7 @@ export class InicioComponent implements OnInit, OnDestroy {
 
           this.episodes = [];
           this.totalElements = 0;
-          this.programContextsByEpisodeId.clear();
+          this.programContextsByStage.clear();
 
           this.episodesError =
             error.status === 403
@@ -1099,7 +1119,7 @@ export class InicioComponent implements OnInit, OnDestroy {
       });
   }
   private loadEpisodeProgramContexts(episodes: PrioritizedEpisodeDTO[]): void {
-    this.programContextsByEpisodeId.clear();
+    this.programContextsByStage.clear();
 
     const programId = this.activeProgramId;
 
@@ -1122,10 +1142,17 @@ export class InicioComponent implements OnInit, OnDestroy {
       })
       .subscribe({
         next: (contexts) => {
-          this.programContextsByEpisodeId.clear();
+          this.programContextsByStage.clear();
 
           for (const context of contexts ?? []) {
-            this.programContextsByEpisodeId.set(context.episodeId, context);
+            this.programContextsByStage.set(
+              this.getProgramStageContextKey(
+                context.episodeId,
+                context.programId,
+                context.stageId,
+              ),
+              context,
+            );
           }
 
           console.debug('[Inicio] Contextos por programa cargados:', {
@@ -1136,7 +1163,7 @@ export class InicioComponent implements OnInit, OnDestroy {
         },
 
         error: (error: HttpErrorResponse) => {
-          this.programContextsByEpisodeId.clear();
+          this.programContextsByStage.clear();
 
           console.error(
             '[Inicio] Error cargando contextos por programa:',

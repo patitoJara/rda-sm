@@ -156,7 +156,7 @@
     </mat-error>
   </mat-form-field>
 
-  <mat-form-field appearance="outline" floatLabel="always" class="feedback-field feedback-field--commitment" hideRequiredMarker="true">
+  <mat-form-field appearance="outline" floatLabel="always" class="feedback-field feedback-field--commitment" hideRequiredMarker="true" subscriptSizing="dynamic">
     <mat-label>Compromiso biopsicosocial <span class="field-status field-status--required">Obligatorio</span></mat-label>
     <mat-icon matPrefix>psychology</mat-icon>
 
@@ -178,6 +178,9 @@
     >
       Debe seleccionar el nivel de compromiso.
     </mat-error>
+    <mat-hint *ngIf="isMildCommitmentSelected" class="feedback-mild-note">
+      Leve: habilita “No es perfil” en Retroalimentación.
+    </mat-hint>
   </mat-form-field>
 
   <mat-form-field appearance="outline" floatLabel="always" class="feedback-field feedback-field--result" hideRequiredMarker="true">

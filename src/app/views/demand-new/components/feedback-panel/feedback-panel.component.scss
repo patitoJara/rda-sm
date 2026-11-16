@@ -287,6 +287,19 @@
   grid-column: span 3;
 }
 
+.feedback-mild-note {
+  display: block;
+  box-sizing: border-box;
+  max-width: 100%;
+  padding: 3px 6px;
+  color: #163f5a;
+  background: #e9f3ff;
+  border: 1px solid #78afe8;
+  border-radius: 6px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
 .feedback-field--commitment {
   grid-column: span 3;
 }

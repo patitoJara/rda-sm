@@ -1,0 +1,38 @@
+<div class="field">
+  <label [for]="id + (kind === 'select' ? '-trigger' : '-input')">{{ label }} @if (required && !disabled) {<span aria-hidden="true">*</span>}</label>
+  <span #control class="control" [class.invalid]="!!error" [class.disabled]="disabled">
+    @if (kind !== 'select') {
+      <input [id]="id + '-input'" [attr.aria-invalid]="error ? 'true' : null" [attr.aria-describedby]="error && !opened ? id + '-error' : null" [disabled]="disabled" inputmode="numeric" [placeholder]="kind === 'date' ? 'DD/MM/YYYY' : 'HH:mm'" [ngModelOptions]="{standalone: true}" [required]="required" [ngModel]="value" (ngModelChange)="edit($event)" (blur)="finish()">
+    }
+    <button #trigger type="button" [labTooltip]="'Abrir ' + label" [id]="id + '-trigger'" [class.select-trigger]="kind === 'select'" [disabled]="disabled" [attr.aria-label]="'Abrir ' + label + (kind === 'select' ? ': ' + selectedLabel : '')" [attr.aria-haspopup]="kind === 'select' ? 'listbox' : 'dialog'" [attr.aria-expanded]="opened" [attr.aria-controls]="id + (kind === 'select' ? '-options' : '-popup')" (keydown.arrowdown)="$event.preventDefault(); open(true)" (click)="open()">
+      @if (kind === 'select') {<span>{{ selectedLabel }}</span>}
+      <span aria-hidden="true">{{ kind === 'date' ? '▦' : kind === 'time' ? '◷' : '⌄' }}</span>
+    </button>
+  </span>
+</div>
+@if (error && !opened) {<p class="error" [id]="id + '-error'" role="alert">{{ error }}</p>}
+<div #popup class="picker-popup" [labPopover]="trigger" [labPopoverAnchor]="control" [labPopoverWidth]="kind === 'select' ? 260 : 300" (labPopoverClosed)="opened = false" [id]="id + '-popup'" [attr.role]="kind === 'select' ? 'group' : 'dialog'" [attr.aria-label]="label + ' · selector experimental'">
+  <header><h3>{{ label }}</h3><button type="button" aria-label="Cerrar selector" labTooltip="Cerrar" (click)="close()">×</button></header>
+  @if (kind === 'date') {
+    <div class="month"><button type="button" aria-label="Mes anterior" labTooltip="Mes anterior" [disabled]="year === 1 && month === 0" (click)="changeMonth(-1)">‹</button><span aria-live="polite">{{ months[month] }} {{ year }}</span><button type="button" aria-label="Mes siguiente" labTooltip="Mes siguiente" [disabled]="year === 9999 && month === 11" (click)="changeMonth(1)">›</button></div>
+    <div class="calendar" role="group" aria-label="Días del mes. Flechas para cambiar día; Inicio y Fin para cambiar dentro de la semana.">
+      @for (weekday of weekdays; track $index) {<span class="weekday" aria-hidden="true">{{ weekday }}</span>}
+      @for (day of days; track $index) {
+        @if (day) {<button type="button" [attr.data-day]="day" [tabIndex]="day === focusDay ? 0 : -1" [attr.aria-label]="dayValue(day)" [attr.aria-pressed]="value === dayValue(day)" (focus)="focusDay = day" (keydown)="moveDay($event, day)" (click)="choose(dayValue(day))">{{ day }}</button>}
+        @else {<span></span>}
+      }
+    </div>
+    <p class="hint">DD/MM/YYYY · También puede escribir la fecha. Flechas: día o semana.</p>
+  } @else if (kind === 'time') {
+    <div class="time-row">@for (part of ['hour', 'minute']; track part) {<div class="time-part"><label [for]="id + '-' + part">{{ part === 'hour' ? 'Hora' : 'Minuto' }}</label><div class="time-step"><button type="button" [attr.aria-label]="'Restar ' + (part === 'hour' ? 'hora' : 'minuto')" (click)="stepTime(part === 'hour' ? 'hour' : 'minute', -1)">−</button>@if (part === 'hour') {<input [id]="id + '-hour'" type="number" min="0" max="23" step="1" [(ngModel)]="hour" [ngModelOptions]="{standalone: true}">} @else {<input [id]="id + '-minute'" type="number" min="0" max="59" step="1" [(ngModel)]="minute" [ngModelOptions]="{standalone: true}">}<button type="button" [attr.aria-label]="'Sumar ' + (part === 'hour' ? 'hora' : 'minuto')" (click)="stepTime(part === 'hour' ? 'hour' : 'minute', 1)">+</button></div></div>}</div>
+    <div class="presets">@for (time of ['06:40', '09:30', '18:40', '23:59']; track time) {<button type="button" (click)="choose(time)">{{ time }}</button>}</div>
+    <p class="hint">24 horas · 00:00–23:59. El ingreso manual sigue siendo la opción principal.</p>
+    @if (error) {<p class="error" role="alert">{{ error }}</p>}
+    <footer><button type="button" (click)="close()">Cancelar</button><button type="button" class="primary" (click)="applyTime()">Aplicar hora</button></footer>
+  } @else {
+    <div class="options" [id]="id + '-options'" role="listbox" [attr.aria-label]="'Opciones de ' + label" [attr.aria-required]="required" (keydown)="moveOption($event)">
+      @for (option of options; track option.value) {<button type="button" role="option" data-option [disabled]="option.disabled" [attr.aria-disabled]="!!option.disabled" [attr.aria-selected]="value === option.value" (click)="choose(option.value)"><span>{{ option.label }}</span><span aria-hidden="true">{{ value === option.value ? '✓' : '' }}</span></button>}
+    </div>
+    <p class="hint">Flechas, Inicio/Fin y Tab para recorrer. Enter para elegir; Escape para cerrar.</p>
+  }
+</div>

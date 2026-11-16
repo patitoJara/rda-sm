@@ -6,6 +6,7 @@ import { AboutPrivateComponent } from './views/about/about-private/about-private
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 import { pendingChangesGuard } from './core/guards/pending-changes.guard';
+import { uiLabRoleGuard } from './views/ui-lab/ui-lab-role.guard';
 
 export const routes: Routes = [
   // 🔓 RUTAS PÚBLICAS
@@ -38,6 +39,13 @@ export const routes: Routes = [
     component: TemplateComponent,
     canActivate: [authGuard],
     children: [
+      {
+        path: 'ui-lab',
+        loadComponent: () =>
+          import('./views/ui-lab/ui-lab.component').then((m) => m.UiLabComponent),
+        canActivate: [authGuard, uiLabRoleGuard],
+        data: { title: 'UI Lab', roles: ['ADMIN'], hidden: true },
+      },
       // 🏠 INICIO (bienvenida + dashboard)
       {
         path: 'inicio',

@@ -278,3 +278,316 @@
     margin-left: 0;
   }
 }
+
+
+/* MT-RDA-01L-COMPACT-UI
+   Ajuste exclusivo de densidad visual.
+   No modifica logica funcional ni permisos.
+*/
+
+.available-episodes {
+  display: block !important;
+  width: 100%;
+  max-width: 100%;
+  margin: 6px 0 10px !important;
+  padding: 8px 10px !important;
+  box-sizing: border-box;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0 0 7px !important;
+    padding: 0 !important;
+
+    mat-icon {
+      width: 17px;
+      height: 17px;
+      font-size: 17px;
+    }
+
+    strong {
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    span {
+      font-size: 11px;
+      line-height: 1.3;
+    }
+  }
+
+  &__list {
+    display: grid !important;
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, 360px), 1fr)
+    );
+    align-items: start;
+    gap: 8px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+.available-episode-card {
+  display: block !important;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  padding: 9px 11px !important;
+  margin: 0 !important;
+  border-radius: 8px !important;
+  box-sizing: border-box;
+
+  &__main {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 9px;
+    min-width: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    strong {
+      font-size: 12px;
+      line-height: 1.3;
+    }
+
+    span,
+    small {
+      font-size: 11px;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__status {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 6px 0 0 !important;
+    padding: 0 !important;
+
+    span {
+      font-size: 10px;
+      line-height: 1.25;
+    }
+  }
+
+  button[mat-stroked-button] {
+    min-height: 27px !important;
+    height: auto !important;
+    padding: 3px 9px !important;
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    border-radius: 7px !important;
+
+    mat-icon {
+      width: 14px;
+      height: 14px;
+      font-size: 14px;
+      margin-right: 3px;
+    }
+  }
+}
+
+.available-episode-stages {
+  display: grid !important;
+  gap: 5px !important;
+  margin: 7px 0 0 !important;
+  padding: 0 !important;
+  width: 100%;
+
+  > div {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px 10px !important;
+    margin: 0 !important;
+    padding: 6px 8px !important;
+    border-radius: 6px !important;
+    min-width: 0;
+
+    > div {
+      display: grid !important;
+      gap: 2px !important;
+      min-width: 0;
+      flex: 1 1 180px !important;
+
+      strong {
+        font-size: 11px;
+        line-height: 1.25;
+      }
+
+      span,
+      small {
+        font-size: 10.5px;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+      }
+    }
+
+    button {
+      flex-shrink: 0;
+    }
+  }
+}
+
+@media (max-width: 700px) {
+  .available-episodes {
+    padding: 7px !important;
+
+    &__list {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 7px !important;
+    }
+  }
+
+  .available-episode-card {
+    padding: 8px !important;
+  }
+
+  .available-episode-stages > div {
+    align-items: flex-start !important;
+  }
+}
+
+/* MT-RDA-01L-FINAL-DENSITY
+   Compactacion visual de episodios disponibles.
+   Sin modificaciones funcionales.
+*/
+
+.available-episodes {
+  margin-top: 2px !important;
+  margin-bottom: 4px !important;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+}
+
+.available-episodes__header {
+  margin-bottom: 4px !important;
+  min-height: 0 !important;
+}
+
+.available-episodes__list {
+  gap: 6px !important;
+  align-items: start !important;
+}
+
+.available-episode-card {
+  padding: 7px 9px !important;
+  min-height: 0 !important;
+}
+
+.available-episode-card__main {
+  gap: 2px 7px !important;
+}
+
+.available-episode-card__status {
+  margin-top: 3px !important;
+}
+
+.available-episode-stages {
+  gap: 4px !important;
+  margin-top: 5px !important;
+}
+
+.available-episode-stages > div {
+  padding: 5px 7px !important;
+  gap: 5px 8px !important;
+}
+
+.available-episode-stages > div > div {
+  gap: 1px !important;
+}
+
+@media (max-width: 700px) {
+  .available-episodes__list {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* RDA-ENC-001-HEADER */
+.demand-header-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: 12px;
+  align-items: start;
+  width: 100%;
+
+  > .search-card,
+  > .demand-header-episodes-card {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+    align-self: start;
+    box-sizing: border-box;
+  }
+
+  .available-episodes {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .available-episodes__list {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .available-episode-card {
+    width: 100%;
+    padding: 7px 9px !important;
+  }
+
+  .available-episode-stages > div {
+    padding: 5px 7px !important;
+    gap: 5px 8px !important;
+  }
+
+  /* RDA-ENC-001-RUN-VISIBLE */
+  > .search-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  > .search-card .search-card__title {
+    width: 100%;
+    min-width: 0;
+  }
+  > .search-card .search-form {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    min-width: 0;
+  }
+  > .search-card .rut-field {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  > .search-card .primary-btn {
+    position: static !important;
+    align-self: flex-start !important;
+    max-width: 100%;
+  }
+  .search-feedbacks {
+    min-height: 0;
+  }
+
+  .search-feedbacks .empty-banner {
+    min-height: 0;
+    margin: 0;
+    padding: 5px 8px;
+  }
+}
+
+@media (max-width: 1050px) {
+  .demand-header-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* RDA-ENC-001-FIX-FOCO-RUN */
+:host ::ng-deep .search-card .search-form > .primary-btn > .mat-focus-indicator{pointer-events:none!important}

@@ -16,8 +16,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { UserEmailDialogComponent } from './user-email.dialog';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { forkJoin, merge, of } from 'rxjs';
 import { catchError, finalize, map } from 'rxjs/operators';
@@ -29,6 +31,8 @@ import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dial
 
 import { AuthLoginService } from '../../services/auth.login.service';
 import { Router } from '@angular/router';
+import { TokenService } from '../../services/token.service';
+import { SessionService } from '../../core/services/session.service';
 
 @Component({
   standalone: true,
@@ -48,6 +52,7 @@ import { Router } from '@angular/router';
     MatDialogModule,
     MatChipsModule,
     MatProgressBarModule,
+    MatTooltipModule,
   ],
 })
 export class UsersComponent implements AfterViewInit {
@@ -69,12 +74,17 @@ export class UsersComponent implements AfterViewInit {
   /** Filtro de estado */
   filterUsers: 'all' | 'active' | 'deleted' = 'active';
 
+  private searchTimer: ReturnType<typeof setTimeout> | undefined;
+  private loadSequence = 0;
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
   private api = inject(UsersService);
   private dialog = inject(MatDialog);
   private cdr = inject(ChangeDetectorRef);
+  private tokenService = inject(TokenService);
+  private sessionService = inject(SessionService);
   //private authService = inject(AuthLoginService);
   //private router = inject(Router);
 
@@ -128,6 +138,7 @@ export class UsersComponent implements AfterViewInit {
 
   /** Carga usuarios desde el backend */
   load(): void {
+    const sequence = ++this.loadSequence;
     this.loading = true;
 
     const page = this.paginator?.pageIndex ?? 0;
@@ -147,9 +158,10 @@ export class UsersComponent implements AfterViewInit {
         state: undefined,
         sort,
       })
-      .pipe(finalize(() => (this.loading = false)))
+      .pipe(finalize(() => { if (sequence === this.loadSequence) this.loading = false; }))
       .subscribe({
         next: (res: any) => {
+          if (sequence !== this.loadSequence) return;
           console.log('[USERS PAGINATION]', {
             pageIndex: this.paginator.pageIndex,
             pageSize: this.paginator.pageSize,
@@ -199,9 +211,9 @@ export class UsersComponent implements AfterViewInit {
                 .toLowerCase()
                 .replace(/[.\-\s]/g, '');
 
-            const search = normalize(this.q);
+            const searchTerms = this.q.trim().split(/\s+/).map(normalize).filter(Boolean);
 
-            if (search) {
+            if (searchTerms.length) {
               filteredRows = filteredRows.filter((user) => {
                 const searchableText = normalize([
                   user.rut,
@@ -213,7 +225,7 @@ export class UsersComponent implements AfterViewInit {
                   user.email,
                 ].join(' '));
 
-                return searchableText.includes(search);
+                return searchTerms.every((term) => searchableText.includes(term));
               });
             }
 
@@ -260,6 +272,7 @@ export class UsersComponent implements AfterViewInit {
           this.enrichUsers(allRows);
         },
         error: (err) => {
+          if (sequence !== this.loadSequence) return;
           console.error('Error cargando usuarios:', err);
           this.total = 0;
           this.dataSource.data = [];
@@ -345,9 +358,13 @@ export class UsersComponent implements AfterViewInit {
   }
 
   applyFilter(term: string): void {
-    this.q = term.trim();
-    this.paginator.firstPage();
-    this.load();
+    this.q = term;
+    if (this.searchTimer !== undefined) clearTimeout(this.searchTimer);
+    this.searchTimer = setTimeout(() => {
+      this.searchTimer = undefined;
+      this.paginator.firstPage();
+      this.load();
+    }, 300);
   }
 
   /** Obtener valor para ordenar */
@@ -384,6 +401,8 @@ export class UsersComponent implements AfterViewInit {
 
   /** Cambio de estado */
   setState(state: 'all' | 'active' | 'deleted'): void {
+    if (this.searchTimer !== undefined) clearTimeout(this.searchTimer);
+    this.searchTimer = undefined;
     this.q = '';
     this.filterUsers = state;
     this.paginator.firstPage();
@@ -404,6 +423,60 @@ export class UsersComponent implements AfterViewInit {
 
     ref.afterClosed().subscribe((result) => {
       if (result) this.load();
+    });
+  }
+
+  /** Cambia solo el estado de habilitación. No afecta relaciones. */
+  toggleActive(row: User): void {
+    if (row.deletedAt || row.active === undefined || row.id == null) return;
+    const next = !row.active;
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '430px', disableClose: true,
+      data: {
+        title: next ? 'Activar usuario' : 'Inactivar usuario',
+        message: `¿Confirmas ${next ? 'activar' : 'inactivar'} la cuenta de ${row.firstName ?? row.username}? Se conservarán sus roles, programas y actuaciones históricas.`,
+        confirmText: next ? 'Activar' : 'Inactivar',
+        cancelText: 'Cancelar',
+        color: next ? 'primary' : 'warn', icon: next ? 'check_circle' : 'person_off',
+      },
+    });
+    ref.afterClosed().subscribe((ok: boolean) => {
+      if (!ok) return;
+      this.loading = true;
+      this.api.setActive(Number(row.id), next).subscribe({
+        next: () => this.load(),
+        error: (err) => { this.loading = false; console.error('Error cambiando habilitación:', err); window.alert('No se pudo cambiar el estado. Comprueba los permisos y vuelve a consultar.'); },
+      });
+    });
+  }
+
+  /** Correo independiente: jamás pasa por la edición general de roles/programas. */
+  editEmail(row: User): void {
+    if (row.deletedAt || row.id == null) return;
+    const ref = this.dialog.open(UserEmailDialogComponent, {
+      width: '460px', maxWidth: '95vw', disableClose: true,
+      data: { email: row.email ?? '', username: row.username ?? '' },
+    });
+    ref.afterClosed().subscribe((email: string | undefined) => {
+      if (email === undefined || email === row.email) return;
+      this.loading = true;
+      this.api.updateEmail(Number(row.id), email).subscribe({
+        next: () => {
+          const currentUserId = this.tokenService.getUserId();
+
+          if (currentUserId !== null && Number(row.id) === currentUserId) {
+            window.alert(
+              'Tu correo electrónico fue actualizado correctamente. ' +
+              'Por seguridad, debes iniciar sesión nuevamente.'
+            );
+            this.sessionService.logout('manual');
+            return;
+          }
+
+          this.load();
+        },
+        error: (err) => { this.loading = false; console.error('Error actualizando correo:', err); window.alert('No se pudo actualizar el correo. Comprueba el dato y vuelve a consultar.'); },
+      });
     });
   }
 

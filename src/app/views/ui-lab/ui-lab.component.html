@@ -1,0 +1,336 @@
+<main class="lab" [class.lab--plum]="palette === 'plum'">
+  <header class="lab-hero">
+    <div>
+      <p class="lab-eyebrow">RDA-SM / EXPERIMENTACIÓN VISUAL / 05</p>
+      <h1>UI Lab <span class="lab-tag">En evaluación</span></h1>
+      <p>Controles compactos, guía permanente y acciones claras. Un laboratorio para sistemas institucionales operacionales.</p>
+    </div>
+<app-lab-picker class="lab-palette" label="Paleta de demostración" kind="select" [options]="paletteOptions" [(value)]="palette" />
+  </header>
+  <nav class="lab-nav" aria-label="Secciones del laboratorio">
+    @for (section of sections; track section[0]) {
+      <a [href]="'/ui-lab#lab-' + section[0]">{{ section[1] }}</a>
+    }
+  </nav>
+  <p class="lab-note">Datos ficticios · Sin conexión a operaciones de negocio · Ninguna alternativa es todavía un estándar.</p>
+
+  <section id="lab-type" class="lab-section" aria-labelledby="type-title">
+    <header class="lab-section-heading"><span class="lab-number">01</span><div><h2 id="type-title">Tipografía</h2><p>Roboto 400 y 500. Jerarquía por tamaño, color y peso moderado.</p></div></header>
+    <div class="lab-type-grid">
+      <div><span class="lab-caption">Título principal · 24px / 500 · candidato</span><div class="lab-type-title">Una lectura clara</div></div>
+      <div><span class="lab-caption">Título de sección · 16px / 500 · candidato</span><div class="lab-type-section">Datos de la persona</div></div>
+      <div><span class="lab-caption">Subtítulo · 14px / 400</span><div class="lab-type-subtitle">Información de consulta</div></div>
+      <div><span class="lab-caption">Label · 12px / 400</span><div class="lab-type-label">Nombre de la persona</div></div>
+      <div><span class="lab-caption">Valor · 14px / 500</span><div class="lab-type-value">Elena Ríos · ejemplo</div></div>
+      <div><span class="lab-caption">Texto secundario · 13px / 400</span><div class="lab-secondary">Última actualización: hoy</div></div>
+      <div><span class="lab-caption">Ayuda · 12px / 400</span><div class="lab-help">Incluye el dígito verificador.</div></div>
+    </div>
+    <p class="lab-note">600 no se compara aquí: la carga actual de Roboto no incluye ese peso. Sin pesos sintéticos.</p>
+    <div class="lab-type-comparison">@for (size of sectionSizes; track size) {<article [class.lab-candidate]="size === 16"><span class="lab-caption">Sección · {{ size }}px / 500 {{ size === 16 ? "· candidato principal" : "· referencia comparativa" }}</span><p [style.font-size.px]="size" class="lab-type-choice">Datos de la persona</p></article>}</div>
+    <div class="lab-type-comparison">@for (size of titleSizes; track size) {<article [class.lab-candidate]="size === 24"><span class="lab-caption">Principal operacional · {{ size }}px / 500 {{ size === 24 ? "· candidato principal" : size === 22 ? "· vistas muy densas" : "· encabezados especiales" }}</span><p [style.font-size.px]="size" class="lab-type-choice">Bandeja de atención</p></article>}</div>
+    <p class="lab-note">26px se conserva como alternativa para encabezados importantes, sin asumir un tamaño universal.</p>
+  </section>
+
+  <section id="lab-controls" class="lab-section" aria-labelledby="controls-title">
+    <header class="lab-section-heading"><span class="lab-number">02</span><div><h2 id="controls-title">Controles y estados</h2><p>Propuestas de interacción. Usa Tab para comprobar el foco real.</p></div></header>
+    <div class="lab-wrap">
+      <label class="lab-field lab-example-field">Texto<input class="lab-control" placeholder="Escribe un ejemplo"></label>
+      <app-lab-picker class="lab-example-field" label="Programa" kind="select" [options]="programOptions" value="a" />
+      <label class="lab-field lab-date-field">Fecha<input class="lab-control" inputmode="numeric" value="05/10/2026"></label>
+      <label class="lab-field lab-time-field">Hora · 24 horas<input class="lab-control" inputmode="numeric" value="10:30"></label>
+      <label class="lab-field lab-textarea-field">Textarea<textarea class="lab-control" rows="3" placeholder="Observación de demostración"></textarea></label>
+    </div>
+    <fieldset class="lab-choices"><legend>Selecciones</legend>
+      <label><input type="checkbox" checked> Recibir recordatorio</label>
+      <label><input type="checkbox" disabled> Opción deshabilitada</label>
+      <label><input type="radio" name="lab-contact" checked> Teléfono</label>
+      <label><input type="radio" name="lab-contact"> Correo</label>
+    </fieldset>
+    <div class="lab-wrap lab-state-row">
+      <label class="lab-field lab-state-field">Normal<input class="lab-control" value="Texto editable"></label>
+      <label class="lab-field lab-state-field">Foco ilustrado<input class="lab-control is-focus" value="También admite foco real"></label>
+      <label class="lab-field lab-state-field">Error ilustrado<input class="lab-control is-error" value="Ejemplo incompleto" aria-invalid="true" aria-describedby="lab-error"><span id="lab-error" class="lab-error">Revisa este dato de ejemplo.</span></label>
+      <label class="lab-field lab-state-field">Disabled<input class="lab-control" value="No disponible" disabled></label>
+      <label class="lab-field lab-state-field">Readonly<input class="lab-control" value="Se puede seleccionar y copiar" readonly></label>
+    </div>
+    <p class="lab-note">Los selects interactivos usan el mismo dropdown anclado. Compare el control cerrado y abierto, hover, foco, selección y disabled.</p>
+  </section>
+
+  <section id="lab-heights" class="lab-section" aria-labelledby="heights-title">
+    <header class="lab-section-heading"><span class="lab-number">03</span><div><h2 id="heights-title">Comparación de alturas</h2><p>36px es el candidato principal. Las otras alternativas siguen disponibles para comparación.</p></div></header>
+    <div class="lab-height-grid">
+      @for (height of heights; track height) {
+        <div class="lab-height-sample" [class.lab-candidate]="height === 36" [style.--lab-control-height]="height + 'px'">
+          <h3>{{ height }} px @if (height === 36) {<span class="lab-tag">Candidato principal</span>}</h3>
+          <label class="lab-field">Texto<input class="lab-control" value="Elena Ríos"></label>
+          <app-lab-picker label="Programa" kind="select" [options]="programOptions" value="a" />
+          <label class="lab-field">Fecha<input class="lab-control" inputmode="numeric" value="05/10/2026"></label>
+          <p class="lab-help">{{ heightNotes[height] }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section id="lab-widths" class="lab-section" aria-labelledby="widths-title">
+    <header class="lab-section-heading"><span class="lab-number">04</span><div><h2 id="widths-title">Anchos por contenido</h2><p>El mismo input base. El ancho pertenece al uso dentro del formulario.</p></div></header>
+    <div class="lab-wrap">
+      @for (example of widthExamples; track example.label) {
+        <label class="lab-field lab-width-example" [style.width]="example.width">{{ example.label }} <span class="lab-caption">{{ example.width }}</span>
+          <input class="lab-control" [value]="example.value">
+        </label>
+      }
+    </div>
+    <div class="lab-wrap lab-year-comparison">@for (width of yearWidths; track width) {<article [class.lab-candidate]="width === 8"><label class="lab-field" [style.width]="width + 'ch'">Año · {{ width }}ch<input class="lab-control" value="2026"></label><span class="lab-caption">{{ width === 6 ? 'Rechazado: estrecho' : width === 7 ? 'Funciona, justo' : width === 8 ? 'Candidato principal' : 'Espacio innecesario' }}</span></article>}</div>
+    <p class="lab-note">ch toma el ancho del “0”; no equivale al número exacto de letras. Contenido + padding + borde + iconos + margen visual determinan cada uso. Año 6ch se conserva solo como comparación rechazada; 8ch es la referencia inicial candidata; el icono de un selector requiere reserva adicional. Todos se limitan al 100% disponible.</p>
+  </section>
+
+  <section id="lab-data" class="lab-section" aria-labelledby="data-title">
+    <header class="lab-section-heading"><span class="lab-number">05</span><div><h2 id="data-title">Display-data-compact</h2><p>Solo lectura, sin controles de formulario.</p></div></header>
+    <article class="lab-data-card">
+      <header><h3>Elena Ríos <span>· 12.345.678-5</span></h3><p class="lab-help">Persona ficticia · Información de consulta</p></header>
+      <div class="lab-data-groups">
+        <div class="lab-data-person"><h4><span aria-hidden="true">♙</span> Persona y contacto</h4><dl class="lab-data-grid">
+          <div><dt>Fecha de nacimiento</dt><dd>27/03/1995</dd></div><div><dt>Edad</dt><dd>31 años</dd></div>
+          <div><dt>Teléfono</dt><dd>+56 9 0000 0000</dd></div><div><dt>Correo</dt><dd>elena.rios&#64;example.com</dd></div>
+          <div class="lab-data-wide"><dt>Dirección</dt><dd>Calle de Ejemplo 123, Punta Arenas</dd></div>
+        </dl></div>
+        <div class="lab-data-referrer"><h4><span aria-hidden="true">♧</span> Referente</h4><p class="lab-secondary">Sin referente registrado</p></div>
+      </div>
+    </article>
+  </section>
+
+  <section id="lab-context" class="lab-section" aria-labelledby="context-title">
+    <header class="lab-section-heading"><span class="lab-number">05b</span><div><h2 id="context-title">Context-info-01</h2><p>Información útil en tres niveles. La estructura visual es reutilizable; los datos pertenecen al dominio.</p></div></header>
+    <article class="lab-context-card" (focusin)="countryFocused = true" (focusout)="countryFocused = false">
+      <app-lab-picker class="lab-context-country" label="País" kind="select" [options]="countryOptions" [value]="country" (valueChange)="country = $event; countrySelected = true" />
+      <div class="lab-context-minimum"><svg class="lab-country-flag" viewBox="0 0 30 20" role="img" aria-label="Bandera de Chile"><path fill="#fff" d="M0 0h30v20H0z"/><path fill="#d52b1e" d="M0 10h30v10H0z"/><path fill="#0039a6" d="M0 0h10v10H0z"/><path fill="#fff" d="m5 1.7.74 2.28h2.4L6.2 5.39l.74 2.28L5 6.26 3.06 7.67l.74-2.28L1.86 3.98h2.4z"/></svg><div><p class="lab-type-value">Chile</p><p class="lab-secondary">América del Sur</p></div><span class="lab-caption">Nivel 1 · siempre visible</span></div>
+      @if (countryFocused || countrySelected) {<p class="lab-context-hint" role="status">Nivel 2 · Confirme que Chile corresponde al país requerido. Código CL · prefijo +56.</p>}
+      <button class="lab-button lab-button--clear" [attr.aria-expanded]="countryExpanded" aria-controls="lab-country-details" (click)="countryExpanded = !countryExpanded">{{ countryExpanded ? 'Ver menos' : 'Ver información' }}</button>
+      @if (countryExpanded) {<div id="lab-country-details"><span class="lab-caption">Nivel 3 · información ampliada</span><dl class="lab-data-grid"><div><dt>Capital</dt><dd>Santiago</dd></div><div><dt>Continente</dt><dd>América del Sur</dd></div><div><dt>Población</dt><dd>No incluida en esta muestra</dd></div><div><dt>Código ISO</dt><dd>CL</dd></div><div><dt>Prefijo</dt><dd>+56</dd></div></dl></div>}
+    </article>
+    <p class="lab-note">Aplicaciones futuras: comuna, ciudad, programa, profesional, medicamento, curso o documento. Mostrar solo información que ayude a confirmar o decidir.</p>
+  </section>
+
+  <section id="lab-event" class="lab-section" aria-labelledby="event-title">
+    <header class="lab-section-heading"><span class="lab-number">06</span><div><h2 id="event-title">Event-card-01</h2><p>Trazabilidad con label y valor del mismo tamaño: 13px.</p></div></header>
+    <article class="lab-event-card">
+      <header><div class="lab-event-identity"><span class="lab-event-icon" aria-hidden="true">▦</span><div><h3>Citación</h3><p class="lab-help">Evento de demostración</p></div></div><div class="lab-event-date"><time datetime="2026-10-09T10:00">09/10/2026 · 10:00</time></div></header>
+      <dl class="lab-event-summary"><div class="lab-event-state"><dt><span aria-hidden="true">✓</span> Estado</dt><dd>Registrada</dd></div><div><dt><span aria-hidden="true">♙</span> Facultativo</dt><dd>Profesional de ejemplo</dd></div><div><dt><span aria-hidden="true">▣</span> Profesión</dt><dd>Psicología · ejemplo</dd></div></dl>
+      <footer class="lab-trace"><div><span>Registrado por</span><strong>Usuario de ejemplo</strong></div><div><span>Programa / etapa</span><strong>Programa de ejemplo · Etapa 1</strong></div><div><span>Registro</span><strong>05/10/2026</strong></div></footer>
+    </article>
+  </section>
+
+  <section id="lab-filters" class="lab-section" aria-labelledby="filters-title">
+    <header class="lab-section-heading"><span class="lab-number">07</span><div><h2 id="filters-title">Filtros compactos</h2><p>Geometría de demostración y superficie con color intercambiable.</p></div></header>
+    <form class="lab-filter-bar" (ngSubmit)="applyFilters()">
+      <app-lab-picker class="lab-month-field" label="Mes" kind="select" [options]="monthOptions" [(value)]="filters.month" />
+      <app-lab-picker class="lab-year-field" label="Año" kind="select" [options]="yearOptions" [(value)]="filters.year" />
+      <app-lab-picker class="lab-date-field" label="Fecha inicio" kind="date" [(value)]="filters.start" />
+      <app-lab-picker class="lab-date-field" label="Fecha fin" kind="date" [(value)]="filters.end" />
+      <div class="lab-filter-actions"><button class="lab-button lab-button--primary" type="submit"><span aria-hidden="true">⌕</span> Buscar</button><button class="lab-button" type="button" (click)="clearFilters()">Limpiar</button></div>
+    </form>
+    <p class="lab-calendar-note"><span class="lab-tag">Popup experimental local</span> Visual DD/MM/YYYY · API candidato YYYY-MM-DD. La comparación del rango usa fechas normalizadas.</p>
+    <p class="lab-feedback" role="status">{{ filterMessage }}</p>
+  </section>
+
+  <section id="lab-buttons" class="lab-section" aria-labelledby="buttons-title">
+    <header class="lab-section-heading"><span class="lab-number">08</span><div><h2 id="buttons-title">Botones</h2><p>Normal, hover ilustrado y disabled. También puedes probar el hover real.</p></div></header>
+    <div class="lab-button-examples">
+      @for (state of ['Normal', 'Hover ilustrado', 'Disabled']; track state) {
+        <div class="lab-button-row"><span class="lab-caption">{{ state }}</span><div class="lab-wrap">
+          <button class="lab-button lab-button--primary" [class.is-hover]="state === 'Hover ilustrado'" [disabled]="state === 'Disabled'" (click)="showAction()">Primario</button>
+          <button class="lab-button" [class.is-hover]="state === 'Hover ilustrado'" [disabled]="state === 'Disabled'" (click)="showAction()">Secundario</button>
+          <button class="lab-button lab-button--clear" [class.is-hover]="state === 'Hover ilustrado'" [disabled]="state === 'Disabled'" (click)="actionMessage = ''">Limpiar</button>
+          <button class="lab-button" [class.is-hover]="state === 'Hover ilustrado'" [disabled]="state === 'Disabled'" (click)="showAction()"><span aria-hidden="true">＋</span> Agregar</button>
+          <button class="lab-button lab-button--icon" [class.is-hover]="state === 'Hover ilustrado'" [disabled]="state === 'Disabled'" (click)="showAction()" aria-label="Actualizar demostración" labTooltip="Actualizar demostración">↻</button>
+        </div></div>
+      }
+    </div>
+    <p class="lab-feedback" role="status">{{ actionMessage }}</p>
+  </section>
+
+  <section id="lab-composition" class="lab-section" aria-labelledby="composition-title">
+    <header class="lab-section-heading"><span class="lab-number">09</span><div><h2 id="composition-title">Formulario responsive</h2><p>Cambia el ancho real del navegador: cada campo conserva su geometría y la fila se reorganiza.</p></div></header>
+    <div class="lab-wrap lab-composition">
+      <label class="lab-field lab-date-field">Fecha<input class="lab-control" inputmode="numeric" value="05/10/2026"></label>
+      <label class="lab-field lab-rut-field">RUT<input class="lab-control" placeholder="12.345.678-5"></label>
+      <label class="lab-field lab-name-field">Nombre<input class="lab-control" placeholder="Nombre de ejemplo"></label>
+      <app-lab-picker class="lab-program-field" label="Programa" kind="select" [options]="programOptions" value="a" />
+    </div>
+  </section>
+  <section id="lab-anatomy" class="lab-section" aria-labelledby="anatomy-title">
+    <header class="lab-section-heading"><span class="lab-number">10</span><div><h2 id="anatomy-title">Anatomía y estados de campo</h2><p>Label permanente de 12px, valor de 14px y control candidato de 36px. El placeholder nunca sustituye al label.</p></div></header>
+    <p class="lab-note">* Campos obligatorios</p><div class="lab-anatomy-grid">
+      @for (state of anatomyStates; track state) {
+        <div class="lab-anatomy-sample">
+          <h3>{{ state }} <span class="lab-caption">Estado ilustrado</span></h3>
+          <label class="lab-field" [for]="'rut-state-' + state">RUT @if (state !== 'Readonly' && state !== 'Disabled') {<span aria-hidden="true">*</span>}</label>
+          <input class="lab-control" [id]="'rut-state-' + state" placeholder="Ej.: 18.903.594-2"
+            [value]="state === 'Normal' ? '' : state === 'Error' ? '18.903.594-3' : '18.903.594-2'"
+            [class.is-hover]="state === 'Hover'" [class.is-focus]="state === 'Focus'" [class.is-error]="state === 'Error'"
+            [attr.aria-invalid]="state === 'Error' ? 'true' : null" [attr.aria-describedby]="'rut-state-help-' + state"
+            [readOnly]="state === 'Readonly'" [disabled]="state === 'Disabled'">
+          <p class="lab-field-message" [class.lab-error]="state === 'Error'" [class.lab-valid]="state === 'Válido'" [id]="'rut-state-help-' + state">
+            @if (state === 'Error') {<span aria-hidden="true">!</span> RUT inválido. Revise el número ingresado.}
+            @else if (state === 'Válido') {<span aria-hidden="true">✓</span> RUT verificado.}
+            @else if (state !== 'Readonly' && state !== 'Disabled') {Incluya el dígito verificador.}
+          </p>
+        </div>
+      }
+    </div>
+    <div class="lab-required-comparison">
+      <article><h3>A · Asterisco · candidato general</h3><p class="lab-help">* Campos obligatorios</p><label class="lab-field">RUT *<input class="lab-control" required placeholder="18.903.594-2"></label></article>
+      <article><h3>B · Referencia para casos cortos o críticos</h3><label class="lab-field"><span class="lab-label-line">RUT <span>Obligatorio</span></span><input class="lab-control" required placeholder="18.903.594-2"></label></article>
+      <article><h3>C · Excepción opcional</h3><p class="lab-help">Concepto para formularios con mayoría obligatoria.</p><label class="lab-field">Segundo nombre (opcional)<input class="lab-control" placeholder="Segundo nombre"></label></article>
+    </div>
+    <p class="lab-note">Candidato general: asterisco con leyenda. Si casi todo es obligatorio, marcar las excepciones opcionales. Readonly y disabled no muestran marcas ni ayudas de edición.</p>
+  </section>
+
+  <section id="lab-entry" class="lab-section" aria-labelledby="entry-title">
+    <header class="lab-section-heading"><span class="lab-number">11</span><div><h2 id="entry-title">Ingreso manual inteligente</h2><p>Escriba libremente. Al salir del campo se valida y formatea; el cursor no se modifica durante la escritura.</p></div></header>
+    <p class="lab-note">* Campos obligatorios</p><div class="lab-entry-grid">
+      @for (kind of entryKinds; track kind) {
+        <div class="lab-entry-card">
+          <label class="lab-field" [for]="'entry-' + kind">{{ entryLabels[kind] }} <span aria-hidden="true">*</span></label>
+          <input class="lab-control" [id]="'entry-' + kind" type="text" [attr.inputmode]="kind === 'rut' ? 'text' : 'numeric'"
+            [placeholder]="entryPlaceholders[kind]" [(ngModel)]="entry[kind].value" (ngModelChange)="editEntry(kind)" (blur)="finishEntry(kind)"
+            required [class.is-error]="!!entry[kind].error" [attr.aria-invalid]="entry[kind].error ? 'true' : null" [attr.aria-describedby]="'entry-help-' + kind">
+          <p class="lab-field-message" [id]="'entry-help-' + kind" [class.lab-error]="!!entry[kind].error" aria-live="polite">
+            @if (entry[kind].error) {<span aria-hidden="true">!</span> {{ entry[kind].error }}}
+            @else if (entry[kind].valid) {<span class="lab-valid">✓ {{ kind === 'rut' ? 'RUT verificado.' : 'Dato válido.' }}</span>}
+            @else { {{ entryHints[kind] }} }
+          </p>
+          <dl class="lab-normalized"><div><dt>Normalizado</dt><dd>{{ entry[kind].normalized || '—' }}</dd></div>
+            @if (kind === 'date') {<div><dt>API candidato</dt><dd>{{ apiDate || '—' }}</dd></div>}
+          </dl>
+        </div>
+      }
+    </div>
+    <p class="lab-note">Pruebe RUT con K/k; fechas 31/02/2026 y 29/02/2028; horas 1840, 640, 930, 1545, 2359, 0005, 2365, 2460 y 2500. Fecha sin hora: conversión por componentes, sin zona horaria. No se envían datos a una API.</p>
+    <p class="lab-note">Los valores normalizados y el formato API se muestran para evaluar el laboratorio; no forman parte de la interfaz para el usuario final.</p>
+  </section>
+
+  <section id="lab-pickers" class="lab-section" aria-labelledby="pickers-title">
+    <header class="lab-section-heading"><span class="lab-number">11b</span><div><h2 id="pickers-title">Desplegables estilizados · experimentos</h2><p>Abra cada control y cambie de paleta. Mismo lenguaje visual dentro y fuera del popup.</p></div></header>
+    <div class="lab-wrap">
+      <app-lab-picker class="lab-date-field" label="Fecha" kind="date" [(value)]="pickerDate" />
+      <app-lab-picker class="lab-time-field" label="Hora · 24h" kind="time" [(value)]="pickerTime" />
+      <app-lab-picker class="lab-name-field" label="Programa" kind="select" [options]="programOptions" [(value)]="pickerProgram" />
+      <app-lab-picker class="lab-example-field" label="Programa deshabilitado" kind="select" [options]="programOptions" value="a" [disabled]="true" />
+    </div>
+    <p class="lab-note">Popovers anclados locales: clic fuera o Escape cierran; Tab permite continuar sin atrapar el foco. Calendario con flechas y selección; hora editable 24h; opciones con selección, disabled y scroll. Todavía no son componentes globales ni un combobox definitivo. El ingreso manual valida al salir y conserva los errores.</p>
+  </section>
+
+  <section id="lab-planner" class="lab-section" aria-labelledby="planner-title">
+    <header class="lab-section-heading"><span class="lab-number">12</span><div><h2 id="planner-title">Planificador de distribución</h2><p>El mismo formulario a tres anchos máximos de muestra. Si la ventana es menor, todos se adaptan al espacio real.</p></div></header>
+    <dl class="lab-classification"><div><dt>Compactos</dt><dd>Año, hora, fecha, RUT, código</dd></div><div><dt>Medios</dt><dd>Nombre, apellido, teléfono, comuna</dd></div><div><dt>Amplios</dt><dd>Correo, programa, dirección</dd></div><div><dt>Expansibles</dt><dd>Observación, descripción, comentario</dd></div></dl>
+    <div class="lab-wrap lab-planner-settings">
+      <label class="lab-field">Ancho exterior solicitado (px)<input class="lab-control" type="number" min="240" max="1800" [ngModel]="plannerWidth" (ngModelChange)="setPlannerWidth($event)"></label>
+      <label class="lab-field">Gap (px)<input class="lab-control" type="number" min="0" max="32" [ngModel]="plannerGap" (ngModelChange)="setPlannerGap($event)"></label>
+      @for (width of [1040, 640, 320]; track width) {<button class="lab-button" (click)="plannerWidth = width">{{ width }}px</button>}
+    </div>
+    <div class="lab-table-scroll"><table class="lab-plan-table"><caption>Descomposición del ancho esperado · px</caption><thead><tr><th>Campo</th><th>Contenido</th><th>Padding total</th><th>Bordes</th><th>Icono + reserva</th><th>Mínimo usable</th><th>Esperado</th></tr></thead><tbody>@for (field of planFields; track field.label) {<tr><th scope="row">{{ field.label }}</th><td>{{ field.content }}</td><td>{{ field.padding }}</td><td>{{ field.border }}</td><td>{{ field.icon }}</td><td>{{ field.minimum }}</td><td>{{ fieldWidth(field) }}</td></tr>}</tbody></table></div>
+    <dl class="lab-plan-metrics" aria-live="polite"><div><dt>Ancho útil real</dt><dd>{{ measuredWidth }}px</dd></div><div><dt>Gaps de una fila</dt><dd>{{ plannerGap * 3 }}px</dd></div><div><dt>Total requerido</dt><dd>{{ planner.total }}px</dd></div><div><dt>Disponible − requerido</dt><dd>{{ planner.remaining }}px</dd></div><div><dt>Resultado</dt><dd>{{ planner.fits ? 'Cabe en una fila' : 'No cabe en una fila' }}</dd></div></dl>
+    <div class="lab-live-plan" [style.width.px]="plannerWidth"><div #plannerCanvas>
+      @for (row of planner.rows; track $index; let index = $index) {
+        <p class="lab-caption">Fila sugerida {{ index + 1 }}</p><div class="lab-live-row" [style.gap.px]="plannerGap">@for (field of row; track field.label) {@if (field.label === "Fecha") {<app-lab-picker [style.width.px]="fieldWidth(field)" label="Fecha" kind="date" [value]="field.value" />} @else {<label class="lab-field" [style.width.px]="fieldWidth(field)">{{ field.label }}<input class="lab-control" [value]="field.value" readonly></label>}}</div>
+      }
+      <label class="lab-field lab-live-comment">Observación · expansible<textarea class="lab-control" placeholder="Comentario opcional" rows="2"></textarea></label>
+    </div></div>
+    @if (planner.tooNarrow) {<p class="lab-error" role="status">Algún campo queda bajo su mínimo cómodo. Revise el contenedor y la legibilidad antes de aprobar.</p>}
+    <p class="lab-note">El ancho exterior incluye 24px de padding y 2px de borde. Una muestra exterior de 320px deja 294px útiles: Fecha (158) + RUT (145) + gap (12) requieren 315px, por lo que se separan. Solo comparten fila desde 315px útiles (341px exteriores con este marco), siempre que conserven legibilidad. El planificador mide el contenido real, también cuando la ventana limita el ancho solicitado. Con 1040px exteriores quedan 1014px útiles; los cuatro campos requieren 919px. Mobile no obliga a una columna ni a juntar los compactos. La fórmula orienta; la legibilidad decide.</p>
+    @for (layout of layouts; track layout.name) {
+      <div class="lab-plan-preview" [style.max-width]="layout.width">
+        <h3>{{ layout.name }} <span class="lab-caption">Máximo de muestra: {{ layout.width }} · no es un breakpoint global</span></h3>
+        <div class="lab-plan-row">
+          <app-lab-picker class="lab-plan-date" label="Fecha · icono incluido" kind="date" value="05/10/2026" />
+          <label class="lab-field lab-plan-rut">RUT · ~14ch<input class="lab-control" value="18.903.594-2"></label>
+          <label class="lab-field lab-plan-name">Nombre · ~32ch<input class="lab-control" value="Elena Ríos · ejemplo"></label>
+          <app-lab-picker class="lab-plan-program" label="Programa · ~32ch" kind="select" [options]="programOptions" value="a" />
+          <label class="lab-field lab-plan-comment">Observación · expansible<textarea class="lab-control" rows="2" placeholder="Comentario opcional"></textarea></label>
+        </div>
+      </div>
+    }
+    <p class="lab-note">Contenido + padding + iconos + gaps orientan la distribución. La legibilidad decide; no se reparten columnas por porcentajes iguales.</p>
+  </section>
+
+  <section id="lab-navigation" class="lab-section" aria-labelledby="navigation-title">
+    <header class="lab-section-heading"><span class="lab-number">13</span><div><h2 id="navigation-title">Navigation</h2><p>Simulación local: ninguna opción abre una pantalla productiva.</p></div></header>
+    <app-lab-picker class="lab-example-field" label="Modo a comparar" kind="select" [options]="navOptions" [(value)]="navMode" (valueChange)="drawerOpen = false" />
+    <div class="lab-nav-demo" [class.is-rail]="navMode === 'tablet' || navCollapsed" [class.is-mobile]="navMode === 'mobile'">
+      <header class="lab-demo-topbar"><span>Sistema institucional · ejemplo</span><span class="lab-timer"><span aria-hidden="true">◷</span> 24:18</span></header>
+      @if (navMode === 'mobile') {<button type="button" class="lab-button lab-drawer-toggle" (click)="drawerOpen = !drawerOpen" [attr.aria-expanded]="drawerOpen" aria-controls="lab-demo-sidebar">☰ Menú</button>}
+      @if (navMode !== 'mobile' || drawerOpen) {
+        @if (navMode === 'mobile') {<button class="lab-nav-scrim" aria-label="Cerrar menú de ejemplo" (click)="drawerOpen = false"></button>}
+        <aside id="lab-demo-sidebar" class="lab-demo-sidebar" aria-label="Menú de ejemplo" [cdkTrapFocus]="navMode === 'mobile' && drawerOpen" [cdkTrapFocusAutoCapture]="navMode === 'mobile'" (keydown.escape)="drawerOpen = false">
+          <header class="lab-sidebar-header">
+            @if ((navMode === 'tablet' || navCollapsed) && navMode !== 'mobile') {<span class="lab-logo-small" labTooltip="Reducción conceptual, no isotipo definitivo">SSM</span>}
+            @else {<img src="assets/logoSSM.png" alt="Servicio de Salud Magallanes"><span class="lab-caption">Logo fijo</span>}
+            @if (navMode === 'desktop') {<button class="lab-button lab-button--icon" [attr.aria-label]="navCollapsed ? 'Expandir sidebar de ejemplo' : 'Colapsar sidebar de ejemplo'" (click)="navCollapsed = !navCollapsed">☰</button>}
+            @if (navMode === 'mobile') {<button class="lab-button lab-button--icon" aria-label="Cerrar menú de ejemplo" (click)="drawerOpen = false">×</button>}
+          </header>
+          <nav class="lab-sidebar-content" aria-label="Navegación de demostración">
+            @for (item of navItems; track item; let i = $index) {<button class="lab-menu-item" [class.is-active]="navSelected === item" [attr.aria-current]="navSelected === item ? 'page' : null" [labTooltip]="item" [attr.aria-label]="item" (click)="selectNav(item)"><span class="lab-menu-icon" aria-hidden="true">{{ i === 0 ? '▤' : i === 1 ? '♙' : '▦' }}</span><span class="lab-menu-text">{{ item }}</span></button>}
+            <button class="lab-menu-item" (click)="groupOpen = !groupOpen" [attr.aria-expanded]="groupOpen" aria-controls="lab-nav-group" aria-label="Grupo Administración" labTooltip="Administración"><span class="lab-chevron" [class.is-open]="groupOpen" aria-hidden="true">▸</span><span class="lab-menu-text">Administración</span></button>
+            @if (groupOpen) {<div id="lab-nav-group" class="lab-nav-group"><button class="lab-menu-item" (click)="selectNav('Catálogos')" [class.is-active]="navSelected === 'Catálogos'" [attr.aria-current]="navSelected === 'Catálogos' ? 'page' : null" aria-label="Catálogos" labTooltip="Catálogos"><span aria-hidden="true">≡</span><span class="lab-menu-text">Catálogos</span></button></div>}
+          </nav>
+          <footer class="lab-sidebar-footer">{{ navMode === 'tablet' || navCollapsed ? 'UI' : 'Pie fijo · demostración' }}</footer>
+        </aside>
+      }
+      <div class="lab-demo-content"><h3>{{ navSelected }}</h3><p>Área de trabajo de ejemplo.</p><p class="lab-note">Active persiste al seleccionar. Pase el mouse: solo el icono se desplaza 4px y escala 1.15; la fila conserva su geometría. Use Tab para distinguir el foco. El logo permanece fijo al desplazar la lista.</p></div>
+    </div>
+    <p class="lab-note">Desktop permite expandir/colapsar; tablet ilustra un rail; mobile abre un drawer superpuesto. El logo reducido “SSM” es conceptual. No se simulan opciones deshabilitadas sin una razón funcional.</p>
+  </section>
+
+  <section id="lab-messages" class="lab-section" aria-labelledby="messages-title">
+    <header class="lab-section-heading"><span class="lab-number">14</span><div><h2 id="messages-title">Mensajería institucional</h2><p>Ejemplos con overlay real, foco modal y cierre con Escape. Textos de proceso variables.</p></div></header>
+    <div class="lab-message-grid">@for (type of messageTypes; track type) {
+      <article class="lab-message-preview"><span class="lab-message-icon" [class.is-danger]="type === 'error'" [class.is-warning]="type === 'validation'" [class.is-success]="type === 'success'" aria-hidden="true">{{ messages[type].icon }}</span><h3>{{ messages[type].title }}</h3><p>{{ messages[type].body }}</p><button class="lab-button" (click)="openMessage(type)">Probar {{ type === 'confirmation' ? 'Sí / No' : 'Aceptar' }}</button></article>
+    }</div>
+    <dialog #messageDialog class="lab-message-dialog" aria-labelledby="lab-dialog-title" aria-describedby="lab-dialog-body" (close)="messageResult = messageDialog.returnValue || 'Cerrado con Escape'">
+      <span class="lab-message-icon" [class.is-danger]="messageType === 'error'" [class.is-warning]="messageType === 'validation'" [class.is-success]="messageType === 'success'" aria-hidden="true">{{ messages[messageType].icon }}</span>
+      <h2 id="lab-dialog-title">{{ messages[messageType].title }}</h2><p id="lab-dialog-body">{{ messages[messageType].body }}</p>
+      <footer>@if (messageType === 'confirmation') {<button class="lab-button" (click)="closeMessage('No')">No</button><button class="lab-button lab-button--primary" (click)="closeMessage('Sí')">Sí</button>} @else {<button class="lab-button lab-button--primary" (click)="closeMessage('Aceptar')">Aceptar</button>}</footer>
+    </dialog>
+    <p class="lab-feedback" role="status">@if (messageResult) {Resultado de demostración: {{ messageResult }}}</p>
+    <p class="lab-note">Ancho máximo candidato 420px; padding 20px; radius 12px; centrado; máximo 90dvh con scroll interno. No guarda, elimina ni confirma operaciones reales.</p>
+  </section>
+
+  <section id="lab-timer" class="lab-section" aria-labelledby="timer-title">
+    <header class="lab-section-heading"><span class="lab-number">15</span><div><h2 id="timer-title">Temporizador institucional</h2><p>Representación visual MM:SS. Valores estáticos; sin cuenta regresiva, extensión ni cierre de sesión.</p></div></header>
+    <div class="lab-wrap"><div class="lab-timer-sample"><span class="lab-timer"><span aria-hidden="true">◷</span> 24:18</span><span>Normal</span></div><div class="lab-timer-sample"><span class="lab-timer is-warning"><span aria-hidden="true">◷</span> 04:59</span><span>Atención</span></div><div class="lab-timer-sample"><span class="lab-timer is-danger"><span aria-hidden="true">◷</span> 00:00</span><span>Tiempo agotado</span></div></div>
+    <p class="lab-note">Ubicación candidata: extremo de la topbar del ejemplo Navigation. Altura 30px, texto 13px, cifras tabulares y wrapping según espacio. Los umbrales funcionales no se definen aquí.</p>
+  </section>
+
+  <section id="lab-watermarks" class="lab-section" aria-labelledby="watermarks-title">
+    <header class="lab-section-heading"><span class="lab-number">16</span><div><h2 id="watermarks-title">Timbre / watermark</h2><p>La UI define cómo se ve. La regla de negocio decidirá cuándo se muestra.</p></div></header>
+    <app-lab-picker class="lab-example-field" label="Estado ilustrado" kind="select" [options]="stampOptions" [(value)]="stampState" />
+    <div class="lab-stamp-grid">@for (variant of stampVariants; track variant.size) {<article class="lab-stamp-sample" [class.lab-candidate]="variant.size === 190"><div class="lab-stamp-institutional" [style.width.px]="variant.size" [style.opacity]="variant.opacity" aria-hidden="true"><img src="assets/logoSSM.png" alt=""><span>Bienestar · ejemplo</span></div><div class="lab-stamp-content"><h3>A · Institucional</h3><span class="lab-caption">{{ variant.size }}px · opacidad {{ variant.opacity }} · {{ variant.size === 190 ? "candidato principal" : variant.size === 150 ? "demasiado tenue" : "demasiado dominante" }}</span><p>Identidad superior, sin comunicar estado.</p><button class="lab-button" (click)="showAction()">Probar interacción</button></div></article>}</div>
+    <div class="lab-stamp-grid"><article class="lab-stamp-sample"><div class="lab-stamp-state" aria-hidden="true">{{ stampState }}</div><div class="lab-stamp-content"><h3>B · Estado: {{ stampState }}</h3><p>Marca central diagonal. Texto de estado también visible aquí.</p><button class="lab-button" (click)="showAction()">Probar interacción</button></div></article></div>
+    <p class="lab-note">Institucional: comparación 150/.12, 190/.18 y 220/.24, limitado por el contenedor. Estado: tamaño adaptable, rotación −16°, opacidad .09. Ambos conservan pointer-events: none; el contenido interactivo queda encima.</p>
+    <p class="lab-feedback" role="status">{{ actionMessage }}</p>
+  </section>
+
+  <section id="lab-kpi" class="lab-section" aria-labelledby="kpi-title">
+    <header class="lab-section-heading"><span class="lab-number">17</span><div><h2 id="kpi-title">KPI-card-01</h2><p>Patrón aprobado candidato. Enteros, porcentaje y días; color concentrado en el icono.</p></div></header>
+    <div #kpiGrid class="lab-kpi-grid" [style.grid-template-columns]="'repeat(' + kpiColumns + ', minmax(0, 1fr))'">@for (kpi of kpis; track kpi.title) {<article class="lab-kpi-card"><span class="lab-kpi-icon" aria-hidden="true">{{ kpi.icon }}</span><div><h3>{{ kpi.title }}</h3><p>{{ kpi.detail }}</p></div><strong>{{ kpi.value }}</strong></article>}</div>
+    <p class="lab-note">Grupo equilibrado: 6 / 3 / 2 / 1 calculado con mínimo cómodo de prueba 250px por card y gap 10px. Seis caben desde 1550px útiles (6 × 250 + 5 × 10); a 1600px cada card dispone de unos 258px. Referencia local sujeta a legibilidad, sin 5 + 1.</p>
+  </section>
+
+  <section id="lab-media" class="lab-section" aria-labelledby="media-title">
+    <header class="lab-section-heading"><span class="lab-number">18</span><div><h2 id="media-title">Jerarquía entre medios</h2><p>Referencia conceptual. No se generan reportes, impresiones ni correos.</p></div></header>
+    <div class="lab-media-grid">@for (medium of ['Frontend', 'Reportes / impresión', 'Correos']; track medium) {<article class="lab-media-sample" [class.lab-email-sample]="medium === 'Correos'"><span class="lab-tag">{{ medium }}</span><h3 class="lab-media-title">Resumen de atención</h3><h4>Datos de la persona</h4><dl><dt>Nombre</dt><dd>Elena Ríos · ejemplo</dd></dl><p>Información presentada con una jerarquía consistente.</p><p class="lab-help">Información secundaria · ejemplo</p></article>}</div>
+    <p class="lab-note">Título principal 20px/500; sección 14px/500; label 12px/400; valor 14px/500; texto 14px/400; secundario 12px/400. Correo: Roboto, Helvetica Neue, Arial, sans-serif; el fallback puede cambiar la métrica, no la jerarquía conceptual.</p>
+  </section>
+
+  <app-lab-crud id="lab-crud" />
+
+  <section id="lab-tokens" class="lab-section" aria-labelledby="tokens-title">
+    <header class="lab-section-heading"><span class="lab-number">19</span><div><h2 id="tokens-title">Tokens y futura arquitectura</h2><p>Variables experimentales locales. Todavía no es una librería definitiva.</p></div></header>
+    <dl class="lab-classification"><div><dt>Futuro estándar global</dt><dd>Tipografía, alturas, padding, bordes, radius, estados, gaps, comportamiento y accesibilidad.</dd></div><div><dt>Variable por sistema</dt><dd>Colores, identidad visual y logos. Cambie la paleta arriba para comparar.</dd></div><div><dt>Variable por formulario</dt><dd>Anchos, distribución, filas, columnas, agrupaciones y responsive específico.</dd></div><div><dt>Variable por dato / dominio</dt><dd>Validación, normalización, formato e información contextual: DV del RUT, fecha visual/API, hora y datos de país o programa.</dd></div></dl>
+    <p class="lab-note">Tokens locales: --ui-primary, --ui-primary-hover, --ui-primary-soft, --ui-surface, --ui-surface-soft, --ui-text, --ui-text-secondary, --ui-border, --ui-focus, --ui-success, --ui-warning, --ui-danger, --ui-disabled y --ui-readonly-bg. Navigation usa --nav-hover-bg, --nav-active-bg, --nav-active-indicator, --nav-icon, --nav-icon-hover y --nav-focus.</p>
+    <p class="lab-note">Densidad operacional: no adoptar automáticamente inputs de 48/56px, títulos enormes ni gaps amplios. UX guiada: indicar el dato esperado, ayudar con formatos, conservar errores y mantener clara la siguiente acción, sin llenar la pantalla de instrucciones.</p>
+    <p class="lab-note">A evaluar posteriormente: Angular Aria, Material/CDK, Signal Forms, CSS Custom Properties, SCSS, Vitest y eventualmente Storybook. Las herramientas aportan comportamiento y accesibilidad; nosotros definimos apariencia, densidad, geometría y distribución. Sin nuevas dependencias. Pendiente antes de estandarizar: contraste, disabled, foco, teclado, lector de pantalla, ARIA, área mínima de interacción, posicionamiento de overlays, zoom, responsive y reduced motion. No se declara cumplimiento total.</p>
+  </section>
+  <footer class="lab-end">UI Lab 05 · Comparar → evaluar → aprobar → documentar · 36px candidato principal.</footer>
+</main>

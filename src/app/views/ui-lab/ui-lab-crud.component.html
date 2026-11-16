@@ -1,0 +1,154 @@
+<div class="responsive-controls"><app-lab-picker label="Comparación responsive CRUD" kind="select" [options]="previews" [(value)]="preview" /><p class="technical">Ancho máximo de la muestra, limitado por el espacio real. Desktop: tabla completa; tablet: columnas prioritarias; mobile: cards con detalle en drawer.</p></div>
+<div class="crud-preview" [style.width]="previewWidth">
+<section class="crud-section" aria-labelledby="crud-title">
+  <header class="section-heading"><span class="number">20</span><div><h2 id="crud-title" #listTitle tabindex="-1">CRUD operacional · experimento local</h2><p>48 registros ficticios. Los cambios viven solo en memoria y se pierden al recargar.</p></div></header>
+  <div class="lab-settings">
+    <app-lab-picker label="Altura de fila" kind="select" [options]="densityOptions" [(value)]="density" />
+    <app-lab-picker label="Filtros secundarios" kind="select" [options]="filterLayouts" [(value)]="filterLayout" (valueChange)="filtersVisible = true" />
+    <app-lab-picker label="Acciones por fila" kind="select" [options]="actionLayouts" [(value)]="actionLayout" />
+    <app-lab-picker label="Estado del listado" kind="select" [options]="listStates" [(value)]="listState" (valueChange)="resetPage()" />
+  </div>
+  <div class="comparison-buttons" role="group" aria-label="Comparar filtros">@for (layout of filterLayouts; track layout.value) {<button class="button" [class.current]="filterLayout === layout.value" [attr.aria-pressed]="filterLayout === layout.value" (click)="filterPopup.close(false); filterLayout = layout.value; filtersVisible = true">{{ layout.label }}</button>}</div>
+  <div class="toolbar">
+    <label class="field search">Buscar<input type="search" class="control" [(ngModel)]="search" (ngModelChange)="resetPage()" placeholder="Nombre, RUT o código"></label>
+    <button #filterTrigger class="button" type="button" (click)="filterLayout === 'popover' ? filterPopup.open() : filtersVisible = !filtersVisible" [attr.aria-expanded]="filterLayout === 'popover' ? filterPopup.opened : filtersVisible">Filtros</button>
+    <button class="button clear" type="button" (click)="clearFilters()">Limpiar</button>
+    <button class="button primary add" type="button" [disabled]="saving" (click)="openEditor('create')">＋ Agregar</button>
+  </div>
+  <ng-template #filtersContent><div class="filters">
+    <app-lab-picker label="Estado" kind="select" [options]="filterStates" [(value)]="stateFilter" (valueChange)="resetPage()" />
+    <app-lab-picker label="Programa" kind="select" [options]="filterPrograms" [(value)]="programFilter" (valueChange)="resetPage()" />
+  </div></ng-template>
+  @if (filtersVisible && filterLayout !== 'popover') {<div class="filter-region" [class.panel]="filterLayout === 'panel'"><ng-container [ngTemplateOutlet]="filtersContent" /></div>}
+  <div class="popup" [labPopover]="filterTrigger" [labPopoverWidth]="360" #filterPopup="labPopover" role="region" aria-label="Filtros secundarios"><ng-container [ngTemplateOutlet]="filtersContent" /><button class="button" type="button" (click)="filterPopup.close()">Cerrar filtros</button></div>
+  @if (selected.size && listState === 'ready') {
+    <div class="selection-bar" role="region" aria-label="Acciones para la selección"><span>{{ selected.size }} seleccionados</span><button class="button" (click)="notify('Exportación simulada de ' + selected.size + ' registros. No se genera un archivo.')">Exportar · simular</button><button class="button" [disabled]="saving" (click)="bulkState()">Cambiar a Activo</button><button class="button clear" (click)="selected.clear()">Quitar selección</button></div>
+  }
+  <ng-template #rowActions let-row><div class="row-actions">
+                <button class="icon-button" [disabled]="saving" [attr.aria-label]="'Ver ' + row.code" labTooltip="Ver" (click)="openEditor('view', row)">◎</button>
+                <button class="icon-button" [disabled]="saving" [attr.aria-label]="'Editar ' + row.code" labTooltip="Editar" (click)="openEditor('edit', row)">✎</button>
+                @if (actionLayout === 'direct') {<button #deleteTrigger class="icon-button danger-text" [disabled]="saving" [attr.aria-label]="'Eliminar ' + row.code" labTooltip="Eliminar" (click)="askDelete(row, deleteTrigger)">×</button>}
+                @else {
+                  <button #moreTrigger class="icon-button" [disabled]="saving" [attr.aria-label]="'Más acciones de ' + row.code" labTooltip="Más acciones" aria-haspopup="menu" [attr.aria-expanded]="rowMenu.opened" (click)="rowMenu.open()" (keydown.arrowdown)="$event.preventDefault(); rowMenu.focusFirst()">⋮</button>
+                  <div #rowMenuPanel class="popup menu" [labPopover]="moreTrigger" [labPopoverWidth]="190" #rowMenu="labPopover" role="menu" [attr.aria-label]="'Acciones de ' + row.code" (keydown)="moveOption($event, rowMenuPanel)">
+                    <button data-option role="menuitem" (click)="rowMenu.close(); duplicate(row)">Duplicar</button>
+                    <button data-option role="menuitem" (click)="rowMenu.close(); notify('Historial de demostración: ' + row.code + ' creado el ' + displayDate(row.date))">Historial</button>
+                    <button data-option role="menuitem" class="danger-text" (click)="rowMenu.close(); askDelete(row, moreTrigger)">Eliminar</button>
+                  </div>
+                }
+              </div></ng-template>
+  <div class="mobile-records" [attr.aria-busy]="listState === 'loading'">
+    @if (listState === 'ready' && result.total) {
+      <label class="mobile-select-all"><input type="checkbox" [checked]="allPageSelected" [indeterminate]="somePageSelected" [disabled]="saving" (change)="togglePage()">Seleccionar página visible</label>
+      @for (row of result.rows; track row.id) {<article class="mobile-record" [class.selected]="selected.has(row.id)">
+        <header><label class="check-target"><input type="checkbox" [attr.aria-label]="'Seleccionar ' + row.code" [checked]="selected.has(row.id)" [disabled]="saving" (change)="toggleRow(row.id)"></label><span>{{ row.code }}</span><span class="badge" [class.success]="row.state === 'Activo'" [class.warning]="row.state === 'Pendiente'">{{ row.state }}</span></header>
+        <h3>{{ row.name }}</h3><footer><span class="help">Ver: datos secundarios</span><ng-container [ngTemplateOutlet]="rowActions" [ngTemplateOutletContext]="{$implicit: row}" /></footer>
+      </article>}
+    } @else if (listState === 'loading') {@for (item of [1,2,3]; track item) {<div class="mobile-record" aria-hidden="true"><span class="skeleton"></span></div>}}
+  </div>
+  <div class="table-scroll" tabindex="0" aria-label="Listado desplazable de registros ficticios" [attr.aria-busy]="listState === 'loading'" [style.--row-height]="density + 'px'">
+    <table>
+      <caption class="sr-only">Listado experimental. Fechas DD/MM/YYYY, cantidades alineadas a la derecha y columnas según contenido.</caption>
+      <thead><tr><th class="check"><label class="check-target"><input type="checkbox" aria-label="Seleccionar todos los registros de esta página" [checked]="allPageSelected" [indeterminate]="somePageSelected" [disabled]="listState !== 'ready' || !result.total || saving" (change)="togglePage()"></label></th>
+        @for (column of columns; track column.key) {<th [class]="column.css" [attr.aria-sort]="sortLabel(column.key)"><button class="sort-button" (click)="sort(column.key)" [attr.aria-label]="'Ordenar por ' + column.label" [labTooltip]="'Ordenar por ' + column.label"><span>{{ column.label }}</span><span aria-hidden="true">{{ sortKey === column.key ? direction === 'asc' ? '↑' : '↓' : '↕' }}</span></button></th>}
+        <th class="actions">Acciones</th></tr></thead>
+      <tbody>
+        @if (listState === 'loading') {
+          @for (i of [1,2,3,4,5,6]; track i) {<tr aria-hidden="true"><td class="check"><span class="skeleton"></span></td>@for (column of columns; track column.key) {<td [class]="column.css"><span class="skeleton"></span></td>}<td class="actions"><span class="skeleton"></span></td></tr>}
+        } @else if (listState === 'ready' && result.total) {
+          @for (row of result.rows; track row.id) {
+            <tr [class.selected]="selected.has(row.id)">
+              <td class="check"><label class="check-target"><input type="checkbox" [attr.aria-label]="'Seleccionar ' + row.code" [checked]="selected.has(row.id)" [disabled]="saving" (change)="toggleRow(row.id)"></label></td>
+              <td class="code">{{ row.code }}</td><td class="name">{{ row.name }}</td><td class="rut">{{ row.rut }}</td><td class="program">{{ row.program }}</td><td class="date">{{ displayDate(row.date) }}</td>
+              <td class="state"><span class="badge" [class.success]="row.state === 'Activo'" [class.warning]="row.state === 'Pendiente'">{{ row.state }}</span></td><td class="responsible">{{ row.responsible }}</td><td class="number-cell">{{ row.count }}</td>
+              <td class="actions"><ng-container [ngTemplateOutlet]="rowActions" [ngTemplateOutletContext]="{$implicit: row}" /></td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+  <div class="list-feedback" role="status" aria-live="polite">
+    @if (listState === 'loading') {<p>Cargando registros de demostración…</p><button class="button" (click)="listState = 'ready'">Terminar simulación</button>}
+    @else if (listState === 'error') {<p>No fue posible cargar la información.</p><button class="button" (click)="listState = 'ready'; notify('Reintento de demostración completado.')">Reintentar</button>}
+    @else if (listState === 'empty' || !records.length) {<p>No hay registros.</p><button class="button primary" (click)="openEditor('create')">Agregar registro</button>}
+    @else if (listState === 'no-results' || !result.total) {<p>No encontramos registros con esos filtros.</p><button class="button" (click)="clearFilters()">Limpiar filtros</button>}
+  </div>
+  @if (listState === 'ready' && result.total) {
+    <nav class="pagination" aria-label="Paginación de registros"><span>{{ result.start }}–{{ result.end }} de {{ result.total }}</span><span class="page-caption">Página {{ result.page }} de {{ result.pages }}</span>
+      <div class="page-buttons"><button class="icon-button" aria-label="Página anterior" labTooltip="Anterior" [disabled]="result.page === 1" (click)="page = result.page - 1">‹</button>
+        @for (number of pageNumbers; track number; let i = $index) {@if (i && number - pageNumbers[i-1] > 1) {<span aria-hidden="true">…</span>}<button class="icon-button" [class.current]="result.page === number" [attr.aria-label]="'Página ' + number" [attr.aria-current]="result.page === number ? 'page' : null" (click)="page = number">{{ number }}</button>}
+        <button class="icon-button" aria-label="Página siguiente" labTooltip="Siguiente" [disabled]="result.page === result.pages" (click)="page = result.page + 1">›</button></div>
+      <app-lab-picker label="Tamaño de página" kind="select" [options]="sizes" [(value)]="pageSize" (valueChange)="resetPage()" />
+    </nav>
+  }
+  <p class="technical">Compare filas de 36/40/44px. El contenido largo puede aumentar la altura para conservar lectura. Encabezado sticky, scroll interno y columnas por naturaleza del dato. Seleccionar todos se limita a la página visible.</p>
+</section>
+
+</div>
+<section class="crud-section" aria-labelledby="drawer-pattern-title">
+  <header class="section-heading"><span class="number">21</span><div><h2 id="drawer-pattern-title">CRUD-DRAWER-01 · Ver / Editar / Crear</h2><p>Abra una acción de fila o Agregar. Panel derecho contextual, con scroll propio y geometría compartida.</p></div></header>
+  <div class="mode-buttons"><button class="button" [disabled]="!records.length || saving" (click)="openEditor('view', records[0])">Probar Ver</button><button class="button" [disabled]="!records.length || saving" (click)="openEditor('edit', records[0])">Probar Editar y Guardar</button><button class="button" [disabled]="saving" (click)="openEditor('create')">Probar Crear</button></div>
+  <dl class="pattern-guide"><div><dt>Drawer</dt><dd>CRUD corto o medio; detalle y edición sin abandonar el listado.</dd></div><div><dt>Modal</dt><dd>Formularios muy pequeños, decisiones, confirmaciones y acciones breves.</dd></div><div><dt>Página / ruta</dt><dd>Formularios extensos, procesos complejos y múltiples secciones.</dd></div><div><dt>Inline</dt><dd>Una celda, un campo o una propiedad. El formulario completo debajo de la tabla no es el candidato general.</dd></div></dl>
+  <p class="technical">El drawer no bloquea el listado. En mobile usa el ancho disponible; cierre para regresar a la tabla. Escape cierra si no hay cambios pendientes. Cancelar, cerrar o cambiar de registro con cambios pide conservarlos o descartarlos explícitamente.</p>
+</section>
+<dialog #drawer class="crud-drawer" aria-labelledby="editor-title" aria-modal="false" (keydown.escape)="$event.preventDefault(); $event.stopPropagation(); requestClose()">
+  <header class="drawer-header"><div><h2 id="editor-title" #editorTitle tabindex="-1">{{ mode === 'view' ? 'Ver registro' : mode === 'edit' ? 'Editar registro' : 'Crear registro' }} {{ draft.id ? '· ' + draft.code : '' }}</h2><p>CRUD-DRAWER-01 · datos ficticios en memoria</p></div><button class="icon-button" type="button" aria-label="Cerrar detalle" labTooltip="Cerrar" [disabled]="saving" (click)="requestClose()">×</button></header>
+  <div class="drawer-body">
+    @if (mode !== 'view') {<p class="technical">* Campos obligatorios. Sin envío a API.</p>}
+  <form id="crud-editor-form" (ngSubmit)="save()" novalidate>
+    <fieldset [disabled]="saving" [attr.aria-busy]="saving"><legend class="sr-only">Datos del registro de muestra</legend><div class="editor-fields">
+      <label class="field code-field">Código<input class="control" [value]="draft.code" readonly></label>
+      <label class="field name-field">Nombre {{ mode !== 'view' && !saving ? '*' : '' }}<input class="control" name="name" [(ngModel)]="draft.name" [readOnly]="mode === 'view'" [required]="mode !== 'view'" placeholder="Nombre de ejemplo"></label>
+      <label class="field rut-field">RUT {{ mode !== 'view' && !saving ? '*' : '' }}<input class="control" name="rut" [(ngModel)]="draft.rut" [readOnly]="mode === 'view'" [required]="mode !== 'view'" (blur)="formatDraftRut()" placeholder="12.345.678-5"></label>
+      @if (mode === 'view') {
+        <label class="field date-field">Fecha<input class="control" [value]="draft.date" readonly></label>
+        <label class="field program-field">Programa<input class="control" [value]="draft.program" readonly></label>
+        <label class="field state-field">Estado<input class="control" [value]="draft.state" readonly></label>
+      } @else {
+        <app-lab-picker class="date-field" label="Fecha" kind="date" [required]="true" [(value)]="draft.date" [disabled]="saving" />
+        <app-lab-picker class="program-field" label="Programa" kind="select" [required]="true" [options]="programOptions" [(value)]="draft.program" [disabled]="saving" />
+        <app-lab-picker class="state-field" label="Estado" kind="select" [options]="stateOptions" [(value)]="draft.state" [disabled]="saving" />
+      }
+      <label class="field responsible-field">Responsable {{ mode !== 'view' ? '(opcional)' : '' }}<input class="control" name="responsible" [(ngModel)]="draft.responsible" [readOnly]="mode === 'view'" placeholder="Profesional de ejemplo"></label>
+      <label class="field count-field">Gestiones<input class="control" [value]="draft.count" readonly></label>
+    </div></fieldset>
+    <p class="form-message" [class.error]="!!formError" role="status">{{ formError || (saving ? 'Guardando cambios de demostración…' : mode === 'view' ? 'Información de consulta. Puede seleccionar y copiar los valores.' : 'El formato de RUT y fecha se completa al salir del campo.') }}</p>
+
+  </form>
+  </div>
+  <div #drawerFooter class="drawer-footer">
+    @if (discardPrompt) {<div class="discard-prompt" role="alert"><p>Hay cambios sin guardar. ¿Desea descartarlos?</p><div><button class="button" type="button" (click)="keepEditing()">Seguir editando</button><button class="button" type="button" (click)="discardChanges()">Descartar cambios</button></div></div>}
+    <footer class="form-actions">@if (mode === 'view') {<button class="button" type="button" (click)="requestClose()">Cerrar</button><button class="button primary" type="button" (click)="openEditor('edit')" [disabled]="!draft.id">Editar</button>} @else {<button class="button" type="button" [disabled]="saving" (click)="requestClose()">Cancelar</button><button class="button primary save-button" type="submit" form="crud-editor-form" [disabled]="saving" [attr.aria-busy]="saving">@if (saving) {<span class="progress-dot" aria-hidden="true"></span>}{{ saving ? 'Guardando…' : 'Guardar' }}</button>}</footer>
+  </div>
+</dialog>
+  <dialog #deleteDialog class="message-dialog" aria-labelledby="delete-title" aria-describedby="delete-body" (close)="restoreActionFocus()">
+    <span class="message-icon" aria-hidden="true">!</span><h2 id="delete-title">Confirmar eliminación</h2><p id="delete-body">Está a punto de eliminar {{ pendingDelete?.code }} de esta muestra. Esta acción solo afecta datos ficticios en memoria.</p>
+    <footer><button class="button" type="button" autofocus (click)="cancelDelete()">Cancelar</button><button class="button destructive" type="button" (click)="confirmDelete()">Eliminar</button></footer>
+  </dialog>
+
+<section class="crud-section" aria-labelledby="extra-title">
+  <header class="section-heading"><span class="number">22</span><div><h2 id="extra-title">Autocomplete, multiselect y feedback breve</h2><p>Referencias pequeñas con lista anclada. Ninguna consulta externa.</p></div></header>
+  <div class="extra-fields">
+    <div class="field auto-field"><label for="crud-autocomplete">Profesional · autocomplete</label><input #autoInput id="crud-autocomplete" class="control" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" [attr.aria-expanded]="autoPopup.opened" aria-controls="crud-suggestions" [(ngModel)]="autocomplete" (ngModelChange)="autoChoice = ''; !autoPopup.opened && autoPopup.open(null)" (keydown.arrowdown)="$event.preventDefault(); autoPopup.focusFirst('[data-option]')" placeholder="Escriba para buscar">
+      <div #autoPanel class="popup options" [labPopover]="autoInput" #autoPopup="labPopover" [labPopoverWidth]="300" (keydown)="moveOption($event, autoPanel)"><h3>Profesional</h3><div id="crud-suggestions" role="listbox" aria-label="Profesionales sugeridos">@for (person of suggestions; track person) {<button data-option type="button" role="option" [attr.aria-selected]="autoChoice === person" (click)="autocomplete = person; autoChoice = person; autoPopup.close()">{{ person }}</button>}@empty {<p role="status">Sin coincidencias.</p>}</div></div>
+      <div class="comparison-buttons"><button class="button" (click)="showAutocomplete('results', autoPopup, autoInput)">Con resultados</button><button class="button" (click)="showAutocomplete('empty', autoPopup, autoInput)">Sin resultados</button><button class="button" (click)="showAutocomplete('selected', autoPopup, autoInput)">Seleccionado</button></div>
+      <span class="help">Flecha abajo entra a la lista; flechas, Inicio/Fin, Enter y Escape. {{ autoChoice ? 'Selección: ' + autoChoice : 'Puede escribir y luego elegir una sugerencia.' }}</span>
+    </div>
+    <div class="field multi-field"><span id="crud-multi-label">Programas · multiselect</span><button #multiTrigger class="control multi-trigger" aria-labelledby="crud-multi-label crud-multi-value" aria-haspopup="listbox" [attr.aria-expanded]="multiPopup.opened" (click)="multiPopup.open()" (keydown.arrowdown)="$event.preventDefault(); multiPopup.focusFirst()"><span id="crud-multi-value">{{ multiSelection.size ? multiSelection.size + ' seleccionados' : 'Seleccionar programas' }}</span><span aria-hidden="true">⌄</span></button>
+      <div #multiPanel class="popup options" [labPopover]="multiTrigger" #multiPopup="labPopover" [labPopoverWidth]="340" (keydown)="moveOption($event, multiPanel)"><h3>Programas</h3><label class="field">Buscar programa<input class="control" [(ngModel)]="multiSearch" (keydown.arrowdown)="$event.preventDefault(); multiPopup.focusFirst('[data-option]:not(:disabled)')"></label><div role="listbox" aria-multiselectable="true" aria-label="Programas seleccionables">@for (program of filteredMultiOptions; track program.value) {<button data-option type="button" role="option" [disabled]="program.disabled" [attr.aria-disabled]="program.disabled" [attr.aria-selected]="multiSelection.has(program.value)" (click)="toggleMulti(program.value)"><span>{{ program.label }}</span><span aria-hidden="true">{{ program.disabled ? 'No disponible' : multiSelection.has(program.value) ? '✓' : '＋' }}</span></button>}@empty {<p role="status">Sin coincidencias.</p>}</div><button class="button" (click)="multiPopup.close()">Listo</button></div>
+      <app-lab-picker label="Representación de seleccionados" kind="select" [options]="multiDisplays" [(value)]="multiDisplay" />
+      @if (multiDisplay === 'chips' && multiSelection.size <= 3) {<div class="chips">@for (program of multiSelection; track program) {<span class="chip">{{ program }}<button [attr.aria-label]="'Quitar ' + program" [labTooltip]="'Quitar ' + program" (click)="toggleMulti(program)">×</button></span>}</div>}
+      @else {<p class="help">{{ multiSelection.size }} programas seleccionados.</p>}
+      @if (multiSelection.size) {<button class="button" [attr.aria-expanded]="expandSelection" (click)="expandSelection = !expandSelection">{{ expandSelection ? 'Ocultar seleccionados' : 'Ver seleccionados' }}</button>}
+      @if (expandSelection) {<ul class="selected-summary">@for (program of selectedPrograms; track program) {<li>{{ program }}<button class="icon-button" [attr.aria-label]="'Quitar ' + program" labTooltip="Quitar" (click)="toggleMulti(program)">×</button></li>}</ul>}
+      <div class="comparison-buttons"><button class="button" (click)="setMultiSample(2)">Probar 2</button><button class="button" (click)="setMultiSample(15)">Probar 15</button><button class="button" (click)="setMultiSample(0)">Limpiar</button></div>
+      <span class="help">Máximo 3 chips; más selecciones usan resumen y expansión con scroll. La última opción está deshabilitada.</span>
+    </div>
+  </div>
+  <div class="toast-examples"><button class="button" (click)="notify('Registro guardado. Mensaje de demostración.')">Probar toast: guardado</button><button class="button" (click)="notify('Cambios actualizados. Mensaje de demostración.')">Probar toast: actualizado</button><button class="button" (click)="notify('Copiado al portapapeles. Solo ejemplo de mensaje; no se copia información.')">Probar toast: copiado</button></div>
+  <p class="technical">Toast no modal, temporal y cerrable; pausa al enfocar o pasar el mouse. Las decisiones y errores críticos siguen usando el mensaje institucional. El botón Guardar del formulario simula 1,2 segundos, conserva su ancho y bloquea dobles envíos.</p>
+  <p class="technical">Pendiente: contraste, disabled, teclado, lector de pantalla, ARIA, zoom, foco, tamaño de interacción, reduced motion, responsive, posicionamiento y compatibilidad institucional de Popover API. Prototipos locales; no se declara cumplimiento total.</p>
+</section>
+<div class="sr-only" role="status" aria-live="polite" aria-atomic="true">{{ announcement }}</div>
+<div #toastStack class="toast-stack" role="log" aria-live="polite" aria-relevant="additions" aria-atomic="false" aria-label="Mensajes breves" [style.bottom.px]="toastClearance" [style.--toast-clearance]="toastClearance + 'px'">@for (toast of toasts; track toast.id) {<div class="toast" [attr.data-toast-id]="toast.id" (mouseenter)="pauseToast(toast.id, 'hover', true)" (mouseleave)="pauseToast(toast.id, 'hover', false)" (focusin)="pauseToast(toast.id, 'focus', true)" (focusout)="pauseToast(toast.id, 'focus', false)"><span>{{ toast.message }}</span><button class="icon-button" aria-label="Cerrar mensaje breve" labTooltip="Cerrar mensaje" (click)="closeToast(toast.id)">×</button></div>}</div>

@@ -1,0 +1,10 @@
+// Imported only by laboratory components; never emitted as application-global CSS.
+@mixin scrollbars {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ui-scroll-thumb, #b3c8cf) transparent;
+  &::-webkit-scrollbar { width: 8px; height: 8px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: var(--ui-scroll-thumb, #b3c8cf); border: 2px solid transparent; background-clip: padding-box; border-radius: 8px; }
+  &:hover { scrollbar-color: var(--ui-scroll-hover, #839fa9) transparent; }
+  &::-webkit-scrollbar-thumb:hover { background-color: var(--ui-scroll-hover, #839fa9); }
+}

@@ -199,6 +199,7 @@
         <mat-label>Estado</mat-label>
         <mat-select formControlName="status">
           <mat-option value="ACTIVE">Activos</mat-option>
+          <mat-option value="INACTIVE">Inactivos</mat-option>
           <mat-option value="DELETED">Eliminados</mat-option>
           <mat-option value="ALL">Todos</mat-option>
         </mat-select>
@@ -325,8 +326,9 @@
               <span
                 class="status-badge"
                 [class.deleted]="professional.deletedAt"
+                [class.inactive]="!professional.deletedAt && professional.active === false"
               >
-                {{ professional.deletedAt ? "Eliminado" : "Activo" }}
+                {{ professional.deletedAt ? "Eliminado" : professional.active === false ? "Inactivo" : "Activo" }}
               </span>
             </td>
 
@@ -341,6 +343,17 @@
                 <mat-icon>edit</mat-icon>
               </button>
 
+              <button
+                mat-icon-button
+                type="button"
+                *ngIf="!professional.deletedAt"
+                [matTooltip]="professional.active === false ? 'Activar' : 'Inactivar'"
+                [attr.aria-label]="professional.active === false ? 'Activar facultativo' : 'Inactivar facultativo'"
+                [disabled]="isChangingStatus || isLoading || isSaving"
+                (click)="changeActiveStatus(professional)"
+              >
+                <mat-icon>{{ professional.active === false ? 'check_circle' : 'block' }}</mat-icon>
+              </button>
               <button
                 mat-icon-button
                 type="button"

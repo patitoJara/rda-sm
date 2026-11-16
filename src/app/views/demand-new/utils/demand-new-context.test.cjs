@@ -89,7 +89,7 @@ function componentClass(file,className,names,deps) {
   const out={}; new Function('exports',...Object.keys(deps),js)(out,...Object.values(deps)); return out.Tested;
 }
 const deps={...context,...stages,...current,...episodes,...trajectory,...permissions,...milestone,finalize,requestAnimationFrame:()=>{},console:{log(){},error(){},warn(){}}};
-const names=['clearSelectedEpisode','applyLongitudinalData','loadEpisodeLongitudinal','loadEpisodeProgramContext','selectedEpisodeId','currentEpisodeStage','workingStage','workingStageId','workingStageEvents','resolvedCurrentStageId','currentStageEvents','currentDocumentEpisodeId','currentDocumentStageId','isHistoricalEpisode','hasCurrentEpisode','canManageCurrentEpisode','ensureOperationContext','compactProgramTrajectory','availableEpisodes','selectAvailableEpisode','feedbackEvents','lastCurrentStageEvent'];
+const names=['clearSelectedEpisode','applyLongitudinalData','loadEpisodeLongitudinal','loadEpisodeProgramContext','selectedEpisodeId','currentEpisodeStage','workingStage','workingStageId','workingStageEvents','resolvedCurrentStageId','currentStageEvents','currentDocumentEpisodeId','currentDocumentStageId','isHistoricalEpisode','hasCurrentEpisode','canManageCurrentEpisode','canEnterEpisodeManagement','ensureOperationContext','compactProgramTrajectory','availableEpisodes','selectAvailableEpisode','feedbackEvents','lastCurrentStageEvent'];
 const Tested=componentClass('demand-new.component.ts','DemandNewComponent',names,deps);
 function fixture() {
   const target=new Tested(), requests=[], persons=[], contexts=[], substances=[];
