@@ -1,4 +1,4 @@
-﻿import {
+import {
   resolveDemandActionMatrix,
   resolveFeedbackSaveAction,
   DemandActionMatrixInput,
@@ -94,6 +94,33 @@ describe('resolveDemandActionMatrix', () => {
     });
   });
 
+  it('LISTA_ESPERA permite una segunda decision solamente Referencia', () => {
+    const matrix = resolveDemandActionMatrix(buildInput({
+      feedbackResults: ['LISTA_ESPERA'],
+      feedbackCount: 1,
+    }));
+
+    expect(matrix.scenario).toBe('FEEDBACK_WAITING_LIST');
+    expect(matrix.citation.enabled).toBeFalse();
+    expect(matrix.attendance.enabled).toBeFalse();
+    expect(matrix.feedback.enabled).toBeTrue();
+
+    expect(resolveFeedbackSaveAction(matrix, 'REFERENCIA').enabled).toBeTrue();
+
+    for (const result of ['LISTA_ESPERA', 'INGRESO_TRATAMIENTO', 'ABANDONO', 'RED_EXTERNA', '']) {
+      expect(resolveFeedbackSaveAction(matrix, result).enabled).toBeFalse();
+    }
+  });
+
+  it('LISTA_ESPERA bloquea retroalimentacion si ya existen dos decisiones', () => {
+    const matrix = resolveDemandActionMatrix(buildInput({
+      feedbackResults: ['LISTA_ESPERA'],
+      feedbackCount: 2,
+    }));
+
+    expect(matrix.feedback.enabled).toBeFalse();
+    expect(resolveFeedbackSaveAction(matrix, 'REFERENCIA').enabled).toBeFalse();
+  });
   it('debe permitir retroalimentación cuando las citaciones están resueltas y aún no existe retroalimentación', () => {
     const matrix = resolveDemandActionMatrix(
       buildInput({

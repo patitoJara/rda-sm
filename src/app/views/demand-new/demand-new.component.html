@@ -175,7 +175,7 @@
       </div>
       <div class="empty-banner error" *ngIf="episodeContextError" role="alert"><mat-icon>error</mat-icon><span>{{ episodeContextError }}</span></div>
       <div class="empty-banner error" *ngIf="longitudinalError && !hasCurrentEpisode" role="alert"><mat-icon>error</mat-icon><span>{{ longitudinalError }}</span></div>
-      
+
     </div>
   </mat-card>
 <mat-card
@@ -189,7 +189,7 @@
         <div class="available-episodes__list">
           <article
             class="available-episode-card"
-            
+
             *ngFor="
               let episode of availableEpisodes;
               trackBy: trackAvailableEpisode
@@ -215,11 +215,11 @@
             <div
               class="available-episode-stages" style="display:grid;grid-template-columns:minmax(0,1fr);gap:3px;margin:4px 0 0"
               *ngIf="getAvailableEpisodeStages(episode).length > 0"
-              
+
             >
               <div
                 *ngFor="let stage of getAvailableEpisodeStages(episode)" style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:4px 6px"
-                
+
               >
                 <div >
                   <strong>
@@ -258,7 +258,7 @@
                 </button>
               </div>
             </div>
-            
+
           </article>
         </div>
       </section>

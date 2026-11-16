@@ -21,7 +21,8 @@ Se aplica la primera condición coincidente:
 - Retroalimentación `REFERENCIA`: permite referencia, pero bloquea cierre hasta que esté ejecutada.
 - `INGRESO_TRATAMIENTO` o `ABANDONO`: habilita solo su respectiva causal de cierre y bloquea referencia.
 - `LISTA_ESPERA`: permite referencia y cierre por ingreso a tratamiento o abandono.
-- Antes de retroalimentación habilitante, referencia y cierre están bloqueados. Citación, observación y panel de retroalimentación están habilitados; asistencia requiere citaciones pendientes.
+- `ACTIVE_INITIAL` (ratificado por el responsable el 20-10-2026): episodio y etapa abiertos, sin citaciones ni movimientos que activen un escenario anterior. Permite primera citación y observación, sujetas a los permisos operativos existentes; bloquea retroalimentación (`feedback.enabled = false`), asistencia, referencia y cierre. La ausencia de citaciones no permite cierre; registrar una citación no habilita por sí solo el cierre.
+- Antes de retroalimentación habilitante, referencia y cierre están bloqueados. La habilitación del panel de retroalimentación depende del escenario de citaciones; no debe describirse como disponible en toda etapa abierta.
 - Con citaciones pendientes, abrir retroalimentación no equivale a poder guardarla: `resolveFeedbackSaveAction` solo permite `ABANDONO` en ese escenario.
 
 ## Relación con cierre y referencia
@@ -33,7 +34,7 @@ Integración y APIs: [módulo](harness.md) y [componente](demand-new.component.h
 ## PENDIENTE DE VERIFICAR
 
 - El comentario inicial afirma que la referencia cierra la etapa de origen; la implementación contempla referencia ejecutada sin cierre formal, con observación y cierre habilitados. Verificar el efecto real con backend y aplicación. No registrar cierre automático como regla funcional.
-- El comentario vincula referencia con primera entrevista asistida, pero `firstInterviewCompleted` no se utiliza en las decisiones de esta matriz. También afirma disponibilidad de retroalimentación mientras la etapa esté abierta, aunque las ramas con retroalimentación existente la bloquean. Verificar esas afirmaciones antes de reutilizarlas.
+- El comentario vincula referencia con primera entrevista asistida, pero `firstInterviewCompleted` no se utiliza en las decisiones de esta matriz. Su afirmación de retroalimentación disponible mientras la etapa esté abierta no aplica a `ACTIVE_INITIAL`, conforme a la ratificación anterior, ni a las ramas que ya tienen retroalimentación. No reutilizar esa generalización.
 
 ## NO ROMPER
 

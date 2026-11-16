@@ -522,8 +522,11 @@ export function resolveDemandActionMatrix(
         DEMAND_ACTION_MATRIX_MESSAGES.attendanceBlockedByFeedback,
       ),
 
-      feedback: action((input.feedbackCount ?? input.feedbackResults.length) === 1 && input.feedbackResults.length === 1,
-        'Después de Lista de espera solo se permite una segunda decisión Referencia.'),
+      feedback: action(
+        (input.feedbackCount ?? input.feedbackResults.length) === 1 &&
+        input.feedbackResults.length === 1,
+        'Después de Lista de espera solo se permite una segunda decisión Referencia.',
+      ),
 
       observation: action(true),
 
