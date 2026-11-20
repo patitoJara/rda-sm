@@ -13,7 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { catchError, finalize, forkJoin, of } from 'rxjs';
+import { catchError, EMPTY, expand, finalize, forkJoin, from, map, mergeMap, of, reduce, switchMap, toArray } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { loadHistory, stageResults, History, Movement } from './program-analysis-data';
@@ -26,6 +26,8 @@ import {
   SupervisorProgramReferenceDTO,
 } from '../../../core/models/demand-priority.models';
 import { DemandService } from '../../../core/services/demand.service';
+import { PostulantService } from '../../../services/postulant.service';
+import { PrioritizedEpisodeStageDTO } from '../../../core/models/demand-priority.models';
 
 type SupervisionLevel =
   | 'CRITICO'
@@ -60,10 +62,16 @@ interface ProgramAnalysisRow extends SupervisorProgramDashboardDTO {
 })
 export class ProgramAnalysisDialogComponent implements OnInit {
   private readonly demandService = inject(DemandService);
+  private readonly postulantService = inject(PostulantService);
 
   loading = false;
   error: string | null = null;
   private allPrograms: ProgramAnalysisRow[] = [];
+  suicideRiskTotal: number | null = null;
+  suicideRiskByProgram = new Map<number, number>();
+  suicideRiskLoading = false;
+  suicideRiskError: string | null = null;
+  private suicideRiskRequest = 0;
   private readonly destroyRef = inject(DestroyRef);
   private readonly activeMetricsService = inject(InicioActiveMetricsService);
   year = 2026;
@@ -148,11 +156,21 @@ export class ProgramAnalysisDialogComponent implements OnInit {
     const labels: Record<string, string> = { INGRESO_TRATAMIENTO: 'Ingreso a tratamiento', REFERENCIA: 'Referencia', ABANDONO: 'Abandono' };
     return codes.length ? codes.map(code => labels[code] ?? code).join(' / ') : 'Sin etapas cerradas';
   }
+  suicideRiskCount(programId: number): number | string {
+    return this.suicideRiskLoading || this.suicideRiskError
+      ? '—' : (this.suicideRiskByProgram.get(programId) ?? '—');
+  }
+  get selectedSuicideRiskTotal(): number | string {
+    if (this.suicideRiskLoading || this.suicideRiskError || this.suicideRiskTotal === null) return '—';
+    if (!this.programId) return this.suicideRiskTotal;
+    return this.suicideRiskByProgram.get(this.programId) ?? '—';
+  }
   get cards(): { label: string; value: number | string; icon: string }[] {
     return [
       { label: 'Programas con actividad', value: this.programsWithActivity, icon: 'domain' },
       { label: 'Demandas activas · actuales', value: this.totalActiveDemands, icon: 'folder_open' },
       { label: 'Casos críticos · rojos actuales', value: this.sum('redCases'), icon: 'warning' },
+      { label: 'Riesgo suicida · gestión abierta actual', value: this.selectedSuicideRiskTotal, icon: 'health_and_safety' },
       { label: 'Ingresadas · período', value: this.count('entered'), icon: 'add_circle' },
       { label: 'Cerradas · período', value: this.count('closed'), icon: 'check_circle' },
       { label: 'Sin movimiento reciente', value: '—', icon: 'event_busy' },
@@ -236,6 +254,81 @@ export class ProgramAnalysisDialogComponent implements OnInit {
     return this.sumReference('pendingReferences');
   }
 
+  /** Cuenta personas unicas por programa, solo etapas abiertas actuales (no serie historica). */
+  private loadSuicideRiskMetrics(): void {
+    const request = ++this.suicideRiskRequest;
+    this.suicideRiskLoading = true;
+    this.suicideRiskError = null;
+    this.suicideRiskTotal = null;
+    this.suicideRiskByProgram.clear();
+    const allowedPrograms = new Set(this.allPrograms.map(p => p.programId));
+    this.demandService.getPrioritizedEpisodeStages({ page: 0, size: 100, stateCode: 'EN_TRAMITE' }).pipe(
+      expand(page => {
+        if (!Array.isArray(page.content) || !Number.isInteger(page.totalPages) || page.totalPages > 100 || page.totalPages < 0) {
+          throw new Error('Cobertura de etapas no verificable');
+        }
+        return page.last || page.number + 1 >= page.totalPages
+          ? EMPTY
+          : this.demandService.getPrioritizedEpisodeStages({ page: page.number + 1, size: 100, stateCode: 'EN_TRAMITE' });
+      }),
+      reduce((all, page) => all.concat(page.content), [] as PrioritizedEpisodeStageDTO[]),
+      switchMap(stages => {
+        const programRuts = new Map<number, Set<string>>();
+        const originalRutByKey = new Map<string, string>();
+        for (const stage of stages) {
+          if (stage.closed || stage.stageStateCode !== 'EN_TRAMITE') continue;
+          if (!allowedPrograms.has(stage.programId) || !stage.rut?.trim()) {
+            throw new Error('Identidad o programa de una etapa abierta no verificable');
+          }
+          const key = stage.rut.replace(/[.\-\s]/g, '').toUpperCase();
+          if (!key) throw new Error('RUN de una etapa no verificable');
+          if (!programRuts.has(stage.programId)) programRuts.set(stage.programId, new Set<string>());
+          programRuts.get(stage.programId)!.add(key);
+          if (!originalRutByKey.has(key)) originalRutByKey.set(key, stage.rut);
+        }
+        if (originalRutByKey.size > 2000) throw new Error('Volumen superior al limite seguro de consulta');
+        const lookups = [...originalRutByKey.entries()];
+        return from(lookups).pipe(
+          mergeMap(([key, rut]) => this.demandService.findPersonByRut(rut).pipe(
+            switchMap(person => {
+              const id = Number(person?.id);
+              if (!Number.isInteger(id) || id <= 0) throw new Error('Identificador de postulante no disponible');
+              return this.postulantService.getById(id);
+            }),
+            map(person => {
+              if (!person || !Object.prototype.hasOwnProperty.call(person, 'suicideRiskFlag')) {
+                throw new Error('Campo suicideRiskFlag ausente de la ficha completa');
+              }
+              return { key, risk: person.suicideRiskFlag === true };
+            }),
+          ), 4),
+          toArray(),
+          map(people => {
+            const positive = new Set(people.filter(person => person.risk).map(person => person.key));
+            const counts = new Map<number, number>();
+            for (const programId of allowedPrograms) {
+              counts.set(programId, [...(programRuts.get(programId) ?? [])].filter(rut => positive.has(rut)).length);
+            }
+            return { total: positive.size, counts };
+          }),
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
+      next: result => {
+        if (request !== this.suicideRiskRequest) return;
+        this.suicideRiskTotal = result.total;
+        this.suicideRiskByProgram = result.counts;
+        this.suicideRiskLoading = false;
+      },
+      error: () => {
+        if (request !== this.suicideRiskRequest) return;
+        this.suicideRiskLoading = false;
+        this.suicideRiskError = 'Riesgo suicida: cobertura incompleta o consulta no disponible. No se muestran cifras parciales.';
+      },
+    });
+  }
+
   loadAnalysis(): void {
     if (this.loading) {
       return;
@@ -248,6 +341,11 @@ export class ProgramAnalysisDialogComponent implements OnInit {
     this.activeLoadedProgramId = null;
     this.history = null;
     this.historyError = null;
+    ++this.suicideRiskRequest;
+    this.suicideRiskLoading = true;
+    this.suicideRiskTotal = null;
+    this.suicideRiskError = null;
+    this.suicideRiskByProgram.clear();
     forkJoin({
       programs: this.demandService.getSupervisorProgramsDashboard(),
       references: this.demandService.getSupervisorProgramsReferences().pipe(catchError(() => of([] as SupervisorProgramReferenceDTO[]))),
@@ -259,6 +357,7 @@ export class ProgramAnalysisDialogComponent implements OnInit {
         this.updatedAt = new Date();
         if (!this.allPrograms.some(p => p.programId === this.programId)) this.programId = 0;
         this.filterChanged();
+        this.loadSuicideRiskMetrics();
         loadHistory(this.demandService).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
           next: (history) => {
             if (historyRequest !== this.historyRequest) return;
@@ -273,6 +372,8 @@ export class ProgramAnalysisDialogComponent implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         this.allPrograms = [];
+        this.suicideRiskLoading = false;
+        this.suicideRiskError = 'No se pudo verificar el indicador de riesgo suicida.';
         this.error = error.status === 403 ? 'No tiene permisos para consultar el análisis por programa.' : 'No fue posible cargar el análisis por programa.';
       },
     });
@@ -325,11 +426,13 @@ export class ProgramAnalysisDialogComponent implements OnInit {
       return {
         id, name: program.programName,
         active: program.activeDemands, red: program.redCases,
+        suicideRisk: this.suicideRiskCount(id),
         entered: this.count('entered', id), closed: this.count('closed', id),
         withoutCitation: program.withoutFirstCitation, withoutFeedback: program.withoutFeedback,
         operational: [
           { label: 'Lista de espera', value: active?.waitingList },
           { label: 'Casos rojos', value: program.redCases },
+          { label: 'Riesgo suicida · gestión abierta actual', value: this.suicideRiskCount(id) },
           { label: 'Promedio días por episodio', value: active?.averageWaitingDays ?? program.averageAccumulatedDays },
           { label: 'Promedio días por programa', value: active?.averageProgramDays },
           { label: 'Hitos pendientes', value: program.pendingActions },
@@ -362,6 +465,7 @@ export class ProgramAnalysisDialogComponent implements OnInit {
           { label: 'Referencias pendientes', value: program.pendingReferences },
           { label: 'Cierres pendientes', value: program.pendingClosures },
           { label: 'Alertas abiertas', value: program.openAlerts },
+          { label: 'Personas con riesgo suicida · abiertas actuales', value: this.suicideRiskCount(id) },
         ],
       };
     });
@@ -374,6 +478,7 @@ export class ProgramAnalysisDialogComponent implements OnInit {
         { label: 'Programas incluidos', value: programs.length },
         { label: 'Demandas activas · actuales', value: this.totalActiveDemands },
         { label: 'Casos críticos · rojos actuales', value: this.sum('redCases') },
+        { label: 'Personas con riesgo suicida · abiertas actuales', value: this.selectedSuicideRiskTotal },
         { label: 'Demandas ingresadas · período', value: this.count('entered') },
         { label: 'Cierres definitivos · período', value: this.count('closed') },
         { label: 'Etapas de gestión cerradas', value: this.closedStageCount },

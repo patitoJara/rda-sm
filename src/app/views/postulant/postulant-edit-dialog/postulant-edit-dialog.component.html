@@ -82,6 +82,15 @@
             <input formControlName="address" />
           </div>
 
+          <div class="field-line">
+            <label>Riesgo suicida</label>
+            <select formControlName="suicideRiskFlag">
+              <option [ngValue]="null">Sin información</option>
+              <option [ngValue]="true">Sí</option>
+              <option [ngValue]="false">No</option>
+            </select>
+          </div>
+
           <!-- COMUNA + SEXO -->
           <div class="field-line">
             <label>Comuna</label>

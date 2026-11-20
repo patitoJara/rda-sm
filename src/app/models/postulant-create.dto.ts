@@ -20,4 +20,5 @@ export interface PostulantCreateDto {
   email?: string | null;
   phone?: string | null;
   address?: string | null;
+  suicideRiskFlag?: boolean | null;
 }

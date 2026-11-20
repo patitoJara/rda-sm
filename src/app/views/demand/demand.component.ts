@@ -355,6 +355,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
 
       commune: [null, Validators.required],
       address: [''],
+      suicideRiskFlag: [null],
       sex: [null, Validators.required],
 
       // Referente
@@ -1028,6 +1029,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
         email: raw.email?.trim() ?? null,
         phone: raw.phone?.trim() ?? null,
         address: raw.address?.trim() ?? null,
+        suicideRiskFlag: raw.suicideRiskFlag,
       };
 
       const postulant = await firstValueFrom(
@@ -2223,6 +2225,7 @@ export class DemandComponent implements OnInit, PendingChangesComponent {
           phone: p.phone ?? '',
           email: p.email ?? '',
           address: p.address ?? '',
+          suicideRiskFlag: p.suicideRiskFlag ?? null,
           sex: p.sex?.id ?? null,
           commune: p.commune?.id ?? null,
 

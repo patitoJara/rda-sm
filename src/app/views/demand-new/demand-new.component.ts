@@ -477,6 +477,8 @@ export class DemandNewComponent
       validators: [Validators.email],
     }),
 
+    suicideRiskFlag: new FormControl<boolean | null>(null),
+
     address: new FormControl<string>('', {
       nonNullable: true,
     }),
@@ -1802,7 +1804,7 @@ export class DemandNewComponent
     this.showCreatePersonForm = true;
 
     this.personForm.reset();
-    this.personForm.patchValue({ rut });
+    this.personForm.patchValue({ rut, suicideRiskFlag: null });
 
     this.personForm.get('rut')?.disable({ emitEvent: false });
   }
@@ -2817,6 +2819,7 @@ export class DemandNewComponent
       phone: toStringOrNull(raw.phone),
 
       address: toStringOrNull(raw.address),
+      suicideRiskFlag: raw.suicideRiskFlag,
     };
 
     /*
@@ -4334,6 +4337,7 @@ export class DemandNewComponent
       phone: person.phone ?? '',
       email: person.email ?? '',
       address: person.address ?? '',
+      suicideRiskFlag: person.suicideRiskFlag ?? null,
       commune: person.commune?.id ?? null,
       intPrev: person.convPrev?.intPrev?.id ?? null,
       convPrev: person.convPrev?.id ?? null,

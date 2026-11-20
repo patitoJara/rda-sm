@@ -81,6 +81,7 @@ interface Demandante {
   usuario: string;
   dias: number;
   postulante: string;
+  suicideRiskFlag: boolean | null;
   rut: string;
   comuna: string;
   fecha: Date;
@@ -267,6 +268,7 @@ export class DemandListComponent implements OnInit {
         postulante:
           `${r.postulant?.firstName ?? ''} ${r.postulant?.lastName ?? ''}`.trim(),
         rut: r.postulant?.rut ?? '---',
+        suicideRiskFlag: r.postulant?.suicideRiskFlag ?? null,
         programa: r.program?.name ?? '---',
         comuna: r.postulant?.commune?.name ?? '---',
         dias: r.date_attention

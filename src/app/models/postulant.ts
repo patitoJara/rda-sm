@@ -76,6 +76,7 @@ export interface Postulant {
   email?: string | null;
   phone?: string | null;
   address?: string | null;
+  suicideRiskFlag?: boolean | null;
 
   createdAt?: string | null;
   updatedAt?: string | null;
@@ -117,4 +118,5 @@ export interface PostulantCreateDto {
   email?: string | null;
   phone?: string | null;
   address?: string | null;
+  suicideRiskFlag?: boolean | null;
 }

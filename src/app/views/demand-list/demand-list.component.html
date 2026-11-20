@@ -135,7 +135,9 @@
       <!-- POSTULANTE -->
       <ng-container matColumnDef="postulante">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Postulante</th>
-        <td mat-cell *matCellDef="let el">{{ el.postulante }}</td>
+        <td mat-cell *matCellDef="let el">{{ el.postulante }}
+          <span *ngIf="el.suicideRiskFlag === true" role="img" aria-label="Indicador de riesgo suicida" title="Riesgo suicida registrado">🟡</span>
+        </td>
       </ng-container>
 
       <!-- RUT -->

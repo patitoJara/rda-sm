@@ -104,6 +104,7 @@ export class PostulantEditDialogComponent implements OnInit {
         [Validators.email, Validators.pattern(EMAIL_REGEX)],
       ],
       address: [this.postulant.address ?? ''],
+      suicideRiskFlag: [this.postulant.suicideRiskFlag ?? null],
       commune: [this.postulant.commune?.id ?? null],
       sex: [this.postulant.sex?.id ?? null],
       intPrev: [this.postulant.convPrev?.intPrev?.id ?? null],
@@ -158,6 +159,7 @@ export class PostulantEditDialogComponent implements OnInit {
       phone: raw.phone,
       email: raw.email,
       address: raw.address,
+      suicideRiskFlag: raw.suicideRiskFlag,
 
       birthdate: birthDate
         ? birthDate.toISOString().substring(0, 10)

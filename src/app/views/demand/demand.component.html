@@ -398,6 +398,18 @@
                         <input formControlName="address" />
                       </div>
                     </div>
+                    <div class="fila-1">
+                      <div class="field-clinico-linea">
+                        <label>Riesgo suicida</label>
+                        <mat-form-field appearance="fill" class="clinico-form-field">
+                          <mat-select formControlName="suicideRiskFlag">
+                            <mat-option [value]="null">Sin información</mat-option>
+                            <mat-option [value]="true">Sí</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+                    </div>
                     <!-- COMUNA -->
                     <div class="fila-1">
                       <div class="field-clinico-linea">

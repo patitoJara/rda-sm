@@ -17,7 +17,7 @@ import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { catchError, finalize, map, of, switchMap } from 'rxjs';
+import { catchError, finalize, from, map, mergeMap, of, switchMap } from 'rxjs';
 import {
   DemandEpisodeProgramContextDTO,
   PrioritizedEpisodeDTO,
@@ -29,6 +29,7 @@ import {
   DemandService,
 } from '../../core/services/demand.service';
 import { ContactService } from '../../services/contact.service';
+import { PostulantService } from '../../services/postulant.service';
 import { Contact } from '../../models/contact';
 import { DemandListStateService } from '../../core/services/demand-list-state.service';
 import { getSemaphoreColorFromDays } from '../demand-new/utils/demand-new-semaphore.utils';
@@ -96,6 +97,7 @@ export class InicioComponent implements OnInit, OnDestroy {
   private readonly preloadCatalogs = inject(PreloadCatalogsService);
   private readonly demandService = inject(DemandService);
   private readonly contactService = inject(ContactService);
+  private readonly postulantService = inject(PostulantService);
   private readonly demandListState = inject(DemandListStateService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
@@ -148,6 +150,60 @@ export class InicioComponent implements OnInit, OnDestroy {
   > = {};
 
   readonly personDetailErrorByEpisodeId: Record<number, string | null> = {};
+
+  // Bandera consultada mediante el GET de persona existente; null = sin dato o no consultado.
+  readonly suicideRiskByRut = new Map<string, boolean | null>();
+  private suicideRiskLookupVersion = 0;
+
+  isSuicideRiskVisible(episode: PrioritizedEpisodeDTO): boolean {
+    const person = this.personDetailByEpisodeId[Number(episode.episodeId)]?.person;
+    if (person && person['suicideRiskFlag'] === true) {
+      return true;
+    }
+    return this.suicideRiskByRut.get(String(episode.rut ?? '').trim()) === true;
+  }
+
+  private loadSuicideRiskIndicators(episodes: PrioritizedEpisodeDTO[]): void {
+    const version = ++this.suicideRiskLookupVersion;
+    this.suicideRiskByRut.clear();
+    const ruts = Array.from(new Set(
+      episodes.map((episode) => String(episode.rut ?? '').trim()).filter(Boolean),
+    ));
+    from(ruts)
+      .pipe(
+        mergeMap(
+          (rut) => this.demandService.findPersonByRut(rut).pipe(
+            // La respuesta resumida puede omitir el indicador; consultar la ficha completa por ID.
+            switchMap((person) => {
+              const directRisk = person?.['suicideRiskFlag'];
+              if (directRisk === true || directRisk === false) {
+                return of({ rut, risk: directRisk as boolean | null });
+              }
+              const id = Number(person?.id);
+              if (!Number.isInteger(id) || id <= 0) {
+                return of({ rut, risk: null as boolean | null });
+              }
+              return this.postulantService.getById(id).pipe(
+                map((fullPerson) => ({
+                  rut,
+                  risk: fullPerson?.suicideRiskFlag === true
+                    ? true
+                    : fullPerson?.suicideRiskFlag === false ? false : null,
+                })),
+                catchError(() => of({ rut, risk: null as boolean | null })),
+              );
+            }),
+            catchError(() => of({ rut, risk: false })),
+          ),
+          4,
+        ),
+      )
+      .subscribe(({ rut, risk }) => {
+        if (version === this.suicideRiskLookupVersion) {
+          this.suicideRiskByRut.set(rut, risk);
+        }
+      });
+  }
   pageIndex = 0;
   pageSize = 20;
   totalElements = 0;
@@ -1096,6 +1152,7 @@ export class InicioComponent implements OnInit, OnDestroy {
 
           this.episodes = episodes;
           this.totalElements = totalElements;
+          this.loadSuicideRiskIndicators(episodes);
 
           if (this.isHistoricalMode) {
             this.programContextsByStage.clear();
@@ -1109,6 +1166,8 @@ export class InicioComponent implements OnInit, OnDestroy {
 
           this.episodes = [];
           this.totalElements = 0;
+          ++this.suicideRiskLookupVersion;
+          this.suicideRiskByRut.clear();
           this.programContextsByStage.clear();
 
           this.episodesError =

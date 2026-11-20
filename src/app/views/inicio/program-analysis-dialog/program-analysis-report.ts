@@ -8,6 +8,7 @@ export interface ProgramReport {
   entered: ReportValue;
   closed: ReportValue;
   red: ReportValue;
+  suicideRisk: ReportValue;
   withoutCitation: ReportValue;
   withoutFeedback: ReportValue;
   operational: ReportMetric[];
@@ -52,9 +53,9 @@ export function buildExecutiveReport(report: ExecutiveReport): string {
   if (report.consolidated) {
     sheets.push(`<article class="sheet" data-report-sheet="summary">${header(report)}
       ${section('Resumen general', metrics(report.summary))}
-      ${section('Consolidado por programa', `<table class="consolidated"><thead><tr><th>Programa</th><th>Activas</th><th>Ingresadas</th><th>Cerradas</th><th>Rojos</th><th>Sin C1</th><th>Sin retroalimentación</th></tr></thead><tbody>${report.programs.map(p => `<tr><th scope="row">${escape(p.name)}</th><td>${value(p.active)}</td><td>${value(p.entered)}</td><td>${value(p.closed)}</td><td>${value(p.red)}</td><td>${value(p.withoutCitation)}</td><td>${value(p.withoutFeedback)}</td></tr>`).join('')}</tbody></table>`)}
-      <p class="note">Ingresadas y cerradas corresponden al período seleccionado; cerradas significa episodios finalizados definitivamente. Activas, rojos, sin primera citación y sin retroalimentación corresponden a la situación actual, no a una reconstrucción histórica.</p>
-      <p class="note">—: información no disponible. Casos críticos: casos rojos actuales. Las etapas cerradas representan gestiones, no episodios distintos.</p>
+      ${section('Consolidado por programa', `<table class="consolidated"><thead><tr><th>Programa</th><th>Activas</th><th>Ingresadas</th><th>Cerradas</th><th>Rojos</th><th>Riesgo suicida</th><th>Sin C1</th><th>Sin retroalimentación</th></tr></thead><tbody>${report.programs.map(p => `<tr><th scope="row">${escape(p.name)}</th><td>${value(p.active)}</td><td>${value(p.entered)}</td><td>${value(p.closed)}</td><td>${value(p.red)}</td><td>${value(p.suicideRisk)}</td><td>${value(p.withoutCitation)}</td><td>${value(p.withoutFeedback)}</td></tr>`).join('')}</tbody></table>`)}
+      <p class="note">Ingresadas y cerradas corresponden al período seleccionado; cerradas significa episodios finalizados definitivamente. Activas, rojos, riesgo suicida, sin primera citación y sin retroalimentación corresponden a la situación actual, no a una reconstrucción histórica.</p>
+      <p class="note">—: información no disponible. Casos críticos: casos rojos actuales. Riesgo suicida: personas únicas por programa con gestión abierta actual; no equivale a casos rojos. Las etapas cerradas representan gestiones, no episodios distintos.</p>
       <aside>${institutionalNote}</aside></article>`);
   }
   for (const p of report.programs) {

@@ -63,6 +63,9 @@ export class DemandEditService {
       email: form.value.email,
       phone: form.value.phone,
       address: form.value.address,
+      suicideRiskFlag: form.get('suicideRiskFlag')
+        ? form.get('suicideRiskFlag')!.value
+        : (postulant.suicideRiskFlag ?? null),
     };
 
     return this.postulantService.update(postulant.id, payload);

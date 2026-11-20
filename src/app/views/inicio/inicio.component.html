@@ -578,13 +578,16 @@
   "
   (click)="togglePersonDetails(row, $event)"
 >
-  <mat-icon>
-    {{
-      isPersonDetailsExpanded(row)
-        ? "expand_less"
-        : "person"
-    }}
-  </mat-icon>
+  <img
+    *ngIf="isSuicideRiskVisible(row); else normalPersonIcon"
+    src="assets/suicidio.png"
+    alt=""
+    aria-hidden="true"
+    style="display: block; width: 30px; height: 36px; object-fit: contain;"
+  />
+  <ng-template #normalPersonIcon>
+    <mat-icon>{{ isPersonDetailsExpanded(row) ? "expand_less" : "person" }}</mat-icon>
+  </ng-template>
 </button>
 
               <div>
@@ -953,6 +956,11 @@
       <span>
         Datos del demandante · Información de consulta · Solo lectura
       </span>
+      <span
+        *ngIf="detail.person['suicideRiskFlag'] === true"
+        role="status"
+        aria-label="Riesgo suicida: Sí"
+      ><mat-icon aria-hidden="true">warning_amber</mat-icon> Riesgo suicida</span>
     </div>
   </div>
 </div>

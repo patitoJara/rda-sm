@@ -487,6 +487,17 @@
           </div>
         </div>
 
+        <div class="person-editor-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Riesgo suicida</mat-label>
+            <mat-select formControlName="suicideRiskFlag" panelClass="person-editor-select-panel">
+              <mat-option [value]="null">Sin información</mat-option>
+              <mat-option [value]="true">Sí</mat-option>
+              <mat-option [value]="false">No</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
         <div class="person-editor-grid person-editor-grid--prevision">
           <mat-form-field appearance="outline">
             <mat-label>Tipo de previsión</mat-label>
@@ -748,6 +759,7 @@
           {{ selectedPerson.secondLastName }}
         </h2>
 
+
         <div class="person-meta-line">
           <span> RUN {{ selectedPerson.rut || "Sin información" }} </span>
 
@@ -761,6 +773,19 @@
         </div>
       </div>
       <div class="summary-person-status">
+<div
+  *ngIf="selectedPerson.suicideRiskFlag === true"
+  role="img"
+  aria-label="Riesgo suicida"
+  title="Riesgo suicida registrado"
+  style="display: flex; align-items: center; justify-content: center; width: 76px; min-width: 76px; align-self: center;"
+>
+  <img
+    src="assets/suicidio.png"
+    alt=""
+    style="display: block; width: 95px; height: 105px; object-fit: contain;"
+  />
+</div>
         <div
           class="status-pill status-pill--days"
           *ngIf="hasCurrentEpisode && !showCreateEpisodeForm"
