@@ -84,6 +84,27 @@ export function buildExecutiveReport(report: ExecutiveReport): string {
     .metadata { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 8.5pt; color: #526a77; margin-bottom: 10px; }
     section { margin: 5px 0; } h2 { font-size: 10.5pt; color: #08778a; border-bottom: 1px solid #cbdfe6; padding-bottom: 3px; margin: 0 0 5px; break-after: avoid; }
     .closing-block { break-inside: avoid; }
+    /* AG-RDA-TF-INFORME-001: compactacion exclusiva de fichas individuales.
+       Se conservan los saltos entre .sheet, el consolidado y la integridad
+       del bloque complementario final. Sin transformaciones/escala de letra. */
+    @media print {
+      .sheet[data-report-sheet="program"] header { gap: 9px; padding-bottom: 5px; margin-bottom: 5px; }
+      .sheet[data-report-sheet="program"] header img { width: 54px; max-height: 47px; }
+      .sheet[data-report-sheet="program"] h1 { margin: 2px 0; font-size: 15pt; }
+      .sheet[data-report-sheet="program"] .program-name { font-size: 12pt; line-height: 1.15; margin: 5px 0 4px; }
+      .sheet[data-report-sheet="program"] .metadata { gap: 2px 11px; margin-bottom: 6px; }
+      .sheet[data-report-sheet="program"] section { margin: 3px 0; }
+      .sheet[data-report-sheet="program"] h2 { padding-bottom: 2px; margin-bottom: 3px; }
+      .sheet[data-report-sheet="program"] .metrics { gap: 2px 3px; }
+      .sheet[data-report-sheet="program"] .metrics > div { padding: 3px 6px; }
+      .sheet[data-report-sheet="program"] dt { line-height: 1.18; }
+      .sheet[data-report-sheet="program"] dd { margin-top: 1px; line-height: 1.16; }
+      .sheet[data-report-sheet="program"] .monthly th,
+      .sheet[data-report-sheet="program"] .monthly td { padding: 3px 1px; }
+      .sheet[data-report-sheet="program"] .caption { margin: 2px 0; }
+      .sheet[data-report-sheet="program"] aside { padding: 4px 8px; margin-top: 4px; }
+      .sheet[data-report-sheet="program"] .closing-block { break-inside: avoid; }
+    }
     .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; gap: 4px; break-inside: avoid; }
     .metrics.columns-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .metrics > div { border: 1px solid #dce7eb; background: #f4f9fa; padding: 4px 7px; break-inside: avoid; overflow-wrap: anywhere; }
